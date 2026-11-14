@@ -5,7 +5,7 @@
 **배포 주소: https://funwings77-sudo.github.io/golf/** (GitHub Pages, `main` 브랜치에 푸시하면 자동 재배포)
 휴대폰에서 열고 "홈 화면에 추가"하면 앱처럼 쓸 수 있습니다.
 
-**Android APK: https://funwings77-sudo.github.io/golf/pinpoint-caddie.apk** (디버그 서명, 설치 시 "출처를 알 수 없는 앱" 허용 필요 · 다시 빌드: `npm run android:apk`)
+**Android APK: https://funwings77-sudo.github.io/golf/pinpoint-caddie.apk** (디버그 서명, 설치 시 "출처를 알 수 없는 앱" 허용 필요 · 재빌드+업로드: `npm run release:apk`)
 
 ## 실행
 ```

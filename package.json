@@ -9,7 +9,8 @@
     "test": "node --test tests/engine.test.mjs",
     "build:www": "node scripts/build-www.mjs",
     "android:sync": "npm run build:www && npx cap sync android",
-    "android:apk": "npm run android:sync && cd android && gradlew.bat assembleDebug"
+    "android:apk": "npm run android:sync && cd android && .\\gradlew.bat assembleDebug",
+    "release:apk": "node scripts/release-apk.mjs"
   },
   "devDependencies": {
     "@capacitor/android": "^6.2.3",

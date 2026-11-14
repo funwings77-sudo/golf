@@ -1,0 +1,92 @@
+// APK 재빌드 + GitHub Pages 업로드를 한 번에: npm run release:apk [-- --no-push]
+// 1) 엔진 테스트 → 2) 버전 자동 증가 → 3) www 생성·cap sync → 4) Gradle 빌드
+// 5) pinpoint-caddie.apk 교체 → 6) 커밋·푸시 → 7) Pages에서 같은 파일이 받아지는지 확인
+import { execSync } from 'node:child_process';
+import { readFile, writeFile, copyFile, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const push = !process.argv.includes('--no-push');
+const PAGES_URL = 'https://funwings77-sudo.github.io/golf/pinpoint-caddie.apk';
+const env = { ...process.env };
+
+// Windows 기본 설치 경로에서 JDK·SDK 자동 탐색 (환경변수가 있으면 그대로 사용)
+if (!env.ANDROID_HOME && env.LOCALAPPDATA) {
+  const sdk = join(env.LOCALAPPDATA, 'Android', 'Sdk');
+  if (existsSync(sdk)) env.ANDROID_HOME = sdk;
+}
+if (!env.JAVA_HOME) {
+  const jdk = 'C:\\Program Files\\Microsoft\\jdk-17.0.19.10-hotspot';
+  if (existsSync(jdk)) env.JAVA_HOME = jdk;
+}
+// Gradle용 SDK 경로: properties 파일에서 '\'는 이스케이프 문자라 반드시 '/'로 적는다
+if (env.ANDROID_HOME) {
+  await writeFile(join(root, 'android', 'local.properties'), `sdk.dir=${env.ANDROID_HOME.replace(/\\/g, '/')}\n`);
+}
+
+const step = (n, msg) => console.log(`\n[${n}/7] ${msg}`);
+const run = (cmd, cwd = root) => execSync(cmd, { cwd, env, stdio: 'inherit' });
+const out = cmd => execSync(cmd, { cwd: root, env, encoding: 'utf8' }).trim();
+const sha = buf => createHash('sha256').update(buf).digest('hex');
+
+// 다른 작업 중인 변경이 섞여 커밋되지 않도록, APK·버전 파일만 커밋한다.
+// 단, 웹 코드에 커밋 안 된 변경이 있으면 APK와 저장소 내용이 어긋나므로 먼저 알린다.
+const dirty = out('git status --porcelain').split('\n').filter(Boolean)
+  .filter(l => !/pinpoint-caddie\.apk$|android\/app\/build\.gradle$/.test(l));
+if (dirty.length && push) {
+  console.warn('⚠ 커밋되지 않은 변경이 있습니다 (APK에는 포함되지만 커밋되지 않음):\n  ' + dirty.join('\n  '));
+}
+
+step(1, '엔진 테스트');
+run('npm test');
+
+step(2, '앱 버전 증가');
+const gradlePath = join(root, 'android', 'app', 'build.gradle');
+let gradle = await readFile(gradlePath, 'utf8');
+const code = +gradle.match(/versionCode (\d+)/)[1] + 1;
+const name = `1.0.${code - 1}`;
+gradle = gradle.replace(/versionCode \d+/, `versionCode ${code}`).replace(/versionName "[^"]*"/, `versionName "${name}"`);
+await writeFile(gradlePath, gradle);
+console.log(`versionCode ${code}, versionName ${name}`);
+
+step(3, '웹 자산 → Android 동기화');
+run('npm run android:sync');
+
+step(4, 'Gradle 빌드 (assembleDebug)');
+run(`"${join(root, 'android', process.platform === 'win32' ? 'gradlew.bat' : 'gradlew')}" assembleDebug`, join(root, 'android'));
+
+step(5, 'pinpoint-caddie.apk 교체');
+const built = join(root, 'android', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
+const target = join(root, 'pinpoint-caddie.apk');
+await copyFile(built, target);
+const hash = sha(await readFile(target));
+console.log(`${((await stat(target)).size / 1048576).toFixed(1)}MB  sha256 ${hash.slice(0, 16)}…`);
+
+if (!push) { console.log('\n--no-push: 커밋·업로드 생략. 완료.'); process.exit(0); }
+
+step(6, '커밋 · 푸시');
+run('git add pinpoint-caddie.apk android/app/build.gradle');
+const who = out('git config user.name') ? '' : '-c user.name="PinPoint" -c user.email="noreply@users.noreply.github.com" ';
+run(`git ${who}commit -q -m "Android APK ${name} (versionCode ${code})"`);
+run('git push');
+
+step(7, 'GitHub Pages 반영 확인 (최대 6분)');
+const deadline = Date.now() + 6 * 60_000;
+for (;;) {
+  try {
+    const r = await fetch(`${PAGES_URL}?v=${Date.now()}`, { cache: 'no-store' });
+    if (r.ok && sha(Buffer.from(await r.arrayBuffer())) === hash) {
+      console.log(`✅ 다운로드 확인 완료: ${PAGES_URL}  (버전 ${name})`);
+      break;
+    }
+  } catch {}
+  if (Date.now() > deadline) {
+    console.log(`⏳ 아직 이전 파일이 제공 중입니다. 몇 분 뒤 다시 받아 보세요: ${PAGES_URL}`);
+    break;
+  }
+  process.stdout.write('.');
+  await new Promise(r => setTimeout(r, 10_000));
+}
