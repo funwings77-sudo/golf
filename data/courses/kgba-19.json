@@ -1,0 +1,475 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-19",
+  "name": "골프존카운티 선운",
+  "region": "전북 고창군",
+  "address": "전라북도 고창군 아산면 운곡로 418",
+  "phone": "(063)560-2000",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": 6,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4지만 멀어 보임, 왼쪽 벙커 오른쪽 끝 겨냥 (내장객 평균 5.0타) · 해저드: 그린 앞 왼쪽 벙커, 오른쪽 암벽 깊은 러프 · 그린: 포대그린, 2단 그린",
+    "nine": "선운",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 329,
+     "blue": 329,
+     "white": 309,
+     "red": 270,
+     "teeNames": "블루 329m(360yd)/화이트 309m(338yd)/레드 270m(295yd)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 2,
+    "par": 5,
+    "hdcp": 11,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이 센터보다 약간 왼쪽 (평균 6.5타) · 해저드: 왼쪽 벙커(레귤러티 기준 앞까지 180m, 넘기기 캐리 210m) · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 503,
+     "blue": 503,
+     "white": 471,
+     "red": 416,
+     "teeNames": "블루 503m(550yd)/화이트 471m(515yd)/레드 416m(455yd)",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 3,
+    "par": 4,
+    "hdcp": 13,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "레귤러 기준 가장 짧은 파4, 슬라이스 홀로 왼쪽 벙커 겨냥 (평균 4.9타) · 해저드: 그린 앞 왼쪽 벙커 · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 336,
+     "blue": 336,
+     "white": 317,
+     "red": 271,
+     "teeNames": "블루 336m(367yd)/화이트 317m(347yd)/레드 271m(296yd)",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 4,
+    "par": 3,
+    "hdcp": 14,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "중앙·왼쪽 핀은 직접, 오른쪽 핀은 깃대 약간 왼쪽 (평균 4.0타) · 해저드: 오른쪽 벙커·해저드 · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 180,
+     "blue": 180,
+     "white": 147,
+     "red": 111,
+     "teeNames": "블루 180m(197yd)/화이트 147m(161yd)/레드 111m(121yd)",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": 5,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "훅이 나는 홀, 그린 앞 오른쪽 벙커 겨냥 (평균 5.3타) · 해저드: 그린 앞 오른쪽 벙커 · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 406,
+     "blue": 406,
+     "white": 382,
+     "red": 312,
+     "teeNames": "블루 406m(444yd)/화이트 382m(418yd)/레드 312m(341yd)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 6,
+    "par": 4,
+    "hdcp": 9,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이 가운데로 편하게 (평균 5.2타) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 336,
+     "blue": 336,
+     "white": 314,
+     "red": 266,
+     "teeNames": "블루 336m(367yd)/화이트 314m(343yd)/레드 266m(291yd)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": 17,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "훅 홀, 오른쪽 벙커 센터 겨냥 (평균 4.8타) · 해저드: 그린 앞 오른쪽 벙커(레귤러 기준 벙커 앞 230m) · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 355,
+     "blue": 355,
+     "white": 321,
+     "red": 272,
+     "teeNames": "블루 355m(388yd)/화이트 321m(351yd)/레드 272m(297yd)",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 8,
+    "par": 3,
+    "hdcp": 15,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오른쪽 해저드 주의 (평균 3.8타) · 해저드: 오른쪽 벙커 앞 워터해저드 · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 172,
+     "blue": 172,
+     "white": 156,
+     "red": 123,
+     "teeNames": "블루 172m(188yd)/화이트 156m(171yd)/레드 123m(135yd)",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 9,
+    "par": 5,
+    "hdcp": 18,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "보너스 파5 슬라이스 홀, 그린 좌측 끝 언덕 겨냥 (평균 5.6타) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "선운",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 529,
+     "blue": 529,
+     "white": 494,
+     "red": 433,
+     "teeNames": "블루 529m(579yd)/화이트 494m(540yd)/레드 433m(474yd)",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": 10,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린 왼쪽 벙커 센터 겨냥 (평균 4.9타) · 해저드: 그린 왼쪽 벙커 · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 364,
+     "blue": 364,
+     "white": 343,
+     "red": 299,
+     "teeNames": "블루 364m(398yd)/화이트 343m(375yd)/레드 299m(327yd)",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 11,
+    "par": 3,
+    "hdcp": 16,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약간 훅이 나는 파3 (평균 3.9타) · 해저드: 왼쪽 해저드 처리 · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 158,
+     "blue": 158,
+     "white": 148,
+     "red": 113,
+     "teeNames": "블루 158m(173yd)/화이트 148m(162yd)/레드 113m(124yd)",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 12,
+    "par": 5,
+    "hdcp": 4,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "슬라이스가 많아 암벽 앞 소나무 쪽 공략 (평균 6.5타) · 해저드: 왼쪽 카트도로 암벽(200m 지점) · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 503,
+     "blue": 503,
+     "white": 477,
+     "red": 412,
+     "teeNames": "블루 503m(550yd)/화이트 477m(522yd)/레드 412m(451yd)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 13,
+    "par": 4,
+    "hdcp": 1,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파4 HDCP1, 왼쪽 벙커 겨냥 (평균 5.3타) · 해저드: 그린 앞 왼쪽 벙커, 왼쪽 나무숲(넘기기 160~170m), 오른쪽 OB(타석까지 180m) · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 355,
+     "blue": 355,
+     "white": 336,
+     "red": 267,
+     "teeNames": "블루 355m(388yd)/화이트 336m(367yd)/레드 267m(292yd)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": 8,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "왼쪽 벙커 좌측 라이트 겨냥 (평균 5.2타) · 해저드: 그린 앞 왼쪽 벙커 · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 395,
+     "blue": 395,
+     "white": 367,
+     "red": 294,
+     "teeNames": "블루 395m(432yd)/화이트 367m(401yd)/레드 294m(322yd)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": 3,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "가장 긴 파4 (평균 5.2타) · 해저드: 오른쪽 해저드, 왼쪽 OB(150~100m 구간 부분 해저드) · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 407,
+     "blue": 407,
+     "white": 383,
+     "red": 316,
+     "teeNames": "블루 407m(445yd)/화이트 383m(419yd)/레드 316m(346yd)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 16,
+    "par": 3,
+    "hdcp": 7,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "지정 니어홀, 우측 핀은 핀보다 좌측 공략 (평균 4.0타) · 해저드: 아일랜드 그린(물) · 그린: 아일랜드 그린, 오른쪽이 왼쪽보다 멀다",
+    "nine": "화시",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 188,
+     "blue": 188,
+     "white": 167,
+     "red": 100,
+     "teeNames": "블루 188m(206yd)/화이트 167m(183yd)/레드 100m(109yd)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 17,
+    "par": 5,
+    "hdcp": 12,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "왼쪽으로 감아도는 도그렉, 해저드 앞 소나무 세 그루보다 왼쪽 (평균 6.0타) · 해저드: 대각선 해저드 · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 494,
+     "blue": 494,
+     "white": 462,
+     "red": 384,
+     "teeNames": "블루 494m(540yd)/화이트 462m(505yd)/레드 384m(420yd)",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": 2,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "파4 홀(설명 외 정보 없음), HDCP2 (평균 4.7타) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "화시",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 404,
+     "blue": 404,
+     "white": 379,
+     "red": 281,
+     "teeNames": "블루 404m(442yd)/화이트 379m(414yd)/레드 281m(307yd)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   }
+  ],
+  "info": {
+   "operationType": "비회원제",
+   "totalHoles": 18,
+   "memberHoles": null,
+   "publicHoles": 18,
+   "homepage": "https://www.golfzoncounty.com/",
+   "openedYear": null,
+   "layout": "선운 9홀(파36, 블루 3,146m) + 화시 9홀(파36, 블루 3,268m)",
+   "par18": 72,
+   "lengthYards": 7014,
+   "fairwayGrass": "중지(티박스·페어웨이)",
+   "greenGrass": "벤트그래스(Pencross/Shark/Penn A-1)",
+   "architect": "홈페이지 미제공",
+   "fees": {
+    "weekday": "10~11월 기준 130,000원(1부 ~07:30) / 140,000원(07:31~, 2부) — 월별 '이달의 그린피' 변동",
+    "weekend": "10~11월 기준 160,000원(1부 ~07:30) / 170,000원(07:31~, 2부)",
+    "cart": "100,000원/팀 (9홀 50,000원)",
+    "caddie": "150,000원/팀 (현장 지급)"
+   },
+   "reservation": "골프존카운티 앱·웹 인터넷 실시간 예약(골프존 회원가입): 매주 월요일 09시, 오픈 주 포함 5주 뒤 월~일 오픈. 전화 063-560-2019(09~17시), 팩스 063-560-2001. 골프텔 패키지는 10시 전화 전용. 2인 플레이 불가",
+   "difficulty": "골프존카운티 평가: 전장 3, 홀 다양성 4, 경관 4, 샷밸류 4, 폭/넓이 4, 코스전략 다양성 5. KGA 코스레이팅(9홀) 블루 선운 35.1/65·화시 35.6/65, 화이트 34.0/62·34.7/66, 레드 33.9/60·33.8/61. 18홀 평균스코어 90.6",
+   "features": "골프존카운티 1호 골프장, 평화로움·아름다움에 중점을 둔 편안한 코스(고창). 대중제 18홀(선운·화시 코스), 화시 7번 아일랜드 파3(지정 니어홀), 화시 4번 내리막 파4 HDCP1. 티 3종(블루/화이트/레드), 홀별 내장객 평균타수·그린 이미지·3D 제공. 원표기 m·yd 병기(블루 합 6,414m = 7,014yd). 불일치: 골프장 소개의 '총전장 5,872m'는 홀별 블루(6,414m)·화이트(5,973m) 합계와 모두 불일치. 개장연도·설계자 미제공. 목록상 홈페이지(golfzoncounty.com)는 통합 예약플랫폼이며 golfclubSeq=5 페이지에서 수집",
+   "facilities": "클럽하우스(아일랜드형 인포메이션 데스크 로비), 사우나, 스테이 선운(골프텔)·GS룸, 식당 '호시그린'. 대여: 골프채 풀세트 50,000원, 퍼터 20,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.golfzoncounty.com/golfclub/main?golfclubSeq=5 / https://www.golfzoncounty.com/golfclub/intro?golfclubSeq=5 / https://www.golfzoncounty.com/golfclub/course?golfclubSeq=5 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=5&courseSeq=13 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=5&courseSeq=12 / https://www.golfzoncounty.com/golfclub/resvGuide?golfclubSeq=5 / https://www.golfzoncounty.com/golfclub/monthGreenfeeInfo?golfclubInfoTableSeq=741&golfclubSeq=5 / https://www.golfzoncounty.com/golfclub/facility?golfclubSeq=5",
+    "note": "KGBA id 19 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 19,
+   "name": "골프존카운티 선운",
+   "nines": [
+    "선운",
+    "화시"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "선운",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "화시",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "center": {
+   "lat": 35.46721,
+   "lon": 126.633972,
+   "precision": "address"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.875Z"
+ }
+}

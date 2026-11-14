@@ -1,0 +1,871 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-11",
+  "name": "경주신라",
+  "region": "경북 경주시",
+  "address": "경북 경주시 보문로 319 (신평동, 경주신라컨트리클럽)",
+  "phone": "(054)740-7114",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파4. 티샷은 페어웨이 중앙에서 약간 우측 · 해저드: 좌측 OB, 그린 주변 벙커 · 그린: 투그린, 뒷편 오르막이나 지표 완만",
+    "nine": "천마",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 389,
+     "blue": 369,
+     "white": 357,
+     "red": 345,
+     "teeNames": "C.T 389 / R.T 357 (텍스트). 공략도 블루/화이트/레드: 좌그린 369/357/345, 우그린 360/348/337",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 2,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌 도그렉 파5. 티샷 중앙 약간 우측, 세컨드는 페어웨이 정중앙 · 해저드: 좌측 OB, IP 부근 크로스벙커, 그린 주변 벙커 · 그린: 지표 완만",
+    "nine": "천마",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 485,
+     "blue": 470,
+     "white": 454,
+     "red": 377,
+     "teeNames": "C.T 485 / R.T 462. 공략도: 좌그린 470/454/377, 우그린 465/448/371",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 3,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "계곡을 넘기는 심리적 부담 파3. 짧은 샷은 불리 · 해저드: 티 앞 계곡, 그린 주변 벙커 · 그린: 그린 앞 오르막 경사, 지표 완만",
+    "nine": "천마",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 174,
+     "blue": 176,
+     "white": 149,
+     "red": 128,
+     "teeNames": "C.T 174 / R.T 146. 공략도: 좌그린 176/149/128, 우그린 179/152/131 (블루가 C.T보다 길게 표기)",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 4,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷은 무난하나 그린 공략 정확성과 퍼팅 신중함 필요 · 해저드: 좌측 OB, 그린 좌·우 벙커 · 그린: 언듈레이션이 의외로 심함",
+    "nine": "천마",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 334,
+     "blue": 308,
+     "white": 289,
+     "red": 230,
+     "teeNames": "C.T 334 / R.T 302. 공략도: 좌그린 308/289/230, 우그린 334/315/256",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티 앞 계곡으로 초보자 부담. 티샷 페어웨이 중앙, 정확한 어프로치 · 해저드: 티 앞 계곡, 페어웨이 좌측 벙커, 그린 좌·뒤 벙커 · 그린: 지표 원만",
+    "nine": "천마",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 357,
+     "blue": 366,
+     "white": 343,
+     "red": 296,
+     "teeNames": "C.T 357 / R.T 338. 공략도: 좌그린 366/343/296, 우그린 341/319/271",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 6,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 파5. 티샷 약간 우측, 세컨드 중앙 약간 좌측 · 해저드: 페어웨이 좌측 벙커, 그린 주변 벙커 다수 · 그린: 앞쪽으로 내리막 경사, 라인 읽기 어려움",
+    "nine": "천마",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 517,
+     "blue": 477,
+     "white": 455,
+     "red": 382,
+     "teeNames": "C.T 517 / R.T 485. 공략도: 좌그린 477/455/382, 우그린 493/472/399",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 7,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파3. 샷만 정확하면 무난, 바람 계산 필수 · 해저드: 전방 워터해저드(연못 2곳), 그린 좌·우 벙커 · 그린: 지표 완만, 바람 영향 큼",
+    "nine": "천마",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 196,
+     "blue": 184,
+     "white": 156,
+     "red": 138,
+     "teeNames": "C.T 196 / R.T 174. 공략도: 좌그린 184/156/138, 우그린 199/169/146",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 8,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4. IP가 완만한 오르막이라 페어웨이 중앙 우측 겨냥 · 해저드: 그린 주변 벙커 · 그린: 심한 언듈레이션은 아니나 브레이크 오독 주의",
+    "nine": "천마",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 347,
+     "blue": 350,
+     "white": 322,
+     "red": 280,
+     "teeNames": "C.T 347 / R.T 320. 공략도: 좌그린 350/322/280, 우그린 358/330/288 (블루가 C.T보다 길게 표기)",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 파4. 티샷 페어웨이 중앙, 세컨드는 1클럽 더 · 해저드: 그린 주변 벙커 · 그린: 그린 앞 오르막, 지표 완만",
+    "nine": "천마",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 398,
+     "blue": 380,
+     "white": 346,
+     "red": 274,
+     "teeNames": "C.T 398 / R.T 375. 공략도: 좌그린 380/346/274, 우그린 398/364/292",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "핸디캡1. IP 오르막으로 미들아이언 이상 남는 경우 많음, 세컨드는 약간 좌측이 안전 · 해저드: 티 앞 좌측 연못, 그린 우측 벙커 · 그린: 지표 완만",
+    "nine": "천마",
+    "nineHole": 10,
+    "scorecard": {
+     "unit": "m",
+     "back": 384,
+     "blue": 341,
+     "white": 320,
+     "red": 286,
+     "teeNames": "C.T 384 / R.T 347. 공략도: 좌그린 341/320/286, 우그린 374/353/319",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 11,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "서비스 파5. 장타자 투온 가능, 중급 이하는 쓰리온 권장 · 해저드: 그린 좌·우 벙커 · 그린: 뒷편 오르막, 핀이 뒤일 때 거리 감안",
+    "nine": "천마",
+    "nineHole": 11,
+    "scorecard": {
+     "unit": "m",
+     "back": 507,
+     "blue": 511,
+     "white": 481,
+     "red": 452,
+     "teeNames": "C.T 507 / R.T 475. 공략도: 좌그린 511/481/452, 우그린 486/457/428",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 중앙, 훅 주의. 그린은 우측 벙커를 피해 좌측 공략 · 해저드: 페어웨이 좌측 벙커·독립수, 그린 앞 좌측 연못(해저드), 그린 우측 벙커 · 그린: 지표 완만",
+    "nine": "천마",
+    "nineHole": 12,
+    "scorecard": {
+     "unit": "m",
+     "back": 366,
+     "blue": 358,
+     "white": 334,
+     "red": 269,
+     "teeNames": "C.T 366 / R.T 329. 공략도: 좌그린 358/334/269, 우그린 372/347/283",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 13,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 파3. 티샷이 정확해야 원온 가능 · 해저드: 좌측 내리막 OB, 그린 주변 벙커 · 그린: 좌그린은 뒤로 길고 심한 오르막, 3퍼트 주의",
+    "nine": "천마",
+    "nineHole": 13,
+    "scorecard": {
+     "unit": "m",
+     "back": 210,
+     "blue": 205,
+     "white": 188,
+     "red": 153,
+     "teeNames": "C.T 210 / R.T 192. 공략도: 좌그린 205/188/153, 우그린 185/168/135",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌 도그렉. 티샷 페어웨이 중앙 좌측, 세컨드 정확성 요구 · 해저드: 세컨드 지점 좌·우 벙커, 그린 주변 벙커 · 그린: 뒤쪽 오르막, 지표 완만",
+    "nine": "천마",
+    "nineHole": 14,
+    "scorecard": {
+     "unit": "m",
+     "back": 425,
+     "blue": 417,
+     "white": 391,
+     "red": 298,
+     "teeNames": "C.T 425 / R.T 402. 공략도: 좌그린 417/391/298, 우그린 430/404/311",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 페어웨이 중앙, 그린 앞 좌측 벙커 의식 · 해저드: 티 앞 우측 연못, 페어웨이 좌·우 크로스벙커, 그린 앞 좌측 벙커 · 그린: 지표 완만",
+    "nine": "천마",
+    "nineHole": 15,
+    "scorecard": {
+     "unit": "m",
+     "back": 343,
+     "blue": 332,
+     "white": 306,
+     "red": 263,
+     "teeNames": "C.T 343 / R.T 311. 공략도: 좌그린 332/306/263, 우그린 354/329/286",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 파4. 티샷 페어웨이 중앙 좌측 · 해저드: 우측 연못(IP~그린), 그린 앞 좌측·그린 뒤 벙커 · 그린: 뒷편 오르막, 지표 완만",
+    "nine": "천마",
+    "nineHole": 16,
+    "scorecard": {
+     "unit": "m",
+     "back": 402,
+     "blue": 391,
+     "white": 350,
+     "red": 280,
+     "teeNames": "C.T 402 / R.T 366. 공략도: 좌그린 391/350/280, 우그린 409/369/298",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파3이나 바람에 따라 변화 큼, 정확한 샷 · 해저드: 티 앞 연못, 그린 앞 길게 놓인 벙커 · 그린: 뒤쪽 오르막, 비교적 완만",
+    "nine": "천마",
+    "nineHole": 17,
+    "scorecard": {
+     "unit": "m",
+     "back": 137,
+     "blue": 137,
+     "white": 122,
+     "red": 111,
+     "teeNames": "C.T 137 / R.T 123. 공략도: 좌그린 137/122/111, 우그린 145/128/116",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 18,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 파5. 티샷 중앙, 세컨드는 중앙 좌측으로 우측 해저드 회피 · 해저드: 우그린 앞 해저드(연못), 좌그린 뒤 연못, 페어웨이·그린 벙커 · 그린: 평탄하고 완만",
+    "nine": "천마",
+    "nineHole": 18,
+    "scorecard": {
+     "unit": "m",
+     "back": 553,
+     "blue": 498,
+     "white": 465,
+     "red": 355,
+     "teeNames": "C.T 553 / R.T 521. 공략도: 좌그린 498/465/355, 우그린 528/495/385",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약간 좌 도그렉 서비스홀. 페어웨이 중앙 좌측이 공략에 유리 · 해저드: 우측 그린 뒤까지 OB, 좌측 티 앞 병행 워터해저드, 그린 주변 벙커 · 그린: 홀컵 위치에 따라 까다로움",
+    "nine": "화랑",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 339,
+     "blue": 347,
+     "white": 318,
+     "red": 289,
+     "teeNames": "C.T 339 / R.T 319. 공략도: 좌그린 347/318/289, 우그린 345/316/287",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약간 좌 도그렉. 전 구간 정확한 샷 요구 · 해저드: 좌·우 OB, IP 좌·우 사이드벙커, 그린 우측 내리막 병행 워터해저드, 그린 앞 벙커 · 그린: 지표 까다로움",
+    "nine": "화랑",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 387,
+     "blue": 376,
+     "white": 349,
+     "red": 294,
+     "teeNames": "C.T 387 / R.T 352. 공략도: 좌그린 376/349/294, 우그린 377/351/296",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 21,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "물과 벙커로 둘러싸인 파3, 정확한 티샷 필요 · 해저드: 우측 OB, 좌측 워터해저드, 그린 주위 벙커 5개 · 그린: 투그린(좌그린 짧고 우그린 길음)",
+    "nine": "화랑",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 190,
+     "blue": 156,
+     "white": 150,
+     "red": 128,
+     "teeNames": "C.T 190 / R.T 175. 공략도: 좌그린 156/150/128, 우그린 183/174/153 (C.T와 차이 큼)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 22,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 중앙에서 우측, 세컨드는 좌측 벙커 약간 우측, 서드는 숏아이언 · 해저드: 세컨드~그린 구간 좌·우 벙커, 그린 주변 벙커 · 그린: 지표 원만",
+    "nine": "화랑",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 541,
+     "blue": 536,
+     "white": 517,
+     "red": 431,
+     "teeNames": "C.T 541 / R.T 521. 공략도: 좌그린 536/517/431, 우그린 538/518/433",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 23,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4지만 그린 앞 벙커와 퍼팅이 관건 · 해저드: 티 좌·우 OB(코스에 따라), 페어웨이 벙커, 그린 앞 벙커 · 그린: 언듈레이션 상당히 까다로움",
+    "nine": "화랑",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 296,
+     "blue": 271,
+     "white": 251,
+     "red": 222,
+     "teeNames": "C.T 296 / R.T 273. 공략도: 좌그린 271/251/222, 우그린 288/268/239",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 24,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파3. 벙커와 수시로 부는 바람이 복병 · 해저드: 우측·그린 뒤 OB, 그린 주변 벙커 · 그린: 지표 조금 까다로움",
+    "nine": "화랑",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 168,
+     "blue": 150,
+     "white": 125,
+     "red": 98,
+     "teeNames": "C.T 168 / R.T 140. 공략도: 좌그린 150/125/98, 우그린 163/139/115",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 25,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "각도 큰 도그렉 파5. 티샷 중앙, 상급자 2온 가능하나 3온 권장 · 해저드: 좌측 대형 워터해저드, 그린 우측 연못, 그린 주변 벙커 · 그린: 홀컵 위치에 따라 신중해야 함",
+    "nine": "화랑",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 504,
+     "blue": 477,
+     "white": 458,
+     "red": 413,
+     "teeNames": "C.T 504 / R.T 484. 공략도: 좌그린 477/458/413, 우그린 478/459/414",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 26,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "핸디캡1. IP 오르막으로 거리가 길게 느껴짐, 실거리보다 길게 계산 · 해저드: 좌측 OB, 그린 주변 벙커 · 그린: 지표 완만, 그린 앞 오르막",
+    "nine": "화랑",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 387,
+     "blue": 393,
+     "white": 376,
+     "red": 322,
+     "teeNames": "C.T 387 / R.T 370. 공략도: 좌그린 393/376/322, 우그린 383/366/313",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 27,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 중앙, 세컨드는 한 클럽 길게 · 해저드: 좌·우 OB, 좌측 세컨드 지점 사이드벙커 2곳, 그린 주변 벙커 · 그린: 언듈레이션 까다로움, 그린 앞 오르막",
+    "nine": "화랑",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 351,
+     "blue": 329,
+     "white": 310,
+     "red": 251,
+     "teeNames": "C.T 351 / R.T 331. 공략도: 좌그린 329/310/251, 우그린 349/330/271",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 28,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 약간 좌 도그렉. 좌측 큰 소나무 방향 공략 시 거리 이득 · 해저드: 우측 OB, 좌측 깊은 러프(분실 우려), 페어웨이·그린 벙커 · 그린: 뒤쪽 오르막, 지표 완만",
+    "nine": "화랑",
+    "nineHole": 10,
+    "scorecard": {
+     "unit": "m",
+     "back": 403,
+     "blue": 383,
+     "white": 363,
+     "red": 333,
+     "teeNames": "C.T 403 / R.T 383. 공략도: 좌그린 383/363/333, 우그린 395/375/346",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 29,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우 도그렉 서비스 파5. 티샷은 우측 언덕 1~2부 능선 겨냥 · 해저드: 우측 병행 워터해저드(공략도상 좌측에도 연못), 좌측 사이드벙커, 그린 좌·우 가드벙커 · 그린: 지표 원만",
+    "nine": "화랑",
+    "nineHole": 11,
+    "scorecard": {
+     "unit": "m",
+     "back": 474,
+     "blue": 453,
+     "white": 434,
+     "red": 410,
+     "teeNames": "C.T 474 / R.T 451. 공략도: 좌그린 453/434/410, 우그린 449/430/406",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 30,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷은 독립수 좌측, 어프로치는 한 클럽 길게 · 해저드: 우측 OB, 좌측 병행 워터해저드, 페어웨이 독립수, 그린 좌·우 가드벙커 · 그린: 그린 앞 오르막, 지표 완만",
+    "nine": "화랑",
+    "nineHole": 12,
+    "scorecard": {
+     "unit": "m",
+     "back": 370,
+     "blue": 340,
+     "white": 317,
+     "red": 275,
+     "teeNames": "C.T 370 / R.T 345. 공략도: 좌그린 340/317/275, 우그린 371/348/307",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 31,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 내리막 파3. 맞바람·슬라이스 바람을 정확히 판단 · 해저드: 우측 OB, 좌측 병행 워터해저드, 그린 주변 벙커 · 그린: 홀컵 위치에 따라 다소 까다로움",
+    "nine": "화랑",
+    "nineHole": 13,
+    "scorecard": {
+     "unit": "m",
+     "back": 214,
+     "blue": 204,
+     "white": 177,
+     "red": 132,
+     "teeNames": "C.T 214 / R.T 186. 공략도: 좌그린 204/177/132, 우그린 209/181/134",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 32,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "일명 '갈치홀'. 길고 좁은 페어웨이, 무리한 장타는 OB·해저드 위험 · 해저드: 우측 OB, 좌측 병행 워터해저드, 페어웨이 벙커, 그린 좌·우 벙커 · 그린: 지표 완만",
+    "nine": "화랑",
+    "nineHole": 14,
+    "scorecard": {
+     "unit": "m",
+     "back": 567,
+     "blue": 537,
+     "white": 516,
+     "red": 438,
+     "teeNames": "C.T 567 / R.T 543. 공략도: 좌그린 537/516/438, 우그린 551/530/452",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 33,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "정확한 티샷이 핵심 · 해저드: 우측 OB·병행 워터해저드(티 우측 연못), 좌측 소나무숲, 페어웨이 양쪽 사이드벙커, 그린 좌·우 가드벙커 · 그린: 지표 완만",
+    "nine": "화랑",
+    "nineHole": 15,
+    "scorecard": {
+     "unit": "m",
+     "back": 336,
+     "blue": 299,
+     "white": 281,
+     "red": 252,
+     "teeNames": "C.T 336 / R.T 316. 공략도: 좌그린 299/281/252, 우그린 318/300/271",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 34,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "숏아이언 거리 서비스 파3, 벙커 심리적 부담 · 해저드: 그린을 에워싼 벙커 · 그린: 지표 완만",
+    "nine": "화랑",
+    "nineHole": 16,
+    "scorecard": {
+     "unit": "m",
+     "back": 149,
+     "blue": 146,
+     "white": 126,
+     "red": 105,
+     "teeNames": "C.T 149 / R.T 124. 공략도: 좌그린 146/126/105, 우그린 149/130/110",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 35,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 페어웨이 한가운데, 세컨드는 그린이 잘 안 보여 핀·앞팀 확인 · 해저드: 좌·우 OB, 페어웨이 좌측 벙커, 그린 주변 벙커 · 그린: 완만하나 홀컵 위치에 따라 변화",
+    "nine": "화랑",
+    "nineHole": 17,
+    "scorecard": {
+     "unit": "m",
+     "back": 391,
+     "blue": 373,
+     "white": 353,
+     "red": 312,
+     "teeNames": "C.T 391 / R.T 371. 공략도: 좌그린 373/353/312, 우그린 391/371/330",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 36,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀 전체 오르막, 한 클럽 길게. 정확한 세컨드 요구 · 해저드: 좌·우 OB, IP 좌측 사이드벙커, 그린 앞 좌·우 가드벙커 · 그린: 홀컵 위치에 따라 까다로움",
+    "nine": "화랑",
+    "nineHole": 18,
+    "scorecard": {
+     "unit": "m",
+     "back": 384,
+     "blue": 325,
+     "white": 304,
+     "red": 203,
+     "teeNames": "C.T 384 / R.T 360. 공략도: 좌그린 325/304/203, 우그린 359/338/237",
+     "note": ""
+    },
+    "hdcpNine": 6
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 36,
+   "memberHoles": 36,
+   "publicHoles": null,
+   "homepage": "https://sillacc.co.kr/",
+   "openedYear": 1979,
+   "layout": "천마 18홀(파72, 챔피언 6,524m·레귤러 6,025m) + 화랑 18홀(파72, 챔피언 6,451m·레귤러 6,044m)",
+   "par18": 72,
+   "lengthYards": 7135,
+   "fairwayGrass": "홈페이지 미제공",
+   "greenGrass": "홈페이지 미제공",
+   "architect": "홈페이지 미제공",
+   "fees": {
+    "weekday": "비회원 160,000원 (18홀 평일 기준; 지정회원 70,000 / 주주회원 30,000; 9홀 비회원 90,000) — 비회원 실적용 그린피는 월별 공지(11월·12월 그린피 안내) 참조",
+    "weekend": "비회원 190,000원 (주말·공휴일 18홀; 지정회원 110,000 / 주주회원 30,000; 9홀 비회원 105,000)",
+    "cart": "유도카트(5인승) 팀당 80,000원 (3~4인 원칙, 2인·5인 불가) / 셀프카트(청소비 포함) 1·2부 120,000원, 3부 100,000원",
+    "caddie": "18홀 140,000원 / 9홀 70,000원 (1·2부); 3부 야간은 노캐디 셀프 라운드"
+   },
+   "reservation": "홈페이지 인터넷 예약(회원가입 후). 주주회원: 2주 전 월요일 10시~1일 전 17시 접수, 주말은 토·일 중 1일만, 취소는 4일 전 12시까지, 결장 위약금 20만원. 3부(야간): 3주 전 월요일 13시부터 인터넷·모바일. 지정회원·인터넷 비회원 부킹서비스 별도, 대기예약·조인게시판 운영. 특별예약·문의 054-740-7070/7071",
+   "difficulty": "",
+   "features": "경주 보문관광단지 내 36홀 주주회원제(주주 약 2,800명), 총면적 2,143,354㎡(약 64.8만평). 천마=넓고 평탄한 페어웨이의 남성적 코스, 화랑=업다운이 적당하고 아기자기한 여성적 코스로 홀 사이 크고 작은 연못이 많음. 전 홀 투그린(좌/우), 공략도에 그린별 블루·화이트·레드 거리 표기. 대표 홀: 천마 10번(HDCP1), 화랑 8번(HDCP1), 화랑 14번 파5(567m '갈치홀'). 2026-2027 GMK 대한민국 권역 베스트10 코스 선정(공지). 원표기 m(천마 C.T 6,524m → 7,135yd, 사이트 병기 값). 불일치: 홀 텍스트의 C.T 거리와 공략도 블루티 거리가 다른 홀이 다수(예: 천마 8번 C.T 347m vs 좌그린 블루 350m, 화랑 3번 C.T 190m vs 블루 156/183m). 코스레이팅 인증서 팝업 존재. 잔디·설계자 미제공",
+   "facilities": "클럽하우스, 레스토랑, 그늘집, 골프연습장, 프로샵·시상품, 로비, 사우나. 대여: 골프채 남성신형(테일러메이드) 60,000·남성구형(캘러웨이) 30,000·여성신형(엘로드) 60,000원, 퍼터 10,000원, 골프화 5,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://sillacc.co.kr/swp/course / https://sillacc.co.kr/swp/cheonma_course / https://sillacc.co.kr/swp/hwarang_course / https://sillacc.co.kr/swp/club / https://sillacc.co.kr/swp/charge / https://sillacc.co.kr/swp/guideRes_Member / https://sillacc.co.kr/swp/facilities",
+    "note": "KGBA id 11 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 11,
+   "name": "경주신라",
+   "nines": [
+    "천마",
+    "화랑"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "천마",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "화랑",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36
+    ]
+   }
+  ],
+  "center": {
+   "lat": 35.855534,
+   "lon": 129.284674,
+   "precision": "address"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.868Z"
+ }
+}

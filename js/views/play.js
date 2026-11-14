@@ -5,7 +5,7 @@
 import { S, save, activeCourse, activeHole, allowed, currentMode, MODES } from '../core/state.js';
 import { newRound } from '../core/score.js';
 import { demoCourse } from '../core/course.js';
-import { getCatalog, installCourse, findInstalled } from '../core/remote.js';
+import { getCatalog, installCourse, findInstalled, getClubs } from '../core/remote.js';
 import { Sensors, onPos, onOrientation, sampleFix, keepAwake, vibrate, speak, startOrientation } from '../core/sensors.js';
 import { distance, bearing, destination, normAngle } from '../core/geo.js';
 import { adviseShot, predictBall, toBall, dirWords, compassName, greenR } from '../physics/advice.js';
@@ -52,6 +52,7 @@ function stepClub() {
     <input type="search" id="pq" class="pin-search" placeholder="🔍 골프장 이름으로 찾기" value="${esc(P.q || '')}">
     ${mine.length ? `<div class="picks">${mine.map(c => `<button class="pick" data-c="${esc(c.id)}"><span class="pi">${c.official ? '🏌️' : c.demo ? '🧪' : '🗺️'}</span><span class="pt"><b>${esc(c.name)}</b><small>${c.holes.length}홀${c.official?.region ? ' · ' + esc(c.official.region) : ''}${c.todayPins ? ' · 오늘 핀 ✓' : ''}</small></span><span class="pa">›</span></button>`).join('')}</div>` : '<p class="sub center">아직 받은 골프장이 없어요. 아래에서 골라 받아요.</p>'}
     <h2 class="ph2">📡 골프장 받기</h2><div class="picks" id="cat"><p class="sub center">불러오는 중…</p></div>
+    <h2 class="ph2">🇰🇷 전국 골프장 찾기</h2><div class="picks" id="dir"><p class="sub center">불러오는 중…</p></div>
     <button class="pbtn ghost" id="demo">🧪 연습용 가상 골프장으로 해 보기</button>
   </div>`;
   $('#pq').oninput = e => { P.q = e.target.value; persist(); clearTimeout(stepClub._t); stepClub._t = setTimeout(() => { const pos = e.target.selectionStart; stepClub(); const i = $('#pq'); i.focus(); i.setSelectionRange(pos, pos); }, 250); };
@@ -70,6 +71,41 @@ function stepClub() {
       catch (err) { toast('받지 못했어요: ' + err.message); b.disabled = false; }
     });
   }).catch(() => { const box = $('#cat'); if (box) box.innerHTML = '<p class="sub center">인터넷이 연결되면 골프장 목록이 보여요</p>'; });
+  // 전국 골프장 목록 (KGBA 회원사): 이름·지역 검색, 위치를 알면 가까운 순
+  getClubs().then(clubs => {
+    const box = $('#dir'); if (!box) return;
+    if (!clubs.length) { box.innerHTML = '<p class="sub center">목록을 불러오지 못했어요</p>'; return; }
+    const me = Sensors.pos;
+    let list = clubs.filter(c => !q || c.name.includes(q) || c.sigungu.includes(q) || c.sido.includes(q));
+    if (me) list = list.map(c => ({ ...c, d: c.lat ? distance(me, c) : Infinity })).sort((a, b) => a.d - b.d);
+    else list = list.sort((a, b) => (b.official ? 1 : 0) - (a.official ? 1 : 0) || a.name.localeCompare(b.name, 'ko'));
+    const shown = list.slice(0, q ? 30 : 6);
+    box.innerHTML = (q ? '' : `<p class="sub center" style="margin:0">전국 ${clubs.length}곳 중 ${me ? '가까운 곳' : '코스 정보가 있는 곳'}이에요. 이름을 검색하면 다 찾을 수 있어요.</p>`)
+      + shown.map(c => `<button class="pick" data-club="${c.id}"><span class="pi">${c.official ? '🏌️' : 'ℹ️'}</span><span class="pt"><b>${esc(c.name)}</b><small>${esc(c.sido)} ${esc(c.sigungu)} · ${c.holes || '?'}홀${Number.isFinite(c.d) ? ` · ${c.loc === "sigungu" ? "약 " : ""}${(c.d / 1000).toFixed(c.d < 10000 ? 1 : 0)}km` : ''} · ${c.official ? (findInstalled(c.official) ? '받음' : '스코어카드 있음') : '정보만'}</small></span><span class="pa">›</span></button>`).join('')
+      + (q && !list.length ? '<p class="sub center">찾는 골프장이 없어요</p>' : '');
+    $$('[data-club]', box).forEach(b => b.onclick = () => clubInfo(clubs.find(c => c.id === +b.dataset.club)));
+  }).catch(() => { const box = $('#dir'); if (box) box.innerHTML = '<p class="sub center">인터넷이 연결되면 전국 골프장 목록이 보여요</p>'; });
+}
+
+// 골프장 정보 (전국 목록): 코스 데이터가 있으면 받아서 바로 시작
+function clubInfo(c) {
+  const mine = c.official && findInstalled(c.official);
+  const rows = [['지역', `${c.sido} ${c.sigungu}`], ['홀', c.holes ? `${c.holes}홀${c.courses?.length ? ` (${c.courses.join(' · ')})` : ''}` : ''], ['운영', c.type], ['파 · 전장', [c.par && `파 ${c.par}`, c.yards && `${c.yards}야드`].filter(Boolean).join(' · ')],
+    ['그린피 (주중/주말)', [c.fee?.weekday, c.fee?.weekend].filter(Boolean).join(' / ')], ['카트 · 캐디', [c.fee?.cart, c.fee?.caddie].filter(Boolean).join(' · ')], ['잔디', c.grass], ['개장', c.opened], ['전화', c.phone], ['주소', c.address], ['예약', c.reservation]].filter(([, v]) => v);
+  const home = c.homepage ? (/^https?:/.test(c.homepage) ? c.homepage : 'https://' + c.homepage) : '';
+  sheet({
+    title: c.name,
+    body: `${rows.map(([k, v]) => `<div class="kv"><span>${esc(k)}</span><b style="text-align:right">${esc(String(v))}</b></div>`).join('')}
+      <p>${home ? `<a href="${esc(home)}" target="_blank" rel="noopener">🌐 홈페이지</a>` : ''}${c.phone ? ` · <a href="tel:${esc(c.phone.replace(/[^0-9+]/g, ''))}">📞 전화</a>` : ''}</p>
+      <p class="sub">${c.official ? '홀별 스코어카드(파·거리·공략)가 있어요. 그린 위치는 처음 한 번 지도에서 눌러 정해요.' : '아직 홀별 코스 정보가 없어요. 관리자가 코스를 올리면 받을 수 있어요.'} 정보 확인일 ${esc(c.checked || '—')} · 출처 KGBA 회원사 코스 DB</p>`,
+    actions: [{ label: '닫기' }, ...(c.official ? [{
+      label: mine ? '이 골프장으로 시작' : '받고 시작하기', kind: 'primary', onClick: async () => {
+        if (mine) return choose(mine.id);
+        try { toast('받는 중…'); const cat = await getCatalog(); const e = cat.find(x => x.id === c.official); if (!e) throw new Error('목록에 없어요'); const { course } = await installCourse(e); choose(course.id); }
+        catch (err) { toast('받지 못했어요: ' + err.message); }
+      },
+    }] : [])],
+  });
 }
 function choose(id) { S.ui.courseId = id; S.ui.hole = 1; save('ui'); App_.refreshHeader(); P.step = 'course'; persist(); render(); }
 
@@ -81,7 +117,9 @@ function stepCourse() {
     { k: 'all', t: `1번 홀부터 ${N}홀 모두`, ns: c.holes.map(h => h.n) },
     ...(N === 18 ? [{ k: 'back', t: '10번 홀부터 18홀', ns: [...c.holes.slice(9), ...c.holes.slice(0, 9)].map(h => h.n) }, { k: 'f9', t: '앞 9홀만 (1~9번)', ns: c.holes.slice(0, 9).map(h => h.n) }, { k: 'b9', t: '뒤 9홀만 (10~18번)', ns: c.holes.slice(9).map(h => h.n) }] : []),
   ];
-  let first = nines ? nines[0].name : null, second = nines ? nines[1].name : null, pick = 'all';
+  // 9홀 묶음이면 처음+다음 코스, 18홀 이상 묶음(예: 서코스·동코스)이면 한 코스만 기본
+  const sz = n => n.holes.length;
+  let first = nines ? nines[0].name : null, second = nines ? (sz(nines[0]) >= 18 ? '' : nines[1].name) : null, pick = 'all';
   const players = (localStorage.getItem('pinpoint.lastPlayers') || '나').split(',').map(s => s.trim()).filter(Boolean);
   let mode = S.settings.mode === 'tournament' ? 'tournament' : 'casual';
   const draw = () => {
@@ -89,9 +127,9 @@ function stepCourse() {
       <div class="pstep"><span class="done">1 골프장</span><span class="on">2 코스</span><span>3 치기</span></div>
       <button class="plink" id="back">‹ ${esc(c.name)} · 골프장 다시 고르기</button>
       <h1 class="pq">🚩 어느 코스로 쳐요?</h1>
-      ${nines ? `<p class="sub center">이 골프장은 코스가 ${nines.length}개예요. 처음 9홀과 다음 9홀을 골라요.</p>
-        <h2 class="ph2">처음 9홀</h2><div class="chips big">${nines.map(n => `<button class="${n.name === first ? 'on' : ''}" data-f="${esc(n.name)}">${esc(n.name)}</button>`).join('')}</div>
-        <h2 class="ph2">다음 9홀</h2><div class="chips big">${nines.map(n => `<button class="${n.name === second ? 'on' : ''}" data-s="${esc(n.name)}" ${n.name === first ? 'disabled' : ''}>${esc(n.name)}</button>`).join('')}<button class="${second === '' ? 'on' : ''}" data-s="">9홀만</button></div>`
+      ${nines ? `<p class="sub center">이 골프장은 코스가 ${nines.length}개예요. ${sz(nines[0]) >= 18 ? '칠 코스를 골라요.' : '처음 코스와 다음 코스를 골라요.'}</p>
+        <h2 class="ph2">${sz(nines[0]) >= 18 ? '칠 코스' : '처음 코스'}</h2><div class="chips big">${nines.map(n => `<button class="${n.name === first ? 'on' : ''}" data-f="${esc(n.name)}">${esc(n.name)} <small>${sz(n)}홀</small></button>`).join('')}</div>
+        <h2 class="ph2">다음 코스</h2><div class="chips big">${nines.map(n => `<button class="${n.name === second ? 'on' : ''}" data-s="${esc(n.name)}" ${n.name === first ? 'disabled' : ''}>${esc(n.name)} <small>${sz(n)}홀</small></button>`).join('')}<button class="${second === '' ? 'on' : ''}" data-s="">이 코스만 (${sz(nines.find(n => n.name === first))}홀)</button></div>`
         : `<div class="picks">${opts.map(o => `<button class="pick ${pick === o.k ? 'sel' : ''}" data-o="${o.k}"><span class="pi">${pick === o.k ? '✅' : '⚪'}</span><span class="pt"><b>${o.t}</b></span></button>`).join('')}</div>`}
       <h2 class="ph2">👫 누구랑 쳐요?</h2>
       <div class="chips big" id="pl">${players.map((p, i) => `<button class="on" data-pl="${i}">${esc(p)}${i ? ' ✕' : ''}</button>`).join('')}<button id="addP">＋ 친구</button></div>
@@ -99,7 +137,7 @@ function stepCourse() {
       <button class="pbtn primary" id="go">시작! 🏌️</button>
     </div>`;
     $('#back').onclick = () => { P.step = 'club'; persist(); render(); };
-    $$('[data-f]').forEach(b => b.onclick = () => { first = b.dataset.f; if (second === first) second = nines.find(n => n.name !== first)?.name ?? ''; draw(); });
+    $$('[data-f]').forEach(b => b.onclick = () => { first = b.dataset.f; if (second === first) second = sz(nines.find(n => n.name === first)) >= 18 ? '' : (nines.find(n => n.name !== first)?.name ?? ''); draw(); });
     $$('[data-s]').forEach(b => b.onclick = () => { second = b.dataset.s; draw(); });
     $$('[data-o]').forEach(b => b.onclick = () => { pick = b.dataset.o; draw(); });
     $$('[data-pl]').forEach(b => b.onclick = () => { const i = +b.dataset.pl; if (i) { players.splice(i, 1); draw(); } });
@@ -169,8 +207,16 @@ function update(force = false) {
 function cards() {
   const box = $('#cards'); if (!box) return;
   const h = activeHole(), me = ballPos(), shot = shotOf();
-  if (!me) { box.innerHTML = `<div class="pcard"><div class="bigq">📍 위치를 찾는 중이에요…</div><p class="sub center">밖에서 잠깐 기다려 주세요. 실내라면 ☰ → 설정 → <b>GPS 시뮬레이션</b>을 켜거나, 아래 [📍 내 공 여기!]로 지도에 공 위치를 찍어요.</p></div>`; return; }
   const pin = h.pin || h.green;
+  const card = scoreCard(h);
+  if (!pin) {
+    box.innerHTML = `<div class="pcard"><div class="bigq">🟢 이 홀의 그린 위치를 알려 주세요</div>
+      <p class="sub center" style="margin:6px 0 0">이 골프장은 스코어카드만 있고 지도 위치가 아직 없어요. 위 지도에서 <b>그린 가운데</b>를 한 번 누르면 그때부터 거리와 추천이 나와요. (이 휴대폰에만 저장)</p>
+      <button class="pbtn primary" id="markGreen">🗺️ 지도에서 그린 찍기</button></div>${card}`;
+    $('#markGreen').onclick = () => { if (P.view !== '2d') { P.view = '2d'; persist(); render(); } P.marking = 'green'; toast('🗺️ 위성지도에서 그린 가운데를 눌러 주세요 (확대하면 더 정확해요)', 4000); };
+    return;
+  }
+  if (!me) { box.innerHTML = `<div class="pcard"><div class="bigq">📍 위치를 찾는 중이에요…</div><p class="sub center">밖에서 잠깐 기다려 주세요. 실내라면 ☰ → 설정 → <b>GPS 시뮬레이션</b>을 켜거나, 아래 [📍 내 공 여기!]로 지도에 공 위치를 찍어요.</p></div>`; return; }
   if (shot) {
     const t = toBall(Sensors.pos || me, shot.pred, Sensors.heading);
     box.innerHTML = `<div class="pcard ball"><div class="sub">내 공은 여기쯤 있어요</div>
@@ -199,9 +245,18 @@ function cards() {
   } else if (adv?.kind === 'noclub') advHtml = `<div class="pcard"><a href="#/bag">내 백에서 클럽을 켜 주세요</a></div>`;
   box.innerHTML = `<div class="pcard dist"><div class="sub">${isBall ? '⚪ 공에서' : '📍 지금 위치에서'} 깃발까지</div>
       <div class="bigd"><b>${Math.round(D)}</b><small>m</small></div>
-      <div class="fb">${dF ? `그린 앞 <b>${Math.round(dF)}</b>` : ''}${dB ? ` · 뒤 <b>${Math.round(dB)}</b>` : ''}${h.pin?.src === 'official' ? ' · 오늘 핀 ✓' : ''} · GPS ±${Math.round(me.acc || 0)}m</div></div>${advHtml}`;
+      <div class="fb">${dF ? `그린 앞 <b>${Math.round(dF)}</b>` : ''}${dB ? ` · 뒤 <b>${Math.round(dB)}</b>` : ''}${h.pin?.src === 'official' ? ' · 오늘 핀 ✓' : ''} · GPS ±${Math.round(me.acc || 0)}m</div></div>${advHtml}${card}`;
 }
 
+// 스코어카드(코스 DB): 파 · 핸디캡 · 티별 거리 · 공략 메모
+function scoreCard(h) {
+  const s = h.scorecard; if (!s) return '';
+  const tees = [['백', s.back, '#222'], ['블루', s.blue, '#1f5fbf'], ['화이트', s.white, '#999'], ['레드', s.red, '#c0392b']].filter(t => t[1] != null);
+  const hd = h.hdcpNine ?? h.hdcp ?? h.hdcpCard;
+  return `<div class="pcard scard"><div class="row" style="justify-content:space-between"><b>📋 스코어카드</b><span class="sub">파 ${h.par}${hd ? ` · 핸디캡 ${hd}` : ''}</span></div>
+    <div class="tees">${tees.map(([n, v, c]) => `<span><i style="background:${c}"></i>${n} <b>${v}</b>${s.unit}</span>`).join('')}</div>
+    ${h.note ? `<p class="sub" style="margin:6px 0 0">💡 ${esc(h.note)}</p>` : ''}</div>`;
+}
 function arrowOnly() {
   const shot = shotOf(), a = $('#ballArrow'); if (!shot || !a || !Sensors.pos) return;
   const t = toBall(Sensors.pos, shot.pred, Sensors.heading); if (t.rel != null) a.style.transform = `rotate(${t.rel}deg)`;
@@ -279,13 +334,18 @@ async function mountView() {
   stage.className = 'stage ' + P.view;
   if (P.view === '2d') {
     stage.innerHTML = '<div class="map" id="pmap"></div><div class="zoomb"><button id="zi">＋</button><button id="zo">－</button></div>';
-    const c0 = ballPos() || h.green || h.tee;
-    map = createMap($('#pmap'), { center: ll(c0), zoom: 17 });
+    const c = activeCourse(), near = c.holes.find(x => x.green) || null;
+    const c0 = ballPos() || h.green || h.tee || near?.green || c.center || Sensors.pos || { lat: 36.5, lon: 127.8 };
+    map = createMap($('#pmap'), { center: ll(c0), zoom: h.green || ballPos() || near ? 17 : c.center ? (c.center.precision === "sigungu" ? 12 : 15) : 7 });
     if (!map) return;
     drawHole(map, h); lay = L.layerGroup().addTo(map);
     $('#zi').onclick = () => map.zoomIn(); $('#zo').onclick = () => map.zoomOut();
     map.on('click', e => {
       if (!P.marking) return;
+      if (P.marking === 'green') {
+        P.marking = false; h.green = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) }; h.greenBy = 'user'; save('courses');
+        vibrate(40); toast('🟢 그린 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); fit2d(); return;
+      }
       P.marking = false; P.ballPos = { lat: e.latlng.lat, lon: e.latlng.lng }; P.ballHole = h.n; persist(); vibrate(40); update(true); fit2d();
     });
     fit2d();
@@ -293,7 +353,7 @@ async function mountView() {
     stage.innerHTML = `<div class="map3" id="p3"></div><div class="zoomb"><button id="zi">＋</button><button id="zo">－</button><button id="tilt" title="기울기">⛰️</button></div>
       ${P.view === '4d' ? `<div class="tbar"><button class="btn small" id="fly">▶ 공 날려 보기</button><button class="btn small" id="over">🎬 홀 미리 날아보기</button><input type="range" id="tt" min="0" max="100" value="0" aria-label="시간"><span id="tinfo"></span></div>` : ''}<div class="loading3">⛰️ 3D 지형을 불러오는 중…</div>`;
     try {
-      const sd = sceneData(), center = sd.me || h.green || h.tee;
+      const sd = sceneData(), center = sd.me || h.green || h.tee || activeCourse().center || { lat: 36.5, lon: 127.8 };
       v3 = await import('./view3d.js').then(m => m.create3D($('#p3'), { center, bearingDeg: sd.me && sd.pin ? bearing(sd.me, sd.pin) : 0 }));
       if (!$('#p3')) { v3.destroy(); v3 = null; return; }
       stage.querySelector('.loading3')?.remove();

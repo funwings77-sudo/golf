@@ -1,0 +1,457 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-26",
+  "name": "그린필드",
+  "region": "제주 제주시",
+  "address": "제주특별자치도 제주시 조천읍 번영로 1040-70",
+  "phone": "(064)720-7000",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "한라산 향한 호쾌한 홀, 티샷 페어웨이 좌측, 세컨 한 클럽 크게 · 해저드: 그린 바로 앞 벙커 · 그린: 좌→우로 올라가는 3단 그린",
+    "nine": "마운틴",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 364,
+     "blue": 344,
+     "white": 333,
+     "red": 270,
+     "teeNames": "블랙 364 / 블루 344 / 화이트 333 / 레드 270m (텍스트 421yd(385m)와 불일치)",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 2,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "숲 속 호수 같은 온화한 파3, 평탄하나 길다 · 해저드: 좌측 대형 연못, 그린 우측 벙커 · 그린: 미묘한 언듈레이션",
+    "nine": "마운틴",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 195,
+     "blue": 177,
+     "white": 166,
+     "red": 135,
+     "teeNames": "블랙 195 / 블루 177 / 화이트 166 / 레드 135m (텍스트 232yd(212m)와 불일치)",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 3,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "트인 내리막 짧은 홀, 좌→우 기운 페어웨이로 우측 연못 주의 · 해저드: 그린 우측 연못, 좌측 벙커, 티 옆 연못 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 373,
+     "blue": 351,
+     "white": 329,
+     "red": 229,
+     "teeNames": "블랙 373 / 블루 351 / 화이트 329 / 추가티 280 / 레드 229m (텍스트 375yd(343m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 4,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 파5, 무리 말고 어프로치 위주 · 해저드: 티 앞 연못 넘김, 그라스 벙커만(샌드벙커 없음) · 그린: 그린 앞·좌측 그라스벙커와 5m 낙차",
+    "nine": "마운틴",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 482,
+     "blue": 455,
+     "white": 443,
+     "red": 393,
+     "teeNames": "블랙 482 / 블루 455 / 화이트 443 / 레드 393m (텍스트 552yd(505m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "평탄하게 넓어지는 홀, 벙커 위치·거리 판단이 스코어 좌우 · 해저드: 페어웨이 양측 샌드벙커, 그린 좌우 벙커 · 그린: 양 사이드로 경사",
+    "nine": "마운틴",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 402,
+     "blue": 381,
+     "white": 367,
+     "red": 310,
+     "teeNames": "블랙 402 / 블루 381 / 화이트 367 / 레드 310m (텍스트 433yd(397m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 6,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "분화구형 파3, 높은 타구로 그린에 직접 올려야 · 해저드: 티 앞~그린 뒤를 에워싼 웨스트벙커 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 171,
+     "blue": 153,
+     "white": 129,
+     "red": 105,
+     "teeNames": "블랙 171 / 블루 153 / 화이트 129 / 레드 105m (텍스트 175yd(160m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 7,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티~그린 20m 내리막 짧은 파5, 세컨은 벙커 앞에 둔다 · 해저드: 그린 앞 조여드는 연못, 그린 앞 벙커 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 476,
+     "blue": 456,
+     "white": 432,
+     "red": 376,
+     "teeNames": "블랙 476 / 블루 456 / 화이트 432 / 추가티 415 / 레드 376m (텍스트 529yd(484m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 8,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티에서 9m 오르막 짧은 파4, 굴곡 페어웨이 따라 공략 · 해저드: 티 앞 대형 연못, 페어웨이 양측 벙커(우측 벙커 회피) · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 338,
+     "blue": 321,
+     "white": 310,
+     "red": 241,
+     "teeNames": "블랙 338 / 블루 321 / 화이트 310 / 추가티 274 / 레드 241m (텍스트 375yd(343.5m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "연못 향해 내려치는 긴 파4, 전반 마무리 터프한 홀 · 해저드: 그린 앞 연못, 페어웨이 우측 벙커, 그린 벙커 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 406,
+     "blue": 375,
+     "white": 351,
+     "red": 311,
+     "teeNames": "블랙 406 / 블루 375 / 화이트 351 / 추가티 334 / 레드 311m (텍스트 456yd(417m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 10,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "한라산 등지고 바다 향한 내리막 파5, 모든 샷 왼쪽 공략 · 해저드: 그린 우측 연못·그라스벙커, 페어웨이 벙커 · 그린: 홈페이지 미제공",
+    "nine": "씨(바다)",
+    "nineHole": 10,
+    "scorecard": {
+     "unit": "m",
+     "back": 487,
+     "blue": 468,
+     "white": 455,
+     "red": 375,
+     "teeNames": "블랙 487 / 블루 468 / 화이트 455 / 추가티 427 / 레드 375m (텍스트 532yd(487m) 일치)",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓고 완만한 오르막, 마음 놓고 티샷 · 해저드: 벙커 없음 · 그린: 언듈레이션 주의",
+    "nine": "씨(바다)",
+    "nineHole": 11,
+    "scorecard": {
+     "unit": "m",
+     "back": 386,
+     "blue": 354,
+     "white": 325,
+     "red": 218,
+     "teeNames": "블랙 386 / 블루 354 / 화이트 325 / 추가티 291 / 레드 218m (텍스트 434yd(397m)); 경사도: 티→IP 273yd(250m), IP→그린 161yd(147m), 오르막 +13m",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4, 벙커 앞에 둔지 넘길지 선택 · 해저드: 페어웨이 차단 크로스벙커, 그린 주변 벙커 · 그린: 홈페이지 미제공",
+    "nine": "씨(바다)",
+    "nineHole": 12,
+    "scorecard": {
+     "unit": "m",
+     "back": 338,
+     "blue": 322,
+     "white": 303,
+     "red": 260,
+     "teeNames": "블랙 338 / 블루 322 / 화이트 303 / 추가티 283 / 레드 260m (텍스트 356yd(326m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 13,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "한라산 차경, 연못 가로지르는 파3 · 해저드: 티~그린 사이 연못, 그린 우측 벙커 · 그린: 언듈레이션 있음",
+    "nine": "씨(바다)",
+    "nineHole": 13,
+    "scorecard": {
+     "unit": "m",
+     "back": 174,
+     "blue": 149,
+     "white": 125,
+     "red": 101,
+     "teeNames": "블랙 174 / 블루 149 / 화이트 125 / 레드 101m (텍스트 178yd(162m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "유일하게 타이트한 블라인드성 홀, 티샷 거리 중요 · 해저드: 페어웨이 차단 능선, 그린 앞 벙커 · 그린: 홈페이지 미제공",
+    "nine": "씨(바다)",
+    "nineHole": 14,
+    "scorecard": {
+     "unit": "m",
+     "back": 383,
+     "blue": 356,
+     "white": 339,
+     "red": 290,
+     "teeNames": "블랙 383 / 블루 356 / 화이트 339 / 추가티 319 / 레드 290m (텍스트 409yd(375m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 15,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "부메랑형 좌 도그렉 파5, 거리감 판단이 관건 · 해저드: 좌측~그린까지 이어지는 대형 연못, 연못 가 비치벙커 · 그린: 홈페이지 미제공",
+    "nine": "씨(바다)",
+    "nineHole": 15,
+    "scorecard": {
+     "unit": "m",
+     "back": 535,
+     "blue": 517,
+     "white": 501,
+     "red": 347,
+     "teeNames": "블랙 535 / 블루 517 / 화이트 501 / 추가티 426 / 레드 347m (텍스트 543yd(497m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "연못 넘기는 호쾌한 티샷 필수, 정확한 세컨 · 해저드: 티~그린 앞 우측 연못(끝까지), 그린 주변 벙커 · 그린: 세로로 길고 매우 좁음",
+    "nine": "씨(바다)",
+    "nineHole": 16,
+    "scorecard": {
+     "unit": "m",
+     "back": 347,
+     "blue": 346,
+     "white": 269,
+     "red": 239,
+     "teeNames": "블랙 347 / 블루 346 / 추가티 309 / 화이트 269 / 레드 239m (텍스트 404yd(369m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "클럽 선택 신중 · 해저드: 그린 앞 그라스벙커, 그린 우측 벙커 · 그린: 포대형(앞뒤 낮음), 티와 단차 50cm",
+    "nine": "씨(바다)",
+    "nineHole": 17,
+    "scorecard": {
+     "unit": "m",
+     "back": 175,
+     "blue": 156,
+     "white": 147,
+     "red": 108,
+     "teeNames": "블랙 175 / 블루 156 / 화이트 147 / 레드 108m (텍스트 203yd(186m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "클럽하우스 보며 올려치는 긴 마지막 파4 · 해저드: 티 앞 연못, 그린 좌측 3단 연못·벙커 · 그린: 오르막 3단 그린",
+    "nine": "씨(바다)",
+    "nineHole": 18,
+    "scorecard": {
+     "unit": "m",
+     "back": 406,
+     "blue": 391,
+     "white": 345,
+     "red": 299,
+     "teeNames": "블랙 406 / 블루 391 / 화이트 345 / 레드 299m (텍스트 444yd(407m))",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 18,
+   "memberHoles": 18,
+   "publicHoles": null,
+   "homepage": "https://greenfieldcc.co.kr/",
+   "openedYear": null,
+   "layout": "마운틴 9홀(1~9번, 파36, 블랙 3,207m) + 씨(바다) 9홀(10~18번, 파36, 블랙 3,231m)",
+   "par18": 72,
+   "lengthYards": 7041,
+   "fairwayGrass": "홈페이지 미제공",
+   "greenGrass": "홈페이지 미제공",
+   "architect": "홈페이지 미제공",
+   "fees": {
+    "weekday": "비회원 130,000원 (9홀 추가 80,000원) / 회원 0원, 무기명·주중회원 30,000원 (개별소비세 별도, 2022.5.10 변경 기준)",
+    "weekend": "비회원 170,000원 (9홀 추가 105,000원) / 가족·지정회원 40,000원, 주중회원Ⅰ 50,000·Ⅱ 65,000원, 무기명 65,000원",
+    "cart": "100,000원/대(9홀 50,000원), 리무진카트 180,000원/대(9홀 90,000원)",
+    "caddie": "150,000원/팀 (9홀 80,000원)"
+   },
+   "reservation": "전화·인터넷: 매달 1일 09시에 다음 달까지 오픈. 예약자 주중 정회원·지정회원(프리부킹)/주말 정회원(월 4회), 3~4인, 티오프 7분 간격, 취소 주중 6일·주말 8일 전. 대표 064-720-7000",
+   "difficulty": "사이트 표현: '적당한 코스 난이도', '모험과 도전을 즐길 수 있는 코스', 국제 토너먼트 유치 가능 챔피언코스",
+   "features": "제주 조천읍 곶자왈 숲 속 회원제 18홀(총면적 959,076㎡/290,120평). 제주 토종 활엽수·돌담·건천 보존, 한라산·바다 조망. 그린 18개(12,544㎡), 티 78개소, 레이크 8개소(55,390㎡), 벙커 50개(17,593㎡), 연습그린 3개. 티 4종(블랙/블루/화이트/레드)+일부 홀 추가 티. 대표홀: 마운틴6번(분화구형 웨스트벙커 파3), 마운틴7번(20m 내리막 파5), 씨15번(부메랑형 연못 도그렉), 씨18번(3단 그린). 핸디캡 홈페이지 미제공. 원표기 m(공략도)·yd(텍스트) 병기, N=공략도 블랙 합 6,438m 환산. 불일치: 총전장 표기 7,043yd(코스소개)·7,050yds(인사말) vs 텍스트 홀별 yd 합 7,051yd / 홀별 텍스트 거리와 공략도 블랙티 다수 불일치(예: 마운틴1번 385m vs 364m, 2번 212m vs 195m, 4번 505m vs 482m)",
+   "facilities": "클럽하우스 1동(3,777㎡), 연습장 1동(23,505㎡), 연습그린 3개, 그늘집 3동, 관리동. 신규 고급 리무진 카트(2026.6 공지)"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://greenfieldcc.co.kr/ / https://greenfieldcc.co.kr/swp/club / https://greenfieldcc.co.kr/swp/greet / https://greenfieldcc.co.kr/swp/course / https://greenfieldcc.co.kr/swp/course_mountain / https://greenfieldcc.co.kr/swp/course_sea / https://greenfieldcc.co.kr/swp/charge / https://greenfieldcc.co.kr/swp/reserv_guide",
+    "note": "KGBA id 26 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 26,
+   "name": "그린필드",
+   "nines": [
+    "마운틴",
+    "씨(바다)"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "마운틴",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "씨(바다)",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "center": {
+   "lat": 33.499829,
+   "lon": 126.53139,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.882Z"
+ }
+}

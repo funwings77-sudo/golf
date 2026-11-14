@@ -1,0 +1,475 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-18",
+  "name": "골프존카운티 선산",
+  "region": "경북 구미시",
+  "address": "경북 구미시 산동면 강동로 953-73",
+  "phone": "(054)473-6200",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌측 OB 주의, 우그린은 좌측으로 떨어지면 어프로치 어려워 좌측 회피 (평균 4.7타) · 해저드: 좌측 OB · 그린: 투그린, 왼쪽 그린 마운드",
+    "nine": "OUT",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 396,
+     "blue": 396,
+     "white": 366,
+     "red": 294,
+     "teeNames": "블루 396m(433yd)/화이트 366m(400yd)/레드 294m(322yd); 자체 홈페이지 표기 397m; HDCP는 코스별 1~9",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 2,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌그린은 그린 우측 공략 시 오르막 퍼팅 (평균 3.9타) · 해저드: 홈페이지 미제공 · 그린: 좌그린 경사면 주의, 우그린은 크고 평탄",
+    "nine": "OUT",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 180,
+     "blue": 180,
+     "white": 165,
+     "red": 155,
+     "teeNames": "블루 180m(197yd)/화이트 165m(180yd)/레드 155m(170yd); 자체 홈페이지 표기 168m",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 3,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓은 페어웨이, 우측 OB 피해 좌측 티샷, 그린 중앙 공략 (평균 4.9타) · 해저드: 우측 OB · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 374,
+     "blue": 374,
+     "white": 342,
+     "red": 273,
+     "teeNames": "블루 374m(409yd)/화이트 342m(374yd)/레드 273m(299yd); 자체 홈페이지 표기 376m",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 4,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막, 어려운 라이의 세컨드, 평소보다 1클럽 짧게 (평균 5.0타) · 해저드: 페어웨이 마운드 심함 · 그린: 우그린 폭 좁음",
+    "nine": "OUT",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 367,
+     "blue": 367,
+     "white": 334,
+     "red": 265,
+     "teeNames": "블루 367m(401yd)/화이트 334m(365yd)/레드 265m(290yd); 자체 홈페이지 표기 361m",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 오르막 파4, 우측 벙커 피해 페어웨이 좌측 (평균 5.0타) · 해저드: 우측 벙커 · 그린: 좌그린 2단 그린",
+    "nine": "OUT",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 375,
+     "blue": 375,
+     "white": 336,
+     "red": 264,
+     "teeNames": "블루 375m(410yd)/화이트 336m(367yd)/레드 264m(289yd); 자체 홈페이지 표기 346m",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 6,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌 도그렉 롱홀(슬라이스 홀), 우측 공략으로 세컨드 쉽게, 연못 앞 레이업 (평균 6.2타) · 해저드: 우측 OB·벙커, 페어웨이 좌측 마운드, 그린 앞 해저드(연못) · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 490,
+     "blue": 490,
+     "white": 470,
+     "red": 405,
+     "teeNames": "블루 490m(536yd)/화이트 470m(514yd)/레드 405m(443yd); 자체 홈페이지 표기 509m",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "HDCP1 내리막 파4, 장타와 정확성, 전략적 샷 (평균 5.1타) · 해저드: 세컨드 IP 마운드 심함 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 389,
+     "blue": 389,
+     "white": 365,
+     "red": 315,
+     "teeNames": "블루 389m(425yd)/화이트 365m(399yd)/레드 315m(344yd); 자체 홈페이지 표기 404m",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 8,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "바람 방향 고려한 클럽 선택 (평균 3.8타) · 해저드: 우그린 우측 해저드 · 그린: 좌그린 짧으나 미스 시 어프로치 어려움",
+    "nine": "OUT",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 178,
+     "blue": 178,
+     "white": 150,
+     "red": 130,
+     "teeNames": "블루 178m(195yd)/화이트 150m(164yd)/레드 130m(142yd); 자체 홈페이지 표기 160m",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 9,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "슬라이스 시 OB·트러블, 세컨드는 좌측 해저드 피해 공략 (평균 5.5타) · 해저드: 우측 OB·숲, 좌측 해저드 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 484,
+     "blue": 484,
+     "white": 460,
+     "red": 384,
+     "teeNames": "블루 484m(529yd)/화이트 460m(503yd)/레드 384m(420yd); 자체 홈페이지 표기 495m",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 10,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "IP 넓어 편한 티샷, 서드샷 거리 측정 주의 (평균 5.6타) · 해저드: 홈페이지 미제공 · 그린: 좌·우 그린 모두 경사 심함(핀 넘으면 내리막 퍼팅)",
+    "nine": "IN",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 487,
+     "blue": 487,
+     "white": 465,
+     "red": 363,
+     "teeNames": "블루 487m(533yd)/화이트 465m(509yd)/레드 363m(397yd); 자체 홈페이지 표기 493m",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 서비스 파4, 티샷이 너무 길면 손해 (평균 4.9타) · 해저드: 그린 앞 50~60m 러프지역 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 311,
+     "blue": 311,
+     "white": 296,
+     "red": 254,
+     "teeNames": "블루 311m(340yd)/화이트 296m(324yd)/레드 254m(278yd); 자체 홈페이지 표기 337m",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "IP 좌측 목표 티샷 (평균 5.1타) · 해저드: 슬라이스 OB, 페어웨이 좌측 해저드 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 378,
+     "blue": 378,
+     "white": 344,
+     "red": 289,
+     "teeNames": "블루 378m(413yd)/화이트 344m(376yd)/레드 289m(316yd); 자체 홈페이지 표기 379m",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 13,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "심리적으로 슬라이스 유발, 정확한 샷 (평균 3.7타) · 해저드: 좌그린 사용 시 좌측 OB·벙커 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 140,
+     "blue": 140,
+     "white": 120,
+     "red": 105,
+     "teeNames": "블루 140m(153yd)/화이트 120m(131yd)/레드 105m(115yd); 자체 홈페이지 표기 170m(차이 큼)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "롱기스트 홀, 드라이버 마음껏 (평균 5.2타) · 해저드: 좌·우 그린 벙커 · 그린: 그린 주위 프린지 길음",
+    "nine": "IN",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 384,
+     "blue": 384,
+     "white": 362,
+     "red": 322,
+     "teeNames": "블루 384m(420yd)/화이트 362m(396yd)/레드 322m(352yd); 자체 홈페이지 표기 391m",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "IP~그린 오르막, 한두 클럽 길게 (평균 5.1타) · 해저드: 홈페이지 미제공 · 그린: 그린 굴곡 심함",
+    "nine": "IN",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 396,
+     "blue": 396,
+     "white": 370,
+     "red": 310,
+     "teeNames": "블루 396m(433yd)/화이트 370m(405yd)/레드 310m(339yd); 자체 홈페이지 표기 399m",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌그린은 티샷 거리 부족 시 그린 안 보임 (평균 5.1타) · 해저드: 페어웨이 좌측 큰 마운드 · 그린: 좌·우 그린 길이 차이 큼",
+    "nine": "IN",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 366,
+     "blue": 366,
+     "white": 345,
+     "red": 288,
+     "teeNames": "블루 366m(400yd)/화이트 345m(377yd)/레드 288m(315yd); 자체 홈페이지 표기 363m",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우그린은 숏아이언으로 버디 찬스 (평균 3.8타) · 해저드: 홈페이지 미제공 · 그린: 대형 그린(핀 위치따라 2클럽 차이), 우그린 짧음",
+    "nine": "IN",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 145,
+     "blue": 145,
+     "white": 135,
+     "red": 125,
+     "teeNames": "블루 145m(159yd)/화이트 135m(148yd)/레드 125m(137yd); 자체 홈페이지 표기 157m",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 18,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이 좌측 공략 시 투온 가능, 우그린은 그린 왼쪽 (평균 5.7타) · 해저드: 우측 해저드·나무숲, 우그린 벙커 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 488,
+     "blue": 488,
+     "white": 467,
+     "red": 394,
+     "teeNames": "블루 488m(534yd)/화이트 467m(511yd)/레드 394m(431yd); 자체 홈페이지 표기 502m",
+     "note": ""
+    },
+    "hdcpNine": 5
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 18,
+   "memberHoles": 18,
+   "publicHoles": null,
+   "homepage": "https://sunsan.golfzoncounty.com/",
+   "openedYear": null,
+   "layout": "OUT 9홀(파36, 블루 3,233m) + IN 9홀(파36, 블루 3,095m) — 공식 총전장 6,517m(7,127yd)",
+   "par18": 72,
+   "lengthYards": 7127,
+   "fairwayGrass": "삼덕중지 (티박스 켄터키 블루그래스)",
+   "greenGrass": "벤트그래스(Pencross/Penn A-1)",
+   "architect": "홈페이지 미제공",
+   "fees": {
+    "weekday": "비회원 172,000원 (회원 60,000원, 18홀 기준)",
+    "weekend": "비회원 192,000원 (주말·공휴일, 회원 60,000원)",
+    "cart": "100,000원/팀",
+    "caddie": "150,000원/팀 (2026.10.10부터 14만→15만원 인상, 팝업 공지)"
+   },
+   "reservation": "회원제. 인터넷(sunsan.golfzoncounty.com, 회원인증) 우선: VVIP·VIP회원 매주 월 10시, 정회원·평일회원 월 11시, 비회원 화 10시 (1주 후 토~2주 후 금 범위), 월요일 10~12시는 인터넷 전용. 예약실 054-473-6210. 취소: 주말 4일·평일 3일 전 무료, 이후 10~30%. 골프존카운티 통합 예약에도 등록",
+   "difficulty": "골프존카운티 평가: 전장 5, 홀 다양성 4, 경관 5, 샷밸류 4, 폭/넓이 5, 코스전략 다양성 3. KGA 코스레이팅(9홀) 블루 OUT 36.7/73·IN 36.9/69, 화이트 35.6/71·35.9/67, 레드 35.6/66·35.8/63. 18홀 평균스코어 88.2",
+   "features": "구미 산동의 '명문 컨트리클럽' 18홀(#대회코스). 넓고 완만한 페어웨이, 코스 전체를 휘도는 미들홀 3개 크기의 인공 연못과 다양한 워터해저드. 전 홀 좌/우 투그린 운영 표현 다수. 티 3종(블루/화이트/레드). 불일치: 공식 총전장 6,517m/7,127yd vs 골프존카운티 홀별 블루 합 6,328m(6,920yd) vs 자체 홈페이지 홀별 표기 합 6,407m(홀별 값도 서로 다름, 예: OUT 2번 168m vs 180m, OUT 6번 509m vs 490m). 자체 홈페이지 공략도 이미지에는 거리 숫자 없음, HDCP 미표기(통합사이트에는 코스별 1~9). 전장 연결값은 공식 총전장 yd 표기 사용. 개장연도·설계자 미제공. 자체 홈페이지 '클럽정보' 메뉴는 링크 비노출로 접근 불가",
+   "facilities": "홈페이지 미제공(자체 홈페이지 클럽정보 메뉴 접근 불가). 대여: 골프채 풀세트 50,000원, 퍼터 20,000원. 2026 클럽챔피언대회·2027 연단체 모집 공지"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://sunsan.golfzoncounty.com/course/course_intro / https://sunsan.golfzoncounty.com/course/out_course / https://sunsan.golfzoncounty.com/course/in_course / https://sunsan.golfzoncounty.com/info/how_to_resv / https://sunsan.golfzoncounty.com/info/price_guide / https://sunsan.golfzoncounty.com/main / https://www.golfzoncounty.com/golfclub/intro?golfclubSeq=28 / https://www.golfzoncounty.com/golfclub/course?golfclubSeq=28 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=28&courseSeq=15 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=28&courseSeq=14",
+    "note": "KGBA id 18 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 18,
+   "name": "골프존카운티 선산",
+   "nines": [
+    "OUT",
+    "IN"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "OUT",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "IN",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "center": {
+   "lat": 36.119551,
+   "lon": 128.344469,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.874Z"
+ }
+}

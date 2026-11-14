@@ -1,0 +1,457 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-9",
+  "name": "강남300",
+  "region": "경기 광주시",
+  "address": "경기도 광주시 새말길 353 (목동)",
+  "phone": "(031)719-0300",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 3,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 4,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 5,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 6,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 8,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 9,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(OUT 공통: 단차 큰 페어웨이·도그렉 다수) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "OUT",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 10,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 13,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 16,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 17,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   },
+   {
+    "n": 18,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 설명 없음(IN 공통: 호수를 끼고 좌우 경사 심함; 공략도 표기 파 합계 37로 공식 72파와 불일치) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "IN",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": null,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "홈페이지 미제공(홀별 거리·티 정보 없음)",
+     "note": ""
+    }
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 18,
+   "memberHoles": 18,
+   "publicHoles": null,
+   "homepage": "https://www.kn300.com/",
+   "openedYear": null,
+   "layout": "18홀 (OUT 9홀 + IN 9홀)",
+   "par18": null,
+   "lengthYards": null,
+   "fairwayGrass": "야지·중지(한국잔디)",
+   "greenGrass": "벤트그라스",
+   "architect": "(주)필드컨설턴트 김명길 (시공 성호건설(주))",
+   "fees": {
+    "weekday": "비회원 245,000원 (정회원 130,000 / 준·주중회원 180,000)",
+    "weekend": "비회원 310,000원 (정회원 160,000 / 준·주중회원 265,000)",
+    "cart": "팀당 120,000원",
+    "caddie": "팀당 150,000원 (1캐디 4백; 5인 플레이 시 카트 2대·캐디 2명 필수)"
+   },
+   "reservation": "홈페이지(모바일)·스마트폰 앱(안드로이드/iOS) 예약, 예약실 전화 031-785-1611 (평일 09:00~17:00)",
+   "difficulty": "홈페이지 미기재 (OUT은 고저차·도그렉 많고, IN은 호수와 좌우 경사가 심하다고 소개)",
+   "features": "전략형(벌칙형 탈피) 코스로 소개; OUT=단차 큰 페어웨이·도그렉 홀 다수, IN=호수를 끼고 좌우 경사가 심함; 야간 라이트 34개소; 총면적 830,063㎡; 동계휴장 1월초~2월초(대략); 티업 7분 간격",
+   "facilities": "프로샵, 라커·사우나, 레스토랑, 연회실(소연회실 4개 매·난·국·죽 + 대연회실), 그늘집, 클럽 대여(세트 50,000원/퍼터 10,000원)"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.kn300.com/Mobile/Club/Index / https://www.kn300.com/Mobile/Club/Course / https://www.kn300.com/Club/CourseOut / https://www.kn300.com/Club/CourseIn / https://www.kn300.com/Mobile/Club/UseInfo / https://www.kn300.com/Mobile/Club/Charge / https://www.kn300.com/Mobile/Club/ClubInfo",
+    "note": "KGBA id 9 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 9,
+   "name": "강남300",
+   "nines": [
+    "OUT",
+    "IN"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "OUT",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "IN",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "center": {
+   "lat": 37.386953,
+   "lon": 127.182377,
+   "precision": "address"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.863Z"
+ }
+}

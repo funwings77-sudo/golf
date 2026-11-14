@@ -97,3 +97,6 @@ main#view.play { padding: 0 0 calc(var(--nav-h) + 12px + env(safe-area-inset-bot
 .ar-diag { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 4; background: rgba(0,0,0,.78); color: #fff; border-radius: 14px; padding: 10px 12px; font-size: 13px; line-height: 1.5; display: none; max-height: 70%; overflow: auto; }
 .ar-diag.show { display: block; }
 .ar-diag b.ok { color: #7fe0a6; } .ar-diag b.bad { color: #ff9a8f; } .ar-diag b.mid { color: #ffd479; }
+.scard .tees { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 15px; }
+.scard .tees i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; border: 1px solid #fff; box-shadow: 0 0 0 1px var(--line); }
+.chips.big button small { font-weight: 600; opacity: .75; font-size: 12px; }

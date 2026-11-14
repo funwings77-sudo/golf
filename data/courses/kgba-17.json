@@ -1,0 +1,670 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-17",
+  "name": "골든베이",
+  "region": "충남 태안군",
+  "address": "충남 태안군 근흥면 정산포로 217 (정죽리, 골든베이)",
+  "phone": "(041)671-8000",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "레이크사이드 파4, 긴장 말고 티샷, 세컨드는 그린 좌측 · 해저드: 티잉그라운드부터 이어지는 워터해저드, 그린 우측 벙커 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 331,
+     "blue": 303,
+     "white": 271,
+     "red": 245,
+     "teeNames": "블랙 331/블루 303/화이트 271/옐로 -/레드 245",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 2,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파3이나 바람 영향 큼, 티샷 전 풍향 확인 후 클럽·어드레스 설정 · 해저드: 아일랜드 그린, 그린 앞 벙커, 그린 뒤 러프 여유 없어 OB 위험 · 그린: 아일랜드 그린",
+    "nine": "마운틴",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 156,
+     "blue": 124,
+     "white": 106,
+     "red": 92,
+     "teeNames": "블랙 156/블루 124/화이트 106/옐로 -/레드 92",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 3,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 약간 우 도그렉, 티에서 장타 가능. 슬라이스 라이 주의, 2nd IP부터 내리막이라 클럽 여유있게 · 해저드: 1st IP 오르막 구간 블라인드 지역 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 545,
+     "blue": 504,
+     "white": 478,
+     "red": 432,
+     "teeNames": "블랙 545/블루 504/화이트 478/옐로 455/레드 432",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 4,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "핸디캡1 오르막 좌 도그렉. 장타자는 우측 벙커 직접 겨냥, 일반은 암사면 쪽으로 끊어가 3온 · 해저드: 1st IP 우측 벙커, 벙커 전방 암사면 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 412,
+     "blue": 392,
+     "white": 353,
+     "red": 319,
+     "teeNames": "블랙 412/블루 392/화이트 353/옐로 -/레드 319",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 5,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 파3, 클럽을 평소보다 여유있게 · 해저드: 그린 주변 벙커 · 그린: 오르막 그린",
+    "nine": "마운틴",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 190,
+     "blue": 159,
+     "white": 133,
+     "red": 102,
+     "teeNames": "블랙 190/블루 159/화이트 133/옐로 -/레드 102",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 6,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "전반적 내리막, 슬라이스와 수시로 변하는 바람 주의 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 351,
+     "blue": 327,
+     "white": 305,
+     "red": 284,
+     "teeNames": "블랙 351/블루 327/화이트 305/옐로 -/레드 284",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "심한 오르막 우 도그렉, 1st IP 업다운으로 스탠스 어려움. 랜딩존 선정이 핵심, 장타자는 벙커 방향 가로지르기 · 해저드: 그린 앞 페어웨이 벙커 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 359,
+     "blue": 339,
+     "white": 316,
+     "red": 245,
+     "teeNames": "블랙 359/블루 339/화이트 316/옐로 286/레드 245",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 8,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4로 2온 쉬움, 핀은 그린 좌측을 타겟 · 해저드: 좌측 수림지역 벙커, 그린 주변 벙커 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 335,
+     "blue": 311,
+     "white": 285,
+     "red": 263,
+     "teeNames": "블랙 335/블루 311/화이트 285/옐로 286(화이트보다 길게 표기)/레드 263",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 9,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓은 페어웨이와 절경의 긴 파5, 언듈레이션 따른 랜딩존 선정이 핵심, 서드는 핀 직접 · 해저드: 그린 좌측·뒤편 벙커 · 그린: 홈페이지 미제공",
+    "nine": "마운틴",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 563,
+     "blue": 539,
+     "white": 514,
+     "red": 462,
+     "teeNames": "블랙 563/블루 539/화이트 514/옐로 491/레드 462",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "첫 홀이므로 80% 스윙, 세컨드는 핀 직접 공략 · 해저드: 1st IP 우측 벙커·노출암, 그린 우측 벙커 · 그린: 홈페이지 미제공",
+    "nine": "오션",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 372,
+     "blue": 357,
+     "white": 331,
+     "red": 265,
+     "teeNames": "블랙 372/블루 357/화이트 331/옐로 298/레드 265",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 11,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "경관에 집중력을 잃지 말고 정확한 티샷 · 해저드: 그린 앞 넓은 벙커, 그린을 둘러싼 노출암 · 그린: 그린 뒤 노출암 너머 바다 조망",
+    "nine": "오션",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 149,
+     "blue": 117,
+     "white": 97,
+     "red": 78,
+     "teeNames": "블랙 149/블루 117/화이트 97/옐로 -/레드 78",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4, 드라이버 외 클럽으로 티샷 권장 · 해저드: 티 전방 수림지대, 1st IP 폭 좁고 벙커 다수 · 그린: 홈페이지 미제공",
+    "nine": "오션",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 279,
+     "blue": 247,
+     "white": 219,
+     "red": 177,
+     "teeNames": "블랙 279/블루 247/화이트 219/옐로 195/레드 177",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 13,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "2nd IP까지 일자형, 장타자 유리. 자신 있으면 세컨드에서 해저드를 가로질러 그린 공략 · 해저드: 그린 전방 워터해저드 · 그린: 홈페이지 미제공",
+    "nine": "오션",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 532,
+     "blue": 481,
+     "white": 454,
+     "red": 412,
+     "teeNames": "블랙 532/블루 481/화이트 454/옐로 433/레드 412",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4, 드라이버보다 자신 있는 클럽으로 티샷, 슬라이스 경계 · 해저드: 티 앞~우측 워터해저드·송림지대, 그린 주변 벙커 · 그린: 홈페이지 미제공",
+    "nine": "오션",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 329,
+     "blue": 302,
+     "white": 268,
+     "red": 203,
+     "teeNames": "블랙 329/블루 302/화이트 268/옐로 433(오기 추정)/레드 203",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티~그린이 보이는 일자형, 슬라이스 나기 쉬운 지형, 1st IP 언듈레이션 까다로움 · 해저드: 세컨드 지점 우측 벙커 2개 · 그린: 그린 언듈레이션 무난",
+    "nine": "오션",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 366,
+     "blue": 321,
+     "white": 295,
+     "red": 256,
+     "teeNames": "블랙 366/블루 321/화이트 295/옐로 -/레드 256",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 16,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 롱홀로 비거리 이득, 랜딩 포인트 설정, 2nd IP 언듈레이션 복잡 · 해저드: 1st IP 좌우 벙커, 그린 좌측 벙커 3개 · 그린: 홈페이지 미제공",
+    "nine": "오션",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 524,
+     "blue": 486,
+     "white": 450,
+     "red": 416,
+     "teeNames": "블랙 524/블루 486/화이트 450/옐로 -/레드 416",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 파3, 바람 변수 커서 클럽·어드레스 방향 설정, 초보자는 2온 전략 · 해저드: 그린 주변 벙커 · 그린: 홈페이지 미제공",
+    "nine": "오션",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 212,
+     "blue": 175,
+     "white": 158,
+     "red": 123,
+     "teeNames": "블랙 212/블루 175/화이트 158/옐로 -/레드 123",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "방향성 자신 없으면 드라이버 외 티샷 후 미들아이언 공략 · 해저드: 1st IP 주변 벙커 · 그린: 폭이 좁은 그린",
+    "nine": "오션",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 319,
+     "blue": 279,
+     "white": 233,
+     "red": 197,
+     "teeNames": "블랙 319/블루 279/화이트 233/옐로 -/레드 197 (페이지 제목은 PAR 5로 표기, 본문·거리·코스 합계상 파4)",
+     "note": "핸디캡: 홈페이지 미제공"
+    }
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "완만한 내리막 티샷, 세컨드는 약한 오르막 라이 고려 · 해저드: 1st IP 우측 벙커, 페어웨이 좌측 돌출 암석, 그린 좌우 벙커 · 그린: 홈페이지 미제공",
+    "nine": "밸리",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 354,
+     "blue": 335,
+     "white": 312,
+     "red": 243,
+     "teeNames": "블랙 354/블루 335/화이트 312/옐로 287/레드 243",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 좌 도그렉, 장타자는 좌측 베커 가로지르기, 슬라이스 주의, 세컨드 오르막 라이 · 해저드: 티 앞 워터해저드, 좌측 벙커 · 그린: 홈페이지 미제공",
+    "nine": "밸리",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 390,
+     "blue": 342,
+     "white": 294,
+     "red": 266,
+     "teeNames": "블랙 390/블루 342/화이트 294/옐로 -/레드 266",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 21,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "레이크사이드 파3, 바다 바람 고려해 핀 직접 공략 · 해저드: 티~그린 좌측 워터해저드 · 그린: 홈페이지 미제공",
+    "nine": "밸리",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 219,
+     "blue": 192,
+     "white": 166,
+     "red": 117,
+     "teeNames": "블랙 219/블루 192/화이트 166/옐로 -/레드 117",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 22,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "훅 주의, 페어웨이 언듈레이션 복잡해 랜딩존 고려 · 해저드: 좌측 그린까지 이어진 워터해저드 · 그린: 홈페이지 미제공",
+    "nine": "밸리",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 364,
+     "blue": 332,
+     "white": 309,
+     "red": 269,
+     "teeNames": "블랙 364/블루 332/화이트 309/옐로 -/레드 269",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 23,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티에서 좌측 일부 블라인드, 2nd IP 확보 전략. 초보자는 4온 전략 · 해저드: 페어웨이를 가로지르는 워터해저드 · 그린: 홈페이지 미제공",
+    "nine": "밸리",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 521,
+     "blue": 483,
+     "white": 455,
+     "red": 392,
+     "teeNames": "블랙 521/블루 483/화이트 455/옐로 427/레드 392",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 24,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓은 페어웨이의 짧은 파4, 핀 직접 공략 · 해저드: 페어웨이 좌우 벙커, 그린 좌우 벙커 · 그린: 홈페이지 미제공",
+    "nine": "밸리",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 322,
+     "blue": 283,
+     "white": 245,
+     "red": 214,
+     "teeNames": "블랙 322/블루 283/화이트 245/옐로 -/레드 214",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 25,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "핸디캡1. 페어웨이 베커를 넘기는 장타자 유리, 마지막 퍼트까지 신중 · 해저드: 페어웨이 앞 워터해저드, 1st IP 좌우 벙커, 그린 앞까지 크리크, 그린 좌우 벙커 · 그린: 2단 그린",
+    "nine": "밸리",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 348,
+     "blue": 320,
+     "white": 308,
+     "red": 221,
+     "teeNames": "블랙 348/블루 320/화이트 308/옐로 -/레드 221",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 26,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 오르막 파3, 롱아이언 이상 필요 · 해저드: 홈페이지 미제공 · 그린: 단조로운 라이",
+    "nine": "밸리",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 191,
+     "blue": 178,
+     "white": 154,
+     "red": 91,
+     "teeNames": "블랙 191/블루 178/화이트 154/옐로 131/레드 91",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 27,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "골든베이 최장 파5. 티샷은 좌측 암사면 쪽 랜딩(너무 가까우면 레이업) · 해저드: 좌측 암사면, 그린 주변 벙커 · 그린: 그린 난이도 높음",
+    "nine": "밸리",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 590,
+     "blue": 570,
+     "white": 547,
+     "red": 479,
+     "teeNames": "블랙 590/블루 570/화이트 547/옐로 -/레드 479",
+     "note": ""
+    },
+    "hdcpNine": 3
+   }
+  ],
+  "info": {
+   "operationType": "비회원제",
+   "totalHoles": 27,
+   "memberHoles": null,
+   "publicHoles": 27,
+   "homepage": "https://www.goldenbay.kr/",
+   "openedYear": 2010,
+   "layout": "마운틴 9홀(파36, 블랙 3,242m) + 오션 9홀(파36, 블랙 3,082m) + 밸리 9홀(파36, 블랙 3,299m)",
+   "par18": 72,
+   "lengthYards": 7153,
+   "fairwayGrass": "중지(한국잔디)",
+   "greenGrass": "벤트그래스",
+   "architect": "아니카 소렌스탐(Annika Sörenstam)",
+   "fees": {
+    "weekday": "월별 변동(공지사항·온라인 예약 페이지 참고, 부가세 포함) — 금액 홈페이지 본문 미기재. 주중 3인 플레이 가능(4인 요금)",
+    "weekend": "월별 변동(공지 참고) — 주말 4인 필수, 3인 내장 시 4인 요금, 2인 예약 불가",
+    "cart": "5인승 카트 100,000원/팀(캐디 동반 필수) / 싱글카트 50,000원/1인(노캐디)",
+    "caddie": "18홀 150,000원(경기 중단 요금표 기준, 1~9홀 75,000원), 1팀 1캐디"
+   },
+   "reservation": "홈페이지 실시간 골프 예약·패키지 예약(회원가입), 실시간 조인(티업앤조이), 싱글카트 예약, 전화 041-671-8000/8100. 위약: 주중 3일·주말 4일 전 정상취소, 당일 노쇼 30%, 1일 전 20%, 2일 전 10%; 패키지는 15일 전 기준",
+   "difficulty": "",
+   "features": "태안반도 서해안 국립공원 내 리아스식 해안에 자리한 휴양형 골프리조트(총 약 70만평, 코스 약 42만평). 마운틴=울창한 산비탈의 남성적 코스, 오션=서해·섬·낙조·해송림 사이 한국형 링크스(바람 변수, 노출암), 밸리=호수와 숲에 감싸인 분지형. 마운틴 2번 아일랜드 파3, 밸리 9번 590m 최장 파5. 티 5종(블랙/블루/화이트/옐로/레드, 옐로는 일부 홀만). 원표기 m(최장 18홀 밸리+마운틴 6,541m → 약 7,153yd). 불일치: 코스별 '총장' 표기가 m² 단위로 잘못 표기되고 블랙 합계와도 다름(마운틴 3,256/오션 3,113/밸리 3,345), 오션 9번 PAR 5 표기이나 319m·공략 설명상 파4, 오션 5번 옐로 433m(오기 추정), 마운틴 8번 옐로 286m>화이트 285m. 오션 코스 핸디캡 미표기",
+   "facilities": "투스카니 스타일 클럽하우스(레스토랑, 로비, 스타트하우스, 사우나, 락커룸), 그릴/그늘집, 골프샵, 투스칸빌리지(숙박 56실, 로얄스위트룸·가든, 객실 예약 준비중). 대여: 클럽 풀세트 50,000, 드라이버·퍼터 10,000, 골프화 10,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.goldenbay.kr/course/course-info.asp / https://www.goldenbay.kr/course/mountain.asp / https://www.goldenbay.kr/course/ocean.asp / https://www.goldenbay.kr/course/valley.asp / https://www.goldenbay.kr/about/about.asp / https://www.goldenbay.kr/about/guide.asp?tab=2 / https://www.goldenbay.kr/about/guide.asp?tab=3 / https://www.goldenbay.kr/index.asp",
+    "note": "KGBA id 17 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 17,
+   "name": "골든베이",
+   "nines": [
+    "마운틴",
+    "오션",
+    "밸리"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "마운틴",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "오션",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "밸리",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   }
+  ],
+  "center": {
+   "lat": 36.745424,
+   "lon": 126.29836,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.873Z"
+ }
+}

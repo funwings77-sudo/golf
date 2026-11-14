@@ -1,0 +1,883 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-29",
+  "name": "기흥",
+  "region": "경기 화성시",
+  "address": "경기도 화성시 동탄구 풀무골로106번길 244",
+  "phone": "(031)376-4001",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 338,
+     "blue": 338,
+     "white": 313,
+     "red": 298,
+     "teeNames": "블루 338 / 화이트 313 / 레드 298m",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 2,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공(짧은 파5) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 443,
+     "blue": 443,
+     "white": 423,
+     "red": 408,
+     "teeNames": "블루 443 / 화이트 423 / 레드 408m",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 3,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 363,
+     "blue": 363,
+     "white": 338,
+     "red": 333,
+     "teeNames": "블루 363 / 화이트 338 / 레드 333m",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 4,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 158,
+     "blue": 158,
+     "white": 138,
+     "red": 115,
+     "teeNames": "블루 158 / 화이트 138 / 레드 115m",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "HDCP 2 미들홀, 롱기스트 욕심낼 만한 홀(클럽특징) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 368,
+     "blue": 368,
+     "white": 343,
+     "red": 321,
+     "teeNames": "블루 368 / 화이트 343 / 레드 321m",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 6,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 318,
+     "blue": 318,
+     "white": 301,
+     "red": 291,
+     "teeNames": "블루 318 / 화이트 301 / 레드 291m",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 7,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "동·남코스를 내려다보는 아름다운 숏홀(클럽특징 '7번 숏홀', 코스 미기재이나 동코스 문단) · 해저드: 밝은 규사 벙커 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 159,
+     "blue": 159,
+     "white": 133,
+     "red": 120,
+     "teeNames": "블루 159 / 화이트 133 / 레드 120m",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 8,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 338,
+     "blue": 338,
+     "white": 316,
+     "red": 298,
+     "teeNames": "블루 338 / 화이트 316 / 레드 298m",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 9,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "동",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 478,
+     "blue": 478,
+     "white": 458,
+     "red": 443,
+     "teeNames": "블루 478 / 화이트 458 / 레드 443m",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "HDCP 1, 좌로 굽은 도그렉(클럽특징) · 해저드: 우측 자연림 OB · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 463,
+     "blue": 463,
+     "white": 448,
+     "red": 383,
+     "teeNames": "블루 463 / 화이트 448 / 레드 383m (파4로는 매우 길게 표기)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "대형 워터해저드가 일품(클럽특징) · 해저드: 대형 워터해저드 · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 343,
+     "blue": 343,
+     "white": 318,
+     "red": 293,
+     "teeNames": "블루 343 / 화이트 318 / 레드 293m",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 12,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "대형 워터해저드가 일품(클럽특징) · 해저드: 대형 워터해저드 · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 168,
+     "blue": 168,
+     "white": 138,
+     "red": 133,
+     "teeNames": "블루 168 / 화이트 138 / 레드 133m",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 13,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린에서 신중(클럽특징) · 해저드: 홈페이지 미제공 · 그린: 난이도 높은 그린",
+    "nine": "남",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 338,
+     "blue": 338,
+     "white": 313,
+     "red": 289,
+     "teeNames": "블루 338 / 화이트 313 / 레드 289m",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약간 우측 티샷 유리, 훅은 금물(클럽특징) · 해저드: IP 지점 경사 · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 353,
+     "blue": 353,
+     "white": 335,
+     "red": 308,
+     "teeNames": "블루 353 / 화이트 335 / 레드 308m",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 363,
+     "blue": 363,
+     "white": 333,
+     "red": 299,
+     "teeNames": "블루 363 / 화이트 333 / 레드 299m",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 16,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 533,
+     "blue": 533,
+     "white": 513,
+     "red": 463,
+     "teeNames": "블루 533 / 화이트 513 / 레드 463m",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공(긴 파3) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 203,
+     "blue": 203,
+     "white": 184,
+     "red": 163,
+     "teeNames": "블루 203 / 화이트 184 / 레드 163m",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 18,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공(짧은 파5) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "남",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 413,
+     "blue": 413,
+     "white": 413,
+     "red": 385,
+     "teeNames": "블루 413 / 화이트 413(블루와 동일) / 레드 385m",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 406,
+     "blue": 406,
+     "white": 388,
+     "red": 353,
+     "teeNames": "블루 406 / 화이트 388 / 레드 353m",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 404,
+     "blue": 404,
+     "white": 386,
+     "red": 292,
+     "teeNames": "블루 404 / 화이트 386 / 레드 292m",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 21,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 163,
+     "blue": 163,
+     "white": 142,
+     "red": 127,
+     "teeNames": "블루 163 / 화이트 142 / 레드 127m",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 22,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "드라이버보다 페어웨이우드·롱아이언 티샷(클럽특징) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 316,
+     "blue": 316,
+     "white": 292,
+     "red": 283,
+     "teeNames": "블루 316 / 화이트 292 / 레드 283m",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 23,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공(최장 파5) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 584,
+     "blue": 584,
+     "white": 530,
+     "red": 523,
+     "teeNames": "블루 584 / 화이트 530 / 레드 523m",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 24,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 443,
+     "blue": 443,
+     "white": 423,
+     "red": 316,
+     "teeNames": "블루 443 / 화이트 423 / 레드 316m",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 25,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 186,
+     "blue": 186,
+     "white": 167,
+     "red": 137,
+     "teeNames": "블루 186 / 화이트 167 / 레드 137m",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 26,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 341,
+     "blue": 341,
+     "white": 329,
+     "red": 319,
+     "teeNames": "블루 341 / 화이트 329 / 레드 319m",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 27,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "북",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 430,
+     "blue": 430,
+     "white": 414,
+     "red": 393,
+     "teeNames": "블루 430 / 화이트 414 / 레드 393m",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 28,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 358,
+     "blue": 358,
+     "white": 345,
+     "red": 325,
+     "teeNames": "블루 358 / 화이트 345 / 레드 325m",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 29,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 192,
+     "blue": 192,
+     "white": 176,
+     "red": 165,
+     "teeNames": "블루 192 / 화이트 176 / 레드 165m",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 30,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 506,
+     "blue": 506,
+     "white": 491,
+     "red": 476,
+     "teeNames": "블루 506 / 화이트 491 / 레드 476m",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 31,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 192,
+     "blue": 192,
+     "white": 180,
+     "red": 174,
+     "teeNames": "블루 192 / 화이트 180 / 레드 174m",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 32,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공(가장 짧은 파4) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 294,
+     "blue": 294,
+     "white": 261,
+     "red": 246,
+     "teeNames": "블루 294 / 화이트 261 / 레드 246m",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 33,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 475,
+     "blue": 475,
+     "white": 467,
+     "red": 456,
+     "teeNames": "블루 475 / 화이트 467 / 레드 456m",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 34,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "HDCP 1, 티샷은 우드·아이언으로 3온 작전이 유리(클럽특징) · 해저드: 좌우 OB · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 448,
+     "blue": 448,
+     "white": 391,
+     "red": 357,
+     "teeNames": "블루 448 / 화이트 391 / 레드 357m",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 35,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 335,
+     "blue": 335,
+     "white": 310,
+     "red": 303,
+     "teeNames": "블루 335 / 화이트 310 / 레드 303m",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 36,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홈페이지 미제공 · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "서",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 373,
+     "blue": 373,
+     "white": 355,
+     "red": 345,
+     "teeNames": "블루 373 / 화이트 355 / 레드 345m",
+     "note": ""
+    },
+    "hdcpNine": 9
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 36,
+   "memberHoles": 36,
+   "publicHoles": null,
+   "homepage": "https://www.ghcc.kr/",
+   "openedYear": 1991,
+   "layout": "동 9홀(파36, 블루 2,963m) + 남 9홀(파36, 블루 3,177m) / 북 9홀(파36, 블루 3,273m) + 서 9홀(파36, 블루 3,173m) — 동남 18홀·북서 18홀, 총 36홀",
+   "par18": 72,
+   "lengthYards": 7049,
+   "fairwayGrass": "야지+중지",
+   "greenGrass": "벤트그래스",
+   "architect": "홈페이지 미제공",
+   "fees": {
+    "weekday": "비회원 230,000원 / 회원·지명예우자 95,000원 (18홀 입장료)",
+    "weekend": "비회원 300,000원 / 회원 100,000원, 지명예우자 300,000원",
+    "cart": "100,000원/대 (5인승 전동카트)",
+    "caddie": "도우미 봉사료 150,000원(18홀 기준)"
+   },
+   "reservation": "회원제: 정회원 인터넷 직접 예약·취소(평일은 매월 1·16일에 익월 보름치 오픈, 5·20일 2차 재예약), 회원의 날(1·3·5주 일요일·3대 국경일), 월 1회 예약의 날, 포인트팀 제도. 3~4인 필수(2인·5인·갤러리 불가). 예약과 031-379-4001~2, 연간단체 031-379-4003~4",
+   "difficulty": "사이트 표현: 9홀마다 전략홀 3~4개·벌칙형 홀 2~3개가 쉬운 홀과 교대 배치, 공식 챔피언십 토너먼트 가능",
+   "features": "화성 동탄 회원제 36홀(부지 2,460,577㎡, 코스 743,884㎡, 원형보존지 1,349,097㎡). 9홀 단위로 클럽하우스 리턴(Core System). 동남=남사면 계곡의 아기자기한 여성적 코스(남1번 HDCP1 좌 도그렉·우 OB, 남2·3번 대형 워터해저드, 동7번 전망 파3), 북서=넓은 페어웨이·연못의 남성적 코스(서7번 HDCP1 448m 파4, 북5번 584m 파5). 티 3종(블루/화이트/레드). N=북서 블루 6,446m 환산(원표기 m). 홀별 공략도는 이미지맵 링크라 접근 불가. 불일치: 북서 총전장 클럽특징·지형도 6,426m(7,016yds) vs 스코어카드 6,446m / 지형도 'R/Tee' 동남 5,743m·북서 6,047m vs 스코어카드 화이트 5,758m·6,047m / 남9번 블루·화이트 동일 413m(파5) / 사이트 목록상 주소는 '동탄구'",
+   "facilities": "클럽하우스(약 2천 평: 로비 라운지, 레스토랑/대식당, 락커룸, 사우나), 그늘집, 프로샵. 대여: 골프클럽 30,000원, 퍼터 5,000원, 골프화 5,000원. 현관·락카 봉사료 없음"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.ghcc.kr/ / https://www.ghcc.kr/intro/intro01.asp / https://www.ghcc.kr/intro/intro02.asp / https://www.ghcc.kr/intro/intro03.asp / https://www.ghcc.kr/course/course01.asp / https://www.ghcc.kr/course/course02.asp / https://www.ghcc.kr/manage/manage01.asp / https://www.ghcc.kr/manage/manage03.asp",
+    "note": "KGBA id 29 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 29,
+   "name": "기흥",
+   "nines": [
+    "동",
+    "남",
+    "북",
+    "서"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "동",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "남",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "북",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   },
+   {
+    "name": "서",
+    "holes": [
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36
+    ]
+   }
+  ],
+  "center": {
+   "lat": 37.199465,
+   "lon": 126.831263,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.884Z"
+ }
+}

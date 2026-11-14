@@ -55,8 +55,9 @@ export function validateCourse(c) {
   for (const h of c.holes) {
     const n = h.n;
     if (![3, 4, 5, 6].includes(h.par)) E(`Par ${h.par}: 3~6만 가능`, n);
-    if (!isLL(h.tee)) E('티 위치가 없습니다', n);
-    if (!isLL(h.green)) E('그린 중앙 위치가 없습니다', n);
+    // 지도 위치가 없는 홀(스코어카드만 있는 DB 코스 등)은 발행은 허용하고 경고: 앱에서 사용자가 그린을 눌러 지정
+    if (!isLL(h.tee)) W('티 위치가 없습니다 (티샷 공략·티 거리 안내 불가)', n);
+    if (!isLL(h.green)) W('그린 중앙 위치가 없습니다 (앱에서 사용자가 그린을 직접 지정해야 거리 안내 가능)', n);
     for (const k of ['front', 'back', 'ip']) if (h[k] != null && !isLL(h[k])) E(`${k} 좌표가 올바르지 않습니다`, n);
     if (isLL(h.tee) && isLL(h.green)) {
       const L = distance(h.tee, h.green), [lo, hi] = PAR_LEN[h.par] || [0, 1e9];

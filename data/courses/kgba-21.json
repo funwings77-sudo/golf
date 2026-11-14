@@ -1,0 +1,856 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-21",
+  "name": "골프존카운티 오라",
+  "region": "제주 제주시",
+  "address": "제주특별자치도 제주시 오라남로 130-16 (오라2동, 오라칸트리클럽)",
+  "phone": "(064)747-5100",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막, 좌측 소나무 약간 우측 티샷, 세컨샷 정확성 (평균 4.8타) · 해저드: 그린 좌우 벙커, 그린 뒤·우측 낮은 지형 · 그린: 경사 완만",
+    "nine": "동",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 367,
+     "blue": 367,
+     "white": 345,
+     "red": 293,
+     "teeNames": "블루 367m(401yd)/화이트 345m(377yd)/레드 293m(320yd); 티 색상 미표기(KGA표 순서로 추정)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린까지 약 7m 오르막, 페어웨이 우측 높아 좌로 런, 소나무 약간 우측, 세컨 길지 않게 (평균 5.1타) · 해저드: 우측 벙커 · 그린: 우→좌 약한 경사",
+    "nine": "동",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 340,
+     "blue": 340,
+     "white": 321,
+     "red": 259,
+     "teeNames": "블루 340m(372yd)/화이트 321m(351yd)/레드 259m(283yd)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 3,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약 2m 하향, 그린 중앙 우측을 약간 짧게 (평균 4.0타) · 해저드: 홀 중간 깊은 계곡, 전면 해저드, 그린 주위 OB, 좌우그린 사이 대형벙커, 그린 우측 벙커 · 그린: 우→좌(OB 방향) 급경사",
+    "nine": "동",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 177,
+     "blue": 177,
+     "white": 160,
+     "red": 129,
+     "teeNames": "블루 177m(194yd)/화이트 160m(175yd)/레드 129m(141yd)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 4,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막, 영구춘화 계곡 경관, 가운데 소나무 방향 티샷, 서드샷 한 클럽 여유 (평균 6.2타) · 해저드: 우측 페어웨이 벙커, 좌우 OB, 그린 앞 좌우 깊은 벙커 · 그린: 한라산→바다 방향 내리막 심함",
+    "nine": "동",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 506,
+     "blue": 506,
+     "white": 464,
+     "red": 391,
+     "teeNames": "블루 506m(553yd)/화이트 464m(507yd)/레드 391m(428yd)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌 도그렉 오르막, 한라산 조망, 페어웨이 중간 우측 공략, 정확한 세컨샷 (평균 5.1타) · 해저드: 티 바로 앞 해저드, 좌측 계곡·OB, 그린 사이·우측 벙커 · 그린: 넓고 평탄, 후면 높음",
+    "nine": "동",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 363,
+     "blue": 363,
+     "white": 329,
+     "red": 229,
+     "teeNames": "블루 363m(397yd)/화이트 329m(360yd)/레드 229m(250yd)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 6,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막, 티샷 중앙 우측, 세컨 약간 좌측, 서드 짧게 (평균 6.1타) · 해저드: 우측 OB, 그린 후면 OB, 그린 주위 벙커 다수 · 그린: 후면 방향 급경사, 빠름",
+    "nine": "동",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 585,
+     "blue": 585,
+     "white": 521,
+     "red": 424,
+     "teeNames": "블루 585m(640yd)/화이트 521m(570yd)/레드 424m(464yd)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 오르막, 티샷 약간 좌측, 한 클럽 길게, 넘기면 내리막 어프로치 (평균 4.9타) · 해저드: 우측 크로스 벙커 · 그린: 높은 위치, 경사 있고 빠름, 뒤쪽 높음",
+    "nine": "동",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 355,
+     "blue": 355,
+     "white": 321,
+     "red": 226,
+     "teeNames": "블루 355m(388yd)/화이트 321m(351yd)/레드 226m(247yd)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 8,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막·바람 고려, 핀 위치별 클럽 선택, 어려우면 그린 우측 공략 (평균 4.0타) · 해저드: 그린 앞 해저드 · 그린: 2단, 경사 심하고 빠름",
+    "nine": "동",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 185,
+     "blue": 185,
+     "white": 161,
+     "red": 131,
+     "teeNames": "블루 185m(202yd)/화이트 161m(176yd)/레드 131m(143yd)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "제주시·바다 조망, 거리보다 방향성, 세컨 길면 OB 위험 (평균 4.8타) · 해저드: IP 좌우 벙커, 그린 주변 벙커, 그린 뒤 OB · 그린: 비교적 평탄, 후면 낮음",
+    "nine": "동",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 406,
+     "blue": 406,
+     "white": 383,
+     "red": 319,
+     "teeNames": "블루 406m(444yd)/화이트 383m(419yd)/레드 319m(349yd)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "정확성 우선, 그린 중앙 좌측, 짧게 쳐 오르막 퍼트 (평균 4.8타) · 해저드: 좌측 깊은 러프, 우측 크로스 벙커, 그린 사이 깊은 벙커 · 그린: 뒤쪽 높음",
+    "nine": "서",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 373,
+     "blue": 373,
+     "white": 354,
+     "red": 300,
+     "teeNames": "블루 373m(408yd)/화이트 354m(387yd)/레드 300m(328yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 11,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌 도그렉, 페어웨이 좌측 공략, 세컨 정면 나무 좌측 (평균 6.2타) · 해저드: 장타 시 반대편 러프, 우측 러프 · 그린: 비교적 평탄, 좌→우 내리막",
+    "nine": "서",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 529,
+     "blue": 529,
+     "white": 504,
+     "red": 402,
+     "teeNames": "블루 529m(579yd)/화이트 504m(551yd)/레드 402m(440yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 12,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "바다·섬 조망 내리막, 짧게 공략, 핀 위치별 전략 (평균 3.8타) · 해저드: 그린 좌측 뒤 OB, 우측 벙커·러프 · 그린: 중앙 높은 2단, 착시 많음",
+    "nine": "서",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 186,
+     "blue": 186,
+     "white": 166,
+     "red": 119,
+     "teeNames": "블루 186m(203yd)/화이트 166m(182yd)/레드 119m(130yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 13,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "평탄, 랜딩 폭 넓음, 짧게 그린 중앙 우측, 버디 가능 (평균 5.2타) · 해저드: IP 좌우 벙커, 좌측 러프·OB, 그린 주위 벙커 · 그린: 우→좌 급경사(중앙 좌측 매우 심함)",
+    "nine": "서",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 354,
+     "blue": 354,
+     "white": 336,
+     "red": 291,
+     "teeNames": "블루 354m(387yd)/화이트 336m(367yd)/레드 291m(318yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 미들홀, 3온 작전, 오르막 1클럽 길게, 그린 중앙 좌측 (평균 5.2타) · 해저드: 좌측 해저드, 우측 깊은 페어웨이 벙커·해저드, 그린 입구 벙커(좁음) · 그린: 좌→우·뒤→앞 경사 심함",
+    "nine": "서",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 398,
+     "blue": 398,
+     "white": 371,
+     "red": 270,
+     "teeNames": "블루 398m(435yd)/화이트 371m(406yd)/레드 270m(295yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 15,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "서비스 롱홀, 장타자 2온 가능, 서드 짧게 중앙 좌측 (평균 6.0타) · 해저드: 좌우 해저드, IP 우측 페어웨이 벙커 · 그린: 후면 매우 높음",
+    "nine": "서",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 507,
+     "blue": 507,
+     "white": 447,
+     "red": 341,
+     "teeNames": "블루 507m(554yd)/화이트 447m(489yd)/레드 341m(373yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌로 휜 평탄 홀, 강한 맞바람, 그린 중앙 좌측, 3온 작전 (평균 4.9타) · 해저드: 티 앞 계곡, 그린 앞 대형벙커, 그린 뒤 연못·비치벙커 · 그린: 그린 우측 위험",
+    "nine": "서",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 424,
+     "blue": 424,
+     "white": 376,
+     "red": 251,
+     "teeNames": "블루 424m(464yd)/화이트 376m(411yd)/레드 251m(274yd); 본문은 '핸디캡 1번'이라 하나 표기는 HDCP 5",
+     "note": ""
+    }
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린 중앙 우측, 짧게 (평균 3.9타) · 해저드: 앞 해저드, 좌우 벙커 · 그린: 우→좌 경사 심함, 착시",
+    "nine": "서",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 173,
+     "blue": 173,
+     "white": 157,
+     "red": 126,
+     "teeNames": "블루 173m(189yd)/화이트 157m(172yd)/레드 126m(138yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 홀, 숏아이언 세컨, 그린 중앙 우측 (평균 4.6타) · 해저드: 그린 좌우 벙커 · 그린: 우→좌 흐름 빠름",
+    "nine": "서",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 352,
+     "blue": 352,
+     "white": 301,
+     "red": 237,
+     "teeNames": "블루 352m(385yd)/화이트 301m(329yd)/레드 237m(259yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "뒷바람 이용 장타·버디 찬스, 클럽 길게 (평균 4.8타) · 해저드: 좌우 OB, 우측 해저드, 그린 앞 벙커 · 그린: 평탄하나 빠름, 약간 오르막 위치",
+    "nine": "남A",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 318,
+     "blue": 318,
+     "white": 304,
+     "red": 250,
+     "teeNames": "블루 318m(348yd)/화이트 304m(332yd)/레드 250m(273yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이 중앙 약간 우측 티샷 (평균 5.2타) · 해저드: 티 앞 해저드, 좌우 OB, 좌우 갈대밭 · 그린: 비교적 평탄·완만",
+    "nine": "남A",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 358,
+     "blue": 358,
+     "white": 342,
+     "red": 263,
+     "teeNames": "블루 358m(392yd)/화이트 342m(374yd)/레드 263m(288yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 21,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 내리막이나 강한 앞바람, 클럽 여유, 넘기면 어려움 (평균 3.8타) · 해저드: 그린 좌우 OB·벙커 · 그린: 평탄",
+    "nine": "남A",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 173,
+     "blue": 173,
+     "white": 158,
+     "red": 125,
+     "teeNames": "블루 173m(189yd)/화이트 158m(173yd)/레드 125m(137yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 22,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 심함, 세컨 짧게 서드 승부, 장타자 2온 가능 (평균 6.0타) · 해저드: 좌우 OB · 그린: 완만",
+    "nine": "남A",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 525,
+     "blue": 525,
+     "white": 503,
+     "red": 439,
+     "teeNames": "블루 525m(574yd)/화이트 503m(550yd)/레드 439m(480yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 23,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우측으로 약간 휨, 티샷 중앙 좌측, 세컨 클럽 여유 (평균 4.9타) · 해저드: 좌측 OB, 우측 깊은 러프, 그린 좌우 벙커 · 그린: 완만",
+    "nine": "남A",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 345,
+     "blue": 345,
+     "white": 331,
+     "red": 266,
+     "teeNames": "블루 345m(377yd)/화이트 331m(362yd)/레드 266m(291yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 24,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 심함, 클럽 여유, 그린 사이 공략 (평균 4.0타) · 해저드: 그린 앞 벙커 · 그린: 완만하나 빠름",
+    "nine": "남A",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 191,
+     "blue": 191,
+     "white": 180,
+     "red": 145,
+     "teeNames": "블루 191m(209yd)/화이트 180m(197yd)/레드 145m(159yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 25,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좁은 페어웨이, 가운데 소나무 좌측, 다운힐 세컨은 그린 좌측 (평균 4.9타) · 해저드: 좌우 해저드, 우측 벙커 · 그린: 비교적 완만",
+    "nine": "남A",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 366,
+     "blue": 366,
+     "white": 344,
+     "red": 267,
+     "teeNames": "블루 366m(400yd)/화이트 344m(376yd)/레드 267m(292yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 26,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "앞바람, 중앙 좌측 티샷, 구릉 넘겨 올려치는 세컨 (평균 5.0타) · 해저드: 페어웨이 중간 전 해저드, 그린 뒤·우측 OB · 그린: 좌→우 완만",
+    "nine": "남A",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 369,
+     "blue": 369,
+     "white": 353,
+     "red": 268,
+     "teeNames": "블루 369m(404yd)/화이트 353m(386yd)/레드 268m(293yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 27,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좁은 페어웨이, 소나무 약간 우측, 거리보다 정확성 (평균 5.8타) · 해저드: 티 앞 좌우 해저드, 우측으로 길게 뻗은 해저드 · 그린: 뒤→앞 완만",
+    "nine": "남A",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 530,
+     "blue": 530,
+     "white": 515,
+     "red": 387,
+     "teeNames": "블루 530m(580yd)/화이트 515m(563yd)/레드 387m(423yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 28,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "앞바람, 티샷 중앙 좌측, 세컨 그린 좌측 (평균 5.0타) · 해저드: 우측 해저드 · 그린: 주변 좌→우 급경사, 좌측 그린 까다로움",
+    "nine": "남B",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 404,
+     "blue": 404,
+     "white": 358,
+     "red": 264,
+     "teeNames": "블루 404m(442yd)/화이트 358m(392yd)/레드 264m(289yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 29,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "쉬운 파5, 장타자 2온 버디 시도, 서드 짧게 (평균 6.2타) · 해저드: 약 200m 지점 우측 벙커, 좌우 그린 사이 벙커 · 그린: 뒤→앞·우→좌 내리막 심하고 빠름",
+    "nine": "남B",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 483,
+     "blue": 483,
+     "white": 464,
+     "red": 395,
+     "teeNames": "블루 483m(528yd)/화이트 464m(507yd)/레드 395m(432yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 30,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린까지 보이는 홀, 좌측 능선 방향 티샷, 세컨 약간 짧게 (평균 4.9타) · 해저드: 그린 우측 벙커 · 그린: 완만해 보이나 착시 많음",
+    "nine": "남B",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 375,
+     "blue": 375,
+     "white": 357,
+     "red": 268,
+     "teeNames": "블루 375m(410yd)/화이트 357m(390yd)/레드 268m(293yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 31,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 긴 파3, 그린 넘기지 않게 정확한 티샷 (평균 4.0타) · 해저드: 좌우 그린 사이 큰 벙커 · 그린: 까다롭고 빠름",
+    "nine": "남B",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 181,
+     "blue": 181,
+     "white": 168,
+     "red": 106,
+     "teeNames": "블루 181m(198yd)/화이트 168m(184yd)/레드 106m(116yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 32,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우측으로 약간 휨, 중앙 약간 우측 티샷, 핀 따라 짧게 (평균 5.1타) · 해저드: 그린 앞 우측 벙커 · 그린: 오라 대표급 까다로운 경사, 3퍼트 잦음",
+    "nine": "남B",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 373,
+     "blue": 373,
+     "white": 358,
+     "red": 264,
+     "teeNames": "블루 373m(408yd)/화이트 358m(392yd)/레드 264m(289yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 33,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우 도그렉, 소나무 약간 좌측, 세컨 약간 짧게 (평균 5.1타) · 해저드: 우측 OB, 그린 사이 벙커, 그린 뒤 OB · 그린: 비교적 평탄",
+    "nine": "남B",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 390,
+     "blue": 390,
+     "white": 374,
+     "red": 264,
+     "teeNames": "블루 390m(427yd)/화이트 374m(409yd)/레드 264m(289yd); 본문은 '핸디캡 2번'이라 하나 표기는 HDCP 5",
+     "note": ""
+    }
+   },
+   {
+    "n": 34,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "한라산 최근접 홀, 약간 우측 티샷, 세컨·서드 욕심 금물 (평균 6.0타) · 해저드: 우측 OB, 티 앞 해저드, 우측 갈대밭 · 그린: 경사 심하고 빠름",
+    "nine": "남B",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 490,
+     "blue": 490,
+     "white": 474,
+     "red": 333,
+     "teeNames": "블루 490m(536yd)/화이트 474m(518yd)/레드 333m(364yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 35,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "제주시·바다 조망 내리막, 약간 길게, 바람 고려 (평균 3.9타) · 해저드: 그린 앞 벙커, 그린 후면 위험 · 그린: 좌우 2단, 중앙 높음",
+    "nine": "남B",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 199,
+     "blue": 199,
+     "white": 177,
+     "red": 146,
+     "teeNames": "블루 199m(218yd)/화이트 177m(194yd)/레드 146m(160yd)",
+     "note": ""
+    }
+   },
+   {
+    "n": 36,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우측으로 약간 휜 짧은 내리막, 그린 앞 좌측 벙커 방향 티샷 (평균 4.6타) · 해저드: 우측 OB, 그린 앞 좌측 벙커 · 그린: 2단 원그린, 좌→우 내리막 급경사",
+    "nine": "남B",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 363,
+     "blue": 363,
+     "white": 346,
+     "red": 277,
+     "teeNames": "블루 363m(397yd)/화이트 346m(378yd)/레드 277m(303yd)",
+     "note": ""
+    }
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 18,
+   "memberHoles": 18,
+   "publicHoles": null,
+   "homepage": "https://www.golfzoncounty.com/",
+   "openedYear": 40,
+   "layout": "동 9홀(파36, 블루 3,284m) + 서 9홀(파36, 블루 3,296m) + 남A 9홀(파36, 블루 3,175m) + 남B 9홀(파36, 블루 3,258m) = 36홀 파144",
+   "par18": 72,
+   "lengthYards": 7195,
+   "fairwayGrass": "버뮤다그래스+라이그래스(티박스 켄터키 블루그래스)",
+   "greenGrass": "벤트그래스",
+   "architect": "홈페이지 미제공",
+   "fees": {
+    "weekday": "동·서코스(대중제) 180,000원 / 남코스(회원제) 200,000원 (주중 월~금, 1인 18홀, 2023.07.25 요금안내 공지 기준)",
+    "weekend": "동·서코스 230,000원 / 남코스 250,000원 (주말·공휴일, 2023.07.25 공지 기준)",
+    "cart": "18홀 100,000원/팀, 9홀 50,000원/팀 (5인승)",
+    "caddie": "150,000원/팀 (27홀 중단 기준 230,000원)"
+   },
+   "reservation": "골프존카운티 앱·웹 실시간 예약(골프존 회원가입): 매월 20일 09시, 다다음달 말일까지 오픈(사이트 표기 '40일 전 오픈' 병기). 전화 064-747-5100(09~18시), 팩스 064-747-2650. 2인 플레이 불가",
+   "difficulty": "골프존카운티 평가: 전장 5, 홀 다양성 5, 경관 5, 샷밸류 4, 폭/넓이 5, 코스전략 다양성 4. KGA 레이팅(9홀) 블루 동37.1/64·서37.2/65·남A36.2/63·남B36.6/64, 화이트 35.8/61·35.6/62·36.2/63·35.8/63, 레드 34.8/60·34.2/57·34.3/60·34.4/58. 18홀 평균스코어 89.1",
+   "features": "제주시 오라동 한라산 기슭의 36홀(4코스) 한지형 양잔디 골프장. 노송·이국적 조경, 한라산·제주시가지·바다 조망. #대회코스. 동4번 영구춘화 계곡(영주10경) 파5, 동6번 585m 최장 파5, 동5번 계곡 넘기는 좌 도그렉(HDCP1), 서7번 계곡·대형벙커·연못. 좌우 2그린 홀 다수. 티 3종(색상 미표기, m·yd 병기). 18홀 기준 N=동+서 홀별 yd 합(블루 6,580m). 불일치: 총전장 표기 13,012m vs 홀별 블루 합 13,013m / 핸디캡 중복(서 5가 3홀·남A 5가 5홀·남B 5가 4홀) / 서7번·남B6번 본문은 HDCP1·2라 하나 표기는 5 / 사이트 목록은 18홀(회원제)이나 홈페이지는 36홀(동·서 대중제, 남 회원제). 원표기 m(yd 병기)",
+   "facilities": "클럽하우스(락커 700명 수용, 프로샵, 레스토랑 '호시그린', 연회장), 골프연습장, 사우나, 웨딩(대관). 대여: 골프채 S급 60,000원, 골프화 8,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.golfzoncounty.com/golfclub/main?golfclubSeq=3 / https://www.golfzoncounty.com/golfclub/intro?golfclubSeq=3 / https://www.golfzoncounty.com/golfclub/course?golfclubSeq=3 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=3&courseSeq=5 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=3&courseSeq=8 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=3&courseSeq=7 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=3&courseSeq=6 / https://www.golfzoncounty.com/golfclub/resvGuide?golfclubSeq=3 / https://www.golfzoncounty.com/golfclub/noticeInfo?golfclubSeq=3&boardSeq=528 / https://www.golfzoncounty.com/golfclub/facility?golfclubSeq=3",
+    "note": "KGBA id 21 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 21,
+   "name": "골프존카운티 오라",
+   "nines": [
+    "동",
+    "서",
+    "남A",
+    "남B"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "동",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "서",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "남A",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   },
+   {
+    "name": "남B",
+    "holes": [
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36
+    ]
+   }
+  ],
+  "center": {
+   "lat": 33.454297,
+   "lon": 126.512605,
+   "precision": "address"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.878Z"
+ }
+}

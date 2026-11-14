@@ -1,0 +1,679 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-23",
+  "name": "광주",
+  "region": "전남 곡성군",
+  "address": "전라남도 곡성군 옥과면 입면로 455",
+  "phone": "(061)339-7100",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "전망 트인 넓은 페어웨이, IP 이전 안착 시 편안한 파4 · 해저드: IP 이후 약간 내리막(공략도상 페어웨이·그린 주변 벙커) · 그린: 홈페이지 미제공(공략도상 2그린)",
+    "nine": "동악",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 365,
+     "blue": 365,
+     "white": 351,
+     "red": 292,
+     "teeNames": "C.T 365m(399yd) / R.T 351m / L.T 292m",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "시작 좁고 점차 넓어짐, 페어웨이 우측 공략하되 OB 주의, 세컨 클럽 선택 신중 · 해저드: IP 좌측 워터해저드, 우측 법면 OB · 그린: 세컨샷 내리막 끝에 위치",
+    "nine": "동악",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 398,
+     "blue": 398,
+     "white": 384,
+     "red": 293,
+     "teeNames": "C.T 398m(435yd) / R.T 384m / L.T 293m",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 3,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "물결형 오르막 좌우 도그렉, IP 안 보임, 페어웨이 중앙 왼쪽 공략, 욕심 버리고 안정적으로 · 해저드: 페어웨이 우측 OB·벙커 · 그린: 홈페이지 미제공",
+    "nine": "동악",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 509,
+     "blue": 509,
+     "white": 492,
+     "red": 414,
+     "teeNames": "C.T 509m(557yd) / R.T 492m / L.T 414m",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 4,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "IP·그린 안 보임, 다음 홀 티의 큰 나무 방향, 드라이버 대신 아이언 티샷 · 해저드: IP 이후 내리막 양쪽 해저드 · 그린: 세컨샷 거리 착시",
+    "nine": "동악",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 360,
+     "blue": 360,
+     "white": 352,
+     "red": 299,
+     "teeNames": "C.T 360m(394yd) / R.T 352m / L.T 299m",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 5,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 파3, 정확한 티샷 필요 · 해저드: 그린 앞뒤 벙커 · 그린: 언듈레이션 심한 2단 그린",
+    "nine": "동악",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 162,
+     "blue": 162,
+     "white": 150,
+     "red": 116,
+     "teeNames": "C.T 162m(177yd) / R.T 150m / L.T 116m",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 6,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓은 페어웨이, 우→좌 훅 바람, 벙커 넘기면 투온 도전 가능 · 해저드: 페어웨이 중앙 왼쪽 벙커, 좌측 OB, 그린 앞 벙커·좌우 지형 · 그린: 홈페이지 미제공",
+    "nine": "동악",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 480,
+     "blue": 480,
+     "white": 463,
+     "red": 417,
+     "teeNames": "C.T 480m(525yd) / R.T 463m / L.T 417m",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌 도그렉, 중앙 소나무·IP 전방 조명탑 방향, 세컨 클럽 선택 주의 · 해저드: 티 방향이 우측이라 OB 위험 · 그린: 그린 후방 엣지 없음",
+    "nine": "동악",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 336,
+     "blue": 336,
+     "white": 324,
+     "red": 263,
+     "teeNames": "C.T 336m(367yd) / R.T 324m / L.T 263m",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 8,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린이 보이나 긴 파3, 정확한 티샷 · 해저드: 훅 시 OB(좌측), 우측 법면은 OB 아님 · 그린: 홈페이지 미제공",
+    "nine": "동악",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 199,
+     "blue": 199,
+     "white": 186,
+     "red": 119,
+     "teeNames": "C.T 199m(218yd) / R.T 186m / L.T 119m",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓고 편안한 마무리 홀, 앞바람 시 거리 손실(사이트는 '롱기스트 홀'로 표현) · 해저드: 홈페이지 미제공(공략도상 페어웨이 벙커) · 그린: 홈페이지 미제공",
+    "nine": "동악",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 345,
+     "blue": 345,
+     "white": 328,
+     "red": 252,
+     "teeNames": "C.T 345m(377yd) / R.T 328m / L.T 252m",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티가 우측을 향함, 페어웨이 중앙 소나무 공략 · 해저드: 우측 해저드(공략도상 우측 연못) · 그린: 홈페이지 미제공",
+    "nine": "섬진",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 371,
+     "blue": 371,
+     "white": 357,
+     "red": 322,
+     "teeNames": "C.T 371m(406yd) / R.T 357m / L.T 322m",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "중앙 소나무를 너무 정확히 노리면 세컨샷 방해 · 해저드: 홈페이지 미제공(공략도상 페어웨이·그린 벙커) · 그린: 어려운 그린, 퍼팅 라인 관찰 필요",
+    "nine": "섬진",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 328,
+     "blue": 328,
+     "white": 309,
+     "red": 252,
+     "teeNames": "C.T 328m(359yd) / R.T 309m / L.T 252m",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 12,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티~그린 거의 수평, 허공 보고 치는 시원한 홀, 바람 시 정확성 · 해저드: 홈페이지 미제공(공략도상 그린 주변 벙커) · 그린: 홈페이지 미제공",
+    "nine": "섬진",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 185,
+     "blue": 185,
+     "white": 173,
+     "red": 148,
+     "teeNames": "C.T 185m(202yd) / R.T 173m / L.T 148m",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 13,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌측 전방 섬진강·동악산 조망, IP 혼동 주의(건너편 산 기준), 바람 방향 유의 · 해저드: 공략도상 좌측 연못 · 그린: 홈페이지 미제공",
+    "nine": "섬진",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 543,
+     "blue": 543,
+     "white": 527,
+     "red": 447,
+     "teeNames": "C.T 543m(594yd) / R.T 527m / L.T 447m",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌→우 슬라이스 바람 유의, 세컨은 그린 위 목표물 확인 · 해저드: 홈페이지 미제공 · 그린: 세컨 지점부터 안 보이는 오르막 그린",
+    "nine": "섬진",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 396,
+     "blue": 396,
+     "white": 379,
+     "red": 304,
+     "teeNames": "C.T 396m(433yd) / R.T 379m / L.T 304m",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 15,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "IP 안 보임(먼 산 정상 방향), 세컨부터 넓고 평탄한 쉬운 파5 · 해저드: 그린 앞 벙커 · 그린: 홈페이지 미제공",
+    "nine": "섬진",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 491,
+     "blue": 491,
+     "white": 468,
+     "red": 407,
+     "teeNames": "C.T 491m(537yd) / R.T 468m / L.T 407m",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파4, 욕심 버리고 클럽 선택 · 해저드: 페어웨이 양쪽 법면 OB, 벙커 · 그린: 홈페이지 미제공",
+    "nine": "섬진",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 314,
+     "blue": 314,
+     "white": 301,
+     "red": 252,
+     "teeNames": "C.T 314m(343yd) / R.T 301m / L.T 252m",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린 내려다보는 홀, 정확한 클럽 선택 · 해저드: 그린 좌측 OB, 우측 벙커(공략도상 티~그린 사이 연못) · 그린: 홈페이지 미제공",
+    "nine": "섬진",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 176,
+     "blue": 176,
+     "white": 167,
+     "red": 137,
+     "teeNames": "C.T 176m(192yd) / R.T 167m / L.T 137m",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우 도그렉, 그린 안 보임, 중앙 소나무 공략(장타자는 우측 벙커 향해 드로우) · 해저드: 우측 OB, 우측 벙커 · 그린: 홈페이지 미제공",
+    "nine": "섬진",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 375,
+     "blue": 375,
+     "white": 354,
+     "red": 271,
+     "teeNames": "C.T 375m(410yd) / R.T 354m / L.T 271m",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "IP 후 급내리막·그린 앞 오르막, 바람 영향, 오르막 퍼트 위치로 · 해저드: 홈페이지 미제공(공략도상 페어웨이·그린 벙커) · 그린: 매우 어려운 2단 그린",
+    "nine": "설산",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 371,
+     "blue": 371,
+     "white": 354,
+     "red": 309,
+     "teeNames": "C.T 371m(406yd) / R.T 354m / L.T 309m",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "매우 좁은 급내리막, 바람 영향 큼, 편안한 티샷 · 해저드: 페어웨이 양쪽 OB(공략도상 그린 앞 연못) · 그린: 홈페이지 미제공",
+    "nine": "설산",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 395,
+     "blue": 395,
+     "white": 380,
+     "red": 334,
+     "teeNames": "C.T 395m(432yd) / R.T 380m / L.T 334m",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 21,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티·그린 거의 평행, 거리 착시, 클럽 선택 유의 · 해저드: 하천변 약 80m 해저드 넘김 · 그린: 홈페이지 미제공",
+    "nine": "설산",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 158,
+     "blue": 158,
+     "white": 134,
+     "red": 106,
+     "teeNames": "C.T 158m(173yd) / R.T 134m / L.T 106m",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 22,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "일직선 평탄, 좁은 페어웨이, 정확한 티샷 시 2온 가능 · 해저드: 우측 하천, 양쪽 OB · 그린: 홈페이지 미제공",
+    "nine": "설산",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 490,
+     "blue": 490,
+     "white": 474,
+     "red": 417,
+     "teeNames": "C.T 490m(사이트 534yd 표기, 환산 536yd) / R.T 474m / L.T 417m",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 23,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약간 좌 도그렉, 그린 안 보임, 중앙 소나무 공략·비거리 필요 · 해저드: 우측 OB, IP 좌측 경사 · 그린: 홈페이지 미제공",
+    "nine": "설산",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 393,
+     "blue": 393,
+     "white": 380,
+     "red": 330,
+     "teeNames": "C.T 393m(430yd) / R.T 380m / L.T 330m",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 24,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "비교적 짧고 편안한 파3 · 해저드: 티 앞 해저드(섬 수목이 시야 방해), 우그린 시 우측 법면 수목 · 그린: 좌·우 그린(우그린 언급)",
+    "nine": "설산",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 154,
+     "blue": 154,
+     "white": 142,
+     "red": 115,
+     "teeNames": "C.T 154m(168yd) / R.T 142m / L.T 115m",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 25,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우 도그렉, 페어웨이 중앙 공략(좌측은 거리 손실·불편한 라이) · 해저드: IP 우측 벙커, OB · 그린: 홈페이지 미제공",
+    "nine": "설산",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 501,
+     "blue": 501,
+     "white": 490,
+     "red": 383,
+     "teeNames": "C.T 501m(548yd) / R.T 490m / L.T 383m",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 26,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 오르막, 퍼팅 신중 · 해저드: 그린 좌우 벙커(공략도상 티 앞 연못) · 그린: 경사·난이도 매우 높음",
+    "nine": "설산",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 330,
+     "blue": 330,
+     "white": 302,
+     "red": 239,
+     "teeNames": "C.T 330m(361yd) / R.T 302m / L.T 239m",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 27,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우 도그렉, IP부터 급오르막, 우측 법면 버드나무 향해 드로우, 오르막 퍼트 위치로 · 해저드: 우측 OB · 그린: 경사 심한 2단 그린",
+    "nine": "설산",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 332,
+     "blue": 332,
+     "white": 312,
+     "red": 212,
+     "teeNames": "C.T 332m(363yd) / R.T 312m / L.T 212m",
+     "note": ""
+    },
+    "hdcpNine": 7
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 27,
+   "memberHoles": 27,
+   "publicHoles": null,
+   "homepage": "https://www.kjcc.co.kr/",
+   "openedYear": null,
+   "layout": "동악 9홀(파36, C.T 3,154m) + 섬진 9홀(파36, C.T 3,179m) + 설산 9홀(파36, C.T 3,124m)",
+   "par18": 72,
+   "lengthYards": 6926,
+   "fairwayGrass": "홈페이지 미제공",
+   "greenGrass": "홈페이지 미제공",
+   "architect": "홈페이지 미제공",
+   "fees": {
+    "weekday": "일반(비회원) 160,000원 (요금안내 표) / 2026년 12월 비회원: 1부 08시 이전 110,000·이후 125,000원, 2부 150,000원 / 회원 60,000원 (V-VIP 23,000원)",
+    "weekend": "일반(비회원) 200,000원 (요금안내 표) / 2026년 12월 비회원(토·일·공휴일): 1부 08시 이전 150,000·이후 165,000원, 2부 175,000원 / 회원 65,000원",
+    "cart": "100,000원/팀(1인 25,000원), 5인 플레이 25,000원 추가",
+    "caddie": "150,000원/팀 (5인 플레이 210,000원)"
+   },
+   "reservation": "회원 위주(비회원은 회사 판단 시 접수). 홈페이지·'광주cc' 앱·전화(061-339-7191) 선착순: 평일 정회원 5주 전/모든 회원 4주 전 같은 요일 09시, 주말·공휴일 VVIP 5주 전/VIP·정회원 4주 전/모든 회원 3주 전 09시 (2026.3.1 적용). 단체(3팀 이상)는 전화 061-339-7192만",
+   "difficulty": "사이트 표현: '다양한 난이도로 이루어진 절묘한 코스'",
+   "features": "전남 곡성 옥과면, 섬진강과 동악산을 배경으로 한 회원제 27홀(사업면적 1,165,945㎡/353,316평). 정회원 1,519명·주중회원 1,200명. 야간조명 13개 홀(동악·설산 6~9번, 섬진 5~9번). 동악=원시자연을 살린 힘있는 코스(2번 HDCP1 워터해저드), 섬진=섬진강 조망(4번 543m 파5), 설산=하천변 코스(3번 약 80m 해저드 넘기는 파3, 4번 하천 따라 일직선 파5). 티 3종 C.T/R.T/L.T(m). 홀 공략도에 IP 거리·고저 프로파일 표기. N=동악+섬진 C.T 6,333m 환산(원표기 m). 불일치: 섬진1번 공략도 220+171=391m vs 표기 371m / 설산6번 공략도 155m vs 표기 154m / 설산4번 490m를 534yd로 표기(환산 536yd) / 코스제원 섬진 표 캡션이 '설산 코스'로 오기 / 동악9번(파4)을 '롱기스트 홀'로 표현",
+   "facilities": "클럽하우스(로비·프론트·락카·사우나·레스토랑·프로샵), 그늘집(후불 정산), 연습그린, 야간조명. 골프클럽·골프화 대여(클럽 100,000원)"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.kjcc.co.kr/ / https://www.kjcc.co.kr/html/company.asp / https://www.kjcc.co.kr/html/course01.asp / https://www.kjcc.co.kr/html/course02.asp / https://www.kjcc.co.kr/html/course02_02.asp / https://www.kjcc.co.kr/html/course02_03.asp / https://www.kjcc.co.kr/html/guide01.asp / https://www.kjcc.co.kr/html/guide02.asp / https://www.kjcc.co.kr/html/guide03.asp / https://www.kjcc.co.kr/html/facility.asp / https://www.kjcc.co.kr/html/board/event_view.asp?b_idx=380",
+    "note": "KGBA id 23 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 23,
+   "name": "광주",
+   "nines": [
+    "동악",
+    "섬진",
+    "설산"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "동악",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "섬진",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "설산",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   }
+  ],
+  "center": {
+   "lat": 35.28384,
+   "lon": 127.299009,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.880Z"
+ }
+}

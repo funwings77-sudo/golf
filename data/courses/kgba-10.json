@@ -1,0 +1,679 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-10",
+  "name": "강동 디아너스",
+  "region": "경북 경주시",
+  "address": "경북 경주시 보불로 391",
+  "phone": "(054)778-9000",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티~IP 고저차 약 30m 내리막. 그린 좌측 방향 공략이 유리하고 어프로치는 거리 조절에 유의 · 해저드: 우측 OB; 그린 우측 깊은 벙커, 그린 뒤 급경사 내리막 · 그린: 왼쪽으로 낮아지며 라이가 불규칙해 신중한 퍼팅 필요",
+    "nine": "Lake",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 374,
+     "blue": 341,
+     "white": 298,
+     "red": 272,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 288m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 2,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓은 파5로 자신 있게 칠 수 있으나 티잉그라운드가 우측을 향해 있어 스탠스 정렬 주의 · 해저드: 그린 주변 벙커는 얕아 위협 적음, 그린 뒤 내리막 경사 · 그린: 그린 뒤쪽 내리막 경사지",
+    "nine": "Lake",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 557,
+     "blue": 538,
+     "white": 508,
+     "red": 487,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 498m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 3,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "가장 짧은 내리막 파4. 티샷이 짧으면 그린이 안 보이며, 세컨드도 내리막이라 오버하지 않도록 거리 조절 · 해저드: 우측 마운드가 시야 가림; 그린 넘어가면 바로 OB; 그린 앞 양쪽 벙커, 그린 뒤 내리막 · 그린: 대체로 완만한 경사, 전면부 공략 유리",
+    "nine": "Lake",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 326,
+     "blue": 306,
+     "white": 259,
+     "red": 232,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 247m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 4,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "길지 않은 파3. 좌측 앞 벙커를 피하고 그린 형태를 감안한 퍼팅 · 해저드: 홀 전체에 억새 식재; 그린 좌측 앞 깊은 벙커 · 그린: 대체로 완만하나 뒤쪽 양옆과 앞쪽이 낮아지는 형태",
+    "nine": "Lake",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 161,
+     "blue": 140,
+     "white": 119,
+     "red": 91,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 105m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 5,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이가 넓어 티샷 부담은 적으나 IP를 넘기면 계곡 위험. 그린 우측 해저드·벙커를 피하는 전략적 샷 · 해저드: 페어웨이 중앙 가로지르는 래터럴 워터해저드, IP 넘어 계곡; 그린 우측 긴 벙커+워터해저드 · 그린: 지형 변화가 심함, 비교적 평탄한 전면부 공략 유리",
+    "nine": "Lake",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 517,
+     "blue": 498,
+     "white": 465,
+     "red": 395,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 425m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 6,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "아일랜드 파3. 물에 대한 심리적 부담을 이기고 신중하게 그린을 직접 공략 · 해저드: 호수로 둘러싸인 아일랜드 그린(소나무·돌다리) · 그린: 중앙이 높고 사방으로 경사",
+    "nine": "Lake",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 156,
+     "blue": 133,
+     "white": 114,
+     "red": 96,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 114m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 7,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "가장 긴 오르막 파5. 세컨드는 페어웨이 좌측, 어프로치는 정확성 위주로 2단 그린 공략 · 해저드: 페어웨이 우측 래터럴 워터해저드; 150야드 이내 우측 벙커 6개 · 그린: 2단 그린(높은 위치); 대체로 완만, 뒤쪽 양옆·앞쪽이 낮음",
+    "nine": "Lake",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 575,
+     "blue": 563,
+     "white": 546,
+     "red": 493,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 521m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 8,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "토함산 배경 파3(사이트 표기 '토항산'). 짧으면 해저드, 길면 내리막이라 정확한 거리 조절 필요 · 해저드: 그린 앞 워터해저드(앞 경사로 짧으면 굴러 들어감), 그린 뒤 내리막 · 그린: 지형 변화가 심해 라이 읽기 어려움, 평탄한 전면부 공략 유리",
+    "nine": "Lake",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 175,
+     "blue": 147,
+     "white": 122,
+     "red": 112,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 112m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "가장 긴 오르막 파4, 우 도그렉. 티샷이 짧게 떨어지며, 우측 지름길은 벙커·소나무 부담 — 정확하고 긴 샷 필요 · 해저드: 우측 벙커와 소나무; 그린 좌측 앞 벙커 · 그린: 우측으로 크게 기울어짐",
+    "nine": "Lake",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 422,
+     "blue": 406,
+     "white": 372,
+     "red": 322,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 354m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓은 내리막 파4(보문호 조망 스타홀). 왼쪽 벙커만 피하면 평탄한 곳에서 세컨드, 어프로치 거리 조절 · 해저드: 왼쪽 벙커; 그린 뒤 내리막 경사 · 그린: 가운데는 비교적 평탄하나 굴곡이 있음",
+    "nine": "Valley",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 368,
+     "blue": 338,
+     "white": 302,
+     "red": 274,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 292m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 11,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧지 않은 내리막 파3. 좌우 벙커를 감안해 그린 왼쪽을 노리는 것이 유리 · 해저드: 그린 좌우 벙커 · 그린: 비교적 평탄, 좌측으로 기울어 왼쪽에 올리면 오르막 퍼팅",
+    "nine": "Valley",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 195,
+     "blue": 171,
+     "white": 147,
+     "red": 118,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 137m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파4. 왼쪽 벙커를 못 넘길 경우 IP 우측 넓은 페어웨이로, 세컨드는 오버하지 않게 전면부 공략 · 해저드: 페어웨이 좌측 다수 벙커(IP 왼쪽 벙커 위협적); 그린 뒤·오른쪽이 황 꺼짐 · 그린: 경사가 심하고 가운데가 볼록",
+    "nine": "Valley",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 340,
+     "blue": 322,
+     "white": 295,
+     "red": 265,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 288m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 13,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "200야드까지 내리막 후 오르막 — 티샷 비거리가 관건. 서드샷은 숨은 벙커를 고려한 정확한 샷 · 해저드: 페어웨이 왼쪽 워터해저드·벙커; 높은 그린 주변 숨은 벙커, 그린 좌우·전면 벙커 · 그린: 비교적 넓고 완만, 좌우 뒤쪽이 낮아짐",
+    "nine": "Valley",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 475,
+     "blue": 449,
+     "white": 422,
+     "red": 402,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 413m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "비교적 긴 파4(핸디칩 1). 페어웨이가 좁아 보여 위축되기 쉬우며 세컨드는 정교한 롱아이언 필요 · 해저드: 마운드로 그린 안 보임; 그린 오른쪽 깊은 대형 벙커(세컨드 지점에서 안 보임) · 그린: 뒤쪽 내리막, 착시가 많은 라이",
+    "nine": "Valley",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 397,
+     "blue": 372,
+     "white": 350,
+     "red": 292,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 319m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 15,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "까다로운 파5. 티샷은 벙커 오른쪽, 세컨드는 그린 앞 해저드까지 정확한 거리 파악 후 공략 · 해저드: 페어웨이를 두 번 가로지르는 래터럴 워터해저드; 왼쪽 해저드·대형 벙커; 그린 앞 해저드(세컨드 지점에서 안 보임) · 그린: 넓고 완만하나 뒤 양쪽이 움푹 꺼짐",
+    "nine": "Valley",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 565,
+     "blue": 553,
+     "white": 535,
+     "red": 443,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 500m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧지만 오르막이 심하고 티가 우측을 향함. 세컨드는 왼쪽 벙커를 피해 우측 위주의 정확한 아이언 · 해저드: 그린 왼쪽 앞 높이 약 2m의 깊은 벙커; 그린 뒤 급경사 · 그린: 가운데 오른쪽이 높고 뒤쪽이 낮아 전면부 공략 유리",
+    "nine": "Valley",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 356,
+     "blue": 344,
+     "white": 325,
+     "red": 246,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 292m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "맞바람을 감안해 그린을 살짝 넘긴다는 느낌으로, 좌측 벙커를 피해 우측 공략도 무난 · 해저드: 좌측 긴 벙커; 맞바람 지역 · 그린: 가운데 볼록한 능선 기준 앞은 평탄, 뒤는 낮아짐",
+    "nine": "Valley",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 185,
+     "blue": 161,
+     "white": 142,
+     "red": 91,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 119m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓고 완만한 오르막 파4. 오른쪽 벙커를 염두에 둔 티샷, 어프로치는 양쪽 벙커·단 주의 · 해저드: 오른쪽 페어웨이 벙커; 그린 양쪽 벙커 · 그린: 뒤쪽이 높은 2단 그린, 지형 변화 심함",
+    "nine": "Valley",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 361,
+     "blue": 344,
+     "white": 322,
+     "red": 270,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 313m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷은 페어웨이 중앙으로만 보내면 무난. 그린 좌측 벙커 주의 · 해저드: 장타 시 왼쪽 페어웨이 벙커; 그린 왼쪽 깊은 벙커 · 그린: 대체로 완만한 오르막이나 오른쪽이 낮고 지형 변화 있음",
+    "nine": "Hills",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 371,
+     "blue": 344,
+     "white": 316,
+     "red": 281,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 307m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 20,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "완만하게 내려가는 넓은 파5. 세컨드는 페어웨이 오른쪽, 서드는 내리막 샷으로 그린 오른쪽 공략 · 해저드: 세컨드 IP 왼쪽 벙커; 그린 왼쪽 벙커, 그린 뒤 내리막 · 그린: 비교적 평탄하나 뒤쪽이 낮아짐",
+    "nine": "Hills",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 528,
+     "blue": 503,
+     "white": 449,
+     "red": 417,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 434m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 21,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파3. 정교한 아이언으로 그린 왼쪽을 노리는 것이 유리 · 해저드: 그린 앞 워터해저드·갈대, 좌측 언덕 억새 · 그린: 왼쪽 평탄, 오른쪽은 미세한 굴곡이 심함",
+    "nine": "Hills",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 202,
+     "blue": 182,
+     "white": 162,
+     "red": 114,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 137m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 22,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "무리하지 않는 티샷과 정확한 세컨드가 필요 · 해저드: 티에서 잘 안 보이는 벙커·연못이 페어웨이 양쪽에 대규모로 배치; 그린 양쪽 벙커 · 그린: 지형 변화는 단조롭지만 오른쪽이 낮아짐; 급한 오르막 어프로치",
+    "nine": "Hills",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 353,
+     "blue": 332,
+     "white": 309,
+     "red": 278,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 289m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 23,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "긴 좌 도그렉 파4(핸디칩 1). 오른쪽으로 피하면 세컨드가 길어지므로 과감히 중앙 공략 · 해저드: 페어웨이 양쪽 벙커, 중앙에 계류; 그린 우측 연못·벙커 · 그린: 넓으나 가운데 볼록한 능선 기준 앞뒤가 낮아짐",
+    "nine": "Hills",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 412,
+     "blue": 389,
+     "white": 365,
+     "red": 320,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 351m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 24,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 오르막 우 도그렉 파5. 티샷 거리를 확보해야 그린 위치 파악이 쉬움 · 해저드: 언덕 위 그린이 보이지 않음; 그린 주변 벙커 · 그린: 가운데 부분 지형 변화 주의",
+    "nine": "Hills",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 495,
+     "blue": 486,
+     "white": 471,
+     "red": 401,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 448m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 25,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 내리막 파4. 티샷은 중앙, 내리막 라이에서의 세컨드는 전면부 공략 · 해저드: 사이드 벙커; 그린 양옆 벙커, 그린 뒤 급경사 내리막 · 그린: 비교적 평탄하나 오른쪽 가운데가 높고 왼쪽·뒤쪽이 낮음",
+    "nine": "Hills",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 325,
+     "blue": 307,
+     "white": 271,
+     "red": 245,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 268m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 26,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "경관이 아름다운 파3. 좌측 해저드를 피하고 오른쪽 급경사 퍼팅 주의 · 해저드: 그린 좌측 암벽과 해저드, 그린 뒤 대나무 · 그린: 왼쪽은 완만, 오른쪽은 급경사",
+    "nine": "Hills",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 170,
+     "blue": 143,
+     "white": 122,
+     "red": 94,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 112m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 27,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "벙커 위치를 고려한 전략적 티샷, 어프로치는 우측 벙커 주의 · 해저드: IP 중앙 벙커(장타자는 넘겨야 함), IP 오른쪽 앞 벙커; 그린 오른쪽 깊은 벙커 · 그린: 중앙을 기준으로 전후 양분, 뒤쪽이 낮음",
+    "nine": "Hills",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 386,
+     "blue": 367,
+     "white": 353,
+     "red": 325,
+     "teeNames": "BLACK/BLUE/WHITE/RED (GOLD 325m 별도)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 27,
+   "memberHoles": 27,
+   "publicHoles": null,
+   "homepage": "https://gj.kangdongcnl.com/",
+   "openedYear": 2006,
+   "layout": "회원제 27홀: Lake 9홀 + Valley 9홀 + Hills 9홀 (각 파36)",
+   "par18": null,
+   "lengthYards": null,
+   "fairwayGrass": "중지(F/W·러프), 티잉그라운드 켄터키 블루그래스",
+   "greenGrass": "벤트그라스 Dominant(도미넌트)",
+   "architect": "임상하(임 골프) (시공 태영건설)",
+   "fees": {
+    "weekday": "비회원 240,000원 (세금 포함; 정회원 45,000 / 준회원 주중 1·3부 85,000·2부 95,000; 스마트예약 이벤트 요금 별도)",
+    "weekend": "비회원 270,000원 (주말·공휴일, 세금 포함; 준회원 110,000 / 정회원 45,000; 3부는 금요일·휴일 전날 주말요금)",
+    "cart": "1대(4인) 100,000원 (5인 라운드 시 2대 200,000원; 프리미엄 리무진 카트 200,000원 준비중)",
+    "caddie": "4백 1캐디 기준 A등급 150,000원 / S등급 180,000원 (9홀 추가 80,000/90,000원); 셀프라운드(노캐디) 가능; No Tip 제도"
+   },
+   "reservation": "스마트예약(홈페이지 market.kangdongcnl.com), 예약문의 1588-0776 / FAX 054-778-9685; 회원 주말은 배정신청제, 준회원 주중 2주 전 실시간, 3부 3주 전 실시간",
+   "difficulty": "코스레이팅/슬로프(BLACK): Lake+Valley 74.0/130, Valley+Hills 73.9/133, Hills+ 73.9/131 (BLUE 71.9~72.1, RED 70.4~71.0)",
+   "features": "토함산과 보문호 사이의 산악형 27홀; 총면적 1,388,429.75㎡(42만평); 모래 주문진 규사; Lake 6번 아일랜드 파3, Valley 1번 보문호 조망 스타홀, Hills 8번 암벽·대나무 파3; 티 5종(BLACK/BLUE/WHITE/GOLD/RED); 3부 야간 라운드 운영",
+   "facilities": "클럽하우스, 레스토랑, 티하우스, 프로샵, 연회장, 락커·사우나; 강동 리조트 내 콘도·워터파크·웨딩컨벤션; 클럽 대여(클리브랜드 세트 70,000원/낱개 10,000원)"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://gj.kangdongcnl.com/content/02course/01_01.jsp / https://gj.kangdongcnl.com/content/02course/05_01.jsp / https://gj.kangdongcnl.com/content/02course/02_01.jsp / https://gj.kangdongcnl.com/content/02course/03_01.jsp / https://gj.kangdongcnl.com/content/02course/04_01.jsp / https://gj.kangdongcnl.com/content/03use/03_01.jsp / https://gj.kangdongcnl.com/content/03use/02_01.jsp",
+    "note": "KGBA id 10 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 10,
+   "name": "강동 디아너스",
+   "nines": [
+    "Lake",
+    "Valley",
+    "Hills"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "Lake",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "Valley",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "Hills",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   }
+  ],
+  "center": {
+   "lat": 35.823265,
+   "lon": 129.296239,
+   "precision": "address"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.865Z"
+ }
+}

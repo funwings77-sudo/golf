@@ -1,0 +1,871 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-2",
+  "name": "88",
+  "region": "경기 용인시",
+  "address": "경기 용인시 기흥구 석성로521번길 169 (청덕동, 88컨트리클럽)",
+  "phone": "(031)287-8811",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "무궁화홀. 슬라이스 주의, 좌우 그린 사이 방향표시목 겨냥. 세컨드는 벙커 고려 1클럽 길게 · 해저드: 그린 앞 벙커 · 그린: 투그린(좌·우), 약간 경사",
+    "nine": "서코스",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 387,
+     "blue": 387,
+     "white": 358,
+     "red": null,
+     "teeNames": "챔피언 387/레구러 358. 티표석: 우그린 R387m(423yd), 좌그린 L388m(424yd). 레이디 홈페이지 미제공",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "벗나무홀. 넓은 페어웨이, 방향표시목 겨냥. 세컨드는 1클럽 짧게 런으로 온그린도 방법 · 해저드: 티잉그라운드가 우측을 향함 · 그린: 투그린, 평탄",
+    "nine": "서코스",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 383,
+     "blue": 383,
+     "white": 347,
+     "red": null,
+     "teeNames": "챔피언 383/레구러 347. 티표석: R383m(419yd), L377m(412yd)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 3,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "목련홀. 내리막 숏홀, 실제보다 짧아 보임. 1클럽 길게 높이 띄워 런 없이 · 해저드: 우측·그린 뒤 OB, 중앙 워터해저드, 좌우 그린 앞뒤 벙커 · 그린: 투그린, 경사 심한 편",
+    "nine": "서코스",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 177,
+     "blue": 177,
+     "white": 151,
+     "red": null,
+     "teeNames": "챔피언 177/레구러 151. 티표석: R177m(194yd), L185m(202yd)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 4,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "조팝나무홀. 36홀 중 최장 롱홀. 티샷 우측 벙커 좌단, 세컨드는 벙커 앞에 끊어 3온 · 해저드: 36홀 중 벙커 최다, 우측 벙커 · 그린: 투그린, 경사 있음",
+    "nine": "서코스",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 552,
+     "blue": 552,
+     "white": 551,
+     "red": null,
+     "teeNames": "챔피언 552/레구러 551. 티표석: R536m(586yd), L536m(586yd)",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "진달래홀. 티샷 좌측 벙커 우단. 오르막 세컨드 1클럽 길게, 핀 앞쪽에 온 · 해저드: 좌측 벙커 · 그린: 투그린, 앞쪽으로 경사 심함",
+    "nine": "서코스",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 376,
+     "blue": 376,
+     "white": 350,
+     "red": null,
+     "teeNames": "챔피언 376/레구러 350. 티표석: R330m(361yd), L322m(352yd) (공략도와 차이)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 6,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "장미홀. 짧은 미들홀로 투온 용이. 숏아이언으로 높이 띄워 공략 · 해저드: 좌측 OB, 좌측 벙커 2개, 좌그린 앞·뒤 및 그린 사이 벙커 · 그린: 투그린, 비교적 평탄",
+    "nine": "서코스",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 310,
+     "blue": 310,
+     "white": 290,
+     "red": null,
+     "teeNames": "챔피언 310/레구러 290. 티표석: R310m(339yd), L318m(348yd)",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 7,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "단풍홀. 불규칙한 맞바람 고려 클럽 길게 · 해저드: 좌그린 바로 앞 벙커(티에서 잘 안 보임) · 그린: 투그린",
+    "nine": "서코스",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 156,
+     "blue": 156,
+     "white": 142,
+     "red": null,
+     "teeNames": "챔피언 156/레구러 142. 티표석: R156m(171yd), L153m(167yd)",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 8,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "실란홀. 티에서 그린이 안 보이는 가장 짧은 롱홀 · 해저드: 좌측·그린 뒤 OB, 낙구지점 좌측 숨은 그라스벙커, 전방·그린 좌우·그린 사이 벙커 · 그린: 투그린",
+    "nine": "서코스",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 445,
+     "blue": 445,
+     "white": 412,
+     "red": null,
+     "teeNames": "챔피언 445/레구러 412. 티표석: R445m(486yd), L455m(498yd)",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "명자홀(핸디캡1). 티가 우측 향함. 좌측 벙커 우단 겨냥, 세컨드 짧게 끊어 3온이 안전 · 해저드: 좌측 벙커, 그린 앞 벙커 · 그린: 투그린, 경사 심한 편",
+    "nine": "서코스",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 389,
+     "blue": 389,
+     "white": 356,
+     "red": null,
+     "teeNames": "챔피언 389/레구러 356(공략도 표기). 티표석: R356m(389yd), L353m(385yd) — 챔피언 389는 yd 값과 동일(표기 혼선 가능)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 10,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "모란홀(인코스 첫 홀). 평탄한 명홀. 티샷 우측 벙커 방향, 세컨드 좌그린 앞 벙커 방향으로 3온 · 해저드: 좌측 OB, 좌측·좌우 그린 앞 벙커 각 2개 · 그린: 투그린, 평탄",
+    "nine": "서코스",
+    "nineHole": 10,
+    "scorecard": {
+     "unit": "m",
+     "back": 508,
+     "blue": 508,
+     "white": 479,
+     "red": null,
+     "teeNames": "챔피언 508/레구러 479. 티표석: R508m(556yd), L499m(546yd)",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "모감주홀. 좌측 법면 하단 겨냥하면 런으로 평탄한 곳까지. 세컨드는 뛰워서 오버 느낌으로, 버디 기회 · 해저드: 티가 우측을 향함(슬라이스 주의), 그린 주변 벙커 · 그린: 투그린",
+    "nine": "서코스",
+    "nineHole": 11,
+    "scorecard": {
+     "unit": "m",
+     "back": 397,
+     "blue": 397,
+     "white": 360,
+     "red": null,
+     "teeNames": "챔피언 397/레구러 360. 티표석: R397m(434yd), L387m(423yd)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "때죽홀. 우측 법면 하단 방향표시목 겨냥, 세컨드는 그린 사이 표시목 방향 · 해저드: 좌측 벙커 · 그린: 투그린, 평탄",
+    "nine": "서코스",
+    "nineHole": 12,
+    "scorecard": {
+     "unit": "m",
+     "back": 335,
+     "blue": 335,
+     "white": 310,
+     "red": null,
+     "teeNames": "챔피언 335/레구러 310. 티표석: R335m(366yd), L333m(364yd)",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 13,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "양매자홀. 평탄한 숏홀, 양 그린 사이로 높이 띄우기 · 해저드: 좌측·그린 뒤 OB, 좌측 및 그린 주변 벙커 다수 · 그린: 투그린, 비교적 평탄",
+    "nine": "서코스",
+    "nineHole": 13,
+    "scorecard": {
+     "unit": "m",
+     "back": 160,
+     "blue": 160,
+     "white": 141,
+     "red": null,
+     "teeNames": "챔피언 160/레구러 141. 티표석: R160m(175yd), L155m(169yd)",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "매화홀. 급경사 스카이홀, 훅 주의. 우측 벙커 좌단 겨냥 런 활용, 내리막 라이에서는 로프트 큰 클럽 · 해저드: 우측 벙커, 그린 앞 벙커 · 그린: 투그린, 다소 경사",
+    "nine": "서코스",
+    "nineHole": 14,
+    "scorecard": {
+     "unit": "m",
+     "back": 388,
+     "blue": 388,
+     "white": 353,
+     "red": null,
+     "teeNames": "챔피언 388/레구러 353. 티표석: R388m(424yd), L385m(421yd)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 15,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "꽃아그배홀. 숏홀 중 최장 내리막. 1클럽 길게, 양 그린 중간 겨냥 · 해저드: 우측·그린 뒤 OB, 중간 연못, 그린 주변 벙커 · 그린: 투그린",
+    "nine": "서코스",
+    "nineHole": 15,
+    "scorecard": {
+     "unit": "m",
+     "back": 211,
+     "blue": 211,
+     "white": 179,
+     "red": null,
+     "teeNames": "챔피언 211/레구러 179. 티표석: R211m(231yd), L210m(230yd)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "앵두홀(핸디캡2). 좌측 150m 표시목 방향 티샷, 오르막 감안 클럽 길게. 보기 작전 권장 · 해저드: 티 앞 워터해저드, 우측 벙커 3개, 두 그린 앞 벙커 · 그린: 투그린, 경사 심함",
+    "nine": "서코스",
+    "nineHole": 16,
+    "scorecard": {
+     "unit": "m",
+     "back": 402,
+     "blue": 402,
+     "white": 366,
+     "red": null,
+     "teeNames": "챔피언 402/레구러 366. 티표석: R366m(400yd), L365m(399yd)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 17,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "대추나무홀. 짧은 오르막 미들홀, 페어웨이 중앙 방향목 겨냥, 핀 직접 공략 · 해저드: 벙커 없음(서코스 2개 홀 중 하나), 좌측·그린 뒤 OB · 그린: 투그린, 다소 경사",
+    "nine": "서코스",
+    "nineHole": 17,
+    "scorecard": {
+     "unit": "m",
+     "back": 322,
+     "blue": 322,
+     "white": 299,
+     "red": null,
+     "teeNames": "챔피언 322/레구러 299. 티표석: R322m(352yd), L328m(359yd)",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 18,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "자산홍홀. 좌측 법면 하단 겨냥(내리막 런), 세컨드도 좌측, 서드는 그린 중심 · 해저드: 오른쪽 낭떠러지(OB) · 그린: 투그린, 약간 높고 경사 심함",
+    "nine": "서코스",
+    "nineHole": 18,
+    "scorecard": {
+     "unit": "m",
+     "back": 529,
+     "blue": 529,
+     "white": 479,
+     "red": null,
+     "teeNames": "챔피언 529/레구러 479. 티표석: R479m(524yd), L476m(521yd)",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "라일락홀. 우측 벙커 좌단 겨냥, 좌OB 의식한 슬라이스 주의. 핀 앞쪽에 온 · 해저드: 좌측 OB, 우측 벙커 · 그린: 투그린, 약간 높고 넓음, 앞쪽 경사 심함",
+    "nine": "동코스",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 396,
+     "blue": 396,
+     "white": 360,
+     "red": null,
+     "teeNames": "챔피언 396/레구러 360. 티표석: R396m(433yd), L389m(425yd)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "개나리홀. 동코스 최단 미들홀, 파·버디 기회. 오르막 세컨드 1클럽 길게 · 해저드: 좌측 OB, 좌측 벙커 1개, 그린 근처 벙커 2개 · 그린: 투그린, 평탄",
+    "nine": "동코스",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 334,
+     "blue": 334,
+     "white": 302,
+     "red": null,
+     "teeNames": "챔피언 334/레구러 302. 티표석: R334m(365yd), L331m(362yd)",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 21,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "살구나무홀. 좌측 벙커 우단 겨냥, 세컨드는 라이 상태 보고 스푼 활용 · 해저드: 티가 우측을 향함, 좌측 벙커 · 그린: 투그린",
+    "nine": "동코스",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 510,
+     "blue": 510,
+     "white": 459,
+     "red": null,
+     "teeNames": "챔피언 510/레구러 459. 티표석: R510m(558yd), L506m(553yd)",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 22,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "생강홀. 벙커 의식 말고 1클럽 길게 · 해저드: 좌측 OB, 그린 좌우 앞쪽·그린 사이 벙커 · 그린: 투그린, 무난",
+    "nine": "동코스",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 195,
+     "blue": 195,
+     "white": 162,
+     "red": null,
+     "teeNames": "챔피언 195/레구러 162. 티표석: R195m(213yd), L190m(208yd)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 23,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "자귀홀(핸디캡1). 400m 넘는 최장 미들홀. 무리하지 말고 약간 우측으로 안전하게 · 해저드: 좌측 OB, 티 앞 골짜기, 좌측 전방 벙커 열 · 그린: 투그린, 평탄",
+    "nine": "동코스",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 422,
+     "blue": 422,
+     "white": 384,
+     "red": null,
+     "teeNames": "챔피언 422/레구러 384. 티표석: R422m(462yd), L413m(452yd)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 24,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "모과홀. 내리막 숏홀, 항상 맞바람. 1클럽 길게 안전하게 · 해저드: 좌측·그린 뒤 OB, 그린 좌우 앞·그린 사이·뒤편 벙커 · 그린: 투그린",
+    "nine": "동코스",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 166,
+     "blue": 166,
+     "white": 143,
+     "red": null,
+     "teeNames": "챔피언 166/레구러 143. 티표석: R166m(182yd), L168m(184yd)",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 25,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "철쭉홀. 우측으로 심하게 휘어진 도그렉. 우측 2번째 벙커 왼쪽(좌측 100m 표시목) 겨냥 · 해저드: 우측 벙커 다수 · 그린: 투그린, 3단 그린 경사 심함",
+    "nine": "동코스",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 356,
+     "blue": 356,
+     "white": 324,
+     "red": null,
+     "teeNames": "챔피언 356/레구러 324. 티표석: R356m(389yd), L360m(394yd)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 26,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "산수유홀. 좌로 휘어 그린 안 보이는 짧은 롱홀. 좌측 법면 하단 겨냥, 버디 가능 · 해저드: 낙구점 우측·그린 좌우 앞 벙커 · 그린: 투그린",
+    "nine": "동코스",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 494,
+     "blue": 494,
+     "white": 409,
+     "red": null,
+     "teeNames": "챔피언 494/레구러 409. 티표석: R494m(540yd), L509m(557yd)",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 27,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "황매화홀(아웃 마감). 서서히 오르막. 우측 벙커 좌단 겨냥, 세컨드 1클럽 길게 · 해저드: 우측 벙커 · 그린: 투그린, 약간 높고 앞쪽 경사 심함",
+    "nine": "동코스",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 382,
+     "blue": 382,
+     "white": 348,
+     "red": null,
+     "teeNames": "챔피언 382/레구러 348. 티표석: R382m(418yd), L381m(417yd)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 28,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "부용홀. 좌측 산허리 따라 휘어짐. 좌측 법면 하단 겨냥, 세컨드는 롱아이언·우드로 안전하게 · 해저드: 좌측 산·우측 도로 OB, 우측 벙커 열, 좌그린 앞 벙커 · 그린: 투그린",
+    "nine": "동코스",
+    "nineHole": 10,
+    "scorecard": {
+     "unit": "m",
+     "back": 478,
+     "blue": 478,
+     "white": 444,
+     "red": null,
+     "teeNames": "챔피언 478/레구러 444. 티표석: R478m(523yd), L479m(524yd)",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 29,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "회화홀. 전체 내리막. 좌측 법면 하단 겨냥 런 활용, 숏아이언 온그린 · 해저드: 우측 OB, 낙구점 벙커, 티가 오른쪽 향함 · 그린: 투그린, 경사 있음",
+    "nine": "동코스",
+    "nineHole": 11,
+    "scorecard": {
+     "unit": "m",
+     "back": 388,
+     "blue": 388,
+     "white": 360,
+     "red": null,
+     "teeNames": "챔피언 388/레구러 360. 티표석: R388m(424yd), L377m(412yd)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 30,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "불두화홀. 동코스 최단 숏홀, 미들아이언으로 띄워 안정적으로 · 해저드: 좌측·그린 뒤 OB, 좌우 그린 앞 벙커 · 그린: 투그린, 평탄(티보다 낮음)",
+    "nine": "동코스",
+    "nineHole": 12,
+    "scorecard": {
+     "unit": "m",
+     "back": 142,
+     "blue": 142,
+     "white": 125,
+     "red": null,
+     "teeNames": "챔피언 142/레구러 125. 티표석: R142m(155yd), L141m(154yd)",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 31,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "산딸나무홀. 페어웨이 중앙 좌측 소나무 겨냥. 다운힐 라이 많아 스탠스 넓게 · 해저드: 좌측 OB, 우전방 연못, 그린 좌우 앞 벙커 · 그린: 투그린",
+    "nine": "동코스",
+    "nineHole": 13,
+    "scorecard": {
+     "unit": "m",
+     "back": 363,
+     "blue": 363,
+     "white": 327,
+     "red": null,
+     "teeNames": "챔피언 363/레구러 327. 티표석: R363m(397yd), L362m(396yd)",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 32,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "챔레홀(핸디캡2). 좌측 법면 하단 150m 표시목 겨냥 · 해저드: 워터해저드, 우측 벙커 · 그린: 투그린, 경사 심함",
+    "nine": "동코스",
+    "nineHole": 14,
+    "scorecard": {
+     "unit": "m",
+     "back": 411,
+     "blue": 411,
+     "white": 369,
+     "red": null,
+     "teeNames": "챔피언 411/레구러 369. 티표석: R369m(404yd), L375m(410yd)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 33,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "감나무홀. 티가 16번홀 방향. 좌측 벙커 우단 겨냥, 세컨드 길게 · 해저드: 좌측 벙커, 티 앞 연못(공략도), 그린 주변 숨은 벙커 · 그린: 투그린, 오르막으로 그린 안 보임",
+    "nine": "동코스",
+    "nineHole": 15,
+    "scorecard": {
+     "unit": "m",
+     "back": 362,
+     "blue": 362,
+     "white": 332,
+     "red": null,
+     "teeNames": "챔피언 362/레구러 332. 티표석: R332m(363yd), L332m(363yd)",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 34,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "꽃복숭아홀. 동코스 최장홀, 평탄·오르막·내리막 공존. 세컨드 우측 100m 표시목 방향 · 해저드: 우측 벙커, 그린 인접 벙커 · 그린: 투그린",
+    "nine": "동코스",
+    "nineHole": 16,
+    "scorecard": {
+     "unit": "m",
+     "back": 535,
+     "blue": 535,
+     "white": 491,
+     "red": null,
+     "teeNames": "챔피언 535/레구러 491. 티표석: R535m(585yd), L544m(595yd)",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 35,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "보리수홀. 맞바람 심함, 1클럽 길게 로우볼 · 해저드: 티 우전방 워터해저드, 좌우 그린 앞 벙커 · 그린: 투그린, 평탄",
+    "nine": "동코스",
+    "nineHole": 17,
+    "scorecard": {
+     "unit": "m",
+     "back": 176,
+     "blue": 176,
+     "white": 149,
+     "red": null,
+     "teeNames": "챔피언 176/레구러 149. 티표석: R176m(192yd), L171m(187yd)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 36,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "꽃사과홀(마지막). 티가 9홀 쪽을 향함, 우측 벙커 좌단 겨냥 · 해저드: 우측 워터해저드, 중앙·그린 좌우 앞·그린 사이 벙커 · 그린: 투그린, 경사 아주 심함",
+    "nine": "동코스",
+    "nineHole": 18,
+    "scorecard": {
+     "unit": "m",
+     "back": 374,
+     "blue": 374,
+     "white": 345,
+     "red": null,
+     "teeNames": "챔피언 374/레구러 345. 티표석: R374m(409yd), L378m(413yd)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 36,
+   "memberHoles": 36,
+   "publicHoles": null,
+   "homepage": "https://www.88countryclub.co.kr/",
+   "openedYear": 1988,
+   "layout": "동코스 18홀(파72, 챔피언 6,484m) + 서코스 18홀(파72, 챔피언 6,227m)",
+   "par18": 72,
+   "lengthYards": 7091,
+   "fairwayGrass": "",
+   "greenGrass": "",
+   "architect": "",
+   "fees": {
+    "weekday": "비회원 210,000원 (정회원 68,000 / 가족회원 95,000, 세금포함)",
+    "weekend": "비회원 260,000원 (정회원 73,000 / 가족회원 260,000, 공휴일·근로자의날 포함)",
+    "cart": "100,000원(18홀) / 50,000원(9홀)",
+    "caddie": "150,000원(18홀)"
+   },
+   "reservation": "평일: 2주 전 09시부터 인터넷·모바일·전화(1577-8871, 031-287-8817~8). 주말·공휴일: 월별 일정표의 접수일 3일간 인터넷·모바일 접수 후 점수제 전산 배정(회원 명의). 회원의 날(2·4주 일요일 등) 별도. 2인·5인 플레이 불가",
+   "difficulty": "",
+   "features": "국가보훈부 소속(보훈기금 증식 목적) 회원제 36홀. 1984 건설계획 재가, 1986 기공, 1987 88관광개발 설립, 1988.7.8 개장. 서코스=여성적·세밀한 주의력(로라 데이비스도 감탄), 동코스=남성적·광활한 산악지형 전략 코스. 36홀 각각 다른 꽃나무로 장식(홀 이름=꽃나무, '88사계코스'), 전 홀에 레이크·벙커 전략 배치. 전 홀 투그린(좌/우 그린별 티표석 거리 상이). 티: 챔피언/레구러(레이디 미제공). 원표기 m(동 6,484m→약 7,091yd, 서 6,227m→약 6,810yd). 별도 연습장·PAR3 운영. 잔디·설계자·난이도 홈페이지 미제공",
+   "facilities": "클럽하우스(연면적 1,829평, 지하1·지상2층): 로비라운지, 프론트, 프로샵(용품샵), 휴게실, 남·여 락카룸(여성 욕실 코스조망), 대식당(300석), 대·소 연회실, 그늘집. 실외 연습장(031-899-8811), PAR3. 대여: 골프화 5,000·골프채 30,000·퍼터 5,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.88countryclub.co.kr/Course/CourseInfo.aspx / https://www.88countryclub.co.kr/Course/cb_01.aspx~cb_18.aspx / https://www.88countryclub.co.kr/Course/ca_01.aspx~ca_18.aspx / https://www.88countryclub.co.kr/About/History.aspx / https://www.88countryclub.co.kr/About/ClubInfo.aspx / https://www.88countryclub.co.kr/Guide/Fees.aspx / https://www.88countryclub.co.kr/Guide/ReserveGuide.aspx / https://www.88countryclub.co.kr/Course/Facility.aspx",
+    "note": "KGBA id 2 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 2,
+   "name": "88",
+   "nines": [
+    "서코스",
+    "동코스"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "서코스",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "동코스",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36
+    ]
+   }
+  ],
+  "center": {
+   "lat": 37.240574,
+   "lon": 127.178557,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.840Z"
+ }
+}

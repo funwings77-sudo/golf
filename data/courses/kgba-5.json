@@ -1,0 +1,652 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-5",
+  "name": "SG아름다운",
+  "region": "충남 아산시",
+  "address": "충남 아산시 영인면 영인산로 440 (신현리, 아름다운골프장)",
+  "phone": "(041)536-8132",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "아산만 조망 내리막 스타트 홀(우로 약간 휘음). 티샷 페어웨이 우측(페이드), 세컨드 드로우가 이상적 · 해저드: 좌측 페어웨이 벙커(세이빙), 우측 수직 암법면 · 그린: 그린 우측 넓은 Bail-out Area",
+    "nine": "HILL",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 414,
+     "blue": 391,
+     "white": 366,
+     "red": 307,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 344",
+     "note": ""
+    }
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "자연림 계곡 사이 내리막 좌도그렉. 드로우 티샷으로 페어웨이 좌측, 세컨드는 페이드로 좌측 겨냥 · 해저드: 우측 세이빙 벙커, 그린 사이드 가드 벙커(그린 50% 차단)",
+    "nine": "HILL",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 404,
+     "blue": 384,
+     "white": 356,
+     "red": 296,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 326",
+     "note": ""
+    }
+   },
+   {
+    "n": 3,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "계곡 사이 숨은 그린, 드로우 티샷 베스트 · 해저드: 그린 우측 벙커(타깃용), 좌측 벙커(가드) · 그린: 그린 10시 방향, 자연수림 배경",
+    "nine": "HILL",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 180,
+     "blue": 159,
+     "white": 141,
+     "red": 103,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 122",
+     "note": ""
+    }
+   },
+   {
+    "n": 4,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 우도그렉, 그린 미시인. 좌측 벙커 우측으로 티샷, 세컨드는 그린 우측 겨냥 · 해저드: IP 지나 연못, 좌측 벙커, 그린 좌측 벙커·해저드 · 그린: 그린 11시 방향",
+    "nine": "HILL",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 400,
+     "blue": 378,
+     "white": 356,
+     "red": 302,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 336",
+     "note": ""
+    }
+   },
+   {
+    "n": 5,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "연못 넘는 오르막 파5. 우측 벙커 목표 드로우 티샷, 2IP 좌측이 세컨드 베스트, 장타자 투온 어려움 · 해저드: 티 앞 연못, IP 뒤 Bracket 벙커, 그린 우측 벙커·뒤 연못",
+    "nine": "HILL",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 490,
+     "blue": 459,
+     "white": 435,
+     "red": 389,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 412",
+     "note": ""
+    }
+   },
+   {
+    "n": 6,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "계곡 속 Par3, 페이드 티샷 베스트, 롱아이언 테스트 홀 · 해저드: 티 앞 연못 · 그린: 그린 좌측 Bail-out Area, 그린 뒤 좌측 Concave 타깃",
+    "nine": "HILL",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 195,
+     "blue": 181,
+     "white": 169,
+     "red": 119,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 141",
+     "note": ""
+    }
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "자작나무 홀. 티샷은 페어웨이 우측이 베스트, 과감한 세컨드 샷 필요 · 해저드: 페어웨이 우측 OB, 그린 우측 연못, 그린 Bracket 해저드 · 그린: Sky Green(높은 그린), 11시 방향",
+    "nine": "HILL",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 376,
+     "blue": 361,
+     "white": 335,
+     "red": 260,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 300",
+     "note": ""
+    }
+   },
+   {
+    "n": 8,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "능선 끝 좌도그렉 전략 파5. IP 우측 벙커 목표 드로우, 비거리따라 세컨드 지점 선택(우측 페어웨이 베스트) · 해저드: IP 우측 벙커, 2IP Split Fairway, 그린 우측 벙커 · 그린: 그린 12시 방향",
+    "nine": "HILL",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 484,
+     "blue": 460,
+     "white": 431,
+     "red": 373,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 405",
+     "note": ""
+    }
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "충분한 거리. 세컨드는 그린 좌측 벙커 겨냥 페이드, 보기 플레이어는 레이업 3온 · 해저드: 좌측 벙커(타깃), 우측 벙커(세이빙), 그린 좌측 벙커 · 그린: 그린 1시 방향, 소나무가 감싼 그린, 전방 Bail-out Area",
+    "nine": "HILL",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 410,
+     "blue": 387,
+     "white": 359,
+     "red": 305,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 333",
+     "note": ""
+    }
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "Easy Start Hole. 전체 내리막·넓은 페어웨이, 티샷 좌측이 베스트, 세컨드는 그린 좌측 벙커 회피 · 해저드: 그린 좌측 벙커",
+    "nine": "LAKE",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 385,
+     "blue": 371,
+     "white": 350,
+     "red": 304,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 326",
+     "note": ""
+    }
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약간 내리막. Waste Area 인접 페어웨이 우측이 티샷 베스트, 핀 위치따라 공략 달리함 · 해저드: 우측 Waste Area · 그린: 그린 10시 방향으로 휘어짐",
+    "nine": "LAKE",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 382,
+     "blue": 356,
+     "white": 329,
+     "red": 278,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 302",
+     "note": ""
+    }
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌측 연못 캐리한 지점이 티샷 베스트, 거리·방향 정확한 세컨드 · 해저드: 좌측 연못~그린까지 Creek(워터해저드), 우측 벙커(슬라이스 방지), 그린 우측 벙커·좌측 연못 · 그린: 그린 12시 방향",
+    "nine": "LAKE",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 375,
+     "blue": 347,
+     "white": 326,
+     "red": 278,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 302",
+     "note": ""
+    }
+   },
+   {
+    "n": 13,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우도그렉 오르막 파5. 티샷 1IP 좌측, 2IP 벙커 피해 세컨드, 서드 어프로치 정확성 · 해저드: 좌측 폭포형 Creek, 우측 소나무 숲, 2IP 좌우 벙커 · 그린: 오르막으로 그린 블라인드",
+    "nine": "LAKE",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 468,
+     "blue": 442,
+     "white": 411,
+     "red": 329,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 372",
+     "note": ""
+    }
+   },
+   {
+    "n": 14,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "All & Nothing Hole. 스트레이트 볼로 온그린이 유일한 해법, 티하우스 조망 · 해저드: 그린 주위 벙커 다수",
+    "nine": "LAKE",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 206,
+     "blue": 188,
+     "white": 169,
+     "red": 119,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 139",
+     "note": ""
+    }
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "매우 긴 파4. 티샷 좌측, 페이드 세컨드(우드·롱아이언), 보기 플레이어는 좌측 레이업 후 어프로치 · 해저드: 홀 좌우 수림대 · 그린: 그린 좌측 Bail-out Area",
+    "nine": "LAKE",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 430,
+     "blue": 411,
+     "white": 389,
+     "red": 316,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 364",
+     "note": ""
+    }
+   },
+   {
+    "n": 16,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "Giant Par-3(최장 225m). 드로우 티샷, 보기 플레이어는 그린 우측 전방 낙하 후 어프로치 · 해저드: 그린 좌측 세이빙 벙커 · 그린: 소나무에 둘러싸인 숲속 그린",
+    "nine": "LAKE",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 225,
+     "blue": 198,
+     "white": 170,
+     "red": 116,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 140",
+     "note": ""
+    }
+   },
+   {
+    "n": 17,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막, 자작나무 병풍. 티샷 우측, 드로우 세컨드. 보기 플레이어도 파 가능 · 해저드: 그린 좌측 벙커 · 그린: 그린 10시 방향",
+    "nine": "LAKE",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 359,
+     "blue": 331,
+     "white": 299,
+     "red": 256,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 282",
+     "note": ""
+    }
+   },
+   {
+    "n": 18,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "최장 홀(528m). 우측 벙커 겨냥 드로우로 좌측 벙커 넘기기. 세컨드는 크로스벙커 넘김/2온/레이업 선택 · 해저드: 좌우 페어웨이 벙커, 2IP Cross Bunker, 그린 주위 벙커·연못",
+    "nine": "LAKE",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 528,
+     "blue": 495,
+     "white": 467,
+     "red": 413,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 440",
+     "note": ""
+    }
+   },
+   {
+    "n": 19,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "아산호 조망 첫 홀. 좌측 벙커 우측 페어웨이로 티샷 · 해저드: 좌측 페어웨이 벙커 · 그린: 능선 아래 마운드 사이 둥지형 그린",
+    "nine": "ROCK",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 371,
+     "blue": 354,
+     "white": 335,
+     "red": 270,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 322",
+     "note": ""
+    }
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 좌도그렉. 거리보다 랜딩존 방향성, 연못 가까이 보내야 훅라이 회피 · 해저드: 연못(홀이 감싼)",
+    "nine": "ROCK",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 354,
+     "blue": 342,
+     "white": 329,
+     "red": 274,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 318",
+     "note": ""
+    }
+   },
+   {
+    "n": 21,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "락코스 최장 오르막 파4(핸디캡 2). 좌측 벙커 넘기는 티샷, 롱아이언 방향성 · 해저드: 페어웨이 좌측 벙커 · 그린: 하늘에 맞닿은 듯한 그린",
+    "nine": "ROCK",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 392,
+     "blue": 363,
+     "white": 353,
+     "red": 320,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 330",
+     "note": ""
+    }
+   },
+   {
+    "n": 22,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "최고점 티(아산호·채석장 조망), 4~6번 시그니처 시작. 중앙 벙커 왼쪽 넘기면 투온 가능 · 해저드: 페어웨이 중앙 벙커, 그린 우측 크리크, 암벽",
+    "nine": "ROCK",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 515,
+     "blue": 500,
+     "white": 484,
+     "red": 432,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 459",
+     "note": ""
+    }
+   },
+   {
+    "n": 23,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "바위 계곡 내리막 파3(시그니처). 벙커 위치 주의 · 해저드: 바위 계곡, 크리크, 벙커 · 그린: 암벽과 대비되는 편안한 그린",
+    "nine": "ROCK",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 165,
+     "blue": 149,
+     "white": 137,
+     "red": 121,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 127",
+     "note": ""
+    }
+   },
+   {
+    "n": 24,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 시그니처(암벽·벚나무). 우측 밀리면 위험, 페어웨이 좌측으로 안전하게 · 해저드: 페어웨이 우측 넓은 연못·비치 벙커",
+    "nine": "ROCK",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 370,
+     "blue": 355,
+     "white": 335,
+     "red": 256,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 310",
+     "note": ""
+    }
+   },
+   {
+    "n": 25,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 우도그렉(핸디캡 1). 투온 무리 말고 페어웨이 좌측 안전 티샷 · 해저드: 세컨드 IP 까다로움, 바람 영향",
+    "nine": "ROCK",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 516,
+     "blue": 503,
+     "white": 455,
+     "red": 408,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 445",
+     "note": ""
+    }
+   },
+   {
+    "n": 26,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "바위 언덕 연결 내리막 파3. 미들아이언 정교함, 좌측 마운드 활용 티샷 · 해저드: 홀 감싼 우측 벙커 · 그린: 그린 왼쪽 마운드 활용",
+    "nine": "ROCK",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 178,
+     "blue": 168,
+     "white": 156,
+     "red": 121,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 145",
+     "note": ""
+    }
+   },
+   {
+    "n": 27,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "마지막 홀, 티샷 방향 중요, 정교한 샷메이킹. 클럽하우스·리조트 조망 · 해저드: 좌측 절벽(런 길면 굴러내림)",
+    "nine": "ROCK",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 367,
+     "blue": 354,
+     "white": 338,
+     "red": 275,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 328",
+     "note": ""
+    }
+   }
+  ],
+  "info": {
+   "operationType": "비회원제",
+   "totalHoles": 27,
+   "memberHoles": null,
+   "publicHoles": 27,
+   "homepage": "https://www.arumdaunresort.com/",
+   "openedYear": 2009,
+   "layout": "HILL 9홀(파36, 3,353m) + LAKE 9홀(파36, 3,358m) + ROCK 9홀(파36, 3,228m)",
+   "par18": 72,
+   "lengthYards": 7339,
+   "fairwayGrass": "중지(한국잔디)",
+   "greenGrass": "벤트그라스",
+   "architect": "",
+   "fees": {
+    "weekday": "시기·시간대별 변동제(VAT포함). 11/16~30 기준 월 140,000~170,000 / 화~목 150,000~187,000 / 금 160,000~197,000원 (12/7~31 주중 130,000~140,000)",
+    "weekend": "11/16~30 기준 토 259,000원, 일 230,000~240,000원 (12/7~31 토 180,000·일 170,000). 아산주민 1만원·사이버골드 1.5만원 할인",
+    "cart": "100,000원",
+    "caddie": "150,000원(18홀), 9홀 추가 90,000원"
+   },
+   "reservation": "홈페이지 실시간 인터넷예약(1일 1팀): 월~목은 4주 전 월요일 10시, 금~일은 4주 전 금요일 10시 오픈. 예약문의 1566-5855(평일 09:30~17:30). 골프+리조트 패키지 예약 가능, 리조트는 8주 전 오픈",
+   "difficulty": "코스 원칙: '홀마다 난이도를 다양하게', '세컨드 샷은 정교하게 그린은 작게'(벙커·해저드 난이도 높임). ROCK 7번 핸디캡 1, ROCK 3번 핸디캡 2",
+   "features": "서해바다(아산만·아산호) 조망, 영인산 자연휴양림을 끜 대중제 27홀(총면적 56만평). 2009.10.20 개장, ROCK코스 2021.4.1 개장(채석장 암벽 활용, 4~6번 시그니처). 코스 원칙: 바다 조망, 충분한 전장, 작은 그린, 큰 나무 3만 그루 조경, 과일나무. HILL=계곡·자작나무·Sky Green, LAKE=연못·Creek·Giant Par3(225m), ROCK=바위·크리크·비치벙커. 티 5개(블랙/블루/화이트/옐로/레드). 티·그린엣지 켄터키블루그라스. 원표기 m(최장 18홀 LAKE+HILL 6,711m → 약 7,339yd). 설계자·홀 핸디캡(일부 제외) 미제공. 로컬룰 페이지 별도",
+   "facilities": "클럽하우스, 레스토랑, 스타트하우스, 락카룸/사우나(아산 온천욕), 프로샵, 리조트(럭셔리 리조트). 클럽대여 50,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.arumdaunresort.com/html/company01.asp / https://www.arumdaunresort.com/html/course01.asp / https://www.arumdaunresort.com/html/course02.asp / https://www.arumdaunresort.com/html/course03.asp / https://www.arumdaunresort.com/html/course04.asp / https://www.arumdaunresort.com/html/guide01.asp / https://www.arumdaunresort.com/html/guide03.asp",
+    "note": "KGBA id 5 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 5,
+   "name": "SG아름다운",
+   "nines": [
+    "HILL",
+    "LAKE",
+    "ROCK"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "HILL",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "LAKE",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "ROCK",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   }
+  ],
+  "center": {
+   "lat": 36.78995,
+   "lon": 127.002677,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.859Z"
+ }
+}

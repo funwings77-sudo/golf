@@ -1,0 +1,475 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-20",
+  "name": "골프존카운티 안성H",
+  "region": "경기 안성시",
+  "address": "경기 안성시 보개면 보삼로 302 (북가현리)",
+  "phone": "(031)8056-0700",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이 좌측 티샷이 유리, 오르막 감안 (평균 5.0타) · 해저드: 그린 앞 벙커 · 그린: 오르막 그린",
+    "nine": "HILL",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 371,
+     "blue": 371,
+     "white": 339,
+     "red": 261,
+     "teeNames": "블루 371m(406yd)/화이트 339m(371yd)/레드 261m(285yd); HDCP는 코스별 1~9",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 스트레이트 파4, 비교적 쉬움 (평균 5.4타) · 해저드: 티샷 우측 벙커, 그린 앞 벙커 · 그린: 홈페이지 미제공",
+    "nine": "HILL",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 364,
+     "blue": 364,
+     "white": 341,
+     "red": 306,
+     "teeNames": "블루 364m(398yd)/화이트 341m(373yd)/레드 306m(335yd)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 3,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 우 도그렉 블라인드홀, 페어웨이 벙커 좌측으로 티샷 (평균 5.2타) · 해저드: 페어웨이 벙커 · 그린: 오르막 그린",
+    "nine": "HILL",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 342,
+     "blue": 342,
+     "white": 298,
+     "red": 200,
+     "teeNames": "블루 342m(374yd)/화이트 298m(326yd)/레드 200m(219yd)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 4,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "심한 내리막 파3, 조금 짧게 공략 (평균 4.0타) · 해저드: 홈페이지 미제공 · 그린: 그린 뒤로 넘기면 내리막 어프로치",
+    "nine": "HILL",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 174,
+     "blue": 174,
+     "white": 152,
+     "red": 100,
+     "teeNames": "블루 174m(190yd)/화이트 152m(166yd)/레드 100m(109yd)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 우 도그렉, IP 넓음 (평균 5.2타) · 해저드: 우측(슬라이스 주의) · 그린: 홈페이지 미제공",
+    "nine": "HILL",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 359,
+     "blue": 359,
+     "white": 330,
+     "red": 220,
+     "teeNames": "블루 359m(393yd)/화이트 330m(361yd)/레드 220m(241yd)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 6,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 블라인드 파5, 장타자 투온 가능 (평균 6.1타) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "HILL",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 504,
+     "blue": 504,
+     "white": 469,
+     "red": 378,
+     "teeNames": "블루 504m(551yd)/화이트 469m(513yd)/레드 378m(413yd)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 7,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파3, 핀보다 조금 짧게 (평균 3.9타) · 해저드: 홈페이지 미제공 · 그린: 그린 뒤로 넘기면 내리막 어프로치",
+    "nine": "HILL",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 166,
+     "blue": 166,
+     "white": 152,
+     "red": 110,
+     "teeNames": "블루 166m(182yd)/화이트 152m(166yd)/레드 110m(120yd)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 8,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 블라인드 파5, 중앙 좌측 티샷, 투온 사실상 불가 (평균 6.5타) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "HILL",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 553,
+     "blue": 553,
+     "white": 526,
+     "red": 365,
+     "teeNames": "블루 553m(605yd)/화이트 526m(575yd)/레드 365m(399yd)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파4, 우드·롱아이언 티샷, 그린 중앙 공략 (평균 5.0타) · 해저드: 워터해저드(장타 시 위험) · 그린: 아일랜드 그린",
+    "nine": "HILL",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 378,
+     "blue": 378,
+     "white": 335,
+     "red": 306,
+     "teeNames": "블루 378m(413yd)/화이트 335m(366yd)/레드 306m(335yd)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "패널티구역 넘기는 심리적 부담 극복 (평균 5.1타) · 해저드: 티 앞 패널티구역 · 그린: 2단 그린(뒷핀 시 마운드 넘기는 거리)",
+    "nine": "LAKE",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 397,
+     "blue": 397,
+     "white": 361,
+     "red": 280,
+     "teeNames": "블루 397m(434yd)/화이트 361m(395yd)/레드 280m(306yd)",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 11,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파5, 장타자 2온 가능, 방향성 중요 (평균 6.2타) · 해저드: 군데군데 벙커·패널티구역, 좁은 페어웨이 · 그린: 홈페이지 미제공",
+    "nine": "LAKE",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 490,
+     "blue": 490,
+     "white": 453,
+     "red": 326,
+     "teeNames": "블루 490m(536yd)/화이트 453m(495yd)/레드 326m(357yd)",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 12,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧은 파3, 중앙 벙커 피하는 공략 (평균 3.7타) · 해저드: 그린 중앙에 위치한 벙커 · 그린: 홈페이지 미제공",
+    "nine": "LAKE",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 105,
+     "blue": 105,
+     "white": 105,
+     "red": 85,
+     "teeNames": "블루 105m(115yd)/화이트 105m(115yd, 블루와 동일)/레드 85m(93yd)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 13,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 우 도그렉, 티샷 난이도 높음, 페어웨이 좌측 드로우 샷 (평균 5.0타) · 해저드: 홈페이지 미제공 · 그린: 홈페이지 미제공",
+    "nine": "LAKE",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 360,
+     "blue": 360,
+     "white": 330,
+     "red": 280,
+     "teeNames": "블루 360m(394yd)/화이트 330m(361yd)/레드 280m(306yd)",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 14,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "심한 내리막 파3, 정확한 거리·클럽 선택 (평균 3.9타) · 해저드: 그린 주변 벙커 · 그린: 그린 좌측으로 흐르는 경사",
+    "nine": "LAKE",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 163,
+     "blue": 163,
+     "white": 130,
+     "red": 78,
+     "teeNames": "블루 163m(178yd)/화이트 130m(142yd)/레드 78m(85yd)",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 15,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 블라인드 스트레이트 파5, 안전한 3온 (평균 6.5타) · 해저드: 그린 앞뒤 벙커, 좁은 페어웨이 · 그린: 홈페이지 미제공",
+    "nine": "LAKE",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 460,
+     "blue": 460,
+     "white": 428,
+     "red": 365,
+     "teeNames": "블루 460m(503yd)/화이트 428m(468yd)/레드 365m(399yd)",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 시야 확보 어려움, 앞핀 짧게·뒷핀 길게 (평균 5.2타) · 해저드: 홈페이지 미제공 · 그린: 그린 앞·뒤가 낮음",
+    "nine": "LAKE",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 355,
+     "blue": 355,
+     "white": 330,
+     "red": 250,
+     "teeNames": "블루 355m(388yd)/화이트 330m(361yd)/레드 250m(273yd)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 17,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우 도그렉이나 페어웨이 중앙 좌측 티샷 (평균 5.1타) · 해저드: 우측 여유 공간 없음 · 그린: 홈페이지 미제공",
+    "nine": "LAKE",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 349,
+     "blue": 349,
+     "white": 323,
+     "red": 263,
+     "teeNames": "블루 349m(382yd)/화이트 323m(353yd)/레드 263m(288yd)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "HDCP1 긴 파4, 티샷은 중앙 (평균 5.4타) · 해저드: 그린 좌우 패널티구역 · 그린: 아일랜드형 그린",
+    "nine": "LAKE",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 389,
+     "blue": 389,
+     "white": 362,
+     "red": 256,
+     "teeNames": "블루 389m(425yd)/화이트 362m(396yd)/레드 256m(280yd)",
+     "note": ""
+    },
+    "hdcpNine": 1
+   }
+  ],
+  "info": {
+   "operationType": "비회원제",
+   "totalHoles": 18,
+   "memberHoles": null,
+   "publicHoles": 18,
+   "homepage": "https://www.golfzoncounty.com/",
+   "openedYear": null,
+   "layout": "HILL 9홀(파36, 블루 3,211m) + LAKE 9홀(파36, 블루 3,068m)",
+   "par18": 72,
+   "lengthYards": 6867,
+   "fairwayGrass": "안양중지 (티박스 켄터키 블루그래스)",
+   "greenGrass": "벤트그래스 T1",
+   "architect": "게리 플레이어(Gary Player)",
+   "fees": {
+    "weekday": "11월 기준 월 1부 180,000·2부 190,000원 / 화~금 1부 190,000·2부 200,000원 — 월별 '이달의 그린피' 변동",
+    "weekend": "11월 기준 토 1부 260,000~270,000·2부 240,000~250,000원 / 일 1부 250,000~260,000·2부 230,000~240,000원",
+    "cart": "100,000원/팀",
+    "caddie": "150,000원/팀(1·2부), 하우스캐디 160,000원(3부), 5인 플레이 200,000원; 일부 시간 셀프라운드 가능"
+   },
+   "reservation": "골프존카운티 앱·웹 실시간 예약(골프존 회원가입): 매주 월요일 09시, 오픈 주 포함 4주 뒤 월~일 오픈. 전화 031-8056-0700(09~17시), 팩스 031-8056-0719. 2인 플레이 불가, 5인·셀프는 유선 문의",
+   "difficulty": "골프존카운티 평가: 전장 4, 홀 다양성 4, 경관 5, 샷밸류 4, 폭/넓이 4, 코스전략 다양성 4. KGA 코스레이팅(9홀) 블루 HILL 37.8/72·LAKE 36.9/70, 화이트 36.0/69·35.3/68, 레드 34.9/64·33.7/61. 18홀 평균스코어 92.3",
+   "features": "품격있는 명품 퍼블릭'을 내세운 대중제 18홀(안성). 게리 플레이어 설계, LPGA PAT(Playing Ability Test) 인증 코스, 2018 KPGA 정규대회 개최(#대회코스 #에어모션). HILL=블라인드·내리막 파3이 많고 8번 553m 파5(HDCP1), 9번 아일랜드 그린. LAKE=패널티구역 넘기는 티샷, 9번 아일랜드형 그린 파4(HDCP1). 티 3종(블루/화이트/레드), m·yd 병기(블루 합 6,279m = 6,867yd). 불일치: 총전장 표기 6,300m vs 홀별 블루 합 6,279m, 핸디캡은 코스별 1~9 표기, LAKE 3번 블루·화이트 동일 105m. 개장연도 미제공. 시설이용료 20,000원 별도 고지",
+   "facilities": "클럽하우스(프론트·로비·락커), 식당 '호시그린'. 대여: 골프채 풀세트 50,000원, 퍼터 20,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.golfzoncounty.com/golfclub/main?golfclubSeq=53 / https://www.golfzoncounty.com/golfclub/intro?golfclubSeq=53 / https://www.golfzoncounty.com/golfclub/course?golfclubSeq=53 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=53&courseSeq=28 / https://www.golfzoncounty.com/golfclub/courseDtl?golfclubSeq=53&courseSeq=29 / https://www.golfzoncounty.com/golfclub/resvGuide?golfclubSeq=53 / https://www.golfzoncounty.com/golfclub/monthGreenfeeInfo?golfclubInfoTableSeq=768&golfclubSeq=53 / https://www.golfzoncounty.com/golfclub/facility?golfclubSeq=53",
+    "note": "KGBA id 20 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 20,
+   "name": "골프존카운티 안성H",
+   "nines": [
+    "HILL",
+    "LAKE"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "HILL",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "LAKE",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "center": {
+   "lat": 37.007773,
+   "lon": 127.279971,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.877Z"
+ }
+}

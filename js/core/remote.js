@@ -47,11 +47,14 @@ export async function installCourse(entry) {
     id: prev?.id || 'o-' + src.id, name: src.name, created: prev?.created || Date.now(),
     official: { id: src.id, rev: src.rev || 1, updatedAt: src.updatedAt, region: src.region || '', phone: src.phone || '', address: src.address || '' },
     localRules: src.localRules || [], defaultStimp: src.defaultStimp ?? null,
+    ...(src.nines ? { nines: src.nines } : {}), ...(src.center ? { center: src.center } : {}), ...(src.info ? { info: src.info } : {}), ...(src.dataSources ? { dataSources: src.dataSources } : {}),
     shelters: (src.shelters || []).map(s => ({ ...s })),
     holes: src.holes.map(h => {
       const old = prev?.holes.find(x => x.n === h.n);
       const keepPin = old?.pin && old.pin.src !== 'official' && new Date(old.pin.ts).toDateString() === new Date().toDateString();
-      return { ...h, hazards: (h.hazards || []).map(z => ({ ...z })), ...(keepPin ? { pin: old.pin } : {}) };
+      // 공식 데이터에 그린 위치가 없고 내가 지도에서 찍어 둔 위치가 있으면 보존
+      const mine = !h.green && old?.greenBy === 'user' ? { green: old.green, greenBy: 'user' } : {};
+      return { ...h, hazards: (h.hazards || []).map(z => ({ ...z })), ...mine, ...(keepPin ? { pin: old.pin } : {}) };
     }),
   };
   if (prev) S.courses[S.courses.indexOf(prev)] = course; else S.courses.push(course);
@@ -92,4 +95,10 @@ export async function getNotices(course = null) {
 // 설치한 공식 코스 중 새 버전이 있는 것
 export function pendingUpdates(catalog) {
   return S.courses.filter(c => c.official).map(c => ({ c, e: catalog.find(x => x.id === c.official.id) })).filter(x => x.e && x.e.rev > (x.c.official.rev || 0));
+}
+
+// 전국 골프장 목록 (KGBA 회원사 209곳 · 기본정보·요금·대략 위치)
+export async function getClubs() {
+  const j = await fetchJSON('clubs.json', { cacheKey: 'clubs' });
+  return j?.clubs || [];
 }

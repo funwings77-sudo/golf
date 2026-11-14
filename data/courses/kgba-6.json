@@ -1,0 +1,1282 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-6",
+  "name": "가야",
+  "region": "경남 김해시",
+  "address": "경남 김해시 인제로 502 (삼방동, 가야컨트리클럽)",
+  "phone": "(055)337-0091",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "첫 홀치고 파세이브 부담. 좌그린 시 좌측 카트로 쪽은 불리 · 해저드: 훅 시 벙커·OB, 슬라이스 시 법면 러프 · 그린: 좌·우 그린 모두 경사, 우그린은 포대그린(반클럽 길게)",
+    "nine": "신어",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 398,
+     "blue": null,
+     "white": 379,
+     "red": 360,
+     "teeNames": "투그린(좌/우): Back 387/398, Regular 368/379, Front 349/360",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 2,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "평범한 내리막 파3, 한 클럽 짧게 · 해저드: 그린 오버 시 OB · 그린: 좌·우 그린 모두 경사 심함",
+    "nine": "신어",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 170,
+     "blue": null,
+     "white": 152,
+     "red": 134,
+     "teeNames": "Back 163/170(홀페이지 169), Regular 145/152, Front 128/134",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 3,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트는 홈페이지 홀 페이지에 있음(미수집)",
+    "nine": "신어",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 509,
+     "blue": null,
+     "white": 491,
+     "red": 399,
+     "teeNames": "Back 509/497, Regular 491/479, T1 470/459, Front 399/378",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 4,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "신어",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 354,
+     "blue": null,
+     "white": 336,
+     "red": 335,
+     "teeNames": "Back 335/354, Regular 317/336, T1 302/321, Front 316/335",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "신어",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 345,
+     "blue": null,
+     "white": 326,
+     "red": 309,
+     "teeNames": "Back 345/338, Regular 326/320, Front 309/302",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 6,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "신어",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 187,
+     "blue": null,
+     "white": 171,
+     "red": 139,
+     "teeNames": "Back 187/168, Regular 171/151, T1 155/135, Front 139/119",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 7,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "신어",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 364,
+     "blue": null,
+     "white": 347,
+     "red": 333,
+     "teeNames": "Back 347/364, Regular 331/347, Front 316/333",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 8,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "신어",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 373,
+     "blue": null,
+     "white": 355,
+     "red": 323,
+     "teeNames": "Back 362/373, Regular 344/355, T1 328/339, Front 312/323",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 9,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "신어",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 513,
+     "blue": null,
+     "white": 496,
+     "red": 429,
+     "teeNames": "Back 504/513, Regular 487/496, T1 468/477, T2 439/448, Front 420/429",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 10,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 515,
+     "blue": null,
+     "white": 496,
+     "red": 475,
+     "teeNames": "Back 503/515, Regular 484/496, Front 463/475",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 407,
+     "blue": null,
+     "white": 387,
+     "red": 352,
+     "teeNames": "Back 392/407, Regular 372/387, T1 355/370, Front 337/352",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 380,
+     "blue": null,
+     "white": 364,
+     "red": 346,
+     "teeNames": "Back 373/380, Regular 357/364, Front 339/346",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 13,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 178,
+     "blue": null,
+     "white": 158,
+     "red": 103,
+     "teeNames": "Back 157/178, Regular 137/158, T1 119/140, Front 82/103",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 389,
+     "blue": null,
+     "white": 371,
+     "red": 334,
+     "teeNames": "Back 379/389, Regular 361/371, T1 347/357, Front 314/334",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 340,
+     "blue": null,
+     "white": 323,
+     "red": 295,
+     "teeNames": "Back 339/340, Regular 323/323, T1 308/309, Front 294/295",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 16,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 515,
+     "blue": null,
+     "white": 497,
+     "red": 375,
+     "teeNames": "Back 502/515, Regular 485/497, T1 465/478, Front 362/375",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 185,
+     "blue": null,
+     "white": 170,
+     "red": 312,
+     "teeNames": "Back 185/174, Regular 170/159, T1 155/144, Front 312/323(파3인데 백티보다 길어 원표 오류 추정)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "낙동",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 366,
+     "blue": null,
+     "white": 351,
+     "red": 420,
+     "teeNames": "Back 366/358, Regular 351/343, T1 335/327, Front 420/429(백티보다 길어 원표 오류 추정)",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 19,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 510,
+     "blue": null,
+     "white": 495,
+     "red": 437,
+     "teeNames": "Back 510/505, Regular 495/489, T1 476/471, T2 462/457, Front 437/432",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 20,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 360,
+     "blue": null,
+     "white": 345,
+     "red": 331,
+     "teeNames": "Back 353/360, Regular 339/345, Front 324/331",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 21,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 380,
+     "blue": null,
+     "white": 365,
+     "red": 315,
+     "teeNames": "Back 376/380, Regular 361/365, T1 346/350, Front 311/315",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 22,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 167,
+     "blue": null,
+     "white": 149,
+     "red": 127,
+     "teeNames": "Back 167/154, Regular 149/138, Front 127/116",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 23,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 372,
+     "blue": null,
+     "white": 356,
+     "red": 324,
+     "teeNames": "Back 372/360, Regular 356/345, T1 342/330, Front 324/312",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 24,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 367,
+     "blue": null,
+     "white": 349,
+     "red": 239,
+     "teeNames": "Back 363/367, Regular 345/349, T1 331/335, T2 314/318, Front 265/239",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 25,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 350,
+     "blue": null,
+     "white": 338,
+     "red": 302,
+     "teeNames": "Back 331/350, Regular 319/338, T1 306/325, Front 283/302",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 26,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 184,
+     "blue": null,
+     "white": 167,
+     "red": 149,
+     "teeNames": "Back 171/184, Regular 154/167, Front 136/149",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 27,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "김해",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 510,
+     "blue": null,
+     "white": 490,
+     "red": 437,
+     "teeNames": "Back 510/495, Regular 490/475, T1 471/456, Front 437/422",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 28,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 420,
+     "blue": null,
+     "white": 405,
+     "red": 365,
+     "teeNames": "Back 420/412, Regular 405/397, T1 385/377, T2 385/377, T3 374/366, Front 365/357",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 29,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 420,
+     "blue": null,
+     "white": 401,
+     "red": 244,
+     "teeNames": "Back 402/420, Regular 383/401, T1 365/383, Front 226/244",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 30,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 547,
+     "blue": null,
+     "white": 524,
+     "red": 467,
+     "teeNames": "Back 547/537, Regular 524/514, T1 504/494, T2 486/476, Front 467/457",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 31,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 181,
+     "blue": null,
+     "white": 164,
+     "red": 147,
+     "teeNames": "Back 169/181, Regular 152/164, Front 135/147",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 32,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 345,
+     "blue": null,
+     "white": 325,
+     "red": 304,
+     "teeNames": "Back 336/345, Regular 316/325, Front 295/304",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 33,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 369,
+     "blue": null,
+     "white": 354,
+     "red": 269,
+     "teeNames": "Back 369/362, Regular 354/347, T1 338/332, Front 269/263",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 34,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 167,
+     "blue": null,
+     "white": 152,
+     "red": 121,
+     "teeNames": "Back 164/167, Regular 148/152, T1 133/136, Front 118/121",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 35,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 353,
+     "blue": null,
+     "white": 339,
+     "red": 297,
+     "teeNames": "Back 353/341, Regular 339/326, T1 323/311, Front 297/285",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 36,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "수로",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 503,
+     "blue": null,
+     "white": 482,
+     "red": 415,
+     "teeNames": "Back 503/501, Regular 482/480, T1 466/464, Front 415/413",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 37,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 384,
+     "blue": null,
+     "white": 374,
+     "red": 385,
+     "teeNames": "Back 384, Regular 374, T1 359, T2 338, T3 320, Front 385(원표기 그대로)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 38,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 174,
+     "blue": null,
+     "white": 153,
+     "red": 109,
+     "teeNames": "Back 174, Regular 153, T1 131, Front 109",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 39,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 476,
+     "blue": null,
+     "white": 446,
+     "red": 375,
+     "teeNames": "Back 476, Regular 446, T1 419, Front 375",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 40,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 357,
+     "blue": null,
+     "white": 353,
+     "red": 298,
+     "teeNames": "Back 357, Regular 353, T1 335, Front 298",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 41,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 400,
+     "blue": null,
+     "white": 367,
+     "red": 300,
+     "teeNames": "Back 400, Regular 367, T1 344, Front 300",
+     "note": ""
+    },
+    "hdcpNine": 1
+   },
+   {
+    "n": 42,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 357,
+     "blue": null,
+     "white": 330,
+     "red": 315,
+     "teeNames": "Back 357, Regular 330, Front 315",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 43,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 524,
+     "blue": null,
+     "white": 483,
+     "red": 443,
+     "teeNames": "Back 524, Regular 483, Front 443",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 44,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 185,
+     "blue": null,
+     "white": 174,
+     "red": 139,
+     "teeNames": "Back 185, Regular 174, T1 158, Front 139",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 45,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "홀별 공략 텍스트 미수집",
+    "nine": "가락",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 375,
+     "blue": null,
+     "white": 357,
+     "red": 274,
+     "teeNames": "Back 375, Regular 357, T1 330, Front 274",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 46,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "퍼블릭 9홀(파34)",
+    "nine": "퍼블릭",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 269,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 269)",
+     "note": ""
+    }
+   },
+   {
+    "n": 47,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 248,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 248)",
+     "note": ""
+    }
+   },
+   {
+    "n": 48,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 425,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 425)",
+     "note": ""
+    }
+   },
+   {
+    "n": 49,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 290,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 290)",
+     "note": ""
+    }
+   },
+   {
+    "n": 50,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 271,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 271)",
+     "note": ""
+    }
+   },
+   {
+    "n": 51,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 172,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 172)",
+     "note": ""
+    }
+   },
+   {
+    "n": 52,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 125,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 125)",
+     "note": ""
+    }
+   },
+   {
+    "n": 53,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 333,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 333)",
+     "note": ""
+    }
+   },
+   {
+    "n": 54,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "",
+    "nine": "퍼블릭",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 126,
+     "blue": null,
+     "white": null,
+     "red": null,
+     "teeNames": "단일 티(Back 126)",
+     "note": ""
+    }
+   }
+  ],
+  "info": {
+   "operationType": "회원제+비회원제",
+   "totalHoles": 54,
+   "memberHoles": 45,
+   "publicHoles": 9,
+   "homepage": "http://www.gayacc.com",
+   "openedYear": 1988,
+   "layout": "회원제 45홀: 신어 9(파36, 3,139/3,175m) + 낙동 9(파36, 3,196/3,256m) + 김해 9(파36, 3,153/3,155m) + 수로 9(파36, 3,263/3,266m) + 가락 9(파36, 3,232m) / 퍼블릭 9홀(파34, 2,259m)",
+   "par18": 72,
+   "lengthYards": 7132,
+   "fairwayGrass": "",
+   "greenGrass": "",
+   "architect": "",
+   "fees": {
+    "weekday": "비회원 210,000원 (우대회원 55,000 / 정회원 70,000 / 주중회원 75,000, 회원제 18홀·세금포함)",
+    "weekend": "비회원 250,000원 (우대회원 60,000 / 정회원 75,000)",
+    "cart": "100,000원(5인승) / 리무진 카트 200,000원(1일 3팀)",
+    "caddie": "150,000원 (외국어 가능 캐디 200,000원)"
+   },
+   "reservation": "회원제는 인터넷 예약: 우대·정회원 15일 전, 주중회원 14일 전, 비회원 평일 13일·주말 14일 전 08:30부터. 회원의 날(1·3주 일요일) 별도, 취소는 4일 전 12시까지. 퍼블릭·서클 예약 별도 메뉴",
+   "difficulty": "",
+   "features": "김해 소재 54홀(회원제 45+퍼블릭 9) 대형 골프장, 국내 메이저대회 개최. 연혁: 1984 설립, 1988.6.27 신어·낙동 18홀 개장, 1989 김해 9홀, 1992 김해 추가 9홀(수로로 추정), 2005 가락 9홀·퍼블릭 9홀. 대부분 홀이 좌/우 투그린(스코어카드 a/b 표기), 가락·퍼블릭은 원그린. 티: Back/Regular/T1~T3/Front. 원표기 m(최장 18홀 수로+낙동 6,522m→약 7,132yd). 낙동 8·9번 Front 거리는 백티보다 길게 표기(원표 오류 추정). 홀별 공략 텍스트는 신어 1·2번만 수집. 잔디·설계자 홈페이지 미확인",
+   "facilities": "연수원, 수영장, 가야랜드, 골프연습장(연혁·메뉴 기준, 부대시설 페이지 상세 미확인). 대여: 골프채 구형 30,000·신형 50,000, 골프화 5,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.gayacc.com/course.php?location=56 / https://www.gayacc.com/course.php?location=02 / https://www.gayacc.com/club.php?location=02 / https://www.gayacc.com/useguide.php?location=01 / https://www.gayacc.com/useguide.php?location=03",
+    "note": "KGBA id 6 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 6,
+   "name": "가야",
+   "nines": [
+    "신어",
+    "낙동",
+    "김해",
+    "수로",
+    "가락",
+    "퍼블릭"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "신어",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "낙동",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   },
+   {
+    "name": "김해",
+    "holes": [
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   },
+   {
+    "name": "수로",
+    "holes": [
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36
+    ]
+   },
+   {
+    "name": "가락",
+    "holes": [
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45
+    ]
+   },
+   {
+    "name": "퍼블릭",
+    "holes": [
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54
+    ]
+   }
+  ],
+  "center": {
+   "lat": 35.252167,
+   "lon": 128.902837,
+   "precision": "address"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.862Z"
+ }
+}

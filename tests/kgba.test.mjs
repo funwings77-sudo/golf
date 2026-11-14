@@ -42,7 +42,7 @@ test('정규화 → 공식 코스 초안: 9홀 묶음·스코어카드·출처',
   const only = clubToCourse(c1, { id: 'kgba-1-hwarang', nines: ['화랑'] }).course;
   assert.equal(only.holes.length, 9); assert.equal(only.nines, undefined);
   // 좌표가 없으므로 검증 오류(티·그린 미지정)가 나는 것이 정상
-  assert.ok(validateCourse(course).errors.some(e => /티 위치/.test(e.msg)));
+  assert.ok(validateCourse(course).ok && validateCourse(course).warnings.some(e => /그린 중앙 위치/.test(e.msg)), '좌표 없음 = 경고(발행 가능)');
   assert.throws(() => clubToCourse(clubs.find(c => c.id === 2)), /홀 데이터/);
 });
 

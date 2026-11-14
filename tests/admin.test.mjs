@@ -30,7 +30,7 @@ test('코스 검증: 정상 코스 통과, 누락·이상값 검출', () => {
   const v = M.validateCourse(bad);
   assert.ok(!v.ok);
   assert.ok(v.errors.some(e => /코스 ID/.test(e.msg)));
-  assert.ok(v.errors.some(e => e.hole === 2 && /티/.test(e.msg)));
+  assert.ok(v.warnings.some(e => e.hole === 2 && /티 위치/.test(e.msg)), '위치 누락은 경고');
   assert.ok(v.errors.some(e => e.hole === 1 && /Par 7/.test(e.msg)));
   assert.ok(v.errors.some(e => /lava/.test(e.msg)));
 

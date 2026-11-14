@@ -1,0 +1,475 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-4",
+  "name": "ROUTE52",
+  "region": "경기 여주시",
+  "address": "경기 여주군 북내면 중암1길 36",
+  "phone": "(031)882-0052",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": 14,
+    "hdcpCard": 14,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "오르막 파4, 길어 보임. 티샷은 페어웨이 중앙보다 좌측, 세컨드는 핀 위치·오르막 거리 반영 · 해저드: 우측 연못·계류, 그린 좌측 벙커(19·25m 지점) · 그린: 2단 그린, 그린 티보다 +14.2m 높음",
+    "nine": "A(Route A)",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 350,
+     "blue": 330,
+     "white": 312,
+     "red": 202,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 284",
+     "note": ""
+    },
+    "hdcpNine": 14
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": 11,
+    "hdcpCard": 11,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "평지에 가까운 홀. 장타자는 좌측 벙커 선상까지 티샷, 세컨드로 핀에 붙여 버디 기회 · 해저드: 페어웨이 좌측 벙커, 그린 좌우 벙커 · 그린: 그린 100~50m 전방 언듈레이션, 그린 +8m",
+    "nine": "A(Route A)",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 370,
+     "blue": 370,
+     "white": 333,
+     "red": 260,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 300 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 11
+   },
+   {
+    "n": 3,
+    "par": 4,
+    "hdcp": 18,
+    "hdcpCard": 18,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓어 보여도 티샷은 중앙 또는 좌측. 좌측에서 핀 공략 유리, 오르막 감안 · 해저드: 그린 우측 벙커 · 그린: 2단 그린, 우측으로 비스듬히 길어짐, 그린 +15m",
+    "nine": "A(Route A)",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 340,
+     "blue": 340,
+     "white": 315,
+     "red": 245,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 282 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 18
+   },
+   {
+    "n": 4,
+    "par": 5,
+    "hdcp": 5,
+    "hdcpCard": 5,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우측으로 휘는 내리막 파5. 안전하게는 중앙 암반 방향, 장타자는 우측 벙커 방향(슬라이스 시 OB 주의) · 해저드: 페어웨이 좌측 큰 암반 3개, 우측 벙커·우측 OB, 그린 주변 벙커 · 그린: 그린 티보다 -19.5m(내리막)",
+    "nine": "A(Route A)",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 510,
+     "blue": 490,
+     "white": 466,
+     "red": 405,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 443",
+     "note": ""
+    },
+    "hdcpNine": 5
+   },
+   {
+    "n": 5,
+    "par": 3,
+    "hdcp": 9,
+    "hdcpCard": 9,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "그린 앞 이국적 암반의 시그니처 파3. 좌측 벙커·패널티 구역만 주의 · 해저드: 그린 앞 암반, 좌측 벙커, 패널티 구역 · 그린: 그린 +1m",
+    "nine": "A(Route A)",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 165,
+     "blue": 165,
+     "white": 140,
+     "red": 105,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 114 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 9
+   },
+   {
+    "n": 6,
+    "par": 4,
+    "hdcp": 2,
+    "hdcpCard": 2,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "우도그렉. 좌측 벙커 넘기기 무의미, 페어웨이 우측에서 핀 공략. 파 세이브 전략 · 해저드: 페어웨이 좌측 벙커(뒤는 깊은 러프), 좌측 OB, 그린 벙커 · 그린: 어려운 그린 경사, 그린 +11m",
+    "nine": "A(Route A)",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 385,
+     "blue": 350,
+     "white": 323,
+     "red": 270,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 302",
+     "note": ""
+    },
+    "hdcpNine": 2
+   },
+   {
+    "n": 7,
+    "par": 3,
+    "hdcp": 16,
+    "hdcpCard": 16,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "짧지만 만만찮은 내리막 파3. 바람 영향 크므로 신중한 클럽 선택과 정교한 아이언샷 · 해저드: 그린 앞 벙커, 우측 암반 절벽, 암반 · 그린: 그린 경사 까다로움, 그린 -10m(내리막)",
+    "nine": "A(Route A)",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 150,
+     "blue": 150,
+     "white": 130,
+     "red": 90,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 108 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 16
+   },
+   {
+    "n": 8,
+    "par": 5,
+    "hdcp": 8,
+    "hdcpCard": 8,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "평탄한 직선 파5. 세컨드는 페어웨이 중앙 우측, 벙커 피하면 버디 기회 · 해저드: 100m 지점 페어웨이 좌측 경사면, 주요 지점 벙커 · 그린: 그린 +7m",
+    "nine": "A(Route A)",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 505,
+     "blue": 492,
+     "white": 465,
+     "red": 419,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 446",
+     "note": ""
+    },
+    "hdcpNine": 8
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": 3,
+    "hdcpCard": 3,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌측 무리하면 OB 위험. 티샷은 페어웨이 우측이 정석, 장타자 방향·클럽 선택 신중 · 해저드: 페어웨이 좌측 경사면 따라 그린 좌측까지 OB, 좌측 벙커, 그린 주변 벙커, 우측 암반 · 그린: 그린 -6m",
+    "nine": "A(Route A)",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 400,
+     "blue": 381,
+     "white": 358,
+     "red": 280,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 340",
+     "note": ""
+    },
+    "hdcpNine": 3
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": 10,
+    "hdcpCard": 10,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "세컨 지점부터 약간 오르막. 티샷은 중앙에서 좌측, 2단 그린·오르막 감안 정교한 세컨샷 · 해저드: 티 좌측 호수, 그린 우측 벙커 · 그린: 2단 그린, 그린 -2m",
+    "nine": "B(Route B)",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 365,
+     "blue": 365,
+     "white": 335,
+     "red": 270,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 321 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 10
+   },
+   {
+    "n": 11,
+    "par": 3,
+    "hdcp": 15,
+    "hdcpCard": 15,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 파3, 홀인원 기회. 핀을 직접 노리는 티샷으로 스코어 줄이기 · 해저드: 사막 느낌의 대형 벙커(그린 앞·양옆) · 그린: 2단 그린, 그린 -5.5m(내리막)",
+    "nine": "B(Route B)",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 160,
+     "blue": 145,
+     "white": 120,
+     "red": 100,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 117",
+     "note": ""
+    },
+    "hdcpNine": 15
+   },
+   {
+    "n": 12,
+    "par": 5,
+    "hdcp": 12,
+    "hdcpCard": 12,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "루트52 최대 페어웨이 폭. 버디 기회, 오르막이라 헤드업·탑핑 주의 · 해저드: 페어웨이 좌측 벙커, 그린 주변 벙커 · 그린: 그린 +16m(오르막)",
+    "nine": "B(Route B)",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 505,
+     "blue": 505,
+     "white": 465,
+     "red": 400,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 438 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 12
+   },
+   {
+    "n": 13,
+    "par": 4,
+    "hdcp": 7,
+    "hdcpCard": 7,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "장타자는 페어웨이 좌측 또는 클럽 조절. 세컨드는 그린 우측 벙커 주의 · 해저드: 페어웨이 우측 호수(워터해저드), 그린 우측 벙커 · 그린: 그린 -21m(내리막)",
+    "nine": "B(Route B)",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 380,
+     "blue": 355,
+     "white": 335,
+     "red": 285,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 316",
+     "note": ""
+    },
+    "hdcpNine": 7
+   },
+   {
+    "n": 14,
+    "par": 4,
+    "hdcp": 17,
+    "hdcpCard": 17,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "호수를 끼고 있어 긴 드라이버보다 정확한 티샷. 페어웨이 중앙 좌측 유리 · 해저드: 페어웨이 우측~그린 우측 호수, 페어웨이 좌측 벙커 · 그린: 2단 그린, 그린 -8m",
+    "nine": "B(Route B)",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 335,
+     "blue": 335,
+     "white": 300,
+     "red": 240,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 262 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 17
+   },
+   {
+    "n": 15,
+    "par": 5,
+    "hdcp": 4,
+    "hdcpCard": 4,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "최장 파5. 정면 벙커 좌측 넓은 페어웨이로 티샷, 벙커 넘기면 세컨드 까다로움. 서드까지 거리·방향 정확히 · 해저드: 정면 벙커(페어웨이 중앙), 그린 주변 벙커 · 그린: 그린 -19m(내리막)",
+    "nine": "B(Route B)",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 560,
+     "blue": 542,
+     "white": 520,
+     "red": 405,
+     "teeNames": "블랙 560/블루 542/화이트1 520·화이트2 500/옐로1 475·옐로2 450(이미지 451)/레드 405",
+     "note": ""
+    },
+    "hdcpNine": 4
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": 13,
+    "hdcpCard": 13,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "루트52 최대 오르막 파4. 페어웨이 중앙 벙커 넘기면 짧은 클럽으로 기회 · 해저드: 페어웨이 중앙 벙커, 그린 앞 벙커 다수 · 그린: 심한 경사, 그린 +18m",
+    "nine": "B(Route B)",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 345,
+     "blue": 345,
+     "white": 310,
+     "red": 240,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 282 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 13
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": 6,
+    "hdcpCard": 6,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "두 번째 시그니처 홀. 바람 영향 큼, 핀 위치 상관없이 그린 중앙 공략 · 해저드: 그린 주변 호수(아일랜드 그린), 그린 좌측 벙커 · 그린: 아일랜드 그린, 그린 -22m(내리막 심함)",
+    "nine": "B(Route B)",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 195,
+     "blue": 195,
+     "white": 170,
+     "red": 125,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 155 (블랙·블루 동일)",
+     "note": ""
+    },
+    "hdcpNine": 6
+   },
+   {
+    "n": 18,
+    "par": 4,
+    "hdcp": 1,
+    "hdcpCard": 1,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "핸디캡 1번 최난도 홀. 좌도그렉 오르막, 비거리에 따라 티샷 방향 조절, IP 경사로 세컨드 어려움 · 해저드: 페어웨이 좌측 워터해저드, IP 부근 벙커, 그린 벙커 · 그린: 2단 그린 경사 까다로움, 그린 +14m",
+    "nine": "B(Route B)",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 390,
+     "blue": 360,
+     "white": 354,
+     "red": 270,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 333",
+     "note": ""
+    },
+    "hdcpNine": 1
+   }
+  ],
+  "info": {
+   "operationType": "비회원제",
+   "totalHoles": 18,
+   "memberHoles": null,
+   "publicHoles": 18,
+   "homepage": "https://route52cc.com/",
+   "openedYear": null,
+   "layout": "Route A 9홀(파36, 3,175m/3,472yd) + Route B 9홀(파36, 3,235m/3,538yd)",
+   "par18": 72,
+   "lengthYards": 7010,
+   "fairwayGrass": "",
+   "greenGrass": "",
+   "architect": "",
+   "fees": {
+    "weekday": "홈페이지 요금안내 게시판 비어 있음(조회일 기준 미게시)",
+    "weekend": "홈페이지 미게시",
+    "cart": "",
+    "caddie": ""
+   },
+   "reservation": "카카오골프예약 기반 인터넷 예약(24시간) + 전화 031-882-0052(평일 09~18시). 4주 전 수요일 09시 일괄 오픈(인터넷 80%·전화 20% 선착순), 1인 1일 1팀, 4인 플레이 원칙(2인 불가), 취소는 예약일 제외 7일 전 17시까지",
+   "difficulty": "코스 설명: 홀마다 난이도 구분, 14개 클럽 모두 사용하는 Target 코스",
+   "features": "서울 인근(제2영동고속도로) 대중제 18홀, 운영사 케이알레저(주). 지형을 살린 환경친화 계획, 호수·폭포·계류·비치벙커·암반 등 Amenity 코스. A,B 거리 균형, 점진적 Par 배열(Par3 150~195m, Par4 335~400m, Par5 500~565m). 시그니처: A5(그린 앞 암반 파3), B8(아일랜드 그린 내리막 파3). 최난도 B9(HDCP1), A6(HDCP2). 티 5~7개(블랙/블루/화이트/옐로/레드, B6는 화이트·옐로 2개씩). 홀별 고저차·그린 언듈레이션 도면·남은거리 표기 제공. 원표기 m(홈페이지 yd 병기: 총 7,010yd). 개장연도·잔디·설계자·요금 홈페이지 미제공",
+   "facilities": "레스토랑(메뉴 페이지 존재). 기타 시설 안내 홈페이지 미제공"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://route52cc.com/course/courseIntro.asp / https://route52cc.com/course/course01.asp~course18.asp / https://route52cc.com/club/intro.asp / https://route52cc.com/guide/guide.asp / https://route52cc.com/board/list.asp?type=5",
+    "note": "KGBA id 4 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 4,
+   "name": "ROUTE52",
+   "nines": [
+    "A(Route A)",
+    "B(Route B)"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "A(Route A)",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "B(Route B)",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "center": {
+   "lat": 37.29829,
+   "lon": 127.637033,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.857Z"
+ }
+}

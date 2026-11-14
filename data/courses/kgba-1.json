@@ -1,0 +1,457 @@
+{
+ "format": "pinpoint-course",
+ "version": 1,
+ "course": {
+  "id": "kgba-1",
+  "name": "4WELL",
+  "region": "경남 김해시",
+  "address": "경상남도 김해시 진례면 고모로134번길 54-49",
+  "phone": "(055)340-9222",
+  "defaultStimp": 10,
+  "localRules": [],
+  "shelters": [],
+  "rev": 1,
+  "holes": [
+   {
+    "n": 1,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷은 그린 앞 좌측 벙커 방향, 세컨드는 그린 우측 공략 · 해저드: 페어웨이 우측 해저드, 좌측 OB. 그린 좌측 앞 벙커, 그린 뒤 해저드 · 그린: 그린 뒤쪽 폭이 좁음",
+    "nine": "스카이",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 358,
+     "blue": 339,
+     "white": 313,
+     "red": 291,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 2,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 티샷, 거리보다 중앙 정확도. 좌우 마운드가 공을 그린으로 보내줌 · 해저드: 좌측 OB, 우측 해저드. 그린 좌측 앞 벙커 · 그린: 작은 그린, 완만한 언듀레이션",
+    "nine": "스카이",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 389,
+     "blue": 369,
+     "white": 348,
+     "red": 330,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 3,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌우 경사, 클럽 선택 신중. 그린 전방에 떨구는 전략 · 해저드: 중앙 연못, 좌측 OB, 우측 해저드, 그린 주변 벙커 3개 · 그린: 매우 까다로운 2단 그린, 내리막 퍼팅 주의",
+    "nine": "스카이",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 196,
+     "blue": 180,
+     "white": 139,
+     "red": 120,
+     "teeNames": "블랙/블루/화이트/레드 (공략도에 노랑 티 420 표기 — 원본 표기 오류 추정)",
+     "note": ""
+    }
+   },
+   {
+    "n": 4,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "대표적 리스크-리워드 홀. 티샷 중앙 좌측, 세컨드는 아이언으로 IP2 공략 · 해저드: 주요 해저드 언급 없음, IP2 시각적으로 좁아 보임 · 그린: 그린까지 약간 오르막",
+    "nine": "스카이",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 479,
+     "blue": 459,
+     "white": 438,
+     "red": 394,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 414",
+     "note": ""
+    }
+   },
+   {
+    "n": 5,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이 폭 좁음. 티샷 중앙 좌측 또는 클럽하우스 방향 · 해저드: 우측 OB, 좌측 해저드. 그린 주변 벙커(공략 영향 적음) · 그린: 무난한 퍼팅",
+    "nine": "스카이",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 351,
+     "blue": 332,
+     "white": 308,
+     "red": 285,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 6,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "대표적 레이업 홀. 무리한 티샷 자제, 거리 계산 신중 · 해저드: 좌우 해저드, IP지점 벙커 다수, 그린 앞 벙커 다수, 그린 뒤 해저드 · 그린: 그린 폭 좁음",
+    "nine": "스카이",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 333,
+     "blue": 313,
+     "white": 291,
+     "red": 270,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 7,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "계곡 넘겨 캐리. 티샷은 그린 중앙 좌측 · 해저드: 티 전방 계곡, 그린 우측·후방 낭떠러지, 좌우 해저드, 그린 앞 벙커",
+    "nine": "스카이",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 182,
+     "blue": 153,
+     "white": 128,
+     "red": 102,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 8,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "넓은 페어웨이, 티샷 중앙 좌측. 서드샷 오르막 감안 · 해저드: 좌측 해저드, 우측 OB, 세컨드 IP 좌측 해저드 · 그린: 3단 섹션 그린, 언듀레이션 완만",
+    "nine": "스카이",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 558,
+     "blue": 544,
+     "white": 525,
+     "red": 492,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 509",
+     "note": ""
+    }
+   },
+   {
+    "n": 9,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "내리막 마지막 홀, 횡경사 주의. 티샷 우측, 세컨드는 짧게 놓고 오르막 퍼팅 · 해저드: 우측 OB, 좌측 해저드, 그린 뒤 OB · 그린: 무난한 그린",
+    "nine": "스카이",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 400,
+     "blue": 379,
+     "white": 354,
+     "red": 332,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 10,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "급내리막 우측 도그렉 짧은 파4. 슬라이스 주의, 장타자는 원온 시도 가능 · 해저드: 우측 해저드, 그린 옆 벙커(난도 높음) · 그린: 길고 완만한 그린, 퍼팅 비교적 쉬움",
+    "nine": "힐",
+    "nineHole": 1,
+    "scorecard": {
+     "unit": "m",
+     "back": 361,
+     "blue": 353,
+     "white": 338,
+     "red": 306,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 321",
+     "note": ""
+    }
+   },
+   {
+    "n": 11,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "좌로 굽은 넓은 IP. 내리막 이점 살려 장타 가능, 우측 해저드만 주의 · 해저드: 우측 해저드, 그린 양쪽 벙커 · 그린: 그린 양측 벙커로 정확도 필요",
+    "nine": "힐",
+    "nineHole": 2,
+    "scorecard": {
+     "unit": "m",
+     "back": 389,
+     "blue": 372,
+     "white": 356,
+     "red": 315,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 334",
+     "note": ""
+    }
+   },
+   {
+    "n": 12,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "페어웨이 좁아 정확한 티샷 필요. 장타자는 우드 티샷 권장, 이후 숏아이언 공략 · 해저드: IP 지점 벙커 3개, 그린 뒤 OB · 그린: 그린 뒤 여유 공간 적음",
+    "nine": "힐",
+    "nineHole": 3,
+    "scorecard": {
+     "unit": "m",
+     "back": 340,
+     "blue": 318,
+     "white": 298,
+     "red": 281,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 13,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "워터 해저드 우측 큰 마운드를 넘기는 중거리 파3. 그린 중앙 겨냥, 클럽 선택 신중 · 해저드: 티 앞 워터 해저드(연못), 그린 양쪽 벙커 2개, 그린 뒤 2단 벙커 · 그린: 그린 우측 어프로치 공간 넓음",
+    "nine": "힐",
+    "nineHole": 4,
+    "scorecard": {
+     "unit": "m",
+     "back": 176,
+     "blue": 161,
+     "white": 143,
+     "red": 117,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 14,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "물 건너 페어웨이 중앙 약간 좌측으로 티샷. IP 넓으나 좌OB·우해저드 주의, 그린 공략 시 거리 계산 정확히 · 해저드: 티 앞 연못 횡단, 좌측 OB, 우측 해저드, 그린 앞 벙커 4개 · 그린: 그린 폭 좁음",
+    "nine": "힐",
+    "nineHole": 5,
+    "scorecard": {
+     "unit": "m",
+     "back": 538,
+     "blue": 512,
+     "white": 492,
+     "red": 471,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 15,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "Z자형 홀. 좌측 항아리 벙커 피해 페어웨이 중앙, 우측 벽면 뒤 페어웨이 넓음. 연극무대 같은 경관 · 해저드: 물 건너는 티샷, 좌측 항아리 벙커 2개, 그린 주위 깊은 벙커 3개 · 그린: 2단 그린, 오르막 퍼팅 남기는 공략 유리",
+    "nine": "힐",
+    "nineHole": 6,
+    "scorecard": {
+     "unit": "m",
+     "back": 351,
+     "blue": 328,
+     "white": 306,
+     "red": 257,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 287",
+     "note": ""
+    }
+   },
+   {
+    "n": 16,
+    "par": 4,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 페어웨이 중앙 우측. 거리 길지 않아 정확한 티샷이면 온그린 무난. 폭포 아래 야생화 군락 · 해저드: 그린 앞 항아리형 작은 분지, 우측 연못, 페어웨이 벙커 · 그린: 큰 그린, 도전적 퍼팅",
+    "nine": "힐",
+    "nineHole": 7,
+    "scorecard": {
+     "unit": "m",
+     "back": 355,
+     "blue": 332,
+     "white": 306,
+     "red": 284,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 17,
+    "par": 3,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "약간 오르막. 그린 중앙 좌측 겨냥, 오버 금지(암벽) · 해저드: 그린 좌측 벙커, 그린 뒤 암벽(암반) · 그린: 그린 좌측 벙커 너머 숨은 그린 존재",
+    "nine": "힐",
+    "nineHole": 8,
+    "scorecard": {
+     "unit": "m",
+     "back": 161,
+     "blue": 148,
+     "white": 129,
+     "red": 103,
+     "teeNames": "블랙/블루/화이트/레드",
+     "note": ""
+    }
+   },
+   {
+    "n": 18,
+    "par": 5,
+    "hdcp": null,
+    "hdcpCard": null,
+    "hazards": [],
+    "halfWidth": 16,
+    "note": "티샷 부담 적음, 비거리 욕심 금물. 세컨샷은 그린 앞 좌측 벙커 방향이 안전. 양측 벚나무 · 해저드: 좌측 OB, 우측 해저드, 그린 앞 벙커 다수 · 그린: 편안한 그린, 벙커샷 무난",
+    "nine": "힐",
+    "nineHole": 9,
+    "scorecard": {
+     "unit": "m",
+     "back": 486,
+     "blue": 466,
+     "white": 444,
+     "red": 405,
+     "teeNames": "블랙/블루/화이트/레드, 옐로 423",
+     "note": ""
+    }
+   }
+  ],
+  "info": {
+   "operationType": "회원제",
+   "totalHoles": 18,
+   "memberHoles": 18,
+   "publicHoles": null,
+   "homepage": "https://www.4wellcc.com/",
+   "openedYear": null,
+   "layout": "스카이 9홀(파36, 3,246m) + 힐 9홀(파36, 3,157m)",
+   "par18": 72,
+   "lengthYards": 7002,
+   "fairwayGrass": "",
+   "greenGrass": "",
+   "architect": "",
+   "fees": {
+    "weekday": "비회원 정상가 200,000원 (정회원 28,500 / 9차 주중회원 1·2부 105,000·3부 79,000 / 스페셜 79,000·62,000, 제세공과금 별도)",
+    "weekend": "비회원 정상가 240,000원 (준회원 134,000 / 9차 1·2부 123,000·3부 102,000, 비회원 3인 플레이 시 인당 3만원 추가)",
+    "cart": "100,000원(3~4인) / 5인 200,000원",
+    "caddie": "1·2부 150,000원, 3부 160,000원(3~4인) / 5인 300,000·320,000원(캐디 2명)"
+   },
+   "reservation": "인터넷(홈페이지 회원가입 후) 또는 전화 055-340-9000(주중·공휴일 09~18시). 예약가능일: 정회원 15일 전, 준회원 14일 전, 일반 13일 전(주말은 1주 전 월요일). 당일예약은 전화, 단체 3팀 이상 온라인 신청",
+   "difficulty": "",
+   "features": "김해평야 숲 속에 계단식으로 자리한 프라이빗 회원제 18홀(총면적 1,030,540㎡). 스카이=남성적·끌기와 집중력 요구(4번 파5 리스크-리워드, 7번 계곡 넘는 파3), 힐=날렵한 디자인(4번 워터해저드 넘는 파3, 6번 Z자 연극무대 같은 경관, 7번 폭포·야생화). 벙커·워터해저드 다수, 야간 라운드 시 고속도로 불빛 조망. 티: 블랙/블루/화이트/(옐로 일부 홀)/레드. 라운드 4시간 30~50분, 연중무휴. 원표기 m(총 6,403m → 약 7,002yd). 개장연도·잔디·설계자·핸디캅은 홈페이지 미제공. 운영사 (주)메가비엠씨",
+   "facilities": "클럽하우스(유럽풍, 세미나·워크숍 공간), 프로샵, 레스토랑(75석), 스타트하우스, 카페, 티하우스(6·15홀), VIP락카룸(A 300,000원·B 200,000원, 최대 8명), 사우나. 대여: 클럽 50,000원, 골프화 10,000원"
+  },
+  "dataSources": [
+   {
+    "type": "scorecard",
+    "provider": "KGBA 회원사 코스 DB (골프장 홈페이지 수집)",
+    "license": "출처 표기",
+    "date": "2026-11-14",
+    "url": "https://www.4wellcc.com/course/courseIntro.asp / https://www.4wellcc.com/course/course.asp / https://www.4wellcc.com/club/about.asp / https://www.4wellcc.com/information/fee.asp / https://www.4wellcc.com/information/reserInfo.asp / https://www.4wellcc.com/facil/facil.asp",
+    "note": "KGBA id 1 · 수집 상태 완료"
+   }
+  ],
+  "kgba": {
+   "clubId": 1,
+   "name": "4WELL",
+   "nines": [
+    "스카이",
+    "힐"
+   ],
+   "srcHash": "cd72fddd87fc"
+  },
+  "nines": [
+   {
+    "name": "스카이",
+    "holes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   {
+    "name": "힐",
+    "holes": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "center": {
+   "lat": 35.227911,
+   "lon": 128.889538,
+   "precision": "sigungu"
+  },
+  "official": true,
+  "updatedAt": "2026-11-14T16:31:48.836Z"
+ }
+}
