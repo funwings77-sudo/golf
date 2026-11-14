@@ -93,3 +93,7 @@ main#view.play { padding: 0 0 calc(var(--nav-h) + 12px + env(safe-area-inset-bot
 .ar-bar .btn { background: rgba(255,255,255,.95); color: #18211d; }
 @media (prefers-reduced-motion: reduce) { .dp-arrow, .arrow, .pick, .pbtn { transition: none; } }
 .stage .leaflet-control-zoom { display: none; }
+.learn { font-size: 13px; color: var(--sub); margin: -2px 0 0 42px; }
+.ar-diag { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 4; background: rgba(0,0,0,.78); color: #fff; border-radius: 14px; padding: 10px 12px; font-size: 13px; line-height: 1.5; display: none; max-height: 70%; overflow: auto; }
+.ar-diag.show { display: block; }
+.ar-diag b.ok { color: #7fe0a6; } .ar-diag b.bad { color: #ff9a8f; } .ar-diag b.mid { color: #ffd479; }

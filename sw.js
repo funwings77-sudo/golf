@@ -1,11 +1,11 @@
 // 오프라인 우선 서비스 워커: 앱 셸·물리 엔진은 캐시 우선, 지도 타일은 런타임 캐시
-const VER = 'pinpoint-v5';
+const VER = 'pinpoint-v6';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'icons/icon.svg', 'icons/icon-192.png',
   'js/app.js', 'js/ui.js', 'js/map.js',
   'js/core/geo.js', 'js/core/state.js', 'js/core/sensors.js', 'js/core/weather.js', 'js/core/camera.js', 'js/core/score.js', 'js/core/rules.js', 'js/core/course.js', 'js/core/remote.js', 'js/core/report.js',
   'js/physics/putt.js', 'js/physics/putt.worker.js', 'js/physics/flight.js', 'js/physics/strategy.js', 'js/physics/lostball.js',
-  'js/views/home.js', 'js/views/play.js', 'js/views/view3d.js', 'js/views/arview.js', 'js/physics/advice.js', 'js/core/arproj.js', 'css/play.css', 'js/views/distance.js', 'js/views/tee.js', 'js/views/lost.js', 'js/views/green.js', 'js/views/greencanvas.js', 'js/views/lie.js', 'js/views/score.js',
+  'js/views/home.js', 'js/views/play.js', 'js/views/view3d.js', 'js/views/arview.js', 'js/physics/advice.js', 'js/physics/greenmesh.js', 'js/core/arproj.js', 'css/play.css', 'js/views/distance.js', 'js/views/tee.js', 'js/views/lost.js', 'js/views/green.js', 'js/views/greencanvas.js', 'js/views/lie.js', 'js/views/score.js',
   'js/views/courses.js', 'js/views/bag.js', 'js/views/rules.js', 'js/views/safety.js', 'js/views/history.js', 'js/views/calib.js', 'js/views/settings.js', 'js/views/about.js',
   'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',

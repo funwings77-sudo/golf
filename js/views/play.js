@@ -188,6 +188,7 @@ function cards() {
     const rel = adv.rel || 0, side = Math.abs(adv.lateral || 0);
     advHtml = `<div class="pcard adv">
       <div class="ar1"><i>🏌️</i><b>${esc(adv.clubName)}</b>${adv.alternatives?.length ? `<small>다른 선택: ${adv.alternatives.map(a => esc(a.clubName)).join(', ')}</small>` : ''}</div>
+      ${(() => { const cb = S.bag.find(c => c.id === adv.club); return cb ? `<div class="learn">📏 내 ${esc(cb.name)} 비거리 ${Math.round(cb.carry)}m · ${cb.learned ? `실제 ${cb.n}번 친 기록으로 학습됨 ✓` : `아직 기본값이에요 (${cb.n || 0}/3샷) — 칠수록 정확해져요`}</div>` : ''; })()}
       <div class="ar1"><i>💪</i><b>힘 ${adv.power}%</b><span>${esc(adv.swing.short)} (${adv.swing.clock})</span></div>
       <div class="pow"><span style="width:${adv.power}%"></span></div>
       <div class="ar1"><i>🧭</i><b>${dirWords(rel)}</b>${side >= 2 ? `<span>깃발 줄에서 ${rel > 0 ? '오른쪽' : '왼쪽'} ${Math.round(side)}m 지점을 보고</span>` : ''}</div>
@@ -299,6 +300,7 @@ async function mountView() {
       $('#zi').onclick = () => v3.zoomBy(0.7); $('#zo').onclick = () => v3.zoomBy(-0.7);
       let tilted = true; $('#tilt').onclick = () => { tilted = !tilted; v3.setPitch(tilted ? 62 : 0); };
       scene(); v3.fitScene();
+      if (h.greenGrid) { v3.setGreen(h.greenGrid); toast('🟢 이 홀은 정밀 측량 그린맵이 있어요 — 그린을 확대해 보세요 (색 = 경사, 흰 선 = 높이 2cm)', 3500); }
       if (P.view === '4d') {
         const go = async (from, to, club) => {
           const apex = conditionsEffect(club?.id || '7i', distance(from, to)).apex || 25;

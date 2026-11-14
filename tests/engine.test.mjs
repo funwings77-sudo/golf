@@ -192,3 +192,16 @@ test('AR 투영: 세워 든 휴대폰에서 북쪽 깃발은 화면 가운데, �
   const c = yawCorrection(R, enuOf(me, Geo.destination(me, 5, 120), { eye: 0 }), 200, opt);
   near(c, 5, 0.2);
 });
+
+import { contourSegments, greenGeoJSON, gridCorners, slopeAt } from '../js/physics/greenmesh.js';
+test('3D 겹치기용 그린 데이터: 등고선·흐름 화살표·모서리', () => {
+  const nx = 21, dx = 0.5, h = []; for (let j = 0; j < nx; j++) for (let i = 0; i < nx; i++) h.push(0.02 * (-5 + j * dx)); // 북쪽으로 2% 오르막
+  const g = { x0: -5, y0: -5, dx, nx, ny: nx, h }, gg = { origin: { lat: 37.5, lon: 127 }, grid: g };
+  near(slopeAt(g, 10, 10).pct, 2, 1e-9);
+  const segs = contourSegments(g, 0.02);
+  assert.ok(segs.length > 50 && segs.every(s => Math.abs(s.a.y - s.b.y) < 1e-9), '동서 방향 등고선');
+  const gj = greenGeoJSON(gg); assert.ok(gj.features.some(f => f.properties.k === 'flow'));
+  const flow = gj.features.find(f => f.properties.k === 'flow').geometry.coordinates;
+  assert.ok(flow[1][1] < flow[0][1], '화살표는 남쪽(내리막)으로');
+  const c = gridCorners(gg); assert.equal(c.length, 4); assert.ok(c[0][1] > c[3][1] && c[1][0] > c[0][0]);
+});

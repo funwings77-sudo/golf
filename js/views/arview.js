@@ -1,7 +1,7 @@
 // 카메라 증강현실(AR): 실제 풍경 위에 깃발 · 추천 길(지면 선) · 떨어질 곳 · 내 공 · 해저드 표시
 //  정밀도: 회전행렬(α·β·γ) 투영 + 표시 영상의 실제 초점거리(object-fit 보정) + 방위 1탭 보정 + 흔들림 완화
 import { openCamera, coverTransform } from '../core/camera.js';
-import { Sensors, startOrientation, requestMotionPermission } from '../core/sensors.js';
+import { Sensors, startOrientation, requestMotionPermission, onOrientation } from '../core/sensors.js';
 import { rotationMatrix, project, enuOf, focalPx, cameraAxis, yawCorrection, smoothAngle } from '../core/arproj.js';
 import { distance, bearing, destination, normAngle } from '../core/geo.js';
 import { S } from '../core/state.js';
@@ -9,12 +9,16 @@ import { S } from '../core/state.js';
 const YAW_KEY = 'pinpoint.arYaw';
 export async function startAR(box, getScene) {
   box.innerHTML = `<div class="ar"><video playsinline muted></video><canvas></canvas>
-    <div class="ar-msg" id="arMsg"></div>
-    <div class="ar-bar"><button class="btn small" id="arCal">🎯 깃발 맞추기</button><button class="btn small" id="arReset" title="방위 보정 지우기">↺</button><span id="arAcc"></span></div></div>`;
+    <div class="ar-msg" id="arMsg"></div><div class="ar-diag" id="arDiag"></div>
+    <div class="ar-bar"><button class="btn small" id="arCal">🎯 깃발 맞추기</button><button class="btn small" id="arReset" title="방위 보정 지우기">↺</button><button class="btn small" id="arChk">🩺 점검</button><span id="arAcc"></span></div></div>`;
   const video = box.querySelector('video'), cv = box.querySelector('canvas'), msg = box.querySelector('#arMsg'), acc = box.querySelector('#arAcc');
   let stopCam = null, raf = 0, alive = true, calib = false;
   let yaw = 0; try { yaw = +localStorage.getItem(YAW_KEY) || 0; } catch {}
   let a = null, b = null, g = null;
+  // 실기기 점검용: 방향 센서 이벤트 빈도
+  let evN = 0, evRate = 0, evT = performance.now();
+  const unOri = onOrientation(() => { evN++; const now = performance.now(); if (now - evT >= 1000) { evRate = evN * 1000 / (now - evT); evN = 0; evT = now; } });
+  let diagOn = false;
   try { await requestMotionPermission(); } catch {}
   startOrientation();
   try { stopCam = await openCamera(video); }
@@ -29,8 +33,8 @@ export async function startAR(box, getScene) {
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     const sc = getScene();
-    if (Sensors.alphaAbs == null || Sensors.beta == null) { say('🧭 방향 센서를 기다려요…<br><small>휴대폰을 8자 모양으로 한두 번 돌려 주세요</small>'); return; }
     if (!sc?.me) { say('📍 위치를 찾는 중이에요…'); return; }
+    if (Sensors.alphaAbs == null || Sensors.beta == null) { say('🧭 방향 센서를 기다려요…<br><small>휴대폰을 8자 모양으로 한두 번 돌려 주세요 · 🩺 점검을 눌러 원인을 볼 수 있어요</small>'); if (diagOn) diag(sc, { bearing: 0, pitch: 0 }); return; }
     a = smoothAngle(a, (Sensors.alphaAbs + yaw + 360) % 360, 0.2);
     b = b == null ? Sensors.beta : b + (Sensors.beta - b) * 0.25;
     g = g == null ? Sensors.gamma : g + (Sensors.gamma - g) * 0.25;
@@ -73,6 +77,7 @@ export async function startAR(box, getScene) {
         label(top.x, top.y - 16, `⛳ 깃발 ${Math.round(distance(sc.me, sc.pin))}m`, 'rgba(31,95,63,.95)', 17);
       } else edge(sc.pin, '깃발', ax);
     }
+    if (diagOn) diag(sc, ax);
     acc.textContent = `GPS ±${Math.round(sc.me.acc || 0)}m · 방위 ${Math.round(ax.bearing)}°${Sensors.compassAcc != null ? ` (±${Math.round(Sensors.compassAcc)}°)` : ''}${yaw ? ` · 보정 ${yaw > 0 ? '+' : ''}${yaw.toFixed(1)}°` : ''}`;
   }
   function label(x, y, text, bg, size) {
@@ -89,9 +94,26 @@ export async function startAR(box, getScene) {
     ctx.fillStyle = '#ffe27a'; ctx.font = '900 26px system-ui'; ctx.textAlign = 'center'; ctx.fillText(left ? '◀' : '▶', x, y + 9);
     label(x + (left ? 60 : -60), y + 52, `${name}은 ${left ? '왼쪽' : '오른쪽'} ${Math.abs(rel).toFixed(0)}°`, 'rgba(0,0,0,.65)', 13); ctx.textAlign = 'left';
   }
+  // 🩺 실기기 점검: 각 센서 상태 · 예상 오차 · 고치는 방법
+  function diag(sc, ax) {
+    const D = sc.pin ? distance(sc.me, sc.pin) : 150, cAcc = Sensors.compassAcc, gAcc = sc.me.acc || 0, age = (Date.now() - (sc.me.ts || Date.now())) / 1000;
+    const row = (ok, name, val, fix) => `<div>${ok === 2 ? '<b class="ok">✓</b>' : ok === 1 ? '<b class="mid">△</b>' : '<b class="bad">✕</b>'} ${name}: <b>${val}</b>${ok < 2 && fix ? ` <br><small>→ ${fix}</small>` : ''}</div>`;
+    const compErr = cAcc != null && cAcc >= 0 ? cAcc : 10, lat = D * Math.tan(compErr * Math.PI / 180);
+    box.querySelector('#arDiag').innerHTML = `<b>AR 점검</b> <small>(이 화면을 캡처해서 보내 주시면 원인을 찾을 수 있어요)</small>
+      ${row(isSecureContext ? 2 : 0, 'HTTPS', isSecureContext ? '예' : '아니요', 'https 주소로 열어야 센서·카메라가 켜져요')}
+      ${row(video.videoWidth ? 2 : 0, '카메라', video.videoWidth ? `${video.videoWidth}×${video.videoHeight}` : '꺼짐', '카메라 권한을 허용해 주세요')}
+      ${row(evRate >= 20 ? 2 : evRate >= 5 ? 1 : 0, '방향 센서', `${evRate.toFixed(0)}회/초`, '배터리 절약 모드를 끄고, iPhone은 동작·방향 권한을 허용해 주세요')}
+      ${row(Sensors.alphaAbs != null ? 2 : 0, '나침반(북쪽 기준)', Sensors.alphaAbs != null ? `${Math.round(ax.bearing)}°` : '없음', '기기가 나침반을 지원하지 않으면 [깃발 맞추기]로 방향을 맞춰 주세요')}
+      ${row(cAcc == null ? 1 : cAcc <= 15 ? 2 : cAcc <= 30 ? 1 : 0, '나침반 정확도', cAcc == null ? '기기가 알려주지 않음' : `±${Math.round(cAcc)}°`, '휴대폰을 8자로 돌리고, 카트·철제 구조물에서 2m 떨어지세요')}
+      ${row(gAcc <= 5 ? 2 : gAcc <= 10 ? 1 : 0, 'GPS 정확도', `±${Math.round(gAcc)}m · ${age.toFixed(0)}초 전`, '하늘이 트인 곳에서 10초 기다려 주세요')}
+      ${row(Math.abs(ax.pitch) < 35 ? 2 : 1, '휴대폰 자세', `위아래 ${ax.pitch.toFixed(0)}° · 기울기 ${(g ?? 0).toFixed(0)}°`, '휴대폰을 세워서 앞을 비춰 주세요')}
+      ${row(2, '방위 보정', `${yaw ? (yaw > 0 ? '+' : '') + yaw.toFixed(1) + '°' : '없음'} · 화각 ${S.settings.cameraVFov || 63}°`, '')}
+      <div style="margin-top:6px">예상 오차: 깃발(${Math.round(D)}m)이 화면에서 좌우 약 <b>${lat.toFixed(1)}m</b> 어긋날 수 있어요${compErr > 8 ? ' → [🎯 깃발 맞추기]를 쓰면 줄어들어요' : ''}. 거리 숫자는 GPS로 계산해서 ±${Math.round(gAcc)}m 정도예요.</div>`;
+  }
   function say(h) { msg.innerHTML = h; msg.classList.add('show'); }
   function hide() { msg.classList.remove('show'); }
   box.querySelector('#arCal').onclick = () => { calib = !calib; };
+  box.querySelector('#arChk').onclick = () => { diagOn = !diagOn; box.querySelector('#arDiag').classList.toggle('show', diagOn); };
   box.querySelector('#arReset').onclick = () => { yaw = 0; a = null; try { localStorage.removeItem(YAW_KEY); } catch {} };
   cv.addEventListener('click', e => {
     if (!calib || !last.R) return;
@@ -102,5 +124,5 @@ export async function startAR(box, getScene) {
     calib = false;
   });
   raf = requestAnimationFrame(frame);
-  return () => { alive = false; cancelAnimationFrame(raf); stopCam && stopCam(); };
+  return () => { alive = false; cancelAnimationFrame(raf); unOri(); stopCam && stopCam(); };
 }

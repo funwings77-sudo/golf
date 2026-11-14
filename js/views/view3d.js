@@ -3,6 +3,8 @@
 //  4D: 3D + 시간 — 공이 날아가는 모습(탄도) 재생, 홀 플라이오버, 시간 막대로 되감기
 import { SAT_URL } from '../map.js';
 import { distance, bearing, destination } from '../core/geo.js';
+import { greenGeoJSON, gridCorners, slopeAt } from '../physics/greenmesh.js';
+import { slopeColor } from './greencanvas.js';
 
 const ML = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/';
 let libP = null;
@@ -27,11 +29,12 @@ export async function create3D(container, { center, bearingDeg = 0, pitch = 62, 
       version: 8,
       sources: {
         sat: { type: 'raster', tiles: [SAT_URL], tileSize: 256, maxzoom: 19, attribution: 'Imagery © Esri' },
+        dem2: { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 15 },
         dem: { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 15, attribution: 'Terrain © Mapzen, AWS' },
       },
       layers: [
         { id: 'sat', type: 'raster', source: 'sat' },
-        { id: 'hill', type: 'hillshade', source: 'dem', paint: { 'hillshade-exaggeration': 0.35, 'hillshade-shadow-color': '#0b1a10' } },
+        { id: 'hill', type: 'hillshade', source: 'dem2', paint: { 'hillshade-exaggeration': 0.35, 'hillshade-shadow-color': '#0b1a10' } },
       ],
       terrain: { source: 'dem', exaggeration: 1.8 },
     },
@@ -108,6 +111,21 @@ export async function create3D(container, { center, bearingDeg = 0, pitch = 62, 
         await new Promise(r => map.once('moveend', r));
         if (api._stopped) return;
       }
+    },
+    // 사전 측량 그린맵을 지형 위에 겹침: 경사 색(%) + 등고선(2cm) + 흐름 화살표 → 공개 지형 타일보다 훨씬 촘촘한 그린 굴곡
+    setGreen(gg) {
+      for (const id of ['g-img', 'g-minor', 'g-major', 'g-flow']) if (map.getLayer(id)) map.removeLayer(id);
+      for (const id of ['g-img', 'g-lines']) if (map.getSource(id)) map.removeSource(id);
+      if (!gg?.grid) return;
+      const g = gg.grid, cv = document.createElement('canvas'); cv.width = g.nx; cv.height = g.ny;
+      const c = cv.getContext('2d');
+      for (let j = 0; j < g.ny; j++) for (let i = 0; i < g.nx; i++) { c.fillStyle = slopeColor(slopeAt(g, i, j).pct); c.fillRect(i, g.ny - 1 - j, 1, 1); }
+      map.addSource('g-img', { type: 'image', url: cv.toDataURL(), coordinates: gridCorners(gg) });
+      map.addLayer({ id: 'g-img', type: 'raster', source: 'g-img', paint: { 'raster-opacity': 0.72, 'raster-resampling': 'linear' } }, 'pin-line');
+      map.addSource('g-lines', { type: 'geojson', data: greenGeoJSON(gg) });
+      map.addLayer({ id: 'g-minor', type: 'line', source: 'g-lines', filter: ['==', ['get', 'k'], 'minor'], paint: { 'line-color': '#ffffff', 'line-width': 0.8, 'line-opacity': 0.55 } }, 'pin-line');
+      map.addLayer({ id: 'g-major', type: 'line', source: 'g-lines', filter: ['==', ['get', 'k'], 'major'], paint: { 'line-color': '#ffffff', 'line-width': 1.8 } }, 'pin-line');
+      map.addLayer({ id: 'g-flow', type: 'line', source: 'g-lines', filter: ['==', ['get', 'k'], 'flow'], paint: { 'line-color': '#0f1914', 'line-width': 2 } }, 'pin-line');
     },
     destroy() { api._stopped = true; try { map.remove(); } catch {} },
   };
