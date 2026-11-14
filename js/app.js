@@ -169,7 +169,7 @@ function init() {
   setInterval(() => { safetyTick(); hydrateTick(); }, 30000);
   setTimeout(safetyTick, 4000);
   route();
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW', e));
+  if ('serviceWorker' in navigator && location.protocol !== 'file:' && !window.Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW', e));
 }
 init();
 export { sampleFix };

@@ -1,0 +1,8 @@
+{
+  "appId": "io.github.funwings77sudo.pinpoint",
+  "appName": "PinPoint 캐디",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}
