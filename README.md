@@ -2,6 +2,9 @@
 
 기획서 「아마추어 골퍼 필드 페인포인트 정밀 분석 & 올인원 AI 캐디 앱 기획」을 구현한 오프라인 우선 모바일 웹앱입니다.
 
+**배포 주소: https://funwings77-sudo.github.io/golf/** (GitHub Pages, `main` 브랜치에 푸시하면 자동 재배포)
+휴대폰에서 열고 "홈 화면에 추가"하면 앱처럼 쓸 수 있습니다.
+
 ## 실행
 ```
 npm start          # http://localhost:8080
