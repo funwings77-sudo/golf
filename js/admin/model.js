@@ -63,6 +63,16 @@ export function validateCourse(c) {
       if (L < lo || L > hi) W(`길이 ${Math.round(L)}m가 Par ${h.par} 일반 범위(${lo}~${hi}m)를 벗어납니다. 티·그린 위치를 확인하세요`, n);
       if (h.ip && isLL(h.ip) && distance(h.tee, h.ip) > L) W('IP(공략점)가 그린보다 멀리 있습니다', n);
     }
+    // 스코어카드(KGBA DB 등) 거리와 지도 거리 대조: 티→(IP)→그린 경로 기준
+    if (h.scorecard && isLL(h.green)) {
+      const s = h.scorecard, conv = v => (v == null ? null : s.unit === 'yd' ? v * 0.9144 : v);
+      const sets = [['white', h.tees?.white || h.tee, s.white], ['black', h.tees?.black, s.back], ['blue', h.tees?.blue, s.blue], ['red', h.tees?.red, s.red]];
+      for (const [color, tp, card] of sets) {
+        if (!isLL(tp) || card == null) continue;
+        const route = isLL(h.ip) ? distance(tp, h.ip) + distance(h.ip, h.green) : distance(tp, h.green), cm = conv(card), diff = route - cm;
+        if (Math.abs(diff) > Math.max(15, cm * 0.07)) W(`${TEE_SETS.find(t => t[0] === color)[1]} 티: 지도 ${Math.round(route)}m vs 스코어카드 ${Math.round(cm)}m (${diff > 0 ? '+' : ''}${Math.round(diff)}m) — 티·그린 위치를 확인하세요`, n);
+      }
+    }
     if (isLL(h.front) && isLL(h.back)) {
       const d = distance(h.front, h.back);
       if (d < 12 || d > 60) W(`그린 깊이 ${Math.round(d)}m: 일반 범위(12~60m) 밖입니다`, n);
@@ -80,6 +90,9 @@ export function validateCourse(c) {
       if (gv) E('그린 격자: ' + gv, n);
       else if (!isLL(h.greenGrid.origin)) E('그린 격자 원점 좌표가 없습니다', n);
       else if (isLL(h.green) && distance(h.greenGrid.origin, h.green) > 15) W('그린 격자 원점이 그린 중앙에서 15m 이상 떨어져 있습니다', n);
+      const vr = !gv && h.greenGrid.checks?.length ? verifyGrid(h.greenGrid.grid, h.greenGrid.checks) : null;
+      if (vr?.n && !vr.pass) W(`그린맵 현장 검증 오차 RMS ${vr.rms.toFixed(2)}%p > 허용 ${GREEN_TOL_PCT}%p (측정점 ${vr.n}개) — 측량 데이터를 확인하세요`, n);
+      else if (!gv && !h.greenGrid.checks?.length) W('그린맵 현장 검증(디지털 수평계 대조)이 아직 없습니다', n);
     } else W('사전 측량 그린맵이 없습니다 (현장 측정으로만 퍼팅 계산)', n);
   }
   if (!c.shelters?.length) W('낙뢰 대피소가 하나도 없습니다 (안전 화면에서 안내 불가)');
@@ -370,3 +383,28 @@ export function validateNotice(n) {
   return null;
 }
 export function noticesFile(items) { return { format: DATA_FORMATS.notices, version: 1, updatedAt: new Date().toISOString(), items }; }
+
+// ---------------- 그린맵 현장 검증 (기획서 PoC: 디지털 수평계 대조, 경사 오차 ±0.2%p) ----------------
+// 측정값: 경사 pct(%)와 공이 흘러내리는 방향 dir(방위°, 0=북). 격자 경사와 벡터 오차를 비교
+export function gridGradAt(g, x, y) {
+  const { nx, ny, dx, x0, y0, h } = g;
+  const at = (i, j) => h[Math.max(0, Math.min(ny - 1, j)) * nx + Math.max(0, Math.min(nx - 1, i))];
+  const gr = (i, j) => [(at(i + 1, j) - at(i - 1, j)) / (2 * dx), (at(i, j + 1) - at(i, j - 1)) / (2 * dx)];
+  let fx = (x - x0) / dx, fy = (y - y0) / dx; fx = Math.max(0, Math.min(nx - 1.0001, fx)); fy = Math.max(0, Math.min(ny - 1.0001, fy));
+  const i = Math.floor(fx), j = Math.floor(fy), tx = fx - i, ty = fy - j;
+  const a = gr(i, j), b = gr(i + 1, j), c = gr(i, j + 1), d = gr(i + 1, j + 1);
+  return [0, 1].map(k => (a[k] * (1 - tx) + b[k] * tx) * (1 - ty) + (c[k] * (1 - tx) + d[k] * tx) * ty);
+}
+export const GREEN_TOL_PCT = 0.2;
+export function verifyGrid(g, checks = []) {
+  const rows = checks.filter(c => Number.isFinite(c.x) && Number.isFinite(c.y) && Number.isFinite(c.pct) && Number.isFinite(c.dir)).map(c => {
+    const [gx, gy] = gridGradAt(g, c.x, c.y), r = c.dir * Math.PI / 180;
+    const mx = -Math.sin(r) * c.pct / 100, my = -Math.cos(r) * c.pct / 100; // 내리막 방향의 반대 = 경사(오르막) 벡터
+    const err = Math.hypot(gx - mx, gy - my) * 100;
+    const gridPct = Math.hypot(gx, gy) * 100, gridDir = (Math.atan2(-gx, -gy) * 180 / Math.PI + 360) % 360;
+    return { ...c, gridPct, gridDir, err, pass: err <= GREEN_TOL_PCT };
+  });
+  if (!rows.length) return { n: 0, rows };
+  const rms = Math.sqrt(rows.reduce((a, r) => a + r.err * r.err, 0) / rows.length);
+  return { n: rows.length, rows, rms, max: Math.max(...rows.map(r => r.err)), pass: rms <= GREEN_TOL_PCT, enough: rows.length >= 5 };
+}

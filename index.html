@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/play.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 <script type="module" src="js/app.js"></script>
 </head>
@@ -29,18 +30,20 @@
   <div class="alert-bar" id="alertBar" role="alert"></div>
   <main id="view"></main>
   <nav class="tabs" id="tabs">
+    <a href="#/play" data-r="play"><span class="i">🏌️</span>플레이</a>
     <a href="#/distance" data-r="distance"><span class="i">⛳</span>거리</a>
     <a href="#/tee" data-r="tee"><span class="i">🎯</span>티샷</a>
     <a href="#/lost" data-r="lost"><span class="i">📡</span>공찾기</a>
     <a href="#/green" data-r="green"><span class="i">🟢</span>그린</a>
-    <a href="#/lie" data-r="lie"><span class="i">📐</span>라이</a>
     <a href="#/score" data-r="score"><span class="i">📝</span>스코어</a>
   </nav>
   <div class="drawer" id="drawer">
     <div class="bg"></div>
     <div class="panel">
       <div class="brand">⛳ PinPoint AI 캐디</div>
-      <a href="#/home">🏠 홈 · 라운드 시작</a>
+      <a href="#/play">🏌️ 쉬운 플레이 (처음이라면 여기!)</a>
+      <a href="#/home">🏠 홈 · 라운드 시작 (자세히)</a>
+      <a href="#/lie">📐 라이 경사 측정</a>
       <a href="#/courses">🗺️ 코스 관리 · 편집</a>
       <a href="#/bag">🏌️ 내 백 (클럽 · 갭 분석)</a>
       <a href="#/rules">📖 룰 · 구제 도우미</a>

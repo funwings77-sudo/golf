@@ -5,6 +5,7 @@ import { Store } from './store.js';
 const ROUTES = {
   dashboard: () => import('./views/dashboard.js'),
   courses: () => import('./views/courses.js'),
+  kgba: () => import('./views/kgba.js'),
   course: () => import('./views/editor.js'),
   pins: () => import('./views/pins.js'),
   greens: () => import('./views/greens.js'),

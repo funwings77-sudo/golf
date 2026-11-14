@@ -87,6 +87,9 @@ function onOri(e) {
   let h = null;
   if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
   else if (e.absolute && e.alpha != null) h = (360 - e.alpha) % 360;
+  // AR 회전행렬용 절대 alpha (Rz·Rx·Ry, 북 기준). iOS·Android 모두 '360 − 나침반 방위'와 같음
+  Sensors.alphaAbs = h != null ? (360 - h) % 360 : null;
+  Sensors.compassAcc = typeof e.webkitCompassAccuracy === 'number' ? e.webkitCompassAccuracy : null;
   if (h != null) {
     const so = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
     Sensors.heading = (h + so + 360) % 360;

@@ -39,7 +39,7 @@ function render() {
   });
   $$('td[data-h]', el_).forEach(td => td.onclick = () => App_.setHole(+td.dataset.h));
   $('#par').onclick = () => { h.scores.forEach(s => { if (!s.strokes) s.strokes = h.par; }); save('round'); render(); };
-  $('#next').onclick = () => App_.setHole(n + 1);
+  $('#next').onclick = () => App_.stepHole(1);
   $('#share')?.addEventListener('click', async () => {
     const txt = `[PinPoint] ${r.courseName} 정산\n` + st.lines.join('\n') + '\n' + st.transfers.map(t => `${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
     try { if (navigator.share) await navigator.share({ text: txt }); else { await navigator.clipboard.writeText(txt); toast('클립보드에 복사했습니다'); } } catch {}

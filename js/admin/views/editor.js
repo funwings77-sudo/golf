@@ -7,6 +7,7 @@ import { uid } from '../../core/state.js';
 import { Store } from '../store.js';
 import * as M from '../model.js';
 import { go } from '../main.js';
+import { fetchOSMGolf, parseOSM, applyOSM, OSM_ATTRIB } from '../osm.js';
 import { ago, confirmPublish, runPublish, readonlyNote } from '../common.js';
 
 const POINTS = [['tee', '기본 티', 'tee', 'T'], ['green', '그린 중앙', 'green', 'G'], ['front', '그린 앞', 'front', 'F'], ['back', '그린 뒤', 'back', 'B'], ['ip', 'IP 공략점', 'ip', 'IP']];
@@ -40,7 +41,7 @@ function render() {
     <div class="split">
       <div><div class="toolbar no-print" id="tools" style="margin-bottom:8px"></div>
         <div class="a-map"><div class="map" id="emap"></div></div>
-        <div class="row" style="margin-top:8px"><input type="text" id="goto" placeholder="위도, 경도 (예: 37.4419, 127.0094)" style="flex:1;min-width:200px"><button class="btn small" id="gotoBtn">지도 이동</button><button class="btn small" id="fit">홀 전체 보기</button></div>
+        <div class="row" style="margin-top:8px"><input type="text" id="goto" placeholder="위도, 경도 (예: 37.4419, 127.0094)" style="flex:1;min-width:200px"><button class="btn small" id="gotoBtn">지도 이동</button><button class="btn small" id="findBtn" title="OpenStreetMap 검색(Nominatim)으로 골프장 이름 찾기">🔎 이름으로 찾기</button><button class="btn small" id="fit">홀 전체 보기</button></div>
         <p class="sub" id="toolHelp" style="margin:6px 0 0"></p></div>
       <div class="sticky" id="panel"></div>
     </div>`;
@@ -53,6 +54,17 @@ function render() {
     st.map.setView([+m[1], +m[2]], 17);
   };
   $('#fit').onclick = () => fit(true);
+  // 골프장 이름 → 위치 (OSM Nominatim, 골프장 이름만 전송)
+  $('#findBtn').onclick = async () => {
+    const q = ($('#goto').value.trim() && !/\d+\.\d+/.test($('#goto').value) ? $('#goto').value.trim() : st.course.name).replace(/\(.*?\)/g, '').trim();
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=kr&accept-language=ko&q=${encodeURIComponent(q)}`);
+      const list = (await r.json()).filter(x => x.lat && x.lon);
+      if (!list.length) return toast(`'${q}'을(를) 찾지 못했어요. 이름을 바꿔 입력칸에 넣고 다시 눌러 보세요`, 4000);
+      const best = list.find(x => /golf/.test(x.type || '') || /골프|CC|컨트리/.test(x.display_name)) || list[0];
+      st.map?.setView([+best.lat, +best.lon], 16); toast(best.display_name.split(',').slice(0, 3).join(','), 4000);
+    } catch (e) { toast('검색 실패: ' + e.message); }
+  };
 }
 
 function renderHeader() {
@@ -62,14 +74,39 @@ function renderHeader() {
         ${st.remote ? `<span class="badge mute">발행본 rev ${st.remote.rev} · ${ago(st.remote.updatedAt)}</span>` : '<span class="badge warn">아직 발행 안 됨</span>'}
         ${st.dirty ? `<span class="badge warn">● 발행 안 된 변경 (${ago(st.savedAt)} 임시저장)</span>` : '<span class="badge">발행본과 같음</span>'}
         ${v.errors.length ? `<span class="badge err">오류 ${v.errors.length}</span>` : '<span class="badge">오류 없음</span>'}${v.warnings.length ? `<span class="badge warn">확인 ${v.warnings.length}</span>` : ''}</div></div>
-    <div class="a-actions"><a class="btn" href="#/greens/${encodeURIComponent(c.id)}">🟢 그린맵</a>${st.dirty && st.remote ? '<button class="btn" id="revert">↺ 발행본으로 되돌리기</button>' : ''}<button class="btn" id="check">🔎 전체 검증</button><button class="btn primary" id="pub" ${v.errors.length ? 'disabled title="오류를 먼저 고치세요"' : ''}>🚀 발행</button></div></div>`;
+    <div class="a-actions"><button class="btn" id="osm" title="현재 지도 화면 안의 OpenStreetMap 골프 데이터로 티·그린·벙커·물 위치 채우기">🌍 OSM 가져오기</button><a class="btn" href="#/greens/${encodeURIComponent(c.id)}">🟢 그린맵</a>${st.dirty && st.remote ? '<button class="btn" id="revert">↺ 발행본으로 되돌리기</button>' : ''}<button class="btn" id="check">🔎 전체 검증</button><button class="btn primary" id="pub" ${v.errors.length ? 'disabled title="오류를 먼저 고치세요"' : ''}>🚀 발행</button></div></div>`;
   $('#check').onclick = () => showIssues(v);
+  $('#osm').onclick = importOSM;
   $('#pub').onclick = publish;
   $('#revert')?.addEventListener('click', () => sheet({
     title: '발행본으로 되돌리기', body: '<p>이 기기에 임시저장된 변경을 모두 버리고 발행본으로 되돌릴까요?</p>',
     actions: [{ label: '취소' }, { label: '되돌리기', kind: 'danger', onClick: () => { Store.dropDraft(st.id); st.course = M.clone(st.remote); st.dirty = false; drawMap(); renderAll(); toast('되돌렸습니다'); } }],
   }));
 }
+// OpenStreetMap에서 홀 구조 가져오기 (기획서 2+-6 · 무료, ODbL)
+async function importOSM() {
+  if (!st.map) return toast('지도를 불러오지 못했습니다');
+  const b = st.map.getBounds();
+  const btn = $('#osm'); btn.disabled = true; btn.textContent = '🌍 조회 중…';
+  try {
+    const osm = parseOSM(await fetchOSMGolf([b.getSouth(), b.getWest(), b.getNorth(), b.getEast()]));
+    btn.disabled = false; btn.textContent = '🌍 OSM 가져오기';
+    if (!osm.holes.length) return sheet({ title: 'OSM 홀 데이터 없음', body: `<p>지금 지도 화면 안에서 <code>golf=hole</code>(티→핀 선)을 찾지 못했습니다.</p><p class="sub">찾은 것: 그린 ${osm.greens.length} · 티 ${osm.tees.length} · 벙커·물 ${osm.hazards.length}. 골프장 전체가 화면에 들어오게 옮긴 뒤 다시 시도하거나, 위성지도에서 직접 찍으세요. OSM에는 국내 골프장이 일부만 그려져 있습니다.</p>`, actions: [{ label: '닫기' }] });
+    const refs = osm.holes.map(h => h.ref).filter(Boolean);
+    sheet({
+      title: `OSM에서 ${osm.holes.length}개 홀 발견`,
+      body: `<p>홀 번호: ${refs.join(', ') || '번호 없음'} · 그린 ${osm.greens.length} · 벙커·물 ${osm.hazards.length}</p>
+        <p class="sub">홀 번호(ref)가 같은 홀에 티·그린 앞/중앙/뒤·IP·해저드를 넣습니다. OSM 데이터는 누구나 편집한 것이라 오차가 있을 수 있으니, 넣은 뒤 위성지도와 스코어카드 거리 검증으로 꼭 확인하세요. 출처 표기: ${OSM_ATTRIB}</p>`,
+      actions: [{ label: '취소' }, { label: '빈 칸만 채우기', onClick: () => doApply(osm, false) }, { label: '모두 덮어쓰기', kind: 'primary', onClick: () => doApply(osm, true) }],
+    });
+  } catch (e) { btn.disabled = false; btn.textContent = '🌍 OSM 가져오기'; toast(e.message, 5000); }
+}
+function doApply(osm, overwrite) {
+  const r = applyOSM(st.course, osm, { overwrite });
+  st.fitted = false; persist(); renderAll(); fit(true);
+  toast(`${r.matched.length}개 홀 채움${r.skipped.length ? ` · 못 찾은 홀 ${r.skipped.join(', ')}` : ''} — 검증 결과를 확인하세요`, 5000);
+}
+
 function renderAll() { renderHeader(); renderInfo(); renderChips(); renderTools(); renderPanel(); }
 
 function showIssues(v) {
@@ -128,7 +165,7 @@ function holeState(v, n) {
 }
 function renderChips() {
   const v = M.validateCourse(st.course);
-  $('#chips').innerHTML = st.course.holes.map(h => `<button class="${h.n === st.holeN ? 'on' : ''}" data-h="${h.n}" title="${h.n}번 홀 Par ${h.par}">${h.n}<i class="${holeState(v, h.n)}"></i></button>`).join('');
+  $('#chips').innerHTML = st.course.holes.map(h => `<button class="${h.n === st.holeN ? 'on' : ''}" data-h="${h.n}" title="${h.n}번 홀${h.nine ? ` (${h.nine} ${h.nineHole})` : ''} Par ${h.par}">${h.nine ? `<small style="font-weight:600">${esc(h.nine.slice(0, 2))}</small>${h.nineHole}` : h.n}<i class="${holeState(v, h.n)}"></i></button>`).join('');
   $$('#chips button').forEach(b => b.onclick = () => { st.holeN = +b.dataset.h; st.fitted = false; drawMap(); renderChips(); renderPanel(); renderTools(); });
 }
 
@@ -212,6 +249,8 @@ function renderPanel() {
   $('#panel').innerHTML = `<div class="card">
     <div class="row"><h3 class="grow" style="margin:0">${h.n}번 홀</h3><span class="sub">${L_ ? `기본 티 ${Math.round(L_)}m` : '티·그린 미지정'}</span></div>
     ${teeLens.length ? `<p class="sub" style="margin:4px 0 0">${teeLens.join(' · ')}</p>` : ''}
+    ${h.nine ? `<p class="sub" style="margin:4px 0 0">${esc(h.nine)} 코스 ${h.nineHole}번 홀</p>` : ''}
+    ${h.scorecard ? `<div class="note" style="margin:8px 0 0"><b>스코어카드</b> (${h.scorecard.unit}) · 백 ${h.scorecard.back ?? '—'} · 블루 ${h.scorecard.blue ?? '—'} · 화이트 ${h.scorecard.white ?? '—'} · 레드 ${h.scorecard.red ?? '—'}${h.hdcpCard != null ? ` · 카드 핸디캡 ${h.hdcpCard}` : ''}${L_ ? `<br>지도 경로(티→${h.ip ? 'IP→' : ''}그린) ${Math.round(h.ip ? distance(h.tee, h.ip) + distance(h.ip, h.green) : L_)}m` : ''}</div>` : ''}
     <div class="formgrid" style="margin-top:6px">
       <label class="f"><span>Par</span><select id="par">${[3, 4, 5, 6].map(p => `<option ${p === h.par ? 'selected' : ''}>${p}</option>`).join('')}</select></label>
       <label class="f"><span>핸디캡 순위</span><input type="number" id="hdcp" min="1" max="${c.holes.length}" value="${h.hdcp ?? ''}" placeholder="1=가장 어려움"></label>

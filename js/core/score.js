@@ -1,14 +1,16 @@
 // 스코어·내기 자동 정산 / 내 백 갭 분석 / 공 소모 추적
 export function emptyHole() { return { strokes: 0, putts: 0, penalties: 0, lost: 0 }; }
 
-export function newRound({ course, players, mode, games }) {
+export function newRound({ course, players, mode, games, holeNs = null }) {
   const now = Date.now();
+  // holeNs: 칠 홀 순서 (27·36홀 골프장의 전반·후반 코스 선택, 10번 홀 출발 등)
+  const order = (holeNs?.length ? holeNs.map(n => course.holes.find(h => h.n === n)).filter(Boolean) : course.holes);
   return {
     id: Math.random().toString(36).slice(2), courseId: course.id, courseName: course.name, date: new Date(now).toISOString(),
     startedAt: new Date(now).toISOString(), officialId: course.official?.id || null, officialRev: course.official?.rev ?? null,
-    holeTimes: { [course.holes[0]?.n ?? 1]: now }, lostEvents: [],
+    holeTimes: { [order[0]?.n ?? 1]: now }, lostEvents: [],
     mode, players: players.map(p => ({ name: p })), games,
-    holes: course.holes.map(h => ({ n: h.n, par: h.par, scores: players.map(() => emptyHole()) })),
+    holes: order.map(h => ({ n: h.n, par: h.par, ...(h.nine ? { nine: h.nine, nineHole: h.nineHole } : {}), scores: players.map(() => emptyHole()) })),
   };
 }
 

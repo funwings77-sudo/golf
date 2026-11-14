@@ -8,6 +8,7 @@ import { $, $$, sheet, toast, esc } from './ui.js';
 
 const ROUTES = {
   home: () => import('./views/home.js'),
+  play: () => import('./views/play.js'),
   distance: () => import('./views/distance.js'),
   tee: () => import('./views/tee.js'),
   lost: () => import('./views/lost.js'),
@@ -32,10 +33,13 @@ export const App = {
   pendingShot: null, // 스윙 감지/샷 기록 시작점
   go(r) { location.hash = '#/' + r; },
   refreshHeader,
+  // 칠 홀 순서 (라운드 중이면 라운드 순서, 아니면 코스 순서)
+  holeOrder() { const c = activeCourse(); return S.round?.courseId === c?.id ? S.round.holes.map(h => h.n) : (c?.holes || []).map(h => h.n); },
+  stepHole(d) { const o = App.holeOrder(); if (!o.length) return; const i = Math.max(0, o.indexOf(S.ui.hole)); App.setHole(o[(i + d + o.length) % o.length]); },
   setHole(n) {
     const c = activeCourse(); if (!c) return;
-    const max = c.holes.length;
-    S.ui.hole = ((n - 1 + max) % max) + 1; save('ui');
+    if (!c.holes.some(h => h.n === n)) { const max = c.holes.length; n = ((n - 1 + max) % max) + 1; }
+    S.ui.hole = n; save('ui');
     markHoleArrival(S.ui.hole);
     refreshHeader(); current?.onHole?.(S.ui.hole);
   },
@@ -43,7 +47,7 @@ export const App = {
 window.App = App;
 
 async function route() {
-  const name = (location.hash.replace(/^#\/?/, '').split('?')[0]) || (S.round ? 'distance' : 'home');
+  const name = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'play';
   const loader = ROUTES[name] || ROUTES.home;
   try { current?.unmount?.(); } catch (e) { console.error(e); }
   const view = $('#view');
@@ -72,7 +76,7 @@ function refreshHeader() {
   if (c) {
     const h = c.holes.find(x => x.n === S.ui.hole) || c.holes[0];
     nav.hidden = false;
-    $('#holeLbl').textContent = 'H' + h.n;
+    $('#holeLbl').textContent = h.nine ? `${h.nine.slice(0, 2)}${h.nineHole}` : 'H' + h.n;
     $('#ttlMain').textContent = c.name;
     $('#ttlSub').textContent = `Par ${h.par}` + (S.round ? ` · 라운드 진행 중` : '');
   } else {
@@ -175,7 +179,8 @@ function autoHole(p) {
   if (!S.round || !p) return;
   const c = activeCourse(); if (!c) return;
   const n = detectHoleByTee(c, p, S.ui.hole);
-  if (n && n === S.ui.hole + 1) { App.setHole(n); toast(`${n}번 홀 티잉 구역 도착`); speak(`${n}번 홀`); }
+  const o = App.holeOrder(), next = o[o.indexOf(S.ui.hole) + 1];
+  if (n && n === next) { App.setHole(n); toast(`${n}번 홀 티잉 구역 도착`); speak(`${n}번 홀`); }
 }
 
 // ---------- 스윙 감지 → 샷 시작점 기록 ----------
@@ -201,8 +206,8 @@ function init() {
   $('#menuBtn').onclick = () => $('#drawer').classList.add('open');
   $('#drawer .bg').onclick = () => $('#drawer').classList.remove('open');
   $('#modeChip').onclick = modeSheet;
-  $('#holePrev').onclick = () => App.setHole(S.ui.hole - 1);
-  $('#holeNext').onclick = () => App.setHole(S.ui.hole + 1);
+  $('#holePrev').onclick = () => App.stepHole(-1);
+  $('#holeNext').onclick = () => App.stepHole(1);
   window.addEventListener('hashchange', route);
   setInterval(() => { safetyTick(); hydrateTick(); }, 30000);
   setTimeout(safetyTick, 4000);

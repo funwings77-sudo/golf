@@ -139,3 +139,56 @@ test('날씨: 플레이즈라이크 방향성, WBGT 단계', () => {
   assert.equal(wbgtLevel(estimateWBGT(35, 70)).level, 3);
   assert.equal(wbgtLevel(estimateWBGT(18, 50)).level, 0);
 });
+
+import { adviseShot, predictBall, toBall, swingWords, dirWords } from '../js/physics/advice.js';
+test('쉬운 플레이 추천: 풀샷·짧은 거리 힘 조절·퍼트·OB 피하기', () => {
+  const bag = [{ id: 'D', name: '드라이버', carry: 200, sdDist: 0.08, sdLat: 6 }, { id: '7i', name: '7번 아이언', carry: 130, sdDist: 0.07, sdLat: 4 }, { id: 'SW', name: '샌드웨지', carry: 70, sdDist: 0.08, sdLat: 3 }];
+  const me = { lat: 37.5, lon: 127 }, green = Geo.destination(me, 0, 360);
+  const hole = { green, pin: green, front: Geo.destination(green, 180, 12), back: Geo.destination(green, 0, 12), hazards: [], halfWidth: 18 };
+  const a = adviseShot({ me, hole, bag });
+  assert.equal(a.kind, 'full'); assert.equal(a.club, 'D'); assert.ok(a.power >= 85);
+  near(a.D, 360, 0.5); assert.ok(Math.abs(a.rel) <= 16);
+  // 왼쪽 OB → 오른쪽 조준
+  const ob = adviseShot({ me, hole: { ...hole, hazards: [{ type: 'ob', ...Geo.destination(me, 350, 200), r: 35 }] }, bag });
+  assert.ok(ob.rel > a.rel, `${ob.rel} > ${a.rel}`);
+  // 50m: 샌드웨지 힘 약 71%
+  const near50 = adviseShot({ me: Geo.destination(green, 180, 50), hole, bag });
+  assert.equal(near50.kind, 'partial'); assert.equal(near50.club, 'SW'); near(near50.power, 71, 2);
+  assert.equal(near50.swing.short, '어깨 높이까지');
+  assert.equal(adviseShot({ me: Geo.destination(green, 90, 5), hole, bag }).kind, 'putt');
+  assert.equal(dirWords(0.3), '깃발 쪽으로 똑바로'); assert.equal(dirWords(-4.26), '깃발보다 왼쪽으로 4.3°');
+  assert.equal(swingWords(100).short, '끝까지 크게');
+});
+test('친 공 위치 예측과 길 안내', () => {
+  const start = { lat: 37.5, lon: 127 };
+  const p = predictBall({ start, aimBearing: 30, club: { id: '7i', carry: 130 } });
+  const t = toBall(start, p.center);
+  near(t.bearing, 30, 4); assert.ok(t.d > 125 && t.d < 150, 'd ' + t.d);
+  assert.equal(t.compass, '북동'); assert.equal(toBall(start, p.center, 30).rel != null, true);
+});
+
+import { rotationMatrix, project, enuOf, cameraAxis, yawCorrection, focalPx } from '../js/core/arproj.js';
+test('AR 투영: 세워 든 휴대폰에서 북쪽 깃발은 화면 가운데, 동쪽은 오른쪽, 지면은 아래', () => {
+  const W = 400, H = 800, f = focalPx(63, H), opt = { f, cx: W / 2, cy: H / 2 };
+  // 세로로 세워 북쪽을 봄: alpha=0, beta=90, gamma=0
+  const R = rotationMatrix(0, 90, 0);
+  const ax = cameraAxis(R); near(ax.bearing, 0, 1e-6); near(ax.pitch, 0, 1e-6);
+  const me = { lat: 37.5, lon: 127 };
+  const flag = Geo.destination(me, 0, 120);
+  const eyeLevel = project(R, enuOf(me, flag, { eye: 0 }), opt);
+  near(eyeLevel.x, W / 2, 0.5); near(eyeLevel.y, H / 2, 0.5); near(eyeLevel.depth, 120, 0.5);
+  const ground = project(R, enuOf(me, flag, { eye: 1.5 }), opt);
+  assert.ok(ground.y > H / 2, '지면은 지평선 아래'); near(ground.y - H / 2, f * 1.5 / 120, 0.5);
+  const east = project(R, enuOf(me, Geo.destination(me, 10, 120), { eye: 0 }), opt);
+  assert.ok(east.x > W / 2, '오른쪽'); near(Math.atan((east.x - W / 2) / f) * 180 / Math.PI, 10, 0.2);
+  assert.equal(project(R, enuOf(me, Geo.destination(me, 180, 50)), opt).visible, false, '뒤쪽은 안 보임');
+  // 동쪽을 봄: 나침반 90° → alpha = 270
+  const Re = rotationMatrix(270, 90, 0); near(cameraAxis(Re).bearing, 90, 1e-6);
+  const pe = project(Re, enuOf(me, Geo.destination(me, 90, 80), { eye: 0 }), opt); near(pe.x, W / 2, 0.5);
+  // 아래로 20° 숙임(beta=70) → 지평선이 화면 위로 올라감
+  const Rd = rotationMatrix(0, 70, 0); near(cameraAxis(Rd).pitch, -20, 1e-6);
+  assert.ok(project(Rd, enuOf(me, flag, { eye: 0 }), opt).y < H / 2);
+  // 1탭 방위 보정: 깃발이 실제로 화면 x=150에 보이면 오차 각도
+  const c = yawCorrection(R, enuOf(me, Geo.destination(me, 5, 120), { eye: 0 }), 200, opt);
+  near(c, 5, 0.2);
+});
