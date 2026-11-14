@@ -3,6 +3,7 @@ import { S, save, MODES, activeCourse, currentMode, subscribe } from './core/sta
 import { startGPS, onPos, setSim, setVoice, startOrientation, startSwingDetect, vibrate, speak, Sensors, sampleFix } from './core/sensors.js';
 import { fetchWeather } from './core/weather.js';
 import { detectHoleByTee } from './core/course.js';
+import { syncPins, getNotices, getCatalog, pendingUpdates } from './core/remote.js';
 import { $, $$, sheet, toast, esc } from './ui.js';
 
 const ROUTES = {
@@ -26,6 +27,8 @@ const ROUTES = {
 let current = null, currentName = null;
 export const App = {
   weather: null,
+  notices: [],       // 관리자 공지 (게시 중 · 현재 코스 대상)
+  updates: [],       // 새 버전이 있는 공식 코스
   pendingShot: null, // 스윙 감지/샷 기록 시작점
   go(r) { location.hash = '#/' + r; },
   refreshHeader,
@@ -33,6 +36,7 @@ export const App = {
     const c = activeCourse(); if (!c) return;
     const max = c.holes.length;
     S.ui.hole = ((n - 1 + max) % max) + 1; save('ui');
+    markHoleArrival(S.ui.hole);
     refreshHeader(); current?.onHole?.(S.ui.hole);
   },
 };
@@ -116,15 +120,49 @@ async function safetyTick() {
 export function showAlerts() {
   const w = App.weather, bar = $('#alertBar');
   bar.className = 'alert-bar';
-  if (!w) return;
-  if (w.lightningRisk >= 2) {
+  const nt = App.notices[0];
+  // 우선순위: 낙뢰(기상) > 관리자 긴급 공지 > 폭염 > 관리자 주의·안내
+  if (w && w.lightningRisk >= 2) {
     bar.className = 'alert-bar show danger';
     bar.innerHTML = `⚡ 낙뢰 위험 ${w.thunderNow ? '(현재 뇌우)' : '(3시간 내 뇌우 예보)'} — 즉시 대피하세요 · <a href="#/safety" style="color:#fff">대피소 안내</a>`;
     if (!showAlerts._buzzed) { vibrate([400, 200, 400, 200, 800]); speak('낙뢰 위험. 즉시 대피하세요.', true); showAlerts._buzzed = true; }
-  } else if (w.heat.level >= 2) {
+  } else if (nt?.level === 'danger') {
+    noticeBar(bar, nt);
+    if (showAlerts._dangerId !== nt.id) { showAlerts._dangerId = nt.id; vibrate([400, 200, 400, 200, 800]); speak(nt.title, true); }
+  } else if (w && w.heat.level >= 2) {
     bar.className = 'alert-bar show warn';
     bar.innerHTML = `🌡️ 폭염 ${w.heat.label} (WBGT ${w.wbgt.toFixed(1)}) — ${w.heat.hydrateMin}분마다 수분 섭취`;
+  } else if (nt) noticeBar(bar, nt);
+}
+function noticeBar(bar, n) {
+  bar.className = 'alert-bar show ' + (n.level === 'info' ? 'info' : n.level);
+  bar.innerHTML = `${n.level === 'danger' ? '🚨' : n.level === 'warn' ? '⚠️' : '📢'} <b>${esc(n.title)}</b>${n.body ? ' — ' + esc(n.body.length > 80 ? n.body.slice(0, 80) + '…' : n.body) : ''}${App.notices.length > 1 ? ` <a href="#/home" style="color:inherit">외 ${App.notices.length - 1}건</a>` : ''}`;
+}
+
+// ---------- 관리자 발행 데이터: 공지 · 오늘의 핀 · 코스 업데이트 (5분마다) ----------
+let lastCatalogAt = 0;
+async function remoteTick() {
+  if (!navigator.onLine) return;
+  const c = activeCourse();
+  try { App.notices = await getNotices(c); showAlerts(); } catch (e) { console.warn('notices', e.message); }
+  if (c?.official) {
+    try {
+      const r = await syncPins(c);
+      if (r?.changed) { toast(`오늘의 핀 ${r.changed}개 홀 갱신 (골프장 제공 · 스팀프 ${r.stimp})`); current?.onHole?.(S.ui.hole); }
+    } catch (e) { console.warn('pins', e.message); }
   }
+  if (Date.now() - lastCatalogAt > 30 * 60 * 1000 && S.courses.some(x => x.official)) {
+    lastCatalogAt = Date.now();
+    try { App.updates = pendingUpdates(await getCatalog()); } catch {}
+  }
+}
+App.remoteTick = remoteTick;
+
+// 홀 도착 시각 (골프장 제출용 리포트의 진행 속도 계산에 사용)
+function markHoleArrival(n) {
+  const r = S.round; if (!r) return;
+  r.holeTimes = r.holeTimes || {};
+  if (!r.holeTimes[n]) { r.holeTimes[n] = Date.now(); save('round'); }
 }
 function hydrateTick() {
   const w = App.weather; if (!S.round || !w || !w.heat.hydrateMin) return;
@@ -168,6 +206,10 @@ function init() {
   window.addEventListener('hashchange', route);
   setInterval(() => { safetyTick(); hydrateTick(); }, 30000);
   setTimeout(safetyTick, 4000);
+  setInterval(remoteTick, 5 * 60 * 1000);
+  setTimeout(remoteTick, 1500);
+  window.addEventListener('online', () => remoteTick());
+  subscribe(keys => { if (keys.includes('ui') && activeCourse()?.official && remoteTick._course !== activeCourse().id) { remoteTick._course = activeCourse().id; remoteTick(); } });
   route();
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !window.Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW', e));
 }

@@ -1,5 +1,5 @@
 // 룰·구제 도우미: 상황 선택 → 절차 · 벌타 자동 반영 · 지도 위 구제 구역 표시
-import { S, save, activeHole } from '../core/state.js';
+import { S, save, activeHole, activeCourse } from '../core/state.js';
 import { RULES, CLUB_LEN } from '../core/rules.js';
 import { Sensors } from '../core/sensors.js';
 import { createMap, destroyMap, drawHole, ll } from '../map.js';
@@ -10,7 +10,9 @@ export default {
   mount(el) {
     const list = () => {
       destroyMap(map); map = null;
+      const lr = activeCourse()?.localRules || [];
       el.innerHTML = `<h2>📖 룰 · 구제 도우미</h2><p class="sub">상황을 고르면 절차와 벌타를 알려주고, 라운드 중이면 스코어에 반영합니다.</p>
+        ${lr.length ? `<div class="card"><b>📌 ${esc(activeCourse().name)} 로컬 룰</b><ol class="tips">${lr.map(x => `<li>${esc(x)}</li>`).join('')}</ol><p class="sub" style="margin:0">골프장이 정한 규칙으로, 아래 일반 규칙보다 우선합니다.</p></div>` : ''}
         ${RULES.map(r => `<button class="list-btn" data-r="${r.id}"><span class="ico">${r.penalty ? '⚠️' : '🆓'}</span><span class="grow"><b>${esc(r.title)}</b><br><span class="sub">규칙 ${r.rule} · ${r.penalty ? r.penalty + '벌타' : '무벌타'}</span></span>›</button>`).join('')}`;
       $$('[data-r]').forEach(b => b.onclick = () => detail(RULES.find(r => r.id === b.dataset.r)));
     };

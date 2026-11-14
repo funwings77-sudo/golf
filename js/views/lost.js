@@ -301,6 +301,7 @@ async function found() {
     const total = distance(L0.start, f), rollF = clubType(L0.club)?.roll || 0.03;
     S.shots.push({ id: Date.now(), club: L0.club, total, carry: total / (1 + rollF), latDeg: null, start: L0.start, end: { lat: f.lat, lon: f.lon }, ts: Date.now(), fromLost: true });
     const i = S.bag.findIndex(x => x.id === L0.club); if (i >= 0) S.bag[i] = learnClub(S.bag[i], S.shots);
+    recordLostEvent(L0, { lat: f.lat, lon: f.lon }, true, 0);
     toast(`찾았습니다! 예측 중심에서 ${Math.hypot(dx, dy).toFixed(0)}m · ${L0.searchStartAt ? mmss(Date.now() - L0.searchStartAt) + ' 만에' : ''}`);
     save('shots', 'bag');
   } else toast('찾았습니다!');
@@ -320,7 +321,15 @@ function notFound() {
     ],
   });
 }
+// 골프장 제출용 리포트용 분실구 기록 (내 라운드에만, 좌표는 리포트에서 반올림)
+function recordLostEvent(L0, at, found, penalty) {
+  if (!S.round || !at) return;
+  S.round.lostEvents = S.round.lostEvents || [];
+  S.round.lostEvents.push({ hole: L0.hole || S.ui.hole, lat: at.lat, lon: at.lon, found, penalty, searchSec: L0.searchStartAt ? Math.round((Date.now() - L0.searchStartAt) / 1000) : null, ts: Date.now() });
+  save('round');
+}
 function finishLost(pen) {
+  if (S.lost && est?.stats) recordLostEvent(S.lost, fromLocal(S.lost.start, est.stats.mean), false, pen);
   if (S.round) {
     const h = S.round.holes.find(x => x.n === (S.lost.hole || S.ui.hole));
     if (h) { const sc = h.scores[0]; sc.penalties += pen; sc.lost += 1; sc.strokes += pen; save('round'); }

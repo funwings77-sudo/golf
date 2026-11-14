@@ -2,8 +2,11 @@
 export function emptyHole() { return { strokes: 0, putts: 0, penalties: 0, lost: 0 }; }
 
 export function newRound({ course, players, mode, games }) {
+  const now = Date.now();
   return {
-    id: Math.random().toString(36).slice(2), courseId: course.id, courseName: course.name, date: new Date().toISOString(),
+    id: Math.random().toString(36).slice(2), courseId: course.id, courseName: course.name, date: new Date(now).toISOString(),
+    startedAt: new Date(now).toISOString(), officialId: course.official?.id || null, officialRev: course.official?.rev ?? null,
+    holeTimes: { [course.holes[0]?.n ?? 1]: now }, lostEvents: [],
     mode, players: players.map(p => ({ name: p })), games,
     holes: course.holes.map(h => ({ n: h.n, par: h.par, scores: players.map(() => emptyHole()) })),
   };

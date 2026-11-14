@@ -1,6 +1,7 @@
 // 코스 관리 · 편집 (위성지도에 티/그린/핀/IP/해저드/대피소 지정) · 가져오기/내보내기 · 오프라인 지도 저장
 import { S, save, uid } from '../core/state.js';
 import { blankCourse, demoCourse, exportCourse, importCourse, holeLength } from '../core/course.js';
+import { getCatalog, installCourse, findInstalled } from '../core/remote.js';
 import { Sensors, sampleFix } from '../core/sensors.js';
 import { createMap, destroyMap, drawHole, fitHole, ll, HZ_STYLE, SAT_URL } from '../map.js';
 import { $, $$, esc, toast, sheet, confirmSheet, DU } from '../ui.js';
@@ -13,14 +14,43 @@ export default {
   unmount() { destroyMap(map); map = null; },
 };
 
+// 골프장이 발행한 공식 코스 (관리자 페이지 → data/catalog.json)
+async function official() {
+  const box = $('#official'); if (!box) return;
+  try {
+    const cat = await getCatalog();
+    if (!$('#official')) return;
+    if (!cat.length) { box.innerHTML = '<p class="sub" style="margin:0">아직 골프장이 발행한 공식 코스가 없습니다.</p>'; return; }
+    box.innerHTML = cat.map(e => {
+      const mine = findInstalled(e.id), upd = mine && e.rev > (mine.official.rev || 0);
+      return `<div class="kv" style="align-items:center"><span style="color:var(--ink)"><b>${esc(e.name)}</b>${e.region ? ` <span class="sub">${esc(e.region)}</span>` : ''}<br><span class="sub">${e.holes}홀 · 파 ${e.par}${e.length ? ` · ${(e.length / 1000).toFixed(1)}km` : ''} · 그린맵 ${e.greens || 0}/${e.holes}</span></span>
+        ${!mine ? `<button class="btn small primary" data-inst="${esc(e.id)}">설치</button>` : upd ? `<button class="btn small primary" data-inst="${esc(e.id)}">업데이트 (v${e.rev})</button>` : '<span class="pill">설치됨 · 최신</span>'}</div>`;
+    }).join('');
+    $$('[data-inst]', box).forEach(b => b.onclick = async () => {
+      b.disabled = true; b.textContent = '받는 중…';
+      try {
+        const e = cat.find(x => x.id === b.dataset.inst);
+        if (S.round && findInstalled(e.id)?.id === S.round.courseId) toast('진행 중 라운드의 코스입니다 — 위치·해저드만 갱신하고 스코어는 유지합니다', 3500);
+        const { course, updated } = await installCourse(e);
+        if (!S.ui.courseId || !updated) { S.ui.courseId = course.id; S.ui.hole = 1; save('ui'); }
+        App_.refreshHeader(); toast(`'${course.name}' ${updated ? '업데이트' : '설치'} 완료${course.todayPins ? ` · 오늘의 핀 적용 (스팀프 ${course.todayPins.stimp})` : ''}`, 3500); list();
+      } catch (err) { toast('설치 실패: ' + err.message); b.disabled = false; b.textContent = '다시 시도'; }
+    });
+  } catch (err) { box.innerHTML = `<p class="sub" style="margin:0">공식 코스 목록을 받지 못했습니다 (${esc(err.message)}). 인터넷 연결을 확인하세요.</p>`; }
+}
+
 function list() {
   destroyMap(map); map = null;
   el_.innerHTML = `<h2>🗺️ 코스 관리</h2>
-    ${S.courses.map(c => `<div class="card tight"><div class="row"><div class="grow"><b>${esc(c.name)}</b>${c.id === S.ui.courseId ? ' <span class="pill">선택됨</span>' : ''}<br><span class="sub">${c.holes.length}홀 · 지정 완료 ${c.holes.filter(h => h.tee && h.green).length}홀${c.demo ? ' · 가상 데모' : ''}</span></div>
+    <div class="card"><div class="row"><b class="grow">📡 공식 코스 (골프장 제공)</b><button class="btn small" id="refOff">새로고침</button></div><div id="official" style="margin-top:6px"><p class="sub" style="margin:0">불러오는 중…</p></div></div>
+    <h3>내 기기의 코스</h3>
+    ${S.courses.map(c => `<div class="card tight"><div class="row"><div class="grow"><b>${esc(c.name)}</b>${c.id === S.ui.courseId ? ' <span class="pill">선택됨</span>' : ''}${c.official ? ' <span class="pill">공식</span>' : ''}<br><span class="sub">${c.holes.length}홀 · 지정 완료 ${c.holes.filter(h => h.tee && h.green).length}홀${c.demo ? ' · 가상 데모' : ''}${c.official ? ` · v${c.official.rev}` : ''}${c.todayPins ? ' · 오늘 핀 ✓' : ''}</span></div>
       <button class="btn small" data-sel="${c.id}">선택</button><button class="btn small" data-edit="${c.id}">편집</button><button class="btn small" data-more="${c.id}">⋯</button></div></div>`).join('') || '<div class="empty">코스가 없습니다</div>'}
     <div class="grid2"><button class="btn primary" id="new">＋ 새 코스</button><button class="btn" id="demo">🧪 데모 코스</button></div>
     <button class="btn block" id="imp" style="margin-top:8px">📥 코스 파일 가져오기 (JSON)</button><input type="file" id="impFile" accept=".json,application/json" hidden>
     <div class="card"><b>코스 데이터 안내</b><p class="sub">실제 골프장 데이터(홀 지오메트리·cm급 그린맵·실시간 핀)는 골프장 제휴로 공급되는 구조입니다. 지금은 위성지도에서 직접 지정하거나, 동반자가 만든 코스 파일을 가져올 수 있습니다. 핀 위치를 기록해 내보내면 다음 팀과 공유됩니다.</p></div>`;
+  official();
+  $('#refOff').onclick = official;
   $$('[data-sel]').forEach(b => b.onclick = () => { S.ui.courseId = b.dataset.sel; S.ui.hole = 1; save('ui'); App_.refreshHeader(); list(); toast('코스를 선택했습니다'); });
   $$('[data-edit]').forEach(b => b.onclick = () => { editId = b.dataset.edit; holeN = 1; editor(); });
   $$('[data-more]').forEach(b => b.onclick = () => more(S.courses.find(c => c.id === b.dataset.more)));

@@ -50,8 +50,19 @@ export default {
   },
 };
 
+// 골프장 공지 (관리자 발행 · 게시 중 · 현재 코스 대상)
+function notices() {
+  const ns = window.App?.notices || [];
+  if (!ns.length) return '';
+  return `<h3>📢 골프장 공지</h3>${ns.map(n => `<div class="card tight" style="border-left:4px solid ${n.level === 'danger' ? 'var(--danger)' : n.level === 'warn' ? 'var(--warn)' : 'var(--blue)'}"><b>${esc(n.title)}</b>${n.body ? `<p class="sub" style="margin:4px 0 0">${esc(n.body)}</p>` : ''}${n.end ? `<p class="sub" style="margin:4px 0 0">~ ${new Date(n.end).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>` : ''}</div>`).join('')}`;
+}
+function updates() {
+  const u = window.App?.updates || [];
+  return u.length ? `<div class="card tight row"><span class="grow">🔄 공식 코스 업데이트 ${u.length}개: ${u.map(x => esc(x.c.name)).join(', ')}</span><a class="btn small" href="#/courses">업데이트</a></div>` : '';
+}
+
 function quick() {
-  return `<h3>바로 쓰기</h3>
+  return `${notices()}${updates()}<h3>바로 쓰기</h3>
     <a class="list-btn" href="#/green"><span class="ico">🟢</span><span class="grow"><b>그린 리딩 · 퍼팅 계산</b><br><span class="sub">경사 측정 → 라인·조준점·세기·백스윙</span></span></a>
     <a class="list-btn" href="#/lost"><span class="ico">📡</span><span class="grow"><b>분실구 안내</b><br><span class="sub">낙하 예상 구역 → 레이더 길안내 → 카메라 탐지</span></span></a>
     <a class="list-btn" href="#/lie"><span class="ico">📐</span><span class="grow"><b>라이 경사 측정</b><br><span class="sub">휴대폰을 지면에 2초 → 셋업·조준 보정</span></span></a>

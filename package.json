@@ -6,7 +6,7 @@
   "description": "PinPoint AI 캐디 — 올인원 골프 AI 캐디 PWA",
   "scripts": {
     "start": "node server.mjs 8080",
-    "test": "node --test tests/engine.test.mjs",
+    "test": "node --test tests/engine.test.mjs tests/admin.test.mjs",
     "build:www": "node scripts/build-www.mjs",
     "android:sync": "npm run build:www && npx cap sync android",
     "android:apk": "npm run android:sync && cd android && .\\gradlew.bat assembleDebug",

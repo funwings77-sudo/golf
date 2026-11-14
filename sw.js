@@ -1,9 +1,9 @@
 // 오프라인 우선 서비스 워커: 앱 셸·물리 엔진은 캐시 우선, 지도 타일은 런타임 캐시
-const VER = 'pinpoint-v3';
+const VER = 'pinpoint-v4';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'icons/icon.svg', 'icons/icon-192.png',
   'js/app.js', 'js/ui.js', 'js/map.js',
-  'js/core/geo.js', 'js/core/state.js', 'js/core/sensors.js', 'js/core/weather.js', 'js/core/camera.js', 'js/core/score.js', 'js/core/rules.js', 'js/core/course.js',
+  'js/core/geo.js', 'js/core/state.js', 'js/core/sensors.js', 'js/core/weather.js', 'js/core/camera.js', 'js/core/score.js', 'js/core/rules.js', 'js/core/course.js', 'js/core/remote.js', 'js/core/report.js',
   'js/physics/putt.js', 'js/physics/putt.worker.js', 'js/physics/flight.js', 'js/physics/strategy.js', 'js/physics/lostball.js',
   'js/views/home.js', 'js/views/distance.js', 'js/views/tee.js', 'js/views/lost.js', 'js/views/green.js', 'js/views/greencanvas.js', 'js/views/lie.js', 'js/views/score.js',
   'js/views/courses.js', 'js/views/bag.js', 'js/views/rules.js', 'js/views/safety.js', 'js/views/history.js', 'js/views/calib.js', 'js/views/settings.js', 'js/views/about.js',
@@ -19,8 +19,9 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  if (url.hostname.includes('open-meteo.com')) return; // 날씨는 항상 네트워크
-  if (url.origin === location.origin && /(\.apk|\/apk\.json|\/download\.html)$/.test(url.pathname)) return; // APK 다운로드는 캐시하지 않음
+  if (url.hostname.includes('open-meteo.com') || url.hostname === 'api.github.com') return; // 날씨·관리자 API는 항상 네트워크
+  // APK·관리자 페이지·발행 데이터는 캐시하지 않음 (발행 데이터는 앱이 localStorage에 직접 보관)
+  if (url.origin === location.origin && (/(\.apk|\/apk\.json|\/download\.html|\/admin\.html)$/.test(url.pathname) || /\/(data|js\/admin)\//.test(url.pathname))) return;
   if (url.hostname.includes('arcgisonline.com')) {
     e.respondWith(caches.open('pinpoint-tiles').then(async c => {
       const hit = await c.match(e.request); if (hit) return hit;

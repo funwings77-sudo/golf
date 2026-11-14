@@ -45,6 +45,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .alert-bar.show { display: block; }
 .alert-bar.danger { background: var(--danger); color: #fff; }
 .alert-bar.warn { background: var(--warn); color: #fff; }
+.alert-bar.info { background: var(--blue); color: #fff; }
 
 /* 본문 */
 main#view { padding: 12px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom)); }

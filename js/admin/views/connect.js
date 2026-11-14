@@ -1,0 +1,61 @@
+// 연결 설정: GitHub 저장소 + 세분화 토큰(fine-grained PAT)
+import { $, esc, toast } from '../../ui.js';
+import { Store } from '../store.js';
+
+export default {
+  mount(el) {
+    const render = (msg = '') => {
+      const c = Store.conf;
+      el.innerHTML = `<div class="a-head"><div class="grow"><h1>🔑 연결 설정</h1><p class="sub">발행(코스·핀·공지)은 이 저장소의 <code>data/</code> 폴더에 커밋하는 방식입니다. 서버 없이 GitHub가 저장소·이력·권한 관리를 맡습니다.</p></div></div>
+        ${msg}
+        <div class="split">
+          <div>
+            <div class="card">
+              <h3 style="margin-top:0">${Store.connected ? '✅ 연결됨' : '저장소 연결'}</h3>
+              ${Store.connected ? `<div class="kv"><span>계정</span><b>${esc(Store.user?.login || '—')}</b></div>
+                <div class="kv"><span>저장소</span><b>${esc(c.owner)}/${esc(c.repo)}</b></div>
+                <div class="kv"><span>브랜치</span><b>${esc(c.branch)}</b></div>
+                <div class="kv"><span>공개 여부</span><b>${Store.repoInfo?.private ? '비공개' : '공개'}</b></div>
+                <div class="kv"><span>토큰 보관</span><b>${Store.remembered ? '이 기기에 기억' : '이 탭을 닫으면 삭제'}</b></div>
+                <button class="btn danger block" id="disc" style="margin-top:12px">연결 해제 (토큰 삭제)</button>`
+              : `<div class="formgrid">
+                  <label class="f"><span>소유자 (owner)</span><input type="text" id="owner" value="${esc(c.owner)}" autocomplete="off"></label>
+                  <label class="f"><span>저장소 (repo)</span><input type="text" id="repo" value="${esc(c.repo)}" autocomplete="off"></label>
+                  <label class="f"><span>브랜치</span><input type="text" id="branch" value="${esc(c.branch)}" autocomplete="off"></label>
+                </div>
+                <label class="f"><span>GitHub 토큰 (fine-grained personal access token)</span><input type="password" id="token" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+                <label class="row" style="margin:6px 0 12px;font-size:14px"><input type="checkbox" id="remember"> 이 기기에 기억 (공용 PC에서는 끄세요)</label>
+                <button class="btn primary block" id="conn">연결하고 권한 확인</button>
+                ${Store.connError ? `<div class="note err">${esc(Store.connError)}</div>` : ''}`}
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">토큰 만드는 법 (3분)</h3>
+            <ol style="padding-left:20px;margin:0;font-size:14px;line-height:1.8">
+              <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Settings → Fine-grained tokens → Generate new token</a></li>
+              <li><b>Token name</b>: <code>pinpoint-admin</code>, <b>Expiration</b>: 90일 권장</li>
+              <li><b>Repository access</b>: <i>Only select repositories</i> → <code>${esc(c.owner)}/${esc(c.repo)}</code></li>
+              <li><b>Permissions → Repository</b>
+                <ul style="padding-left:18px"><li><b>Contents: Read and write</b> (필수 · 발행)</li><li>Pages: Read-only (선택 · 배포 상태 확인)</li><li>Actions: Read-only (선택 · 배포 진행 표시)</li></ul></li>
+              <li><b>Generate token</b> → 복사해서 왼쪽에 붙여 넣기</li>
+            </ol>
+            <div class="note" style="margin-top:12px"><b>보안</b><br>· 토큰은 <code>api.github.com</code>으로만 전송되고 다른 곳으로 보내지 않습니다.<br>· 기본값은 탭을 닫으면 삭제(sessionStorage)입니다.<br>· 이 페이지는 공개 주소지만 토큰 없이는 아무것도 바꿀 수 없습니다.<br>· 관리자를 추가하려면 저장소에 협업자로 초대하고 각자 토큰을 만드세요. 퇴사자는 협업자에서 제거하면 즉시 권한이 사라집니다.</div>
+          </div>
+        </div>`;
+      $('#disc')?.addEventListener('click', () => { Store.disconnect(); toast('연결을 해제하고 토큰을 지웠습니다'); render(); });
+      $('#conn')?.addEventListener('click', async () => {
+        const token = $('#token').value.trim();
+        const conf = { owner: $('#owner').value.trim(), repo: $('#repo').value.trim(), branch: $('#branch').value.trim() || 'main' };
+        if (!conf.owner || !conf.repo) return toast('소유자와 저장소를 입력하세요');
+        if (!/^(github_pat_|ghp_|gho_|ghu_)[A-Za-z0-9_]{20,}$/.test(token)) return toast('GitHub 토큰 형식이 아닙니다');
+        const btn = $('#conn'); btn.disabled = true; btn.textContent = '확인 중…';
+        try {
+          const info = await Store.connect(token, $('#remember').checked, conf);
+          toast(`${info.user?.login || ''} 계정으로 연결했습니다`);
+          render(`<div class="note ok">연결 성공 · ${esc(conf.owner)}/${esc(conf.repo)} 쓰기 권한 확인됨</div>`);
+        } catch (e) { Store.connError = e.message; Store.emit(); render(); }
+      });
+    };
+    render();
+  },
+};

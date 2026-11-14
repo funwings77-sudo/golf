@@ -1,5 +1,6 @@
 // ③ 그린 위 거리 · ④ 그린 경사 지도 · ⑤ 퍼팅 라인/조준점/세기/백스윙
-import { S, save, allowed, activeHole, currentMode, FEATURE_NAMES } from '../core/state.js';
+import { todayKey } from '../core/remote.js';
+import { S, save, allowed, activeHole, activeCourse, currentMode, FEATURE_NAMES } from '../core/state.js';
 import { distance, toLocal, toRad } from '../core/geo.js';
 import { Sensors, sampleTilt, startSteps, onOrientation, vibrate, speak } from '../core/sensors.js';
 import { muFromStimp, buildSurface, fitQuadFromGradients, optimizePutt, backswingCm, demoGreen, CUP_W } from '../physics/putt.js';
@@ -20,6 +21,9 @@ export default {
   mount(el, App) {
     el_ = el; App_ = App; G = loadG();
     const hole = activeHole();
+    // 골프장이 발행한 오늘 그린 스피드가 있으면 그 값으로 시작 (사용자가 바꾸면 그 값 유지)
+    const tp = activeCourse()?.todayPins;
+    if (tp?.stimp && tp.date === todayKey() && G.stimpSrc !== tp.date) { G.stimp = tp.stimp; G.stimpSrc = tp.date; G.result = null; }
     if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.holeN = hole?.n ?? null; }
     if (!G.src) G.src = hole?.greenGrid ? 'grid' : 'onsite';
     if (G.src === 'grid' && !hole?.greenGrid) G.src = 'demo';

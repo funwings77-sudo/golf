@@ -73,7 +73,7 @@ function render() {
     const w = App_.weather;
     pl = playsLike({ dist: dPin, dh: elev.me != null && elev.pin != null ? elev.pin - elev.me : 0, windSpeed: w?.windSpeed || 0, windFrom: w?.windFrom || 0, shotBearing: brg, tempC: w?.temp ?? 20, altitude: elev.me || 0 });
   }
-  const pinNote = !hole.pin ? '핀 미기록 · 그린 중앙 기준' : isToday(hole.pin.ts) ? '오늘 핀' : `핀 ${new Date(hole.pin.ts).toLocaleDateString()} 기록`;
+  const pinNote = !hole.pin ? '핀 미기록 · 그린 중앙 기준' : isToday(hole.pin.ts) ? (hole.pin.src === 'official' ? `오늘 핀 (골프장 제공${hole.pin.depth != null ? ` · 앞에서 ${hole.pin.depth}m` : ''})` : '오늘 핀 (내 기록)') : `핀 ${new Date(hole.pin.ts).toLocaleDateString()} 기록 · 오늘 핀 아님`;
   // 앞쪽 해저드 캐리
   const hz = (hole.hazards || []).map(z => {
     const d = distance(me, z), rel = normAngle(bearing(me, z) - brg);
