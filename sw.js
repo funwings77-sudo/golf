@@ -1,5 +1,5 @@
 // 오프라인 우선 서비스 워커: 앱 셸·물리 엔진은 캐시 우선, 지도 타일은 런타임 캐시
-const VER = 'pinpoint-v2';
+const VER = 'pinpoint-v3';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'icons/icon.svg', 'icons/icon-192.png',
   'js/app.js', 'js/ui.js', 'js/map.js',
@@ -20,6 +20,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
   if (url.hostname.includes('open-meteo.com')) return; // 날씨는 항상 네트워크
+  if (url.origin === location.origin && /(\.apk|\/apk\.json|\/download\.html)$/.test(url.pathname)) return; // APK 다운로드는 캐시하지 않음
   if (url.hostname.includes('arcgisonline.com')) {
     e.respondWith(caches.open('pinpoint-tiles').then(async c => {
       const hit = await c.match(e.request); if (hit) return hit;

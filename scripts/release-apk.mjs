@@ -35,7 +35,7 @@ const sha = buf => createHash('sha256').update(buf).digest('hex');
 // 다른 작업 중인 변경이 섞여 커밋되지 않도록, APK·버전 파일만 커밋한다.
 // 단, 웹 코드에 커밋 안 된 변경이 있으면 APK와 저장소 내용이 어긋나므로 먼저 알린다.
 const dirty = out('git status --porcelain').split('\n').filter(Boolean)
-  .filter(l => !/pinpoint-caddie\.apk$|android\/app\/build\.gradle$/.test(l));
+  .filter(l => !/pinpoint-caddie\.apk$|apk\.json$|android\/app\/build\.gradle$/.test(l));
 if (dirty.length && push) {
   console.warn('⚠ 커밋되지 않은 변경이 있습니다 (APK에는 포함되지만 커밋되지 않음):\n  ' + dirty.join('\n  '));
 }
@@ -63,12 +63,18 @@ const built = join(root, 'android', 'app', 'build', 'outputs', 'apk', 'debug', '
 const target = join(root, 'pinpoint-caddie.apk');
 await copyFile(built, target);
 const hash = sha(await readFile(target));
-console.log(`${((await stat(target)).size / 1048576).toFixed(1)}MB  sha256 ${hash.slice(0, 16)}…`);
+const bytes = (await stat(target)).size;
+console.log(`${(bytes / 1048576).toFixed(1)}MB  sha256 ${hash.slice(0, 16)}…`);
+// 다운로드 페이지(download.html)가 읽는 버전 정보
+const appId = JSON.parse(await readFile(join(root, 'capacitor.config.json'), 'utf8')).appId;
+await writeFile(join(root, 'apk.json'), JSON.stringify({
+  packageId: appId, versionName: name, versionCode: code, bytes, sha256: hash, builtAt: new Date().toISOString(),
+}, null, 2) + '\n');
 
 if (!push) { console.log('\n--no-push: 커밋·업로드 생략. 완료.'); process.exit(0); }
 
 step(6, '커밋 · 푸시');
-run('git add pinpoint-caddie.apk android/app/build.gradle');
+run('git add pinpoint-caddie.apk apk.json android/app/build.gradle');
 const who = out('git config user.name') ? '' : '-c user.name="PinPoint" -c user.email="noreply@users.noreply.github.com" ';
 run(`git ${who}commit -q -m "Android APK ${name} (versionCode ${code})"`);
 run('git push');

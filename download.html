@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f5f3f">
+<meta name="description" content="PinPoint AI 캐디 Android 앱(APK) 다운로드와 설치 안내">
+<title>PinPoint 앱 다운로드</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root {
+    --bg: #f3f2ec; --paper: #ffffff; --ink: #18211d; --sub: #5b665f; --line: #e0ded3;
+    --green: #1f5f3f; --green2: #2f8a5b; --green-soft: #e4f0e8; --warn-soft: #fbf1dc; --warn-ink: #6b4d12;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1613; --paper: #18221d; --ink: #e9f0ec; --sub: #9aaaa1; --line: #2a3832;
+      --green-soft: #1d3a2b; --warn-soft: #3a3120; --warn-ink: #f0d9a6; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1613; --paper: #18221d; --ink: #e9f0ec; --sub: #9aaaa1; --line: #2a3832;
+    --green-soft: #1d3a2b; --warn-soft: #3a3120; --warn-ink: #f0d9a6; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.6 "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 48px; }
+  .hero { background: linear-gradient(135deg, #123826, #1f5f3f 55%, #2f8a5b); color: #fff; padding: calc(28px + env(safe-area-inset-top)) 16px 28px; text-align: center; }
+  .hero img { width: 88px; height: 88px; border-radius: 22px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+  .hero h1 { margin: 14px 0 4px; font-size: 24px; letter-spacing: -.01em; }
+  .hero p { margin: 0; opacity: .88; font-size: 15px; }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin: 14px 0; }
+  .card.lift { margin-top: -18px; position: relative; box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+  h2 { font-size: 17px; margin: 0 0 10px; }
+  .dl { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 58px; border-radius: 14px; background: var(--green); color: #fff; font-size: 18px; font-weight: 800; text-decoration: none; border: 0; }
+  .dl:active { transform: scale(.98); }
+  .dl svg { width: 22px; height: 22px; }
+  .meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin-top: 10px; color: var(--sub); font-size: 13.5px; }
+  .alt { display: block; text-align: center; margin-top: 12px; color: var(--green2); font-weight: 700; text-decoration: none; }
+  .note { border-radius: 12px; padding: 12px 14px; background: var(--warn-soft); color: var(--warn-ink); font-size: 14.5px; margin: 0 0 12px; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  ol.steps li { counter-increment: s; position: relative; padding: 0 0 14px 40px; }
+  ol.steps li:last-child { padding-bottom: 0; }
+  ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--green-soft); color: var(--green2); font-weight: 800; display: grid; place-items: center; font-size: 14px; }
+  ol.steps b { display: block; }
+  ol.steps span { color: var(--sub); font-size: 14.5px; }
+  .qr { display: flex; gap: 16px; align-items: center; }
+  .qr #qr { flex: none; width: 148px; height: 148px; background: #fff; border-radius: 12px; padding: 8px; border: 1px solid var(--line); }
+  .qr #qr svg { width: 100%; height: 100%; display: block; }
+  .qr p { margin: 0; color: var(--sub); font-size: 14.5px; }
+  ul.feat { margin: 0; padding-left: 20px; color: var(--sub); font-size: 14.5px; }
+  ul.feat li { margin: 3px 0; }
+  details { font-size: 14px; color: var(--sub); }
+  details summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; word-break: break-all; background: var(--green-soft); padding: 1px 5px; border-radius: 5px; }
+  footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 22px; }
+  footer a { color: var(--green2); }
+  @media (max-width: 380px) { .qr { flex-direction: column; text-align: center; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <img src="icons/icon-192.png" alt="" width="88" height="88">
+  <h1>PinPoint AI 캐디</h1>
+  <p>거리 · 라이 경사 · 그린 리딩 · 퍼팅 · 티샷 공략 · 분실구</p>
+</header>
+
+<main class="wrap">
+  <section class="card lift">
+    <p class="note" id="iosNote" hidden>iPhone·iPad에서는 APK를 설치할 수 없습니다. 아래 <b>웹앱</b>을 Safari로 열고 공유 → "홈 화면에 추가"하세요.</p>
+    <a class="dl" id="dlBtn" href="pinpoint-caddie.apk" download="pinpoint-caddie.apk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 20h16"/></svg>
+      Android 앱 다운로드
+    </a>
+    <div class="meta" id="meta"><span>APK</span><span>Android 5.1 이상</span></div>
+    <a class="alt" href="./">설치 없이 웹앱으로 쓰기 →</a>
+  </section>
+
+  <section class="card" id="qrCard" hidden>
+    <h2>휴대폰으로 받기</h2>
+    <div class="qr">
+      <div id="qr" role="img" aria-label="이 페이지 주소 QR 코드"></div>
+      <p>Android 휴대폰 카메라로 QR을 찍으면 이 페이지가 열립니다. 거기서 <b>Android 앱 다운로드</b>를 누르세요.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>설치 방법</h2>
+    <p class="note">개인 배포용 테스트 서명이라 설치할 때 경고가 나옵니다. 정상이며, 아래 순서대로 진행하면 됩니다.</p>
+    <ol class="steps">
+      <li><b>다운로드</b><span>"파일이 유해할 수 있습니다"가 나오면 <b style="display:inline">다운로드</b>를 누릅니다.</span></li>
+      <li><b>열기</b><span>다운로드 완료 알림이나 파일 앱에서 <b style="display:inline">pinpoint-caddie.apk</b>를 엽니다.</span></li>
+      <li><b>설치 허용</b><span>"출처를 알 수 없는 앱" 안내가 나오면 설정 → <b style="display:inline">이 출처 허용</b>을 켜고 뒤로 돌아옵니다.</span></li>
+      <li><b>설치</b><span>Play 프로텍트 경고가 나오면 세부정보 → <b style="display:inline">그래도 설치</b>를 누릅니다.</span></li>
+      <li><b>권한 허용</b><span>처음 실행할 때 <b style="display:inline">위치</b>·<b style="display:inline">카메라</b> 권한을 허용하면 거리 측정과 공 찾기가 동작합니다.</span></li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>업데이트</h2>
+    <p style="margin:0;color:var(--sub);font-size:14.5px">새 버전이 나오면 이 페이지에서 다시 받아 설치하면 됩니다. 기존 앱 위에 덮어 설치되고 라운드·코스 기록은 그대로 남습니다.</p>
+  </section>
+
+  <section class="card">
+    <h2>주요 기능</h2>
+    <ul class="feat">
+      <li>공 ↔ 홀컵 거리 (GPS 칼만 필터 · 플레이즈라이크)</li>
+      <li>라이 경사 측정과 셋업 · 조준 보정</li>
+      <li>그린 경사 지도와 퍼팅 라인 · 세기 · 백스윙 계산</li>
+      <li>티샷 클럽 · 조준 추천 (기대 타수 최소)</li>
+      <li>분실구 낙하 구역 추정 → 레이더 → 카메라 탐지</li>
+      <li>토너먼트 모드 (골프 규칙 4.3a 자동 준수)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>파일 정보 · 무결성 확인</summary>
+      <p id="fileInfo" style="margin:10px 0 0">불러오는 중…</p>
+    </details>
+  </section>
+
+  <footer>데이터는 모두 휴대폰에만 저장됩니다 · <a href="./">웹앱 열기</a></footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+<script>
+(() => {
+  const ua = navigator.userAgent;
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    document.getElementById('iosNote').hidden = false;
+    document.getElementById('dlBtn').style.opacity = '.45';
+  }
+
+  // 데스크톱: 이 페이지 주소 QR (라이브러리 로드 실패 시 카드 숨김 유지)
+  if (!isAndroid && !isIOS) {
+    window.addEventListener('load', () => {
+      if (typeof qrcode !== 'function') return;
+      try {
+        const q = qrcode(0, 'M');
+        q.addData(location.href.split('#')[0]);
+        q.make();
+        document.getElementById('qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+        document.getElementById('qrCard').hidden = false;
+      } catch (e) { console.warn('QR', e); }
+    });
+  }
+
+  // 버전·크기·해시 (release:apk가 apk.json을 갱신)
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  fetch('apk.json?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(m => {
+    const mb = (m.bytes / 1048576).toFixed(1) + 'MB';
+    const date = new Date(m.builtAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('meta').innerHTML =
+      `<span>버전 ${esc(m.versionName)}</span><span>${mb}</span><span>${esc(date)}</span><span>Android 5.1 이상</span>`;
+    document.getElementById('fileInfo').innerHTML =
+      `파일 <code>pinpoint-caddie.apk</code><br>패키지 <code>${esc(m.packageId)}</code><br>버전 ${esc(m.versionName)} (code ${esc(m.versionCode)}) · ${m.bytes.toLocaleString()} bytes<br>SHA-256 <code>${esc(m.sha256)}</code>`;
+    document.getElementById('dlBtn').href = 'pinpoint-caddie.apk?v=' + encodeURIComponent(m.versionCode);
+  }).catch(() => {
+    document.getElementById('fileInfo').textContent = '파일 정보를 불러오지 못했습니다. 다운로드는 그대로 가능합니다.';
+  });
+})();
+</script>
+</body>
+</html>
