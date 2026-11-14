@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1f5f3f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="PinPoint AI 캐디 — 거리·라이 경사·그린 리딩·퍼팅 계산·티샷 공략·분실구 안내를 한 앱에서">
+<title>PinPoint AI 캐디</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="css/app.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="ic" id="menuBtn" aria-label="메뉴">☰</button>
+    <div class="ttl"><b id="ttlMain">PinPoint AI 캐디</b><small id="ttlSub">셀프 라운드의 디지털 캐디</small></div>
+    <div class="holenav" id="holeNav" hidden>
+      <button id="holePrev" aria-label="이전 홀">‹</button><span id="holeLbl">H1</span><button id="holeNext" aria-label="다음 홀">›</button>
+    </div>
+    <button class="mode-chip" id="modeChip">CASUAL</button>
+  </header>
+  <div class="alert-bar" id="alertBar" role="alert"></div>
+  <main id="view"></main>
+  <nav class="tabs" id="tabs">
+    <a href="#/distance" data-r="distance"><span class="i">⛳</span>거리</a>
+    <a href="#/tee" data-r="tee"><span class="i">🎯</span>티샷</a>
+    <a href="#/lost" data-r="lost"><span class="i">📡</span>공찾기</a>
+    <a href="#/green" data-r="green"><span class="i">🟢</span>그린</a>
+    <a href="#/lie" data-r="lie"><span class="i">📐</span>라이</a>
+    <a href="#/score" data-r="score"><span class="i">📝</span>스코어</a>
+  </nav>
+  <div class="drawer" id="drawer">
+    <div class="bg"></div>
+    <div class="panel">
+      <div class="brand">⛳ PinPoint AI 캐디</div>
+      <a href="#/home">🏠 홈 · 라운드 시작</a>
+      <a href="#/courses">🗺️ 코스 관리 · 편집</a>
+      <a href="#/bag">🏌️ 내 백 (클럽 · 갭 분석)</a>
+      <a href="#/rules">📖 룰 · 구제 도우미</a>
+      <a href="#/safety">⚡ 날씨 · 낙뢰 · 폭염 안전</a>
+      <a href="#/history">📊 라운드 기록 · 통계</a>
+      <a href="#/calib">🎚️ 퍼팅 · 센서 캘리브레이션</a>
+      <a href="#/settings">⚙️ 설정</a>
+      <a href="#/about">ℹ️ 앱 정보 · 정확도 안내</a>
+    </div>
+  </div>
+  <div id="sheet"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+</body>
+</html>

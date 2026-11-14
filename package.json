@@ -1,0 +1,11 @@
+{
+  "name": "pinpoint-ai-caddie",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PinPoint AI 캐디 — 올인원 골프 AI 캐디 PWA",
+  "scripts": {
+    "start": "node server.mjs 8080",
+    "test": "node --test tests/engine.test.mjs"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "PinPoint AI 캐디",
+  "short_name": "PinPoint",
+  "description": "거리·라이 경사·그린 리딩·퍼팅 계산·티샷 공략·분실구 안내 올인원 AI 캐디",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1f5f3f",
+  "theme_color": "#1f5f3f",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

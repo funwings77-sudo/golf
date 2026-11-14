@@ -1,0 +1,42 @@
+import { S, save, MODES, DEFAULT_SETTINGS } from '../core/state.js';
+import { requestMotionPermission, Sensors, startOrientation } from '../core/sensors.js';
+import { $, $$, toast, confirmSheet } from '../ui.js';
+
+const SW = [
+  ['voice', '음성 안내', '이어버드로 "핀까지 142미터" 안내'],
+  ['outdoor', '야외 고대비 모드', '강한 햇빛 아래 가독성'],
+  ['bigText', '큰 글씨 (시니어)', ''],
+  ['beginner', '입문자 가이드', '홀마다 "지금 할 일"·에티켓 안내'],
+  ['weather', '날씨·낙뢰·폭염 정보', '위치 좌표를 Open-Meteo에 보내 날씨를 받습니다'],
+  ['swingDetect', '스윙 자동 감지 (실험)', '휴대폰을 주머니에 넣고 스윙하면 샷 위치 저장'],
+  ['simGPS', 'GPS 시뮬레이션', '실내 테스트: 지도를 탭해 내 위치 지정'],
+];
+
+export default {
+  mount(el) {
+    const st = S.settings;
+    const num = (k, label, min, max, step, unit = '') => `<label class="f"><span>${label}</span><div class="row"><input type="number" data-num="${k}" value="${st[k]}" min="${min}" max="${max}" step="${step}" class="grow"><span class="sub">${unit}</span></div></label>`;
+    el.innerHTML = `<h2>⚙️ 설정</h2>
+      <div class="card"><b>기본 플레이 모드</b><div class="seg" id="mode" style="margin-top:8px">${Object.entries(MODES).map(([k, m]) => `<button data-v="${k}" class="${st.mode === k ? 'on' : ''}">${m.label}</button>`).join('')}</div><p class="sub">${MODES[st.mode].desc}</p></div>
+      <div class="card"><div class="grid2">
+        <label class="f"><span>거리 단위</span><div class="seg" id="unit"><button data-v="m" class="${st.unit === 'm' ? 'on' : ''}">미터</button><button data-v="yd" class="${st.unit === 'yd' ? 'on' : ''}">야드</button></div></label>
+        <label class="f"><span>주 사용 손</span><div class="seg" id="hand"><button data-v="R" class="${st.hand === 'R' ? 'on' : ''}">오른손</button><button data-v="L" class="${st.hand === 'L' ? 'on' : ''}">왼손</button></div></label></div>
+        <div class="grid2">${num('hcp', '핸디캡', 0, 54, 1)}<label class="f"><span>성별 (기본 비거리)</span><div class="seg" id="gender"><button data-v="M" class="${st.gender === 'M' ? 'on' : ''}">남</button><button data-v="F" class="${st.gender === 'F' ? 'on' : ''}">여</button></div></label></div></div>
+      <div class="card"><b>측정</b><div class="grid2">${num('eyeHeight', '눈높이 (AR 퍼팅)', 1.0, 2.0, 0.01, 'm')}${num('phoneHeight', '가슴 높이 (공 탐지)', 0.8, 1.8, 0.01, 'm')}${num('stepLen', '보폭', 0.4, 1.2, 0.01, 'm')}${num('cameraVFov', '카메라 세로 화각', 40, 90, 1, '°')}${num('stimp', '기본 그린 스피드', 6, 14, 0.5, 'ft')}${num('roundsPerMonth', '월 라운드 수', 0, 30, 1, '회')}</div></div>
+      <div class="card"><b>퍼팅 실력 (몬테카를로 오차)</b><div class="grid2">${num('aimSigma', '조준 오차 σ', 0.3, 4, 0.1, '°')}${num('speedSigma', '세기 오차 σ (0.06=6%)', 0.02, 0.2, 0.01)}</div></div>
+      <div class="card">${SW.map(([k, n, d]) => `<label class="switch"><span><b>${n}</b>${d ? `<br><span class="sub">${d}</span>` : ''}</span><input type="checkbox" data-sw="${k}" ${st[k] ? 'checked' : ''}></label>`).join('')}</div>
+      <div class="card"><b>센서 권한</b><p class="sub">iPhone은 나침반·기울기 센서 사용에 권한 요청이 필요합니다. 현재: 방위 ${Sensors.heading != null ? '✅' : '—'} · 기울기 ${Sensors.beta != null ? '✅' : '—'} · 위치 ${Sensors.pos ? '✅' : '—'}</p><button class="btn block" id="perm">센서 권한 요청</button></div>
+      <button class="btn danger block" id="wipe">모든 데이터 삭제</button>`;
+    const seg = (id, key, after) => $$(`#${id} button`).forEach(b => b.onclick = () => { st[key] = b.dataset.v; save('settings'); after ? after() : this.mount(el); });
+    seg('mode', 'mode'); seg('unit', 'unit'); seg('hand', 'hand'); seg('gender', 'gender');
+    $$('[data-num]').forEach(i => i.onchange = () => { const v = +i.value; if (isFinite(v)) { st[i.dataset.num] = v; save('settings'); toast('저장'); } });
+    $$('[data-sw]').forEach(i => i.onchange = () => { st[i.dataset.sw] = i.checked; save('settings'); });
+    $('#perm').onclick = async () => { const ok = await requestMotionPermission(); startOrientation(); if ('geolocation' in navigator) navigator.geolocation.getCurrentPosition(() => {}, () => {}); toast(ok ? '센서 권한 허용' : '권한이 거부되었거나 필요 없습니다'); setTimeout(() => this.mount(el), 1200); };
+    $('#wipe').onclick = async () => {
+      if (!(await confirmSheet('모든 데이터 삭제', '코스·라운드·샷 기록·설정을 모두 지웁니다. 되돌릴 수 없습니다.', '삭제', 'danger'))) return;
+      Object.keys(localStorage).filter(k => k.startsWith('pinpoint.')).forEach(k => localStorage.removeItem(k));
+      sessionStorage.clear(); location.reload();
+    };
+    void DEFAULT_SETTINGS;
+  },
+};
