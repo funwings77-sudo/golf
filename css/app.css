@@ -20,6 +20,9 @@
 :root.bigtext { --fs: 18px; --big: 58px; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+a.btn, a.list-btn { color: inherit; text-decoration: none; }
+a { color: var(--green2); }
 html, body { margin: 0; height: 100%; }
 body { background: var(--bg); color: var(--ink); font: 400 var(--fs)/1.5 "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
