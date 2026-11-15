@@ -2,13 +2,15 @@
 //  · API 키는 이 휴대폰에만 저장 (공개 사이트에 키를 넣으면 누구나 훔쳐 쓸 수 있으므로 사용자 본인 키 사용)
 //  · 구조화 출력(JSON 스키마) · 낮은 temperature · 시간 제한 · 자동 재시도 · 모델 자동 선택
 const API = 'https://generativelanguage.googleapis.com/v1beta';
-const K_KEY = 'pinpoint.geminiKey', K_MODEL = 'pinpoint.geminiModel', K_USE = 'pinpoint.geminiUsage';
+const K_KEY = 'pinpoint.geminiKey', K_MODEL = 'pinpoint.geminiModel', K_USE = 'pinpoint.geminiUsage', K_LIST = 'pinpoint.geminiModels';
 
 const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
 export const getKey = () => ls.get(K_KEY) || '';
 export const setKey = k => ls.set(K_KEY, (k || '').trim() || null);
 export const getModel = () => ls.get(K_MODEL) || '';
 export const setModel = m => ls.set(K_MODEL, m || null);
+const getList = () => { try { return JSON.parse(ls.get(K_LIST) || '[]'); } catch { return []; } };
+const setList = l => ls.set(K_LIST, l?.length ? JSON.stringify(l) : null);
 export const hasKey = () => /^[A-Za-z0-9_\-]{20,}$/.test(getKey());
 
 export class GeminiError extends Error {
@@ -43,49 +45,78 @@ async function req(path, { method = 'GET', body, timeout = 25000, key = getKey()
 }
 
 // 사용 가능한 모델 중 빠르고 안정적인 'flash' 계열 최신 정식판을 자동 선택
-export function pickModel(models) {
+export function rankModels(models) {
   const ok = models.filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
     .map(m => m.name.replace(/^models\//, ''))
-    .filter(n => /^gemini-/.test(n) && !/(tts|image|live|audio|embed|thinking|learnlm|aqa|robotics|computer)/i.test(n));
+    .filter(n => /^gemini-\d+(\.\d+)?-(flash|pro)(-lite)?(-\d{3})?$/.test(n)); // 정식 이름(예: gemini-3.6-flash)만
   const ver = n => +(n.match(/gemini-(\d+(?:\.\d+)?)/)?.[1] || 0);
   const score = n => ver(n) * 100 + (/flash/.test(n) ? 20 : /pro/.test(n) ? 5 : 0) - (/lite/.test(n) ? 8 : 0) - (/(preview|exp)/.test(n) ? 1000 : 0) - (/-\d{3}$/.test(n) ? 1 : 0);
-  return ok.sort((a, b) => score(b) - score(a))[0] || null;
+  return ok.filter(n => score(n) > 0).sort((a, b) => score(b) - score(a));
 }
-export async function testConnection(key = getKey()) {
+export const pickModel = models => rankModels(models)[0] || null;
+// 연결 시험: 목록에 있어도 실제로는 막혀 있거나(404) 붐비는(503) 모델이 있어서, 위에서부터 짧게 불러 보고
+//  제때(12초 안) 답하는 모델 최대 3개를 순서대로 저장 → 사용 중 문제가 생기면 다음 모델로 자동 전환
+const PROBE = (model, think) => ({ contents: [{ role: 'user', parts: [{ text: '{"ok":true} 를 그대로 답해' }] }], generationConfig: { maxOutputTokens: 64, responseMimeType: 'application/json', responseSchema: { type: 'OBJECT', properties: { ok: { type: 'BOOLEAN' } }, required: ['ok'] }, ...(think ? thinking(model) : {}) } });
+const chk = j => { const t = (j.candidates?.[0]?.content?.parts || []).filter(p => !p.thought).map(p => p.text || '').join(''); JSON.parse(t); return j; }; // 빈 답·깨진 JSON이면 실패
+async function probe(model, key) {
+  const t0 = performance.now();
+  await req(`/models/${encodeURIComponent(model)}:generateContent`, { method: 'POST', key, timeout: 12000, body: PROBE(model, true) }).then(chk).catch(async e => {
+    if (e.code === 'bad' && /thinking/i.test(e.message)) { noThink.add(model); return req(`/models/${encodeURIComponent(model)}:generateContent`, { method: 'POST', key, timeout: 12000, body: PROBE(model, false) }).then(chk); }
+    throw e;
+  });
+  return Math.round(performance.now() - t0);
+}
+export async function testConnection(key = getKey(), onStep = () => {}) {
   const j = await req('/models?pageSize=200', { key, timeout: 15000 });
-  const model = pickModel(j.models || []);
-  if (!model) throw new GeminiError('model', '이 키로 쓸 수 있는 Gemini 모델이 없어요');
-  return { model, count: (j.models || []).length };
+  const ranked = rankModels(j.models || []);
+  if (!ranked.length) throw new GeminiError('model', '이 키로 쓸 수 있는 Gemini 모델이 없어요');
+  const good = []; let firstErr = null;
+  for (const m of ranked.slice(0, 8)) {
+    onStep(m);
+    try { const ms = await probe(m, key); good.push({ m, ms }); if (good.length >= 3) break; }
+    catch (e) { if (e.code === 'key' || e.code === 'perm') throw e; firstErr ||= e; }
+  }
+  if (!good.length) throw firstErr || new GeminiError('model', '지금 응답하는 모델이 없어요. 잠시 뒤 다시 시도해 주세요');
+  setList(good.map(x => x.m));
+  return { model: good[0].m, ms: good[0].ms, backups: good.slice(1).map(x => x.m), count: (j.models || []).length };
 }
+// 생각(thinking) 시간을 끄면 2~10배 빨라짐 — 숫자 계산은 엔진이 하므로 필요 없음
+const noThink = new Set();
+const thinking = m => (noThink.has(m) ? {} : { thinkingConfig: { thinkingBudget: 0 } });
 
 // 생성: system 지시 + 사용자 내용(글·사진) → JSON (스키마 강제)
 export async function generateJSON({ system, parts, schema, temperature = 0.2, maxTokens = 1024 }) {
   if (!hasKey()) throw new GeminiError('nokey', 'Gemini API 키가 없어요. ☰ → 설정 → AI 캐디에서 넣어 주세요');
-  let model = getModel();
-  if (!model) { model = (await testConnection()).model; setModel(model); }
-  const body = {
-    systemInstruction: { parts: [{ text: system }] },
-    contents: [{ role: 'user', parts }],
-    generationConfig: { temperature, topP: 0.8, maxOutputTokens: maxTokens, responseMimeType: 'application/json', responseSchema: schema },
-  };
+  let list = getList();
+  if (!list.length || !getModel()) { const r = await testConnection(); setModel(r.model); list = getList(); }
+  const order = [getModel(), ...list.filter(m => m !== getModel())];
   let last;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < order.length + 1; i++) {
+    const model = order[Math.min(i, order.length - 1)];
+    const body = {
+      systemInstruction: { parts: [{ text: system }] },
+      contents: [{ role: 'user', parts }],
+      generationConfig: { temperature, topP: 0.8, maxOutputTokens: maxTokens, responseMimeType: 'application/json', responseSchema: schema, ...thinking(model) },
+    };
     try {
-      const j = await req(`/models/${encodeURIComponent(model)}:generateContent`, { method: 'POST', body });
+      const j = await req(`/models/${encodeURIComponent(model)}:generateContent`, { method: 'POST', body, timeout: 20000 });
       const c = j.candidates?.[0];
       if (!c) throw new GeminiError('blocked', j.promptFeedback?.blockReason ? 'AI가 이 질문에 답하지 않았어요 (' + j.promptFeedback.blockReason + ')' : 'AI 응답이 비어 있어요');
       if (c.finishReason && !['STOP', 'MAX_TOKENS'].includes(c.finishReason)) throw new GeminiError('blocked', 'AI가 답을 멈췄어요 (' + c.finishReason + ')');
-      const text = (c.content?.parts || []).map(p => p.text || '').join('');
+      const text = (c.content?.parts || []).filter(p => !p.thought).map(p => p.text || '').join('');
       let data; try { data = JSON.parse(text); } catch { throw new GeminiError('parse', 'AI 응답 형식이 올바르지 않아요', true); }
       usage(j.usageMetadata);
+      if (model !== getModel()) setModel(model); // 잘 되는 모델을 다음부터 먼저
       return { data, model };
     } catch (e) {
       last = e;
-      if (e.code === 'model' && i === 0) { setModel(''); model = (await testConnection()).model; setModel(model); continue; }
-      if (!e.retry) throw e;
-      await new Promise(r => setTimeout(r, 800 * 3 ** i));
+      if (e.code === 'bad' && /thinking/i.test(e.message) && !noThink.has(model)) { noThink.add(model); i--; continue; }
+      if (e.code === 'model') setList(getList().filter(m => m !== model)); // 없어진 모델은 다시 쓰지 않음
+      if (e.code === 'key' || e.code === 'perm' || e.code === 'nokey' || e.code === 'offline' || e.code === 'blocked') throw e;
+      if (i === order.length - 1) await new Promise(r => setTimeout(r, 1500)); // 모두 실패하면 한 번 쉬고 마지막 재시도
     }
   }
+  setList([]); // 모두 실패: 다음 질문 때 모델을 다시 시험해서 고름
   throw last;
 }
 function usage(u) {

@@ -43,7 +43,7 @@ export default {
       const k = $('#gKey').value.trim(), st2 = $('#gStat');
       if (!/^[A-Za-z0-9_\-]{20,}$/.test(k)) { st2.textContent = '⚠ 키 모양이 이상해요. 복사한 키 전체를 붙여 넣어 주세요'; return; }
       st2.textContent = '🔌 Google에 연결하는 중…';
-      try { const r = await testConnection(k); setKey(k); setModel(r.model); st2.innerHTML = `✅ 연결 성공 · 모델 <b>${esc(r.model)}</b> 자동 선택 (쓸 수 있는 모델 ${r.count}개)`; toast('AI 캐디 준비 완료'); }
+      try { const r = await testConnection(k, m => { st2.textContent = `🔌 ${m} 응답 확인 중…`; }); setKey(k); setModel(r.model); st2.innerHTML = `✅ 연결 성공 · <b>${esc(r.model)}</b> (응답 ${(r.ms / 1000).toFixed(1)}초)${r.backups.length ? ` · 예비 ${r.backups.map(esc).join(', ')}` : ''}`; toast('AI 캐디 준비 완료'); }
       catch (e) { st2.textContent = '❌ ' + e.message; }
     };
     $('#gDel').onclick = () => { setKey(''); setModel(''); $('#gKey').value = ''; $('#gStat').textContent = '키를 지웠어요. AI 기능이 꺼졌어요'; };

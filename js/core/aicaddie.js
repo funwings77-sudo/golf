@@ -68,7 +68,9 @@ const CADDIE_SYS = `너는 골프 앱 PinPoint의 AI 캐디야. 한국어 존댓
 4) FACTS에 없는 정보(공 상태, 그린 빠르기 등)는 모른다고 말하거나 사진이 있을 때만 사진에서 읽어.
 5) 위험(OB·물·벙커)이 있으면 cautions에 짧게 적어. 안전 경보(낙뢰·폭염)가 있으면 맨 먼저 말해.
 6) accuracy 정보(핀 기준·오차)가 'mid' 이하면 거리가 틀릴 수 있다는 점을 짧게 알려 줘.
-7) 사진이 있으면 공이 놓인 상태를 lie 칸에 골라.`;
+7) 사진이 있으면 공이 놓인 상태를 lie 칸에 골라.
+8) 방향은 engine.aim_words 표현을 그대로 쓰고, 바람은 weather.along·cross 말과 along_ms·cross_ms 값을 써. 음수(-) 숫자는 말하지 마.
+9) 조준 이유는 engine.aim_reason에 있는 것만 말해 (바람 때문이라고 지어내지 마).`;
 const CADDIE_SCHEMA = {
   type: 'OBJECT',
   properties: {

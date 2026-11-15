@@ -48,7 +48,7 @@ export function openAICaddie({ getFacts }) {
     try {
       if (tab === 'shot') {
         const r = await askCaddie(facts, q, photo ? [photo] : []);
-        out.innerHTML = `<div class="ai-res ${r.ok ? 'ok' : 'warn'}"><div class="ai-h">${r.ok ? '🤖 AI 캐디' : '🧮 엔진 답'} <span>${r.ok ? `✓ 숫자 검증됨${r.retried ? ' (1번 고침)' : ''}` : '⚠ AI 답에 확인 안 된 숫자가 있어 엔진 계산으로 대신했어요'}</span></div>
+        out.innerHTML = `<div class="ai-res ${r.ok ? 'ok' : 'warn'}"><div class="ai-h">${r.ok ? '🤖 AI 캐디' : '🧮 엔진 답'} <span>${r.ok ? `✓ 숫자 검증됨${r.retried ? ' (1번 고침)' : ''}` : `⚠ AI 답을 확인하지 못해 엔진 계산으로 대신했어요 (${esc(r.problems.slice(0, 2).join(' · '))})`}</span></div>
           <p class="ai-a">${esc(r.answer)}</p>
           ${r.lie !== 'unknown' && LIE_KO[r.lie] ? `<p class="ai-lie">📷 사진으로 본 공 상태: <b>${LIE_KO[r.lie]}</b>${r.lieNote ? ' · ' + esc(r.lieNote) : ''}</p>` : ''}
           ${r.cautions.length ? `<ul class="ai-c">${r.cautions.map(c => `<li>⚠ ${esc(c)}</li>`).join('')}</ul>` : ''}
