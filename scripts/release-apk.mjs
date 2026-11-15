@@ -35,7 +35,7 @@ const sha = buf => createHash('sha256').update(buf).digest('hex');
 // 다른 작업 중인 변경이 섞여 커밋되지 않도록, APK·버전 파일만 커밋한다.
 // 단, 웹 코드에 커밋 안 된 변경이 있으면 APK와 저장소 내용이 어긋나므로 먼저 알린다.
 const dirty = out('git status --porcelain').split('\n').filter(Boolean)
-  .filter(l => !/pinpoint-caddie\.apk$|apk\.json$|android\/app\/build\.gradle$/.test(l));
+  .filter(l => !/pinpoint-caddie\.apk$|apk\.json$|releases\.json$|android\/app\/build\.gradle$/.test(l));
 if (dirty.length && push) {
   console.warn('⚠ 커밋되지 않은 변경이 있습니다 (APK에는 포함되지만 커밋되지 않음):\n  ' + dirty.join('\n  '));
 }
@@ -73,8 +73,16 @@ await writeFile(join(root, 'apk.json'), JSON.stringify({
 
 if (!push) { console.log('\n--no-push: 커밋·업로드 생략. 완료.'); process.exit(0); }
 
-step(6, '커밋 · 푸시');
-run('git add pinpoint-caddie.apk apk.json android/app/build.gradle');
+step(6, 'GitHub 릴리스(버전별 다운로드) · 커밋 · 푸시');
+// 버전별 다운로드: 이전 릴리스 이후 변경 내용을 노트로 GitHub Releases에 올리고 releases.json 갱신
+try {
+  const R = await import('./releases.mjs');
+  const prev = R.loadReleases().releases.sort((a, b) => b.code - a.code)[0];
+  const notes = R.notesSince(prev ? `v${prev.version}` : null);
+  R.publishRelease({ version: name, code, apkPath: target, notes: notes.length ? notes : ['안정성 개선'] });
+  console.log(`릴리스 v${name} 등록 · 노트 ${notes.length}줄`);
+} catch (e) { console.warn('⚠ GitHub 릴리스 등록 실패(최신 다운로드는 계속 제공): ' + e.message); }
+run('git add pinpoint-caddie.apk apk.json releases.json android/app/build.gradle');
 const who = out('git config user.name') ? '' : '-c user.name="PinPoint" -c user.email="noreply@users.noreply.github.com" ';
 run(`git ${who}commit -q -m "Android APK ${name} (versionCode ${code})"`);
 run('git push');

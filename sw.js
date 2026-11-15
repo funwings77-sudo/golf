@@ -21,7 +21,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (url.hostname.includes('open-meteo.com') || url.hostname === 'api.github.com') return; // 날씨·관리자 API는 항상 네트워크
   // APK·관리자 페이지·발행 데이터는 캐시하지 않음 (발행 데이터는 앱이 localStorage에 직접 보관)
-  if (url.origin === location.origin && (/(\.apk|\/apk\.json|\/download\.html|\/admin\.html)$/.test(url.pathname) || /\/(data|js\/admin)\//.test(url.pathname))) return;
+  if (url.origin === location.origin && (/(\.apk|\/apk\.json|\/releases\.json|\/download\.html|\/admin\.html)$/.test(url.pathname) || /\/(data|js\/admin)\//.test(url.pathname))) return;
   if (url.hostname.includes('arcgisonline.com')) {
     e.respondWith(caches.open('pinpoint-tiles').then(async c => {
       // Leaflet(<img>, no-cors)이 저장한 불투명 응답은 3D 지도(fetch, cors)에 쓸 수 없음 → 다시 받아 교체

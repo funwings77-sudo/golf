@@ -1,0 +1,90 @@
+{
+ "format": "pinpoint-releases",
+ "version": 1,
+ "repo": "funwings77-sudo/golf",
+ "releases": [
+  {
+   "version": "1.0.5",
+   "code": 6,
+   "date": "2026-11-15T09:17:47+09:00",
+   "bytes": 4854444,
+   "sha256": "4e4e4f05c1c572c24d0f2d86fdce95f034ccf62d46f17653db6e0f0a891454d0",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.5/pinpoint-caddie-1.0.5.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.5",
+   "notes": [
+    "최신 코드로 다시 빌드 (앱 기능은 1.0.4와 같음)"
+   ]
+  },
+  {
+   "version": "1.0.4",
+   "code": 5,
+   "date": "2026-11-15T01:34:20+09:00",
+   "bytes": 4848812,
+   "sha256": "faa77181d9b89578e083e442a243783a06ca53a02a7e650eb36cd36df4a807b3",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.4/pinpoint-caddie-1.0.4.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.4",
+   "notes": [
+    "전국 골프장 209곳 검색·정보(KGBA 회원사 DB)",
+    "스코어카드 공식 코스 19곳(파·핸디캡·티별 거리·공략)",
+    "지도에서 그린 위치 한 번 지정"
+   ]
+  },
+  {
+   "version": "1.0.3",
+   "code": 4,
+   "date": "2026-11-15T00:56:16+09:00",
+   "bytes": 4845688,
+   "sha256": "bd028a2ee789a97f16508a016c9499dd2f23b26afe5f66873380df28f4d2c009",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.3/pinpoint-caddie-1.0.3.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.3",
+   "notes": [
+    "3D 지형 위에 정밀 측량 그린맵(경사·등고선) 겹치기",
+    "AR 🩺 점검(센서·나침반·GPS 상태와 예상 오차)",
+    "추천 카드에 비거리 학습 상태 표시"
+   ]
+  },
+  {
+   "version": "1.0.2",
+   "code": 3,
+   "date": "2026-11-15T00:50:20+09:00",
+   "bytes": 4841354,
+   "sha256": "76a81214f6c9ab8f04bae3e2b84d0bea640537f18eb486e0086d95fbbd3f06c4",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.2/pinpoint-caddie-1.0.2.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.2",
+   "notes": [
+    "쉬운 플레이: 골프장 → 코스 → 거리·클럽·힘·방향 → 친 공 위치",
+    "2D · 3D 지형 · 4D(공 비행·플라이오버) · AR 카메라 보기",
+    "27·36홀 골프장 코스 선택"
+   ]
+  },
+  {
+   "version": "1.0.1",
+   "code": 2,
+   "date": "2026-11-14T22:29:05+09:00",
+   "bytes": 4822197,
+   "sha256": "ddbb6d194f32225b807f4698e7c97bde80f60d86fabfcd6715d5057a88b2c65f",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.1/pinpoint-caddie-1.0.1.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.1",
+   "notes": [
+    "골프장 관리자 연동: 공식 코스 설치·업데이트",
+    "오늘의 핀·그린 스피드 자동 적용, 골프장 공지 경보 바",
+    "골프장 제출용 라운드 리포트(비식별)"
+   ]
+  },
+  {
+   "version": "1.0.0",
+   "code": 1,
+   "date": "2026-11-14T18:13:34+09:00",
+   "bytes": 4711238,
+   "sha256": "552a899b3e479d2fc444d91a1b314b96e67722dad6e2019ab96e25730f6d90a0",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.0/pinpoint-caddie-1.0.0.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.0",
+   "notes": [
+    "첫 Android 앱: 거리(GPS·핀·플레이즈라이크) · 라이 경사 · 그린 리딩 · 퍼팅 계산 · 티샷 공략 · 분실구 안내",
+    "스코어·내기 정산, 룰·구제 도우미, 낙뢰·폭염 경보, 오프라인 지도"
+   ]
+  }
+ ],
+ "latest": "1.0.5",
+ "updatedAt": "2026-11-15T00:23:53.285Z"
+}
