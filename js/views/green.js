@@ -1,4 +1,5 @@
 // ③ 그린 위 거리 · ④ 그린 경사 지도 · ⑤ 퍼팅 라인/조준점/세기/백스윙
+import { mountGreen3D, ovalInside } from './green3d.js';
 import { todayKey } from '../core/remote.js';
 import { S, save, allowed, activeHole, activeCourse, currentMode, FEATURE_NAMES } from '../core/state.js';
 import { distance, toLocal, toRad } from '../core/geo.js';
@@ -259,7 +260,16 @@ let tapMode = null;
 function mapTab(body) {
   const geo = geometry();
   if (geo.D < 0.3 && geo.kind === 'onsite') { body.innerHTML = '<div class="card">측정 탭에서 거리를 먼저 입력하세요.</div>'; return; }
-  body.innerHTML = `<div class="card tight" style="padding:6px"><canvas class="view" id="gcv" width="900" height="1100"></canvas></div>
+  if (G.g3 && geo.kind === 'grid') {
+    const gi = gridInfo(), b = gridBounds(gi.grid), surf = buildSurface(geo.spec);
+    const ins = gi.grid.mask ? geo.inside : ovalInside(b);
+    const th = Math.atan2(geo.hole.y - geo.ball.y, geo.hole.x - geo.ball.x) * 180 / Math.PI;
+    body.innerHTML = `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d">평면 지도</button><button data-v="3d" class="on">⛰️ 3D 그린</button></div><div id="g3wrap"></div>`;
+    mountGreen3D($('#g3wrap'), () => ({ surf, bounds: b, inside: ins, ball: geo.ball, hole: geo.hole, yaw0: 90 - th }));
+    $$('#g3Seg button').forEach(x => x.onclick = () => { G.g3 = x.dataset.v === '3d'; saveG(); mapTab(body); });
+    return;
+  }
+  body.innerHTML = `${geo.kind === 'grid' ? '<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d" class="on">평면 지도</button><button data-v="3d">⛰️ 3D 그린</button></div>' : ''}<div class="card tight" style="padding:6px"><canvas class="view" id="gcv" width="900" height="1100"></canvas></div>
     ${geo.kind === 'grid' ? `<div class="grid2"><button class="btn ${tapMode === 'ball' ? 'on' : ''}" id="tBall">⚪ 공 위치 탭</button><button class="btn ${tapMode === 'hole' ? 'on' : ''}" id="tHole">⛳ 홀 위치 탭</button></div>` : ''}
     <p class="sub">${esc(geo.name)} · 색 = 경사 크기, 흰 선 = 등고선(${'1~5'}cm), 화살표 = 물이 흐르는(공이 휘는) 방향. ${geo.kind === 'onsite' ? '현장 측정 범위(라인 주변)만 표시합니다.' : ''}</p>
     ${!G.result ? '<button class="btn primary block" id="calc2">퍼팅 계산</button>' : ''}`;
@@ -267,6 +277,7 @@ function mapTab(body) {
   const surf = buildSurface(geo.spec);
   const showLine = !(currentMode() === 'practice' && G.training && !G.revealed) && allowed('puttLine') && G.result && G.result.conf >= 0.4;
   const V = drawGreen(cv, surf, { ball: geo.ball, hole: geo.hole, result: showLine ? G.result : null, inside: geo.inside, stimpNote: `스팀프 ${G.stimp}ft · ${geo.D.toFixed(1)}m` });
+  $$('#g3Seg button').forEach(x => x.onclick = () => { G.g3 = x.dataset.v === '3d'; saveG(); mapTab(body); });
   $('#calc2')?.addEventListener('click', compute);
   $('#tBall')?.addEventListener('click', () => { tapMode = tapMode === 'ball' ? null : 'ball'; mapTab(body); });
   $('#tHole')?.addEventListener('click', () => { tapMode = tapMode === 'hole' ? null : 'hole'; mapTab(body); });

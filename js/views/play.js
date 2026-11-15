@@ -9,7 +9,7 @@ import { getCatalog, installCourse, findInstalled, getClubs } from '../core/remo
 import { Sensors, onPos, onOrientation, sampleFix, keepAwake, vibrate, speak, startOrientation } from '../core/sensors.js';
 import { distance, bearing, destination, normAngle, toLocal } from '../core/geo.js';
 import { gridSurface } from '../physics/putt.js';
-import { fetchElevations } from '../core/weather.js';
+import { fetchElevations, playsLike } from '../core/weather.js';
 import { adviseShot, predictBall, toBall, dirWords, compassName, greenR } from '../physics/advice.js';
 import { conditionsEffect } from '../physics/flight.js';
 import { learnClub } from '../core/score.js';
@@ -35,7 +35,7 @@ export default {
   onHole() { if (P.step === 'hole') { adv = null; advKey = ''; P.ballPos = null; persist(); render(); } },
 };
 
-function teardown() { destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; }
+function teardown() { $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; }
 function render() {
   teardown(); unPos?.(); unOri?.(); clearInterval(timer); unPos = unOri = null;
   el_.className = 'play';
@@ -378,8 +378,10 @@ async function found() {
     S.round.lastShot = { hole: shot.hole, dist: total, club: shot.clubName, ts: Date.now() };
     toast(`잘했어요! ${Math.round(total)}m 날아갔어요`, 3000);
     P.ballPos = { lat: f.lat, lon: f.lon }; P.ballHole = shot.hole;
+    (S.round.track ||= []).push({ hole: shot.hole, start: shot.start, end: { lat: f.lat, lon: f.lon }, club: shot.club, dist: total });
   } else { // GPS가 없으면 예상 위치에 공을 놓음 (다르면 다시 찍기)
     P.ballPos = { lat: shot.pred.lat, lon: shot.pred.lon }; P.ballHole = shot.hole;
+    (S.round.track ||= []).push({ hole: shot.hole, start: shot.start, end: { lat: shot.pred.lat, lon: shot.pred.lon }, club: shot.club, dist: distance(shot.start, shot.pred), est: true });
     toast('잘했어요! 예상 위치에 공을 놓았어요 · 다르면 [📍 공 다시 찍기]', 3500);
   }
   delete S.round.liveShot; save('round'); persist(); vibrate([60, 40, 60]); update(true);
@@ -405,7 +407,7 @@ async function mountView() {
     const c0 = ballPos() || h.green || h.tee || near?.green || c.center || Sensors.pos || { lat: 36.5, lon: 127.8 };
     map = createMap($('#pmap'), { center: ll(c0), zoom: h.green || ballPos() || near ? 17 : c.center ? (c.center.precision === "sigungu" ? 12 : 15) : 7 });
     if (!map) return;
-    drawHole(map, h); lay = L.layerGroup().addTo(map);
+    drawHole(map, h); lay = L.layerGroup().addTo(map); map.on('zoomend', () => drawRings(sceneData()));
     $('#zi').onclick = () => map.zoomIn(); $('#zo').onclick = () => map.zoomOut();
     map.on('click', e => {
       if (!P.marking) return;
@@ -417,7 +419,7 @@ async function mountView() {
       if (P.afterMark === 'hit') { P.afterMark = null; hit(); fit2d(); return; }
       update(true); fit2d();
     });
-    fit2d();
+    fit2d(); setTimeout(() => { map?.invalidateSize(); fit2d(); }, 150);
   } else if (P.view === '3d' || P.view === '4d') {
     stage.innerHTML = `<div class="map3" id="p3"></div><div class="zoomb"><button id="zi">＋</button><button id="zo">－</button><button id="tilt" title="기울기">⛰️</button></div>
       ${P.view === '4d' ? `<div class="tbar"><button class="btn small" id="fly">▶ 공 날려 보기</button><button class="btn small" id="over">🎬 홀 미리 날아보기</button><input type="range" id="tt" min="0" max="100" value="0" aria-label="시간"><span id="tinfo"></span></div>` : ''}<div class="loading3">⛰️ 3D 지형을 불러오는 중…</div>`;
@@ -451,8 +453,16 @@ async function mountView() {
 
 function fit2d() {
   if (!map) return;
-  const sd = sceneData(), pts = [sd.me, sd.from, sd.pin, sd.landing, sd.ball].filter(Boolean).map(ll);
-  if (pts.length >= 2) map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [70, 150], paddingBottomRight: [70, 340], maxZoom: 19 });
+  const sd = sceneData();
+  // 거리 링이 보일 때: 목표 주변(앞뒤 ±35m)을 크게 — 내 위치는 작은 코스 지도에서 확인
+  if (sd.from && sd.pin && !shotOf() && distance(sd.from, sd.pin) >= 60) {
+    const t = targetOf(sd), br = bearing(sd.from, t), r = Math.min(55, distance(sd.from, t) * 0.35);
+    const box = [destination(t, br, r), destination(t, br + 180, r), destination(t, br + 90, r * 0.8), destination(t, br - 90, r * 0.8)].map(ll);
+    map.fitBounds(L.latLngBounds(box), { paddingTopLeft: [140, 150], paddingBottomRight: [120, ($('.imm-sheet')?.offsetHeight || 320) + 20], maxZoom: 19.5, animate: false });
+    return;
+  }
+  const pts = [sd.me, sd.from, sd.pin, sd.landing, sd.ball].filter(Boolean).map(ll);
+  if (pts.length >= 2) map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [70, 150], paddingBottomRight: [70, 340], maxZoom: 19, animate: false });
 }
 
 function scene() {
@@ -467,11 +477,121 @@ function scene() {
     L.polyline([ll(from), ll(landing)], { color: '#5ee6a8', weight: 14, opacity: 0.35, lineCap: 'round', interactive: false }).addTo(lay);
     L.polyline([ll(from), ll(landing)], { color: '#ffffff', weight: 4, opacity: 0.98, lineCap: 'round', interactive: false }).addTo(lay);
     if (distance(landing, pin) > 3) L.polyline([ll(landing), ll(pin)], { color: '#ffffff', weight: 3, dashArray: '2 7', interactive: false }).addTo(lay);
-    L.marker(ll(landing), { icon: labelIcon(`🎯 ${Math.round(distance(from, landing))}m`, 'tgt'), interactive: false }).addTo(lay);
+    if (shotOf() || distance(from, pin) < 25) L.marker(ll(landing), { icon: labelIcon(`🎯 ${Math.round(distance(from, landing))}m`, 'tgt'), interactive: false }).addTo(lay);
     const rel = adv?.rel || 0;
     if (Math.abs(rel) >= 0.75) L.marker(ll(destination(from, adv.aimBearing, Math.min(40, distance(from, landing) / 3))), { icon: labelIcon(`${rel > 0 ? '오른쪽' : '왼쪽'} ${Math.abs(rel).toFixed(1)}°`, 'ang'), interactive: false }).addTo(lay);
   }
   if (from) L.circleMarker(ll(from), { radius: 9, color: '#fff', weight: 3, fillColor: P.ballPos ? '#ffffff' : '#2b7bff', fillOpacity: 1 }).bindTooltip(P.ballPos ? '내 공' : '나').addTo(lay);
   if (ball) { L.circle(ll(ball), { radius: shotOf()?.r80 || 10, color: '#ff6b5a', weight: 2, fillOpacity: 0.15, interactive: false }).addTo(lay); L.marker(ll(ball), { icon: labelIcon(`⚪ 내 공 ${Math.round(distance(Sensors.pos || from, ball))}m`, 'ball'), interactive: false }).addTo(lay); }
-  if (pin && from) L.marker(ll(pin), { icon: labelIcon(`⛳ ${Math.round(distance(from, pin))}m`, 'pin'), interactive: false }).addTo(lay);
+  if (pin && from && (shotOf() || distance(from, pin) < 25)) L.marker(ll(pin), { icon: labelIcon(`⛳ ${Math.round(distance(from, pin))}m`, 'pin'), interactive: false }).addTo(lay);
+  drawRings(sd);
+}
+
+// ---------- 거리 링 · 목표점(레이업) · 해저드 캐리 · 체감 거리(경사·바람·기온) ----------
+const HZ_NAME = { bunker: '벙커', water: '물', ob: 'OB', trees: '나무' };
+const divI = (html, cls) => L.divIcon({ className: 'rg-ic ' + cls, html, iconSize: [0, 0] });
+function targetOf(sd) {
+  const h = activeHole();
+  if (P.target && P.target.hole === h?.n) return P.target;
+  return sd.landing || sd.pin;
+}
+function clubFor(d) {
+  const cs = S.bag.filter(c => c.enabled !== false && c.carry > 0).sort((a, b) => a.carry - b.carry);
+  if (!cs.length) return null;
+  return cs.find(c => c.carry >= d * 0.97) || cs.at(-1);
+}
+function plays(sd, d, brg, dh = 0) {
+  if (!allowed('playsLike') || P.plOff) return null;
+  const w = App_.weather, wind = allowed('windAdjust') && w;
+  return playsLike({ dist: d, dh, windSpeed: wind ? w.windSpeed || 0 : 0, windFrom: wind ? w.windFrom || 0 : 0, shotBearing: brg, tempC: w?.temp ?? 20 });
+}
+let ringLay = null;
+function drawRings(sd) {
+  const box = $('#stage'); box?.querySelector('.rg-hud')?.remove();
+  if (ringLay) { ringLay.remove(); ringLay = null; }
+  const { from, pin } = sd;
+  if (!map) return;
+  ringLay = L.layerGroup().addTo(map);
+  drawTrack();
+  if (!from || !pin || shotOf() || distance(from, pin) < 25) return;
+  const h = activeHole(), tgt = targetOf(sd), rT = distance(from, tgt), brg = bearing(from, tgt);
+  const nearPin = distance(tgt, pin) < 15, drop = nearPin ? pinDrop(from, pin, h) : null;
+  const clubsOk = allowed('clubRec');
+  // 화면에서 링 사이가 28px 이상 벌어지도록 간격 선택 (확대하면 촘촘하게)
+  const ppm = map.latLngToContainerPoint(ll(tgt)).distanceTo(map.latLngToContainerPoint(ll(destination(tgt, brg, 10)))) / 10;
+  const step = [2, 3, 5, 10, 20, 25, 50].find(v => v * ppm >= 24) || 50, dense = step * ppm < 30;
+  const ring = (r, main) => {
+    const span = Math.min(30, Math.atan2(main ? 30 : 24, r) * 180 / Math.PI);
+    const pts = []; for (let a = -span; a <= span + 0.01; a += span / 16) pts.push(ll(destination(from, brg + a, r)));
+    L.polyline(pts, main ? { color: '#ffc83d', weight: 4, opacity: 1, interactive: false } : { color: '#ffffff', weight: 1.6, opacity: 0.85, interactive: false }).addTo(ringLay);
+    const pl = plays(sd, r, brg, main && drop ? drop.v : 0), eff = pl ? pl.total : r, c = clubsOk ? clubFor(eff) : null;
+    const left = `${Math.round(eff)}m${c ? ` <b>${esc(c.id)}</b>` : ''}`;
+    if (main) {
+      const dz = main && drop ? `<em>${drop.v >= 0 ? '↑' : '↓'} ${Math.abs(drop.v).toFixed(1)}m</em>` : '';
+      L.marker(pts[0], { icon: divI(`<div><small>${pl ? '체감 거리' : '목표까지'}</small>${left}${dz}</div>`, 'rg-pl'), interactive: false }).addTo(ringLay);
+      L.marker(pts.at(-1), { icon: divI(`<div>${Math.round(r)}m</div>`, 'rg-tag'), interactive: false }).addTo(ringLay);
+      return pl;
+    }
+    if (!dense) L.marker(pts[0], { icon: divI(`<div>${left}</div>`, 'rg-l'), interactive: false }).addTo(ringLay);
+    L.marker(pts.at(-1), { icon: divI(`<div>${Math.round(r)}m</div>`, 'rg-r'), interactive: false }).addTo(ringLay);
+  };
+  for (const k of [-2, -1, 1, 2]) { const r = rT + k * step; if (r > 15) ring(r, false); }
+  const pl = ring(rT, true);
+  // 해저드: 앞까지 · 넘기기(캐리) 거리
+  for (const z of h.hazards || []) {
+    const dz = distance(from, z), off = Math.abs(normAngle(bearing(from, z) - brg));
+    if (dz < 20 || dz > rT + 60 || off > 40 || !HZ_NAME[z.type]) continue;
+    const front = Math.max(0, dz - z.r), carry = dz + z.r;
+    L.marker(ll(z), { icon: divI(`<div>${HZ_NAME[z.type]} <span>앞 ${Math.round(front)}</span> · <b>넘기기 ${Math.round(carry)}m</b></div>`, 'rg-hz ' + z.type), interactive: false }).addTo(ringLay);
+  }
+  // 목표점: 끌어서 레이업 지점 바꾸기 · 두 번 누르면 원래대로
+  const ret = L.marker(ll(tgt), { icon: divI('<div><i></i></div>', 'rg-ret'), draggable: true, zIndexOffset: 900 }).addTo(ringLay);
+  ret.on('dragend', e => { const q = e.target.getLatLng(); P.target = { hole: h.n, lat: q.lat, lon: q.lng }; persist(); drawRings(sceneData()); });
+  ret.on('dblclick', () => { P.target = null; persist(); drawRings(sceneData()); toast('목표를 추천 지점으로 되돌렸어요'); });
+  // 보정 설명 + 바람 표시
+  if (box && allowed('playsLike') && P.plOff) { const hud = document.createElement('div'); hud.className = 'rg-hud'; hud.innerHTML = '<button class="rg-tog">체감 거리 <b>끔</b></button>'; box.appendChild(hud); hud.querySelector('button').onclick = () => { P.plOff = false; persist(); drawRings(sceneData()); }; }
+  if (box && pl) {
+    const pt = pl.parts, bits = [];
+    if (Math.abs(pt.wind) >= 0.5) bits.push(`바람 ${pt.wind > 0 ? '+' : '−'}${Math.abs(pt.wind).toFixed(0)}`);
+    if (Math.abs(pt.elev) >= 0.5) bits.push(`${pt.elev > 0 ? '오르막' : '내리막'} ${pt.elev > 0 ? '+' : '−'}${Math.abs(pt.elev).toFixed(0)}`);
+    if (Math.abs(pt.temp) >= 0.5) bits.push(`기온 ${pt.temp > 0 ? '+' : '−'}${Math.abs(pt.temp).toFixed(0)}`);
+    const diff = pl.total - rT, w = App_.weather;
+    const msg = bits.length ? `${Math.abs(diff) < 0.5 ? '거의 그대로' : `${Math.abs(diff).toFixed(0)}m 더 ${diff > 0 ? '길게' : '짧게'}`} 쳐요 · ${bits.join(' · ')}m` : '바람·경사 영향 거의 없음';
+    const windOk = allowed('windAdjust') && w && w.windSpeed != null;
+    const hud = document.createElement('div'); hud.className = 'rg-hud';
+    hud.innerHTML = `<button class="rg-tog on">체감 거리 <b>켬</b></button><div class="rg-msg">${msg}</div>${windOk ? `<div class="rg-wind"><span>바람</span><i style="transform:rotate(${(w.windFrom + 180) % 360}deg)">↑</i><b>${(+w.windSpeed).toFixed(1)}<small>m/s</small></b></div>` : ''}`;
+    box.appendChild(hud); hud.querySelector('.rg-tog').onclick = () => { P.plOff = true; persist(); drawRings(sceneData()); };
+  }
+  drawPlans(sd);
+}
+
+// 휘어진 공 궤적(위에서 본 모습): 두 점 사이를 살짝 휜 곡선으로
+function curve(a, b, bend = 0.12, n = 24) {
+  const d = distance(a, b), br = bearing(a, b), out = [];
+  for (let i = 0; i <= n; i++) { const t = i / n, p = destination(a, br, d * t); out.push(ll(destination(p, br + 90, d * bend * 4 * t * (1 - t)))); }
+  return out;
+}
+// 공략 계획: 추천(초록) + 다른 방법(파랑) · 예상 타수
+function drawPlans(sd) {
+  const { from, pin, landing } = sd;
+  if (!adv || adv.kind !== 'full' || !landing || !allowed('clubRec')) return;
+  const tag = (p, html, cls) => L.marker(p, { icon: divI(`<div>${html}</div>`, 'rg-plan ' + cls), interactive: false }).addTo(ringLay);
+  if (distance(landing, pin) > 8) L.polyline(curve(landing, pin, 0.1), { color: '#5ee6a8', weight: 3, opacity: 0.9, dashArray: '1 7', lineCap: 'round', interactive: false }).addTo(ringLay);
+  if (adv.es) tag(ll(landing), `추천 · 예상 <b>${adv.es.toFixed(1)}</b>타`, 'best');
+  const alt = adv.alternatives?.[0], ac = alt && S.bag.find(c => c.id === alt.club);
+  if (!ac) return;
+  const D = distance(from, pin), c2 = Math.min(ac.carry, D), l2 = destination(from, bearing(from, pin), c2);
+  L.polyline(curve(from, l2, -0.1), { color: '#4a9dff', weight: 3, opacity: 0.9, interactive: false }).addTo(ringLay);
+  if (distance(l2, pin) > 8) L.polyline(curve(l2, pin, -0.1), { color: '#4a9dff', weight: 2.5, opacity: 0.85, dashArray: '1 7', lineCap: 'round', interactive: false }).addTo(ringLay);
+  L.circleMarker(ll(l2), { radius: 5, color: '#fff', weight: 2, fillColor: '#4a9dff', fillOpacity: 1, interactive: false }).addTo(ringLay);
+  tag(ll(l2), `다른 방법 ${esc(ac.id)}${alt.es ? ` · <b>${alt.es.toFixed(1)}</b>타` : ''}`, 'alt');
+}
+// 이번 홀에서 친 샷 기록 (휘어진 선 + 클럽 · 거리)
+function drawTrack() {
+  const h = activeHole(), tr = (S.round?.track || []).filter(t => t.hole === h?.n);
+  tr.forEach(t => {
+    L.polyline(curve(t.start, t.end, 0.08), { color: '#7dff9e', weight: 3, opacity: 0.95, interactive: false }).addTo(ringLay);
+    L.circleMarker(ll(t.end), { radius: 5, color: '#fff', weight: 2, fillColor: '#2f9e5a', fillOpacity: 1, interactive: false }).addTo(ringLay);
+    L.marker(ll(t.start), { icon: divI(`<div><i>${esc(t.club || '')}</i>${Math.round(t.dist)}m</div>`, 'rg-shot'), interactive: false }).addTo(ringLay);
+  });
 }

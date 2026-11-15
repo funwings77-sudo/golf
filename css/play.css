@@ -186,3 +186,48 @@ svg.arc3 { position: absolute; inset: 0; width: 100%; height: 100%; pointer-even
 .m-dir { margin-top: 8px; font-size: 13px; } .m-foot { margin-top: 4px; }
 .imm-act .a-main { min-height: 50px; font-size: 19px; } .imm-act .a-row > * { min-height: 38px; font-size: 13.5px; }
 @media (max-height: 760px) { .m-foot { display: none; } .m-big b { font-size: 40px; } }
+
+/* ===== 거리 링 · 목표점 · 해저드 캐리 · 체감 거리 ===== */
+.rg-ic { overflow: visible; }
+.rg-ic > div { position: absolute; white-space: nowrap; font-weight: 800; pointer-events: none; }
+.rg-l > div { right: 6px; transform: translateY(-50%); color: #fff; font-size: 13px; text-shadow: 0 1px 3px rgba(0,0,0,.9); }
+.rg-l b { font-weight: 900; margin-left: 2px; }
+.rg-r > div { left: 6px; transform: translateY(-50%); background: rgba(240,240,236,.92); color: #333; font-size: 11.5px; padding: 1px 6px; border-radius: 7px; border: 1px solid rgba(0,0,0,.15); }
+.rg-pl > div { right: 10px; transform: translateY(-50%); background: #fff; color: #111; border-radius: 10px; padding: 5px 10px 6px; font-size: 19px; line-height: 1.1; box-shadow: 0 4px 14px rgba(0,0,0,.35); display: flex; flex-direction: column; }
+.rg-pl small { font-size: 11px; font-weight: 700; color: #555; }
+.rg-tag > div { left: 8px; transform: translateY(-50%); background: #111; color: #fff; font-size: 19px; padding: 4px 9px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,.85); }
+.rg-hz > div { transform: translate(-50%, -50%); background: rgba(20,20,20,.72); color: #fff; font-size: 11.5px; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.3); }
+.rg-hz span { font-weight: 600; opacity: .85; } .rg-hz b { color: #ffc83d; }
+.rg-hz.water > div { border-color: #5ab0ff; } .rg-hz.ob > div { border-color: #ff6b5a; }
+.rg-ret > div { pointer-events: auto; cursor: grab; transform: translate(-50%, -50%); width: 46px; height: 46px; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.4); background: rgba(255,255,255,.08);
+  background-image: linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+  background-size: 2px 10px, 2px 10px, 10px 2px, 10px 2px; background-position: 50% 0, 50% 100%, 0 50%, 100% 50%; background-repeat: no-repeat; }
+.rg-ret i { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: #fff; }
+.leaflet-marker-icon.rg-ret { z-index: 900 !important; }
+.rg-hud { position: absolute; left: 148px; right: 66px; top: 84px; z-index: 990; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; pointer-events: none; }
+.rg-msg { background: rgba(255,255,255,.94); color: #111; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; box-shadow: 0 3px 10px rgba(0,0,0,.3); }
+.rg-wind { display: flex; align-items: center; gap: 6px; background: rgba(14,22,18,.82); color: #fff; border-radius: 12px; padding: 5px 10px; font-size: 12px; }
+.rg-wind i { font-style: normal; font-size: 22px; color: #5ee6a8; font-weight: 900; display: inline-block; line-height: 1; }
+.rg-wind b { font-size: 16px; } .rg-wind small { font-size: 10px; opacity: .8; margin-left: 1px; }
+.rg-pl em { font-style: normal; font-size: 12px; font-weight: 800; color: #1f6fd1; }
+.rg-hud .rg-tog { pointer-events: auto; border: 0; border-radius: 999px; padding: 5px 11px; font-size: 12px; font-weight: 800; background: rgba(14,22,18,.82); color: #fff; cursor: pointer; }
+.rg-hud .rg-tog b { margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #666; color: #fff; }
+.rg-hud .rg-tog.on b { background: #2b7bff; }
+.rg-plan > div { transform: translate(-50%, -50%); font-size: 11.5px; padding: 3px 9px; border-radius: 999px; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.rg-plan.best > div { background: rgba(31,120,72,.92); } .rg-plan.alt > div { background: rgba(43,110,210,.92); }
+.rg-shot > div { transform: translate(-105%, -50%); display: flex; align-items: center; overflow: hidden; border-radius: 8px; background: rgba(17,17,17,.85); color: #fff; font-size: 13px; padding-right: 9px; }
+.rg-shot i { font-style: normal; background: #3fae5f; padding: 4px 8px; margin-right: 8px; font-weight: 900; }
+
+.rg-plan.best > div { transform: translate(-50%, calc(-100% - 30px)); } .rg-plan.alt > div { transform: translate(-50%, 30px); }
+.rg-l > div { font-size: 12px; }
+@media (max-width: 420px) { .rg-pl > div { font-size: 16px; padding: 4px 8px; } .rg-tag > div { font-size: 16px; padding: 3px 7px; } }
+
+/* ===== 3D 그린 ===== */
+.g3-box { position: relative; background: #f4f6f2; border-radius: 18px; padding: 8px 8px 10px; border: 1px solid var(--line, #ddd); }
+.g3 { width: 100%; aspect-ratio: 1; display: block; touch-action: none; cursor: grab; }
+.g3-legend { position: absolute; left: 14px; top: 14px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; font-weight: 800; color: #333; }
+.g3-legend i { width: 14px; height: 70px; border-radius: 4px; background: linear-gradient(#e13c28, #f5be32, #96d746, #3cc896, #28a0e6, #2846c8); }
+.g3-ex { position: absolute; right: 12px; top: 12px; display: flex; gap: 4px; }
+.g3-ex button { border: 1px solid #ccd; background: #fff; border-radius: 8px; padding: 4px 8px; font-weight: 800; font-size: 12px; cursor: pointer; color: #333; }
+.g3-ex button.on { background: #1f6f45; color: #fff; border-color: #1f6f45; }
+.g3-note { margin: 4px 4px 0; font-size: 12px; color: #555; text-align: center; }
