@@ -102,7 +102,7 @@ main#view.play { padding: 0 0 calc(var(--nav-h) + 12px + env(safe-area-inset-bot
 .chips.big button small { font-weight: 600; opacity: .75; font-size: 12px; }
 
 /* ===== 몰입형 홀 화면 (어두운 유리 카드 · 빛나는 공 궤적) ===== */
-.imm { position: relative; height: calc(100dvh - var(--top-h) - var(--nav-h) - env(safe-area-inset-bottom) - env(safe-area-inset-top)); min-height: 560px; background: #0a120e; overflow: hidden; color: #fff; --glass: rgba(14, 22, 18, .72); --glass2: rgba(58, 64, 52, .78); --glow: #5ee6a8; }
+.imm { position: relative; isolation: isolate; z-index: 0; height: calc(100dvh - var(--top-h) - var(--nav-h) - env(safe-area-inset-bottom) - env(safe-area-inset-top)); min-height: 560px; background: #0a120e; overflow: hidden; color: #fff; --glass: rgba(14, 22, 18, .72); --glass2: rgba(58, 64, 52, .78); --glow: #5ee6a8; }
 main#view.play:has(.imm) { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .imm .imm-stage { position: absolute; inset: 0; margin: 0; height: auto; min-height: 0; border-radius: 0; background: #0d1a13; }
 .imm-top { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 20; display: flex; align-items: center; gap: 8px; }
