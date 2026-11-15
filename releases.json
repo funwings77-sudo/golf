@@ -4,6 +4,19 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.14",
+   "code": 15,
+   "date": "2026-11-15T05:22:33.122Z",
+   "bytes": 4911366,
+   "sha256": "ad3b9fdc07e169f9965fbb23c6fd60c2b9c84f85d6e4eb7d4ff4c3ab46910c52",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.14/pinpoint-caddie-1.0.14.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.14",
+   "notes": [
+    "Gemini AI caddie: grounded facts (no coordinates), JSON schema output, anchored number verification with retry and engine fallback, rules Q&A grounded in rule summary, AI round review, photo/voice input, key stored on device, tournament lock",
+    "Register releases 1.0.8-1.0.13; push before creating GitHub release"
+   ]
+  },
+  {
    "version": "1.0.13",
    "code": 14,
    "date": "2026-11-15T14:08:24+09:00",
@@ -188,6 +201,6 @@
    ]
   }
  ],
- "latest": "1.0.13",
- "updatedAt": "2026-11-15T05:10:19.171Z"
+ "latest": "1.0.14",
+ "updatedAt": "2026-11-15T05:22:37.431Z"
 }
