@@ -299,3 +299,4 @@ table.score td.sc-d span { border: 1.6px solid #d0452f; box-shadow: 0 0 0 2px #f
 .imm-gps { cursor: pointer; }
 .drills { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #b9d9c5; } .drills > b { font-size: 14px; }
 .dr { display: flex; flex-direction: column; padding: 6px 0; } .dr span { font-weight: 800; font-size: 14px; } .dr small { color: var(--sub, #666); font-size: 12.5px; }
+.sheet-body .pick { margin-bottom: 8px; }

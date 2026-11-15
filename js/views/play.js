@@ -56,14 +56,11 @@ function stepClub() {
     ${mine.length ? `<div class="picks">${mine.map(c => `<button class="pick" data-c="${esc(c.id)}"><span class="pi">${c.official ? '🏌️' : c.demo ? '🧪' : '🗺️'}</span><span class="pt"><b>${esc(c.name)}</b><small>${c.holes.length}홀${c.official?.region ? ' · ' + esc(c.official.region) : ''}${c.todayPins ? ' · 오늘 핀 ✓' : ''}</small></span><span class="pa">›</span></button>`).join('')}</div>` : '<p class="sub center">아직 받은 골프장이 없어요. 아래에서 골라 받아요.</p>'}
     <h2 class="ph2">📡 골프장 받기</h2><div class="picks" id="cat"><p class="sub center">불러오는 중…</p></div>
     <h2 class="ph2">🇰🇷 전국 골프장 찾기</h2><div class="picks" id="dir"><p class="sub center">불러오는 중…</p></div>
-    <button class="pbtn ghost" id="demo">🧪 연습용 가상 골프장으로 해 보기</button>
+    <button class="pbtn ghost" id="demo">🧪 테스트 코스 만들기 (9홀 가상 골프장)</button>
   </div>`;
   $('#pq').oninput = e => { P.q = e.target.value; persist(); clearTimeout(stepClub._t); stepClub._t = setTimeout(() => { const pos = e.target.selectionStart; stepClub(); const i = $('#pq'); i.focus(); i.setSelectionRange(pos, pos); }, 250); };
   $$('[data-c]').forEach(b => b.onclick = () => choose(b.dataset.c));
-  $('#demo').onclick = () => {
-    const base = Sensors.pos ? { lat: Sensors.pos.lat + 0.0006, lon: Sensors.pos.lon } : undefined;
-    const c = demoCourse(base); S.courses.push(c); save('courses'); choose(c.id);
-  };
+  $('#demo').onclick = demoPick;
   getCatalog().then(cat => {
     const box = $('#cat'); if (!box) return;
     const list = cat.filter(e => !findInstalled(e.id) && (!q || e.name.includes(q)));
@@ -512,6 +509,26 @@ function scoreCard(h) {
   return `<div class="pcard scard"><div class="row" style="justify-content:space-between"><b>📋 스코어카드</b><span class="sub">파 ${h.par}${hd ? ` · 핸디캡 ${hd}` : ''}</span></div>
     <div class="tees">${tees.map(([n, v, c]) => `<span><i style="background:${c}"></i>${n} <b>${v}</b>${s.unit}</span>`).join('')}</div>
     ${h.note ? `<p class="sub" style="margin:6px 0 0">💡 ${esc(h.note)}</p>` : ''}</div>`;
+}
+
+// 테스트 코스 만들기: 걸어서(내 위치에서 시작, 1/4 크기) 또는 실제 크기(가상 장소)
+function demoPick() {
+  const make = (walk, base) => {
+    S.courses = S.courses.filter(c => !(c.demo && !!c.walk === walk)); // 같은 종류의 예전 테스트 코스는 교체
+    const c = demoCourse(base, { walk }); S.courses.push(c); save('courses'); choose(c.id);
+    toast(walk ? '🚶 1번 티가 지금 내 위치예요 · 걸어가며 거리가 바뀌는지 보세요' : '🏌️ 9홀 테스트 골프장을 만들었어요', 4000);
+  };
+  sheet({ title: '🧪 테스트 코스 만들기', body: `
+    <button class="pick" id="dWalk"><span class="pi">🚶</span><span class="pt"><b>걸어서 테스트 (내 위치에서 시작)</b><small>9홀 · 실제의 1/4 크기 (홀당 40~125m) · 공원·운동장에서 GPS·자동 홀 넘김·공 찾기를 직접 확인</small></span><span class="pa">›</span></button>
+    <button class="pick" id="dFull"><span class="pi">🏌️</span><span class="pt"><b>실제 크기 가상 골프장</b><small>9홀 · 파 36 · 3,080m · 집에서 화면·추천·그린맵 확인 (☰ → 설정 → GPS 시뮬레이션과 함께)</small></span><span class="pa">›</span></button>
+    <p class="sub">모두 가상 코스예요. 스코어카드·핸디캡·벙커·물·OB·그린 경사(측량 그린)·오늘 핀이 다 들어 있어요.</p>`, actions: [{ label: '닫기' }] });
+  $('#dWalk').onclick = async () => {
+    toast('📡 지금 위치를 재는 중…', 3000);
+    const f = Sensors.pos ? await sampleFix(2500) : null;
+    if (!f) return toast('위치를 못 찾았어요. 위치 권한을 켜고 바깥에서 다시 해 주세요', 4000);
+    $('#sheet').classList.remove('open'); make(true, { lat: f.lat, lon: f.lon });
+  };
+  $('#dFull').onclick = () => { $('#sheet').classList.remove('open'); make(false, Sensors.pos && !Sensors.pos.sim ? { lat: Sensors.pos.lat + 0.0006, lon: Sensors.pos.lon } : undefined); };
 }
 
 // 지도에서 공 위치 찍기 (공이 내 위치와 다를 때 · 실내 연습)
