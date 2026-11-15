@@ -60,7 +60,16 @@ export async function startAR(box, getScene) {
       pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.stroke(); ctx.setLineDash([]);
     };
     const from = sc.ball || sc.me;
-    if (sc.landing) { path(from, sc.landing, 'rgba(255,226,122,.95)', 8, []); if (sc.pin && distance(sc.landing, sc.pin) > 3) path(sc.landing, sc.pin, 'rgba(255,255,255,.85)', 3, [8, 8], sc.dzPin || 0); }
+    if (sc.landing && sc.apex) { // 빛나는 궤적
+      const d = distance(from, sc.landing), br = bearing(from, sc.landing), arc = [];
+      for (let i = 1; i <= 40; i++) { const t = i / 40, q = project(R, enuOf(sc.me, destination(from, br, d * t), { eye, dz: 4 * sc.apex * t * (1 - t) }), opt); if (q.visible && q.depth > 2) arc.push(q); }
+      if (arc.length > 1) {
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'rgba(94,230,168,.35)'; ctx.lineWidth = 14; ctx.beginPath(); arc.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.stroke();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.stroke();
+      }
+    }
+    if (sc.landing) { path(from, sc.landing, 'rgba(255,226,122,.55)', 5, []); if (sc.pin && distance(sc.landing, sc.pin) > 3) path(sc.landing, sc.pin, 'rgba(255,255,255,.85)', 3, [8, 8], sc.dzPin || 0); }
     else if (sc.pin) path(from, sc.pin, 'rgba(255,226,122,.95)', 6, [], sc.dzPin || 0);
     // 해저드
     for (const z of sc.hazards || []) { const q = P(z); if (q.visible && q.depth < 400) label(q.x, q.y, `${{ ob: 'OB', water: '💧물', bunker: '🏖벙커', trees: '🌳숲' }[z.type] || ''} ${Math.round(distance(sc.me, z))}m`, 'rgba(0,0,0,.55)', 12); }

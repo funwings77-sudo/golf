@@ -44,7 +44,7 @@ export async function create3D(container, { center, bearingDeg = 0, pitch = 62, 
   map.addSource('lines', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({ id: 'pin-line', type: 'line', source: 'lines', filter: ['==', ['get', 'k'], 'pin'], paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.8 } });
   map.addLayer({ id: 'rest-line', type: 'line', source: 'lines', filter: ['==', ['get', 'k'], 'rest'], paint: { 'line-color': '#ffffff', 'line-width': 3, 'line-dasharray': [1, 1.5] } });
-  map.addLayer({ id: 'rec-line', type: 'line', source: 'lines', filter: ['==', ['get', 'k'], 'rec'], paint: { 'line-color': '#ffe27a', 'line-width': 6 }, layout: { 'line-cap': 'round' } });
+  map.addLayer({ id: 'rec-line', type: 'line', source: 'lines', filter: ['==', ['get', 'k'], 'rec'], paint: { 'line-color': '#5ee6a8', 'line-width': 3, 'line-opacity': 0.55 }, layout: { 'line-cap': 'round' } });
   map.addLayer({ id: 'trail', type: 'line', source: 'lines', filter: ['==', ['get', 'k'], 'trail'], paint: { 'line-color': '#ff6b5a', 'line-width': 4 } });
   map.addSource('zone', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({ id: 'zone', type: 'fill', source: 'zone', paint: { 'fill-color': '#ffe27a', 'fill-opacity': 0.25 } });
@@ -68,12 +68,16 @@ export async function create3D(container, { center, bearingDeg = 0, pitch = 62, 
       put('ball', ball, 'mk3 ball', '⚪');
       api.scene = { me, pin, landing, ball };
     },
-    fitScene(pad = 70) {
-      const pts = Object.values(api.scene || {}).filter(Boolean);
-      if (pts.length < 2) return;
-      const b = pts.reduce((bb, p) => bb.extend(ll(p)), new maplibregl.LngLatBounds(ll(pts[0]), ll(pts[0])));
-      const brg = api.scene.me && api.scene.pin ? bearing(api.scene.me, api.scene.pin) : map.getBearing();
-      map.fitBounds(b, { padding: pad, bearing: brg, pitch: map.getPitch() || 62, duration: 800, maxZoom: 18.5 });
+    // 보이는 영역(위 제목·아래 카드를 뺀 곳)에 공 → 깃발이 들어오게: 비스듬한 각도 + 거리로 확대 수준 계산
+    fitScene(pad = { top: 150, bottom: 340, left: 60, right: 70 }) {
+      const sc = api.scene || {}, a = sc.me || sc.landing, z = sc.pin || sc.landing;
+      if (!a || !z) return;
+      const d = Math.max(30, distance(a, z)), brg = bearing(a, z) - 32; // 비스듬히 봐야 공 궤적(아치)이 보임
+      const H = Math.max(160, container.clientHeight - pad.top - pad.bottom), W = Math.max(160, container.clientWidth - pad.left - pad.right);
+      const mid = destination(a, bearing(a, z), d * 0.5), lat = mid.lat * Math.PI / 180;
+      const mpp = d / Math.min(H * 1.15, W * 1.05); // 기울인 화면에서 가까운 쪽이 커 보이므로 여유 있게
+      const zoom = Math.max(14, Math.min(18.6, Math.log2(156543.03 * Math.cos(lat) / mpp)));
+      map.easeTo({ center: ll(mid), zoom, bearing: brg, pitch: map.getPitch() || 62, padding: pad, duration: 800 });
     },
     zoomBy(d) { map.easeTo({ zoom: map.getZoom() + d, duration: 300 }); },
     setPitch(p) { map.easeTo({ pitch: p, duration: 500 }); },
@@ -127,7 +131,27 @@ export async function create3D(container, { center, bearingDeg = 0, pitch = 62, 
       map.addLayer({ id: 'g-major', type: 'line', source: 'g-lines', filter: ['==', ['get', 'k'], 'major'], paint: { 'line-color': '#ffffff', 'line-width': 1.8 } }, 'pin-line');
       map.addLayer({ id: 'g-flow', type: 'line', source: 'g-lines', filter: ['==', ['get', 'k'], 'flow'], paint: { 'line-color': '#0f1914', 'line-width': 2 } }, 'pin-line');
     },
+    setArc(from, to, apex) { api._arc = from && to && apex ? { from, to, apex } : null; drawArc(); },
     destroy() { api._stopped = true; try { map.remove(); } catch {} },
   };
+  // 공 궤적: 지면 점을 화면으로 투영한 뒤 높이만큼 위로 (궤적 · 출발 원 · 착지 원)
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'arc3'); container.appendChild(svg);
+  function drawArc() {
+    const a = api._arc; if (!a) { svg.innerHTML = ''; return; }
+    const d = distance(a.from, a.to), b = bearing(a.from, a.to), pts = [];
+    const pitch = map.getPitch() * Math.PI / 180;
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40, p = destination(a.from, b, d * t), sp = map.project(ll(p));
+      const mpp = 156543.03 * Math.cos(p.lat * Math.PI / 180) / 2 ** map.getZoom();
+      pts.push([sp.x, sp.y - 4 * a.apex * t * (1 - t) / mpp * Math.sin(pitch) * 1.8]);
+    }
+    const path = 'M' + pts.map(q => q.map(v => v.toFixed(1)).join(',')).join(' L');
+    const s0 = map.project(ll(a.from)), s1 = map.project(ll(a.to));
+    svg.innerHTML = `<defs><filter id="glw" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter></defs>
+      <ellipse cx="${s0.x}" cy="${s0.y}" rx="22" ry="8" class="arc-ring"/><ellipse cx="${s1.x}" cy="${s1.y}" rx="16" ry="6" class="arc-ring end"/>
+      <path d="${path}" class="arc-glow" filter="url(#glw)"/><path d="${path}" class="arc-line"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="6" class="arc-ball"/>`;
+  }
+  map.on('render', drawArc);
   return api;
 }
