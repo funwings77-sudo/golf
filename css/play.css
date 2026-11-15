@@ -405,3 +405,68 @@ html.easy #holeNav { display: none !important; }
 .qs-g button { min-height: 66px; }
 /* 위치 권한 이유 */
 .why { display: grid; gap: 8px; margin-bottom: 10px; } .why div { display: flex; align-items: center; gap: 12px; font-size: 15px; } .why i { font-style: normal; font-size: 24px; width: 32px; text-align: center; }
+
+/* ===== 18Birdies · Garmin 방식 쉬운 홀 화면 ===== */
+.bd-top, .bd-fab { display: none; }
+.imm.easy .bd-top { display: flex; position: absolute; top: 10px; left: 8px; right: 8px; z-index: 1000; align-items: center; gap: 6px; }
+.imm.easy .imm-top { top: 92px; left: auto; right: 10px; z-index: 999; }
+.imm.easy .imm-top > :not(#gps) { display: none !important; }
+.bd-nav { flex: none; width: 42px; height: 64px; border-radius: 14px; border: 0; background: rgba(20,24,22,.86); color: #fff; font-size: 30px; font-weight: 300; cursor: pointer; }
+.bd-bar { flex: 1; min-width: 0; height: 64px; display: flex; align-items: stretch; border: 0; border-radius: 16px; overflow: hidden; background: rgba(46,50,48,.9); color: #fff; padding: 0; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.35); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.bd-bar > span { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 8px; }
+.bd-bar small { font-size: 11px; opacity: .7; font-weight: 600; line-height: 1.1; }
+.bd-n { background: #111; min-width: 54px; font-size: 30px; font-weight: 900; line-height: 1; }
+.bd-n small { font-size: 9.5px; margin-bottom: 2px; }
+.bd-d { background: #111; flex: 1; align-items: flex-start !important; padding-left: 4px !important; }
+.bd-d b { font-size: 30px; font-weight: 900; line-height: 1; } .bd-d b small { font-size: 14px; opacity: .8; margin-left: 1px; }
+.bd-m { min-width: 46px; } .bd-m b { font-size: 21px; font-weight: 800; line-height: 1.05; }
+.imm.easy .bd-fab { display: flex; flex-direction: column; gap: 8px; position: absolute; right: 10px; top: 140px; z-index: 999; }
+.bd-fab button { width: 48px; height: 48px; border-radius: 14px; border: 0; background: rgba(20,24,22,.86); color: #fff; font-size: 21px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.bd-fab #fabAI { background: linear-gradient(135deg, #3b6cff, #8b5cf6); }
+.imm.easy .zoomb { top: 140px; left: 10px; }
+.imm.easy .rg-hud { display: none; }
+.imm.easy .imm-card { padding: 10px 12px; background: rgba(20,24,22,.86); }
+.bd-rec { display: flex; align-items: center; gap: 10px; }
+.bd-club { flex: none; max-width: 118px; background: #2b7bff; color: #fff; font-weight: 900; font-size: 15px; line-height: 1.2; padding: 9px 10px; border-radius: 12px; text-align: center; word-break: keep-all; }
+.bd-how { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.bd-pow { position: relative; height: 24px; border-radius: 12px; background: rgba(255,255,255,.15); overflow: hidden; }
+.bd-pow i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #5ee6a8, #ffc83d); }
+.bd-pow em { position: relative; display: block; text-align: center; line-height: 24px; font-style: normal; font-size: 12.5px; font-weight: 900; color: #08140e; }
+.bd-dir { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 800; color: #fff; word-break: keep-all; }
+.bd-dir i { font-style: normal; font-size: 20px; color: #5ee6a8; display: inline-block; }
+.imm.easy .a-main small { font-size: 13px; font-weight: 700; opacity: .7; margin-left: 4px; }
+.bd-bot { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 0; background: rgba(20,24,22,.9); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,.3); }
+.bd-bot button { min-height: 64px; border: 0; background: transparent; color: #fff; font-weight: 800; font-size: 12.5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; }
+.bd-bot button i { font-style: normal; font-size: 20px; }
+.bd-bot button.mid { background: #2b7bff; border-radius: 14px; margin: 4px 0; }
+.bd-bot button.mid b { font-size: 18px; } .bd-bot button.mid small { font-size: 12px; opacity: .9; }
+/* 도구 목록 (18Birdies Tools) */
+.tl-views { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+.tl-views button { min-height: 62px; border-radius: 14px; border: 1.5px solid var(--line, #ddd); background: var(--paper, #fff); font-size: 11.5px; font-weight: 800; color: var(--ink, #222); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
+.tl-views button i { font-style: normal; font-size: 22px; } .tl-views button.on { border-color: #2b7bff; background: #eaf1ff; }
+.tl-list { display: flex; flex-direction: column; border: 1px solid var(--line, #e5e5e5); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.tl-list button { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border: 0; border-top: 1px solid var(--line, #eee); background: var(--paper, #fff); text-align: left; cursor: pointer; color: var(--ink, #222); }
+.tl-list button:first-child { border-top: 0; }
+.tl-list i { font-style: normal; font-size: 24px; width: 32px; text-align: center; }
+.tl-list span { flex: 1; display: flex; flex-direction: column; } .tl-list b { font-size: 15px; } .tl-list small { font-size: 12.5px; color: var(--sub, #777); }
+.tl-list em { font-style: normal; color: var(--sub, #aaa); font-size: 20px; }
+/* 점수 숫자판 (18Birdies) */
+.qs-n { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.qs-n button { min-height: 72px; border-radius: 14px; border: 0; background: #eef3fb; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; color: #1b2430; }
+.qs-n button b.sym { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
+.qs-n button small { font-size: 11.5px; font-weight: 700; color: #667; min-height: 14px; }
+.qs-n b.sym.bd { border: 2px solid currentColor; border-radius: 50%; }
+.qs-n b.sym.eg { border: 2px solid currentColor; border-radius: 50%; box-shadow: 0 0 0 2px #eef3fb, 0 0 0 4px currentColor; }
+.qs-n b.sym.bg { border: 2px solid currentColor; border-radius: 3px; }
+.qs-n b.sym.db { border: 2px solid currentColor; border-radius: 3px; box-shadow: 0 0 0 2px #eef3fb, 0 0 0 4px currentColor; }
+.qs-n button.on { background: #2b7bff; color: #fff; } .qs-n button.on small { color: #e6eeff; }
+.qs-n button.on b.sym.eg, .qs-n button.on b.sym.db { box-shadow: 0 0 0 2px #2b7bff, 0 0 0 4px #fff; }
+.qs-more { width: 100%; margin-top: 8px; border: 1px dashed var(--line, #ccc); background: none; border-radius: 12px; padding: 8px; font-weight: 700; cursor: pointer; color: var(--sub, #666); }
+.qs-p { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.qs-p button { min-height: 54px; border-radius: 12px; border: 0; background: #eef3fb; font-size: 22px; font-weight: 800; cursor: pointer; color: #1b2430; }
+.qs-p button.on { background: #2b7bff; color: #fff; }
+.qs-f { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.qs-f button { min-height: 58px; border-radius: 50px; border: 1.5px solid var(--line, #ccc); background: var(--paper, #fff); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #1b2430; }
+.qs-f button b { font-size: 22px; line-height: 1; } .qs-f button small { font-size: 11.5px; font-weight: 700; }
+.qs-f button.on { background: #1f6f45; border-color: #1f6f45; color: #fff; }
+.imm.easy .rg-pl { display: none; } .imm.easy .rg-hz > div { font-size: 11px; padding: 2px 7px; }
