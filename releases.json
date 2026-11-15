@@ -4,6 +4,83 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.13",
+   "code": 14,
+   "date": "2026-11-15T14:08:24+09:00",
+   "bytes": 4893411,
+   "sha256": "1745541cb9bd9e8b616267368ec76b320368a2ba0fc31da35b034c81773da682",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.13/pinpoint-caddie-1.0.13.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.13",
+   "notes": [
+    "🔄 앱 안에서 새 버전 알림 (메뉴 → 업데이트 확인)"
+   ]
+  },
+  {
+   "version": "1.0.12",
+   "code": 13,
+   "date": "2026-11-15T13:59:49+09:00",
+   "bytes": 4891118,
+   "sha256": "06ee441879338e0862622f09d71eaa9dac18cc404e7020df0c9fcd5fdfb65db6",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.12/pinpoint-caddie-1.0.12.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.12",
+   "notes": [
+    "📐 AR 거리 측정기: 조준선 거리 · 방향 · 각도 · 땅 위 거리선 · 나침반 띠 · 지점 고정 · 높이 재기"
+   ]
+  },
+  {
+   "version": "1.0.11",
+   "code": 12,
+   "date": "2026-11-15T13:46:23+09:00",
+   "bytes": 4886040,
+   "sha256": "63143d2c41ec1461ae3e1e933c6c5792970af595fe574e83dee7bb72a94c25f4",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.11/pinpoint-caddie-1.0.11.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.11",
+   "notes": [
+    "🧪 9홀 테스트 코스: 걸어서 테스트(내 위치에서 시작) / 실제 크기 가상 골프장"
+   ]
+  },
+  {
+   "version": "1.0.10",
+   "code": 11,
+   "date": "2026-11-15T13:32:33+09:00",
+   "bytes": 4884565,
+   "sha256": "0e95fe1ddd140fecbfa24750144874b71448ec405736986ad9fd1cefaea1f03f",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.10/pinpoint-caddie-1.0.10.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.10",
+   "notes": [
+    "거리 신뢰도: 핀 기준 · 위치 정확도 · 오차 범위 표시",
+    "📡 5초 정밀 측정 · 큰 글씨 보기 · 배터리 절전 · 지도 미리 받기(오프라인)",
+    "자동 홀 넘김 끄기 · 홀 메모 · 거리별 핀 근접도 · 연습 처방 · CSV 내보내기"
+   ]
+  },
+  {
+   "version": "1.0.9",
+   "code": 10,
+   "date": "2026-11-15T12:38:28+09:00",
+   "bytes": 4876020,
+   "sha256": "5ef1352183de1e8b25728e22619c485fa3be8a01ce1a798cc7a9e3c05d1d06c0",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.9/pinpoint-caddie-1.0.9.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.9",
+   "notes": [
+    "2D 거리 링(체감 거리·클럽) · 목표점 끌기 · 해저드 넘기기 거리 · 바람 표시",
+    "공략 계획(추천/다른 방법 예상 타수) · 친 샷 기록 · 3D 그린",
+    "📋 거리표 · 원탭 점수 입력 · 스코어카드 ○□ 표시 · 연습 우선순위 · 골프장별 성적 · 티 음성 안내"
+   ]
+  },
+  {
+   "version": "1.0.8",
+   "code": 9,
+   "date": "2026-11-15T12:18:32+09:00",
+   "bytes": 4860062,
+   "sha256": "20fb24d9a70b532652a65e6166c5a16b094aa8ac6809a001971ca0bc130c9b62",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.8/pinpoint-caddie-1.0.8.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.8",
+   "notes": [
+    "GPS가 없을 때 [쳤어요!] → 지도에서 친 곳 찍기로 이어서 기록",
+    "\"내 공 NaNm\" 표시 · 코스 지도 오류 수정"
+   ]
+  },
+  {
    "version": "1.0.7",
    "code": 8,
    "date": "2026-11-15T03:14:46.672Z",
@@ -111,6 +188,6 @@
    ]
   }
  ],
- "latest": "1.0.7",
- "updatedAt": "2026-11-15T03:14:51.203Z"
+ "latest": "1.0.13",
+ "updatedAt": "2026-11-15T05:10:19.171Z"
 }

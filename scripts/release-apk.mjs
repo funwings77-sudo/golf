@@ -76,6 +76,7 @@ await writeFile(join(root, 'apk.json'), JSON.stringify({
 if (!push) { console.log('\n--no-push: 커밋·업로드 생략. 완료.'); process.exit(0); }
 
 step(6, 'GitHub 릴리스(버전별 다운로드) · 커밋 · 푸시');
+run('git push'); // 릴리스 태그가 가리킬 커밋을 먼저 GitHub에 올림 (안 하면 릴리스 등록 실패)
 // 버전별 다운로드: 이전 릴리스 이후 변경 내용을 노트로 GitHub Releases에 올리고 releases.json 갱신
 try {
   const R = await import('./releases.mjs');
