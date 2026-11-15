@@ -73,3 +73,9 @@ export function smoothAngle(prev, next, k = 0.25) {
   let d = ((next - prev + 540) % 360) - 180;
   return (prev + d * k + 360) % 360;
 }
+
+// 🚩 깃대 높이로 거리 재기 (광학 레인지파인더 원리): d = f · H / h
+//  hPx: 화면(영상) 속 깃대 높이(px), fPx: 같은 영상 기준 초점거리(px), H: 실제 깃대 높이(m)
+export const flagDistance = (hPx, fPx, H = 2.13) => (hPx > 0 ? fPx * H / hPx : Infinity);
+// 예상 오차: 손가락·AI 표시 오차 ±1.5px + 깃대 높이 차이(골프장마다 ±5%)
+export const flagError = (d, hPx) => d * Math.hypot(1.5 / Math.max(1, hPx), 0.05);

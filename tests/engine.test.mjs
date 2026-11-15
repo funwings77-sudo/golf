@@ -254,3 +254,13 @@ test('골프장 검색: 띄어쓰기·CC·로마자', () => {
   assert.ok(matches('용인', '레이크사이드', '용인시'));
   assert.ok(!matches('제주', '남서울', '성남시'));
 });
+
+import { flagDistance, flagError } from '../js/core/arproj.js';
+test('깃대 높이로 거리: d = f·H/h', () => {
+  const f = focalPx(63, 1080); // 1080px 세로 영상, 세로 화각 63°
+  const hAt100 = f * 2.13 / 100;   // 100m 앞 깃대의 화면 높이
+  assert.ok(Math.abs(flagDistance(hAt100, f) - 100) < 1e-9);
+  assert.ok(flagError(100, hAt100) > 5 && flagError(100, hAt100) < 12, '100m 오차 ' + flagError(100, hAt100));
+  assert.ok(flagError(40, f * 2.13 / 40) < 4, '40m는 더 정확');
+  assert.equal(flagDistance(0, f), Infinity);
+});

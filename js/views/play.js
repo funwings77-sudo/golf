@@ -244,6 +244,7 @@ function pinInfo(h) {
   if (h.pin) {
     const t = h.pin.ts ? new Date(h.pin.ts) : null, fresh = t && t.toDateString() === today;
     if (h.pin.src === 'demo') return { txt: '데모 핀 (가상)', err: 1, lvl: 0 };
+    if (h.pin.src === 'flag') { const t = new Date(h.pin.ts), fresh = t.toDateString() === new Date().toDateString(); return { txt: `카메라로 잰 핀${fresh ? ' · ' + hhmm(t) : ' (지난 날)'}`, err: fresh ? Math.max(2, h.pin.err || 4) : greenR(h) * 0.6, lvl: fresh ? 0 : 1 }; }
     if (h.pin.src === 'official') return fresh ? { txt: `오늘 핀 · 골프장 발표 ${hhmm(t)}`, err: 1.5, lvl: 0 } : { txt: '지난 핀 (오늘 발표 전)', err: greenR(h) * 0.6, lvl: 1 };
     return { txt: `내가 찍은 핀${fresh ? ' · ' + hhmm(t) : ' (지난 날)'}`, err: fresh ? 2 : greenR(h) * 0.6, lvl: fresh ? 0 : 1 };
   }
@@ -770,7 +771,7 @@ async function mountView() {
     stage.innerHTML = '<div class="arbox" id="arb"></div>';
     const { startAR } = await import('./arview.js');
     if (!$('#arb')) return;
-    arStop = await startAR($('#arb'), () => { const sd = sceneData(); return { ...sd, me: Sensors.pos || sd.from }; }, { onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); } });
+    arStop = await startAR($('#arb'), () => { const sd = sceneData(); return { ...sd, me: Sensors.pos || sd.from }; }, { onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); }, onPin: p => { const h = activeHole(); h.pin = { lat: +p.lat.toFixed(7), lon: +p.lon.toFixed(7), ts: Date.now(), src: 'flag', err: p.err }; save('courses'); adv = null; advKey = ''; update(true); toast(`⛳ 카메라로 잰 핀을 저장했어요 (${p.d}m ±${p.err}m)`, 3500); } });
   }
 }
 

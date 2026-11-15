@@ -7,11 +7,12 @@ import { distance, bearing, destination, normAngle } from '../core/geo.js';
 import { S } from '../core/state.js';
 
 const YAW_KEY = 'pinpoint.arYaw';
-export async function startAR(box, getScene, { onLock = null } = {}) {
+import { openFlagCam } from './flagcam.js';
+export async function startAR(box, getScene, { onLock = null, onPin = null } = {}) {
   box.innerHTML = `<div class="ar"><video playsinline muted></video><canvas></canvas>
     <div class="ar-msg" id="arMsg"></div><div class="ar-diag" id="arDiag"></div>
     <div class="ar-read" id="arRead"></div>
-    <div class="ar-tools"><button id="arLock">📌 고정</button><button id="arHt">🌳 높이</button><button id="arRings" class="on">◎ 거리선</button></div>
+    <div class="ar-tools"><button id="arFlag" class="flag">🚩 깃대로 재기</button><button id="arLock">📌 고정</button><button id="arHt">🌳 높이</button><button id="arRings" class="on">◎ 거리선</button></div>
     <div class="ar-bar"><button class="btn small" id="arCal">🎯 깃발 맞추기</button><button class="btn small" id="arReset" title="방위 보정 지우기">↺</button><button class="btn small" id="arChk">🩺 점검</button><span id="arAcc"></span></div></div>`;
   const video = box.querySelector('video'), cv = box.querySelector('canvas'), msg = box.querySelector('#arMsg'), acc = box.querySelector('#arAcc');
   let stopCam = null, raf = 0, alive = true, calib = false;
@@ -188,6 +189,11 @@ export async function startAR(box, getScene, { onLock = null } = {}) {
     ctx.textAlign = 'left';
   }
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  box.querySelector('#arFlag').onclick = () => {
+    const sc = getScene();
+    const ok = openFlagCam(box, video, { heading: last.R ? cameraAxis(last.R).bearing : null, sc: { me: sc?.me, pin: sc?.pin }, onPin });
+    if (!ok) say('📷 카메라 영상이 아직 없어요');
+  };
   box.querySelector('#arLock').onclick = e => {
     if (lockPt) { lockPt = null; e.target.classList.remove('on'); e.target.textContent = '📌 고정'; return; }
     if (!aim) return;

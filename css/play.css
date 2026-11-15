@@ -470,3 +470,17 @@ html.easy #holeNav { display: none !important; }
 .qs-f button b { font-size: 22px; line-height: 1; } .qs-f button small { font-size: 11.5px; font-weight: 700; }
 .qs-f button.on { background: #1f6f45; border-color: #1f6f45; color: #fff; }
 .imm.easy .rg-pl { display: none; } .imm.easy .rg-hz > div { font-size: 11px; padding: 2px 7px; }
+
+/* 🚩 깃대로 재기 */
+.ar-tools button.flag { background: #ff5a3c; border-color: #ff5a3c; }
+.flagcam { position: absolute; inset: 0; z-index: 20; background: #000; display: flex; flex-direction: column; }
+.fc-img { position: relative; flex: 1; min-height: 0; }
+.fc-img { overflow: hidden; } .fc-mark { position: absolute; inset: 0; width: 100%; height: 100%; } .fc-img img { position: absolute; }
+.fc-panel { background: rgba(20,24,22,.95); color: #fff; padding: 12px 14px 14px; }
+.fc-msg { font-size: 15px; line-height: 1.45; margin-bottom: 10px; }
+.fc-row { display: flex; gap: 8px; } .fc-row button { flex: 1; min-height: 46px; border-radius: 12px; border: 0; font-weight: 800; font-size: 14px; cursor: pointer; background: rgba(255,255,255,.12); color: #fff; }
+.fc-row #fcAI { background: linear-gradient(135deg, #3b6cff, #8b5cf6); flex: 1.6; }
+.fc-res { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; } .fc-res small { width: 100%; font-size: 12px; opacity: .75; }
+.fc-res b { font-size: 48px; font-weight: 900; color: #ffc83d; line-height: 1; } .fc-res b small { width: auto; font-size: 18px; } .fc-res i { font-style: normal; opacity: .8; }
+.fc-cmp { font-size: 13px; margin-top: 6px; opacity: .9; }
+.fc-pin { width: 100%; margin-top: 10px; min-height: 48px; border-radius: 12px; border: 0; background: #5ee6a8; color: #072015; font-weight: 900; font-size: 15px; cursor: pointer; }
