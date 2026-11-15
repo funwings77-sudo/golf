@@ -8,6 +8,8 @@ import { Store } from '../store.js';
 import * as M from '../model.js';
 import { go } from '../main.js';
 import { fetchOSMGolf, parseOSM, applyOSM, OSM_ATTRIB } from '../osm.js';
+import { detectGreens } from '../greendetect.js';
+import { destination, bearing } from '../../core/geo.js';
 import { ago, confirmPublish, runPublish, readonlyNote } from '../common.js';
 
 const POINTS = [['tee', '기본 티', 'tee', 'T'], ['green', '그린 중앙', 'green', 'G'], ['front', '그린 앞', 'front', 'F'], ['back', '그린 뒤', 'back', 'B'], ['ip', 'IP 공략점', 'ip', 'IP']];
@@ -46,8 +48,9 @@ function render() {
       <div class="sticky" id="panel"></div>
     </div>`;
   renderHeader(); renderInfo(); renderChips(); renderTools(); renderPanel();
-  st.map = createMap($('#emap'), { center: ll(hole().green || hole().tee || st.course.holes.find(h => h.tee)?.tee || { lat: 36.5, lon: 127.8 }), zoom: hole().tee ? 17 : 7, me: false });
-  if (st.map) { st.layer = L.layerGroup().addTo(st.map); st.map.on('click', e => apply({ lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) })); drawMap(); }
+  const anyPt = hole().green || hole().tee || st.course.holes.find(h => h.green || h.tee)?.green || st.course.holes.find(h => h.tee)?.tee;
+  st.map = createMap($('#emap'), { center: ll(anyPt || st.course.center || { lat: 36.5, lon: 127.8 }), zoom: anyPt ? 17 : st.course.center ? (st.course.center.precision === 'sigungu' ? 12 : 16) : 7, me: false });
+  if (st.map) { st.layer = L.layerGroup().addTo(st.map); st.qaLayer = L.layerGroup().addTo(st.map); st.map.on('click', e => { const p = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) }; if (st.qa?.on) qaClick(p); else apply(p); }); drawMap(); }
   $('#gotoBtn').onclick = () => {
     const m = $('#goto').value.match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
     if (!m || !st.map) return toast('위도, 경도를 입력하세요');
@@ -74,9 +77,10 @@ function renderHeader() {
         ${st.remote ? `<span class="badge mute">발행본 rev ${st.remote.rev} · ${ago(st.remote.updatedAt)}</span>` : '<span class="badge warn">아직 발행 안 됨</span>'}
         ${st.dirty ? `<span class="badge warn">● 발행 안 된 변경 (${ago(st.savedAt)} 임시저장)</span>` : '<span class="badge">발행본과 같음</span>'}
         ${v.errors.length ? `<span class="badge err">오류 ${v.errors.length}</span>` : '<span class="badge">오류 없음</span>'}${v.warnings.length ? `<span class="badge warn">확인 ${v.warnings.length}</span>` : ''}</div></div>
-    <div class="a-actions"><button class="btn" id="osm" title="현재 지도 화면 안의 OpenStreetMap 골프 데이터로 티·그린·벙커·물 위치 채우기">🌍 OSM 가져오기</button><a class="btn" href="#/greens/${encodeURIComponent(c.id)}">🟢 그린맵</a>${st.dirty && st.remote ? '<button class="btn" id="revert">↺ 발행본으로 되돌리기</button>' : ''}<button class="btn" id="check">🔎 전체 검증</button><button class="btn primary" id="pub" ${v.errors.length ? 'disabled title="오류를 먼저 고치세요"' : ''}>🚀 발행</button></div></div>`;
+    <div class="a-actions"><button class="btn" id="qaBtn" title="위성사진에서 그린 후보를 찾고, 홀 순서대로 그린→티를 눌러 빠르게 지정">⚡ 빠른 지정</button><button class="btn" id="osm" title="현재 지도 화면 안의 OpenStreetMap 골프 데이터로 티·그린·벙커·물 위치 채우기">🌍 OSM 가져오기</button><a class="btn" href="#/greens/${encodeURIComponent(c.id)}">🟢 그린맵</a>${st.dirty && st.remote ? '<button class="btn" id="revert">↺ 발행본으로 되돌리기</button>' : ''}<button class="btn" id="check">🔎 전체 검증</button><button class="btn primary" id="pub" ${v.errors.length ? 'disabled title="오류를 먼저 고치세요"' : ''}>🚀 발행</button></div></div>`;
   $('#check').onclick = () => showIssues(v);
   $('#osm').onclick = importOSM;
+  $('#qaBtn').onclick = () => (st.qa?.on ? qaStop() : qaStart());
   $('#pub').onclick = publish;
   $('#revert')?.addEventListener('click', () => sheet({
     title: '발행본으로 되돌리기', body: '<p>이 기기에 임시저장된 변경을 모두 버리고 발행본으로 되돌릴까요?</p>',
@@ -105,6 +109,81 @@ function doApply(osm, overwrite) {
   const r = applyOSM(st.course, osm, { overwrite });
   st.fitted = false; persist(); renderAll(); fit(true);
   toast(`${r.matched.length}개 홀 채움${r.skipped.length ? ` · 못 찾은 홀 ${r.skipped.join(', ')}` : ''} — 검증 결과를 확인하세요`, 5000);
+}
+
+// ---------- ⚡ 빠른 지정: 그린 후보(위성사진 자동 감지) → 홀마다 그린 클릭 → 티 클릭(스코어카드 거리 안내 원) → 다음 홀 ----------
+async function qaStart() {
+  if (!st.map) return toast('지도를 불러오지 못했습니다');
+  st.qa = { on: true, step: hole().green ? 'tee' : 'green', cands: [], undo: [] };
+  $('#qaBtn').classList.add('on'); $('#qaBtn').textContent = '⚡ 빠른 지정 끝내기';
+  qaBanner('🔍 위성사진에서 그린 후보를 찾는 중…');
+  const b = st.map.getBounds();
+  try {
+    const r = await detectGreens({ s: b.getSouth(), n: b.getNorth(), w: b.getWest(), e: b.getEast() });
+    st.qa.cands = r.candidates; qaDraw();
+    toast(`그린 후보 ${r.candidates.length}개 (빨강 = 확실, 노랑 = 애매). 후보 근처를 누르면 그 중심에 맞춰집니다`, 5000);
+  } catch (e) { toast('후보 찾기 실패: ' + e.message + ' — 후보 없이 직접 눌러도 됩니다', 6000); }
+  qaPrompt();
+}
+function qaStop() { st.qa = null; st.qaLayer?.clearLayers(); $('#qaBanner')?.remove(); $('#qaBtn').classList.remove('on'); $('#qaBtn').textContent = '⚡ 빠른 지정'; }
+function qaBanner(html) {
+  let el = $('#qaBanner');
+  if (!el) { el = document.createElement('div'); el.id = 'qaBanner'; el.className = 'note'; el.style.cssText = 'margin:0 0 8px;font-size:14.5px'; $('#tools').after(el); }
+  el.innerHTML = html;
+}
+function cardM(h) { const s = h.scorecard; if (!s) return null; const v = s.white ?? s.blue ?? s.back ?? s.red; return v == null ? null : s.unit === 'yd' ? v * 0.9144 : v; }
+function qaPrompt() {
+  const h = hole(), name = h.nine ? `${h.nine} ${h.nineHole}번` : `${h.n}번`, Lm = cardM(h);
+  qaBanner(`<b>⚡ ${name} 홀 (파 ${h.par}${Lm ? ` · 스코어카드 ${Math.round(Lm)}m` : ''})</b> — ${st.qa.step === 'green' ? '① <b>그린</b>을 누르세요 (빨간 후보 근처를 누르면 중심에 맞춰짐)' : '② <b>티</b>를 누르세요' + (Lm ? ' (노란 점선 원 = 그린에서 스코어카드 거리. 도그레그면 원보다 안쪽)' : '')}
+    <span class="row" style="margin-top:6px;gap:6px"><button class="btn small" id="qaSkip">이 단계 건너뛰기</button><button class="btn small" id="qaUndo" ${st.qa.undo.length ? '' : 'disabled'}>↩ 되돌리기</button><button class="btn small" id="qaNext">다음 홀 ›</button></span>`);
+  $('#qaSkip').onclick = () => qaAdvance();
+  $('#qaUndo').onclick = qaUndo;
+  $('#qaNext').onclick = () => { st.qa.step = 'green'; qaNextHole(); };
+  qaDraw();
+}
+function qaDraw() {
+  const lay = st.qaLayer; if (!lay) return; lay.clearLayers();
+  for (const c of st.qa?.cands || []) {
+    const used = st.course.holes.some(h => h.green && distance(h.green, c) < c.r + 3);
+    L.circle([c.lat, c.lon], { radius: c.r, color: used ? '#7f8c8d' : c.score >= 0.6 ? '#ff2d55' : '#ffd400', weight: 2, fillOpacity: used ? 0.05 : 0.15, dashArray: used ? '3 4' : null, interactive: false }).addTo(lay);
+  }
+  const h = hole(), Lm = cardM(h);
+  if (st.qa?.step === 'tee' && h.green && Lm) L.circle(ll(h.green), { radius: Lm, color: '#ffe27a', weight: 2, dashArray: '8 8', fill: false, interactive: false }).addTo(lay);
+}
+function qaClick(p) {
+  const h = hole();
+  st.qa.undo.push({ n: h.n, prev: JSON.parse(JSON.stringify(h)), step: st.qa.step });
+  if (st.qa.step === 'green') {
+    const c = (st.qa.cands || []).map(c => ({ c, d: distance(c, p) })).filter(x => x.d <= x.c.r + 10).sort((a, b) => a.d - b.d)[0]?.c;
+    h.green = c ? { lat: c.lat, lon: c.lon } : p; h.greenR = c ? c.r : null;
+    st.qa.step = 'tee';
+    if (h.tee) setFrontBack(h);
+  } else {
+    h.tee = p; setFrontBack(h);
+    st.qa.step = 'green'; persist(); return qaNextHole();
+  }
+  persist(); qaPrompt();
+}
+// 그린 반경(후보 크기 또는 14m)을 티→그린 축에 놓아 앞·뒤 지정
+function setFrontBack(h) {
+  if (!h.tee || !h.green) return;
+  const ax = bearing(h.ip || h.tee, h.green), r = Math.max(7, Math.min(22, (h.greenR || 14) * 0.95));
+  const f = destination(h.green, ax + 180, r), b = destination(h.green, ax, r);
+  h.front = { lat: +f.lat.toFixed(7), lon: +f.lon.toFixed(7) }; h.back = { lat: +b.lat.toFixed(7), lon: +b.lon.toFixed(7) };
+}
+function qaAdvance() { if (st.qa.step === 'green') { st.qa.step = 'tee'; qaPrompt(); } else { st.qa.step = 'green'; qaNextHole(); } }
+function qaNextHole() {
+  const prev = hole(), i = st.course.holes.indexOf(prev);
+  if (i >= st.course.holes.length - 1) { toast('마지막 홀까지 지정했습니다. 검증 결과를 확인하고 발행하세요', 5000); qaStop(); renderAll(); drawMap(); return; }
+  st.holeN = st.course.holes[i + 1].n; st.fitted = true;
+  renderChips(); renderPanel(); drawMap();
+  if (prev.green) st.map.panTo(ll(prev.green));
+  st.qa.step = hole().green ? 'tee' : 'green'; qaPrompt();
+}
+function qaUndo() {
+  const u = st.qa.undo.pop(); if (!u) return;
+  const i = st.course.holes.findIndex(h => h.n === u.n); st.course.holes[i] = u.prev;
+  st.holeN = u.n; st.qa.step = u.step; persist(); renderChips(); renderPanel(); qaPrompt();
 }
 
 function renderAll() { renderHeader(); renderInfo(); renderChips(); renderTools(); renderPanel(); }
