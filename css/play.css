@@ -270,3 +270,32 @@ table.score td.sc-d span { border: 1.6px solid #d0452f; box-shadow: 0 0 0 2px #f
 .lvl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; align-items: end; }
 .lvl div { text-align: center; font-size: 12px; font-weight: 700; } .lvl i { display: block; margin: 0 auto 4px; width: 26px; border-radius: 6px 6px 0 0; background: #2fa35a; }
 .lvl i.bad { background: #e0603a; }
+
+/* ===== 거리 신뢰도 · 메모 · 홀 정보 ===== */
+.m-trust { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 8px; padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.18); color: rgba(255,255,255,.85); font-size: 11.5px; text-align: left; cursor: pointer; }
+.m-trust i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #5ee6a8; }
+.m-trust.mid i { background: #ffc35a; } .m-trust.bad i { background: #ff6b5a; }
+.m-trust span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m-trust b { flex: none; color: #fff; font-size: 12.5px; }
+.m-memo { margin-top: 6px; font-size: 12.5px; color: #ffe9a8; }
+.hi-box { margin-top: 12px; } .hi-box textarea { width: 100%; margin-top: 6px; border-radius: 10px; border: 1px solid var(--line, #ddd); padding: 8px 10px; font: inherit; font-size: 14px; resize: vertical; }
+.hi-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line, #eee); margin-top: 8px; }
+.hi-row small { color: var(--sub, #777); font-size: 12px; }
+.brand-sub { display: block; font-size: 11.5px; font-weight: 600; color: var(--sub, #777); margin-top: 2px; }
+/* ===== 큰 글씨 보기 ===== */
+.imm:has(.imm-stage.big) .imm-card, .imm:has(.imm-stage.big) .imm-mini { display: none; }
+.imm-stage.big { background: radial-gradient(120% 80% at 50% 30%, #12301f, #050a07); }
+.bigv { position: absolute; inset: 70px 70px 150px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; }
+.bg-hole { font-size: 17px; font-weight: 800; opacity: .85; margin-bottom: 6px; }
+.bg-fb { min-height: 34px; display: flex; gap: 8px; align-items: baseline; } .bg-fb span { font-size: 15px; opacity: .7; } .bg-fb b { font-size: 32px; font-weight: 800; }
+.bg-main { font-size: clamp(96px, 30vw, 150px); font-weight: 900; line-height: .95; color: #ffb21e; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.bg-main small { font-size: 30px; margin-left: 2px; color: #ffcf6e; }
+.bg-info { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
+.bg-info > div { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 14px; padding: 6px 12px; display: flex; flex-direction: column; min-width: 78px; }
+.bg-info span { font-size: 12px; opacity: .7; } .bg-info b { font-size: 20px; } .bg-info small { font-size: 11px; opacity: .75; }
+.bigv .m-trust { max-width: 330px; margin-top: 14px; }
+.bg-l { font-size: 18px; opacity: .8; } .bg-arrow { font-size: 64px; color: #5ee6a8; transition: transform .3s; } .bg-sub { font-size: 18px; font-weight: 700; }
+.bg-msg { font-size: 22px; font-weight: 800; } .bg-msg small { font-size: 14px; opacity: .7; font-weight: 500; }
+.imm-gps { cursor: pointer; }
+.drills { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #b9d9c5; } .drills > b { font-size: 14px; }
+.dr { display: flex; flex-direction: column; padding: 6px 0; } .dr span { font-weight: 800; font-size: 14px; } .dr small { color: var(--sub, #666); font-size: 12.5px; }

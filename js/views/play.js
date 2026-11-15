@@ -15,6 +15,7 @@ import { conditionsEffect } from '../physics/flight.js';
 import { learnClub } from '../core/score.js';
 import { createMap, destroyMap, drawHole, ll, flagIcon, labelIcon } from '../map.js';
 import { $, $$, esc, toast, sheet, confirmSheet } from '../ui.js';
+import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
@@ -173,7 +174,7 @@ function stepHole() {
     </div>
     <button class="imm-mini" id="mini" aria-label="코스 지도 (2D로 보기)"></button>
     <div class="imm-side">
-      ${[['2d', '2D'], ['3d', '3D'], ['4d', '4D'], ['ar', 'AR']].map(([k, t]) => `<button class="${P.view === k ? 'on' : ''}" data-v="${k}" aria-label="${t} 보기">${t}</button>`).join('')}
+      ${[['big', '큰'], ['2d', '2D'], ['3d', '3D'], ['4d', '4D'], ['ar', 'AR']].map(([k, t]) => `<button class="${P.view === k ? 'on' : ''}" data-v="${k}" aria-label="${t} 보기">${t}</button>`).join('')}
       <span class="sep"></span><button id="hPrev" aria-label="이전 홀">◀</button><button id="hNext" aria-label="다음 홀">▶</button>
     </div>
     <div class="imm-sheet"><div class="imm-card" id="cards"></div><div class="imm-act" id="act"></div></div>
@@ -182,6 +183,7 @@ function stepHole() {
   $('#hNext').onclick = () => App_.stepHole(1);
   $('#mini').onclick = () => { if (P.view !== '2d') { P.view = '2d'; persist(); render(); } };
   $('#hInfo').onclick = () => holeInfo(h);
+  $('#gps').onclick = precise;
   $$('[data-v]').forEach(b => b.onclick = () => { P.view = b.dataset.v; persist(); render(); });
   mountView();
   unPos = onPos(() => update());
@@ -192,7 +194,122 @@ function stepHole() {
 }
 
 function holeInfo(h) {
-  sheet({ title: `${holeName(h)} · 파 ${h.par}`, body: scoreCard(h) || '<p class="sub">이 홀은 스코어카드 정보가 없어요.</p>', actions: [{ label: '닫기' }] });
+  const c = activeCourse(), off = offlineInfo(c), nT = courseTiles(c).length;
+  const lock = !!S.settings.autoHoleOff;
+  sheet({ title: `${holeName(h)} · 파 ${h.par}`, body: `${scoreCard(h) || '<p class="sub">이 홀은 스코어카드 정보가 없어요.</p>'}
+    <div class="hi-box"><b>📝 이 홀 메모</b><textarea id="memo" rows="2" maxlength="140" placeholder="예) 왼쪽 OB 조심 · 그린 뒤가 높음">${esc(h.memo || '')}</textarea></div>
+    <div class="hi-row"><span><b>🔒 자동 홀 넘김</b><br><small>다음 홀 티에 가면 저절로 넘어가요. GPS가 튀면 꺼 두세요.</small></span><button class="btn small ${lock ? '' : 'primary'}" id="lockB">${lock ? '꺼짐' : '켜짐'}</button></div>
+    <div class="hi-row"><span><b>📥 지도 미리 받기</b><br><small>${off ? `받아 둠 · ${new Date(off.ts).toLocaleDateString()}` : `신호가 약한 곳에서도 지도가 보여요 · 약 ${Math.max(1, Math.round(nT * 22 / 1024))}MB`}</small></span><button class="btn small" id="offB" ${nT ? '' : 'disabled'}>${off ? '다시 받기' : '받기'}</button></div>
+    <div class="hi-row"><span><b>🔋 배터리</b><br><small id="batT">확인 중…</small></span></div>`,
+    actions: [{ label: '저장', kind: 'primary', onClick: () => { h.memo = $('#memo')?.value.trim() || ''; if (!h.memo) delete h.memo; save('courses'); update(true); } }] });
+  $('#lockB').onclick = () => { S.settings.autoHoleOff = !lock; save('settings'); toast(lock ? '자동 홀 넘김을 켰어요' : '자동 홀 넘김을 껐어요 · ◀ ▶로 넘겨요'); holeInfo(h); };
+  $('#offB').onclick = async e => {
+    const b = e.target; b.disabled = true;
+    const r = await prefetchCourse(c, (d, t) => { b.textContent = `${Math.round(d / t * 100)}%`; });
+    toast(r.total ? `📥 지도 ${r.ok}/${r.total}장 저장 (약 ${r.mb}MB) · 이제 신호 없이도 보여요` : r.note, 4000);
+    b.textContent = '완료';
+  };
+  batteryNote().then(t => { const el = $('#batT'); if (el) el.textContent = t; });
+}
+
+// ---------- 거리 신뢰도: 핀 기준 · 위치 정확도 · 오차 범위를 화면에 먼저 밝힘 ----------
+const hhmm = t => `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
+function pinInfo(h) {
+  const today = new Date().toDateString();
+  if (h.pin) {
+    const t = h.pin.ts ? new Date(h.pin.ts) : null, fresh = t && t.toDateString() === today;
+    if (h.pin.src === 'demo') return { txt: '데모 핀 (가상)', err: 1, lvl: 0 };
+    if (h.pin.src === 'official') return fresh ? { txt: `오늘 핀 · 골프장 발표 ${hhmm(t)}`, err: 1.5, lvl: 0 } : { txt: '지난 핀 (오늘 발표 전)', err: greenR(h) * 0.6, lvl: 1 };
+    return { txt: `내가 찍은 핀${fresh ? ' · ' + hhmm(t) : ' (지난 날)'}`, err: fresh ? 2 : greenR(h) * 0.6, lvl: fresh ? 0 : 1 };
+  }
+  if (h.green) return { txt: '그린 중앙 기준 (오늘 핀 정보 없음)', err: Math.round(greenR(h) * 0.6), lvl: 1 };
+  return null;
+}
+function posInfo(h) {
+  if (P.ballPos && P.ballHole === h.n) {
+    if (P.ballSrc === 'avg') return { txt: `정밀 측정 ±${(P.ballAcc || 2).toFixed(1)}m`, err: P.ballAcc || 2, lvl: 0 };
+    if (P.ballSrc === 'fix') return { txt: `공 찾은 곳 ±${Math.round(P.ballAcc || 5)}m`, err: P.ballAcc || 5, lvl: (P.ballAcc || 5) <= 6 ? 0 : 1 };
+    if (P.ballSrc === 'est') return { txt: '예상 공 위치', err: 12, lvl: 2 };
+    return { txt: '지도에서 찍은 위치', err: 4, lvl: 1 };
+  }
+  const p = Sensors.pos; if (!p) return { txt: '위치 없음', err: 30, lvl: 2 };
+  if (p.sim) return { txt: 'GPS 시뮬레이션', err: 1, lvl: 0 };
+  return { txt: `GPS ±${Math.round(p.acc)}m`, err: p.acc, lvl: p.acc <= 6 ? 0 : p.acc <= 15 ? 1 : 2 };
+}
+function trustLine(h, me, D) {
+  const pi = pinInfo(h), po = posInfo(h); if (!pi || D == null) return '';
+  const e = Math.hypot(pi.err, po.err), lvl = ['ok', 'mid', 'bad'][Math.max(pi.lvl, po.lvl)];
+  return `<button class="m-trust ${lvl}" data-trust="1"><i></i><span>${esc(pi.txt)} · ${esc(po.txt)}</span><b>${Math.max(0, Math.round(D - e))}~${Math.round(D + e)}m</b></button>`;
+}
+document.addEventListener('click', e => { if (e.target.closest?.('[data-trust]')) trustSheet(); });
+function trustSheet() {
+  const h = activeHole(), pi = pinInfo(h), po = posInfo(h), me = ballPos() || shotOf()?.start;
+  const D = me && (h.pin || h.green) ? distance(me, h.pin || h.green) : null, e = pi ? Math.hypot(pi.err, po.err) : 0;
+  sheet({ title: '이 거리는 얼마나 정확한가요?', body: `
+    <div class="kv"><span>깃발 기준</span><b>${esc(pi?.txt || '—')}</b></div>
+    <div class="kv"><span>내 위치</span><b>${esc(po.txt)}</b></div>
+    ${D != null ? `<div class="kv"><span>실제 거리 범위</span><b>${Math.max(0, Math.round(D - e))} ~ ${Math.round(D + e)}m</b></div>` : ''}
+    <p class="sub">휴대폰 GPS는 보통 3~10m 틀릴 수 있어요. 오늘 핀 위치를 모르면 그린 가운데로 재기 때문에 그린 크기만큼 차이가 나요. 그래서 PinPoint는 거리와 함께 <b>어디를 기준으로 쟀는지</b>와 <b>틀릴 수 있는 범위</b>를 항상 보여 드려요.</p>
+    <p class="sub">더 정확하게: ① 공 옆에서 <b>정밀 측정</b>(5초 동안 여러 번 재서 평균) ② 깃발이 보이면 지도에서 <b>오늘 핀</b>을 찍으세요.</p>`,
+    actions: [{ label: '⛳ 핀 찍기', onClick: () => { if (P.view !== '2d') { P.view = '2d'; persist(); render(); } P.marking = 'pin'; toast('🗺️ 지도에서 오늘 깃발이 꽂힌 곳을 눌러 주세요', 4000); } }, { label: '📡 정밀 측정', kind: 'primary', onClick: () => { precise(); } }] });
+}
+async function precise() {
+  if (!Sensors.pos) return toast('GPS 신호를 찾는 중이에요');
+  toast('📡 5초 동안 가만히 서 있어 주세요… (여러 번 재서 평균)', 5000);
+  const f = await sampleFix(5000);
+  if (!f) return toast('측정에 실패했어요. 하늘이 트인 곳에서 다시 해 주세요');
+  const h = activeHole();
+  P.ballPos = { lat: f.lat, lon: f.lon }; P.ballHole = h.n; P.ballSrc = 'avg'; P.ballAcc = f.acc; persist();
+  vibrate([40, 30, 40]); toast(`정밀 측정 완료 · ±${f.acc.toFixed(1)}m (${f.n}번 평균) · 공 위치로 고정했어요`, 3500);
+  adv = null; advKey = ''; update(true);
+}
+
+// ---------- 배터리: 18홀을 버틸지 미리 알려 주고, 부족하면 절전 ----------
+let batt = null, batt0 = null, battWarned = false;
+async function battery() {
+  if (!batt && navigator.getBattery) { try { batt = await navigator.getBattery(); } catch {} }
+  if (!batt) return null;
+  if (!batt0 && S.round) batt0 = { l: batt.level, t: Date.now() };
+  return batt;
+}
+async function batteryNote() {
+  const b = await battery(); if (!b) return '이 기기에서는 배터리 정보를 볼 수 없어요';
+  const pct = Math.round(b.level * 100);
+  if (b.charging) return `${pct}% · 충전 중`;
+  const order = App_.holeOrder(), left = Math.max(0, order.length - order.indexOf(activeHole()?.n));
+  let rate = null; if (batt0 && Date.now() - batt0.t > 10 * 60000 && batt0.l > b.level) rate = (batt0.l - b.level) / ((Date.now() - batt0.t) / 60000);
+  const need = left * 15; // 홀당 약 15분
+  if (rate) { const mins = b.level / rate; return `${pct}% · 지금 속도면 약 ${(mins / 60).toFixed(1)}시간 · 남은 ${left}홀(약 ${(need / 60).toFixed(1)}시간) ${mins > need ? '충분해요 ✓' : '부족할 수 있어요 ⚠ 큰 글씨 보기를 쓰세요'}`; }
+  return `${pct}% · ${pct >= 50 ? '18홀 충분해요 ✓' : pct >= 25 ? '아껴 쓰면 충분해요 (큰 글씨 보기 추천)' : '부족할 수 있어요 ⚠'}`;
+}
+async function batteryGuard() {
+  const b = await battery(); if (!b || b.charging || battWarned) return;
+  if (b.level <= 0.2 && ['3d', '4d', 'ar'].includes(P.view)) {
+    battWarned = true; P.view = 'big'; persist(); render();
+    toast(`🔋 배터리 ${Math.round(b.level * 100)}% · 절전을 위해 큰 글씨 보기로 바꿨어요`, 4500);
+  }
+}
+
+// ---------- 큰 글씨 보기: 한눈에 뒤·깃발·앞 거리와 클럽 ----------
+function renderBig() {
+  const box = $('#bigv'); if (!box) return;
+  const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start, pin = h?.pin || h?.green;
+  if (!pin) { box.innerHTML = '<div class="bg-msg">그린 위치가 필요해요<br><small>2D 지도에서 그린을 찍어 주세요</small></div>'; return; }
+  if (!me) { box.innerHTML = '<div class="bg-msg">위치를 찾는 중이에요…<br><small>[📍 공 위치]로 지도에 찍어도 돼요</small></div>'; return; }
+  if (shot) {
+    const t = toBall(Sensors.pos || me, shot.pred, Sensors.heading);
+    box.innerHTML = `<div class="bg-hole">${esc(holeName(h))} · 공 찾으러 가요</div><div class="bg-l">내 공까지</div><div class="bg-main">${Math.round(t.d)}<small>m</small></div><div class="bg-arrow" style="transform:rotate(${t.rel ?? 0}deg)">⬆</div><div class="bg-sub">${t.rel == null ? `${t.compass}쪽으로` : Math.abs(t.rel) < 12 ? '앞으로 쭉' : `${t.rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.round(Math.abs(t.rel))}°`}</div>`;
+    return;
+  }
+  const D = distance(me, pin), dF = h.front ? distance(me, h.front) : null, dB = h.back ? distance(me, h.back) : null;
+  const pl = plays(sceneData(), D, bearing(me, pin), pinDrop(me, pin, h)?.v || 0);
+  const club = allowed('clubRec') && adv?.clubName ? adv : null, w = App_.weather;
+  box.innerHTML = `<div class="bg-hole">${esc(holeName(h))} · 파 ${h.par}</div>
+    <div class="bg-fb">${dB ? `<span>뒤</span><b>${Math.round(dB)}</b>` : ''}</div>
+    <div class="bg-main">${Math.round(D)}<small>m</small></div>
+    <div class="bg-fb">${dF ? `<span>앞</span><b>${Math.round(dF)}</b>` : ''}</div>
+    <div class="bg-info">${pl ? `<div><span>체감</span><b>${Math.round(pl.total)}m</b></div>` : ''}${club ? `<div><span>클럽</span><b>${esc(club.clubName)}</b>${club.power && club.power < 98 ? `<small>힘 ${club.power}%</small>` : ''}</div>` : ''}${allowed('windAdjust') && w?.windSpeed != null ? `<div><span>바람</span><b><i style="display:inline-block;transform:rotate(${(w.windFrom + 180) % 360}deg)">↑</i> ${(+w.windSpeed).toFixed(1)}</b><small>m/s</small></div>` : ''}</div>
+    ${trustLine(h, me, D)}`;
 }
 
 // 상태: 친 공 (라운드 중 하나)
@@ -211,7 +328,7 @@ function compute(force) {
 function update(force = false) {
   if (P.step !== 'hole') return;
   compute(force);
-  gpsChip(); cards(); actions(); scene(); mini();
+  gpsChip(); cards(); actions(); scene(); mini(); batteryGuard();
 }
 
 function gpsChip() {
@@ -288,6 +405,7 @@ function cards() {
     <div class="m-big"><b>${f1(carry)}</b><small>m</small><i class="m-ico"></i></div>
     <div class="m-row"><div><span>남은 거리</span><b>${f1(rest)}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div><div><span>${isBall ? '공→깃발' : '깃발까지'}</span><b>${f1(D)}<small>m</small></b>${h.front && h.back ? `<em class="m-fb">앞 ${Math.round(distance(me, h.front))} · 뒤 ${Math.round(distance(me, h.back))}</em>` : ''}</div></div>
     ${adv?.club ? `<div class="m-dir"><i style="transform:rotate(${Math.max(-60, Math.min(60, rel * 3))}deg)">⬆</i><span><b>${dirWords(rel)}</b> · 방위 ${Math.round(adv.aimBearing)}° ${compassName(adv.aimBearing)}${Math.abs(adv.lateral || 0) >= 2 ? ` · 깃발 줄에서 ${rel > 0 ? '오른쪽' : '왼쪽'} ${Math.round(Math.abs(adv.lateral))}m` : ''}</span></div>` : ''}
+    ${trustLine(h, me, D)}${h.memo ? `<div class="m-memo">📝 ${esc(h.memo)}</div>` : ''}
     ${last ? `<div class="m-foot">방금 샷 <b>${f1(last.dist)}m</b>${last.club ? ` · ${esc(last.club)}` : ''}</div>` : cb ? `<div class="m-foot">내 ${esc(cb.name)} 비거리 ${Math.round(cb.carry)}m · ${cb.learned ? `실제 ${cb.n}샷 학습 ✓` : `기본값 (${cb.n || 0}/3샷)`}${adv.pBad > 0.12 ? ` · ⚠ 위험 ${Math.round(adv.pBad * 100)}%` : ''}</div>` : ''}`;
 }
 
@@ -431,10 +549,11 @@ async function found() {
     }
     S.round.lastShot = { hole: shot.hole, dist: total, club: shot.clubName, ts: Date.now() };
     toast(`잘했어요! ${Math.round(total)}m 날아갔어요`, 3000);
-    P.ballPos = { lat: f.lat, lon: f.lon }; P.ballHole = shot.hole;
-    (S.round.track ||= []).push({ hole: shot.hole, start: shot.start, end: { lat: f.lat, lon: f.lon }, club: shot.club, dist: total });
+    P.ballPos = { lat: f.lat, lon: f.lon }; P.ballHole = shot.hole; P.ballSrc = 'fix'; P.ballAcc = f.acc;
+    const pin0 = activeHole()?.pin || activeHole()?.green;
+    (S.round.track ||= []).push({ hole: shot.hole, start: shot.start, end: { lat: f.lat, lon: f.lon }, club: shot.club, dist: total, pin: pin0 ? { lat: pin0.lat, lon: pin0.lon } : null });
   } else { // GPS가 없으면 예상 위치에 공을 놓음 (다르면 다시 찍기)
-    P.ballPos = { lat: shot.pred.lat, lon: shot.pred.lon }; P.ballHole = shot.hole;
+    P.ballPos = { lat: shot.pred.lat, lon: shot.pred.lon }; P.ballHole = shot.hole; P.ballSrc = 'est';
     (S.round.track ||= []).push({ hole: shot.hole, start: shot.start, end: { lat: shot.pred.lat, lon: shot.pred.lon }, club: shot.club, dist: distance(shot.start, shot.pred), est: true });
     toast('잘했어요! 예상 위치에 공을 놓았어요 · 다르면 [📍 공 다시 찍기]', 3500);
   }
@@ -455,6 +574,7 @@ function sceneData() {
 async function mountView() {
   const stage = $('#stage'), h = activeHole();
   stage.className = 'stage imm-stage ' + P.view;
+  if (P.view === 'big') { stage.innerHTML = '<div class="bigv" id="bigv"></div>'; renderBig(); return; }
   if (P.view === '2d') {
     stage.innerHTML = '<div class="map" id="pmap"></div><div class="zoomb"><button id="zi">＋</button><button id="zo">－</button></div>';
     const c = activeCourse(), near = c.holes.find(x => x.green) || null;
@@ -468,11 +588,15 @@ async function mountView() {
         if (!shotOf() && sceneData().from) { P.target = { hole: h.n, lat: e.latlng.lat, lon: e.latlng.lng }; persist(); drawRings(sceneData()); vibrate(20); }
         return;
       }
+      if (P.marking === 'pin') {
+        P.marking = false; h.pin = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7), ts: Date.now(), src: 'user' }; save('courses');
+        vibrate(40); toast('⛳ 오늘 핀 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); return;
+      }
       if (P.marking === 'green') {
         P.marking = false; h.green = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) }; h.greenBy = 'user'; save('courses');
         vibrate(40); toast('🟢 그린 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); fit2d(); return;
       }
-      P.marking = false; P.ballPos = { lat: e.latlng.lat, lon: e.latlng.lng }; P.ballHole = h.n; persist(); vibrate(40);
+      P.marking = false; P.ballPos = { lat: e.latlng.lat, lon: e.latlng.lng }; P.ballHole = h.n; P.ballSrc = 'map'; persist(); vibrate(40);
       if (P.afterMark === 'hit') { P.afterMark = null; hit(); fit2d(); return; }
       update(true); fit2d();
     });
@@ -523,6 +647,7 @@ function fit2d() {
 }
 
 function scene() {
+  if (P.view === 'big') return renderBig();
   const sd = sceneData();
   if (v3) { v3.setScene({ me: sd.from, pin: sd.pin, landing: sd.landing, ball: sd.ball, ellipse: sd.ellipse }); v3.setArc(sd.from, sd.landing, sd.apex); return; }
   if (!map || !lay) return;

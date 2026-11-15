@@ -52,9 +52,50 @@ function practiceCard(rounds) {
   return `<div class="card prio"><b>🎯 가장 먼저 연습할 것</b><div class="big">${AREA[worst][0]}</div>
     <p class="sub" style="margin:0">${AREA[worst][1]} ${a[worst].txt} → 핸디캡 약 ${Math.round(a[worst].hcp)} 수준이에요.</p>
     <p style="margin:6px 0 0;font-size:14px">💡 ${AREA[worst][2]}</p>
+    ${drills(keys.sort((x, y) => a[y].hcp - a[x].hcp).slice(0, 2))}
     <div class="lvl">${['fw', 'gir', 'scr', 'putt'].map(k => a[k] ? `<div><i class="${k === worst ? 'bad' : ''}" style="height:${Math.max(6, a[k].hcp / mx * 70)}px"></i>${AREA[k][0]}<br><b>${Math.round(a[k].hcp)}</b><br><span class="sub">${a[k].txt}</span></div>` : `<div><i style="height:4px;background:#ccc"></i>${AREA[k][0]}<br><span class="sub">기록 부족</span></div>`).join('')}</div>
     <p class="sub" style="margin:8px 0 0">막대 = 그 영역만 봤을 때의 핸디캡 (낮을수록 잘함) · 일반 아마추어 평균과 비교</p></div>`;
 }
+// 다음 라운드 전 연습 2개 (측정 가능한 목표와 함께)
+const DRILL = {
+  fw: ['🎯 폭 30m 페어웨이 10개', '연습장에서 깃발 두 개 사이(폭 30m)를 페어웨이로 정하고 10개 중 6개 이상 넣기'],
+  gir: ['🎯 거리별 3구 맞히기', '100·130·150m 목표에 각 3개씩, 목표 10m 안에 5개 이상 (내 백에서 실제 비거리 확인)'],
+  scr: ['🎯 칩샷 1m 붙이기', '그린 밖 5m에서 10개 굴려 1m 원 안에 5개 이상 · 7·8번 아이언으로 굴리기'],
+  putt: ['🎯 1m 연속 20개 · 10m 거리감', '1m 퍼트 20개 연속 성공, 10m 퍼트는 홀 주변 1m 안에 10개 중 7개'],
+};
+function drills(keys) {
+  return `<div class="drills"><b>다음 라운드 전 연습 2개</b>${keys.map(k => `<div class="dr"><span>${DRILL[k][0]}</span><small>${DRILL[k][1]}</small></div>`).join('')}</div>`;
+}
+
+// 거리별 핀 근접도: 그린을 노린 샷이 깃발에서 얼마나 멀리 멈췄나 (공 찾은 위치 기준)
+function proxCard(rounds) {
+  const B = [[30, 75], [75, 125], [125, 175], [175, 260]], acc = B.map(() => ({ n: 0, sum: 0, on: 0 }));
+  const R = 6371000, rad = Math.PI / 180;
+  const dist = (a, b) => 2 * R * Math.asin(Math.sqrt(Math.sin((b.lat - a.lat) * rad / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin((b.lon - a.lon) * rad / 2) ** 2));
+  for (const r of rounds) for (const t of r.track || []) {
+    if (!t.pin || t.est) continue;
+    const d0 = dist(t.start, t.pin), d1 = dist(t.end, t.pin);
+    if (d1 > d0 * 0.6) continue; // 레이업·실수 샷은 제외 (깃발을 노린 샷만)
+    const i = B.findIndex(([lo, hi]) => d0 >= lo && d0 < hi); if (i < 0) continue;
+    acc[i].n++; acc[i].sum += d1; if (d1 <= 12) acc[i].on++;
+  }
+  if (acc.reduce((x, y) => x + y.n, 0) < 3) return `<div class="card"><b>📍 거리별 핀 근접도</b><p class="sub">그린을 노린 샷 뒤 [✅ 공 찾았어요]를 GPS로 누르면, 거리마다 깃발에서 평균 몇 m에 멈추는지 보여 드려요. (어느 거리 연습이 필요한지 바로 알 수 있어요)</p></div>`;
+  const worst = acc.map((x, i) => [x.n >= 2 ? x.sum / x.n / ((B[i][0] + B[i][1]) / 2) : -1, i]).sort((x, y) => y[0] - x[0])[0][1];
+  return `<div class="card"><b>📍 거리별 핀 근접도</b><div class="tblwrap"><table class="score"><tr><th>남은 거리</th><th>샷</th><th>깃발까지 평균</th><th>그린 적중</th></tr>${acc.map((x, i) => `<tr ${i === worst && x.n >= 2 ? 'style="background:#fff3e6"' : ''}><td>${B[i][0]}~${B[i][1]}m</td><td>${x.n}</td><td>${x.n ? (x.sum / x.n).toFixed(1) + 'm' : '—'}</td><td>${x.n ? Math.round(x.on / x.n * 100) + '%' : '—'}</td></tr>`).join('')}</table></div>
+    ${acc[worst].n >= 2 ? `<p class="sub" style="margin:6px 0 0">👉 <b>${B[worst][0]}~${B[worst][1]}m</b> 거리가 상대적으로 가장 멀어요. 이 거리 클럽을 집중 연습해 보세요.</p>` : ''}</div>`;
+}
+
+// CSV 내보내기 (엑셀에서 바로 열림 · 한글 깨짐 방지 BOM)
+function exportCSV(rounds) {
+  const rows = [['날짜', '골프장', '모드', '홀', '파', '타수', '퍼트', '티샷', '벌타', '분실구']];
+  const FW = { L: '왼쪽', C: '페어웨이', R: '오른쪽' };
+  for (const r of rounds) for (const h of r.holes) { const sc = h.scores?.[0] || {}; if (!sc.strokes) continue; rows.push([new Date(r.date).toLocaleDateString(), r.courseName, MODES[r.mode]?.label || r.mode, h.n, h.par, sc.strokes, sc.putts || 0, FW[sc.fw] || '', sc.penalties || 0, sc.lost || 0]); }
+  const csv = '\ufeff' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `pinpoint-rounds-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast(`${rows.length - 1}개 홀 기록을 CSV로 저장했어요`);
+}
+
 // 골프장별 성적
 function courseCard(rounds) {
   const by = {};
@@ -83,10 +124,12 @@ export default {
           <div class="stat"><div class="v">${holes ? (me.reduce((a, t) => a + t.threePutts, 0) / holes * 100).toFixed(0) + '%' : '—'}</div><div class="l">3퍼트 비율</div></div></div>
         <div class="grid2" style="margin-top:8px"><div class="stat"><div class="v">${me.length ? avg('lost').toFixed(1) : '—'}</div><div class="l">라운드당 분실구</div></div><div class="stat"><div class="v">${shots.length}</div><div class="l">기록된 샷</div></div></div>
         <p class="sub">연습 모드 라운드는 통계에서 제외됩니다.</p>
-        ${practiceCard(counted)}${courseCard(counted)}
+        ${practiceCard(counted)}${proxCard(counted)}${courseCard(counted)}
+        ${rs.length ? '<button class="btn block" id="csv" style="margin-top:10px">⬇ 내 기록 CSV로 내보내기 (엑셀)</button>' : ''}
         ${Object.keys(byClub).length ? `<h3>클럽별 실제 캐리</h3><div class="tblwrap"><table class="score"><tr><th>클럽</th><th>샷</th><th>평균</th><th>최소~최대</th></tr>${Object.entries(byClub).map(([k, v]) => `<tr><td>${esc(S.bag.find(c => c.id === k)?.name || k)}</td><td>${v.length}</td><td>${DU(v.reduce((a, b) => a + b, 0) / v.length)}</td><td>${DU(Math.min(...v))}~${DU(Math.max(...v))}</td></tr>`).join('')}</table></div>` : ''}
         <h3>라운드</h3>
         ${rs.length ? rs.map((r, i) => { const t = (r.totals || totals(r))[0]; return `<div class="card tight"><div class="row"><div class="grow"><b>${esc(r.courseName)}</b> <span class="pill ${r.mode === 'tournament' ? 'danger' : r.mode === 'practice' ? 'warn' : ''}">${MODES[r.mode]?.label}</span><br><span class="sub">${new Date(r.date).toLocaleDateString()} · ${t.played}홀 · ${t.strokes}타 (${t.toPar >= 0 ? '+' : ''}${t.toPar}) · 퍼트 ${t.putts} · 분실 ${t.lost}</span>${holeBar(r)}</div><button class="btn small" data-rep="${i}" title="골프장 제출용 리포트">📤 리포트</button><button class="btn small" data-del="${i}">삭제</button></div></div>`; }).join('') : '<div class="empty">완료된 라운드가 없습니다</div>'}`;
+      $('#csv')?.addEventListener('click', () => exportCSV(rs));
       $$('[data-rep]').forEach(b => b.onclick = () => shareReport(rs[+b.dataset.rep]));
       $$('[data-del]').forEach(b => b.onclick = async () => { if (!(await confirmSheet('기록 삭제', '이 라운드 기록을 삭제할까요?', '삭제', 'danger'))) return; S.rounds.splice(+b.dataset.del, 1); save('rounds'); render(); });
     };

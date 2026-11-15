@@ -186,7 +186,7 @@ function hydrateTick() {
 
 // ---------- 자동 홀 전환 ----------
 function autoHole(p) {
-  if (!S.round || !p) return;
+  if (!S.round || !p || S.settings.autoHoleOff) return; // 사용자가 홀을 고정하면 자동 전환 안 함
   const c = activeCourse(); if (!c) return;
   const n = detectHoleByTee(c, p, S.ui.hole);
   const o = App.holeOrder(), next = o[o.indexOf(S.ui.hole) + 1];

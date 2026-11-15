@@ -28,7 +28,7 @@ export function demoCourse(base = { lat: 37.4419, lon: 127.0094 }) {
       const p = destination(along, s.brg + 90, off);
       h.hazards.push({ id: uid(), type, lat: p.lat, lon: p.lon, r });
     }
-    h.pin = { ...destination(green, s.brg + 60, 4), ts: Date.now() };
+    h.pin = { ...destination(green, s.brg + 60, 4), ts: Date.now(), src: 'demo' };
     const g = demoGreen(s.green);
     g.y0 -= 12.5; // 그린 중앙을 원점에 맞춤
     h.greenGrid = { origin: { lat: green.lat, lon: green.lon }, grid: g, source: '데모(가상) 측량 그린' };
