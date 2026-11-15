@@ -166,7 +166,17 @@ App.remoteTick = remoteTick;
 function markHoleArrival(n) {
   const r = S.round; if (!r) return;
   r.holeTimes = r.holeTimes || {};
-  if (!r.holeTimes[n]) { r.holeTimes[n] = Date.now(); save('round'); }
+  if (!r.holeTimes[n]) {
+    r.holeTimes[n] = Date.now(); save('round');
+    // 티에서 음성 안내: 홀 · 파 · 핸디캡 · 깃발까지 (음성 안내를 켠 경우)
+    const h = activeCourse()?.holes?.find(x => x.n === n), rh = r.holes?.find(x => x.n === n);
+    if (h || rh) {
+      const par = rh?.par || h?.par, hd = h?.hdcpNine ?? h?.hdcp ?? h?.hdcpCard, pin = h?.pin || h?.green;
+      const R = 6371000, rad = Math.PI / 180, me = Sensors.pos;
+      const d = me && pin ? 2 * R * Math.asin(Math.sqrt(Math.sin((pin.lat - me.lat) * rad / 2) ** 2 + Math.cos(me.lat * rad) * Math.cos(pin.lat * rad) * Math.sin((pin.lon - me.lon) * rad / 2) ** 2)) : null;
+      speak(`${n}번 홀, 파 ${par}${hd ? `, 핸디캡 ${hd}` : ''}${d && d < 700 ? `. 깃발까지 ${Math.round(d)}미터` : ''}`);
+    }
+  }
 }
 function hydrateTick() {
   const w = App.weather; if (!S.round || !w || !w.heat.hydrateMin) return;

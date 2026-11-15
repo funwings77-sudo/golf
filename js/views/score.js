@@ -23,8 +23,8 @@ function render() {
       <div class="grid2" style="margin-top:10px"><button class="btn" id="par">모두 파</button><button class="btn primary" id="next">다음 홀 ›</button></div></div>
     <div class="tblwrap"><table class="score"><tr><th>홀</th>${r.holes.map(x => `<th>${x.n}</th>`).join('')}<th>합</th></tr>
       <tr><td>Par</td>${r.holes.map(x => `<td>${x.par}</td>`).join('')}<td>${r.holes.reduce((a, x) => a + x.par, 0)}</td></tr>
-      ${r.players.map((p, i) => `<tr><td><b>${esc(p.name)}</b></td>${r.holes.map(x => { const s = x.scores[i].strokes; return `<td class="${x.n === n ? 'cur' : ''} ${s && s < x.par ? 'under' : s > x.par + 1 ? 'over' : ''}" data-h="${x.n}">${s || ''}</td>`; }).join('')}<td><b>${tot[i].strokes || ''}</b></td></tr>`).join('')}
-    </table></div>
+      ${r.players.map((p, i) => `<tr><td><b>${esc(p.name)}</b></td>${r.holes.map(x => { const s = x.scores[i].strokes, d = s ? s - x.par : null, m = d == null ? '' : d <= -2 ? 'sc-e' : d === -1 ? 'sc-b' : d === 1 ? 'sc-o' : d >= 2 ? 'sc-d' : ''; return `<td class="${x.n === n ? 'cur' : ''} ${m}" data-h="${x.n}"><span>${s || ''}</span></td>`; }).join('')}<td><b>${tot[i].strokes || ''}</b></td></tr>`).join('')}
+    </table></div><div class="legend-s"><span>○ 버디</span><span>◎ 이글</span><span>□ 보기</span><span>▣ 더블 이상</span></div>
     <div class="grid3" style="margin-top:10px">${tot.slice(0, 1).map(t => `<div class="stat"><div class="v">${t.played ? (t.toPar >= 0 ? '+' : '') + t.toPar : '–'}</div><div class="l">${esc(t.name)} 스코어</div></div><div class="stat"><div class="v">${t.putts}</div><div class="l">퍼트 (3퍼트 ${t.threePutts})</div></div><div class="stat"><div class="v">${t.lost}</div><div class="l">분실구</div></div>`).join('')}</div>
     ${(r.games?.stroke || r.games?.skins) ? `<div class="card"><h3 style="margin-top:0">💰 내기 정산</h3>${st.lines.map(l => `<p class="sub">${esc(l)}</p>`).join('')}
       ${st.net.map(x => `<div class="kv"><span>${esc(x.name)}</span><b style="color:${x.amount > 0 ? 'var(--green)' : x.amount < 0 ? 'var(--danger)' : 'inherit'}">${x.amount > 0 ? '+' : ''}${x.amount.toLocaleString()}원</b></div>`).join('')}

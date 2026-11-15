@@ -168,7 +168,7 @@ function stepHole() {
   el_.innerHTML = `<div class="imm">
     <div class="stage imm-stage" id="stage"></div>
     <div class="imm-top">
-      <button class="imm-pill" id="hInfo" aria-label="홀 정보"><i class="imm-tgt"></i><span><b>거리 측정</b><small>${esc(holeName(h))} · 파 ${h.par} · ${idx + 1}/${order.length}</small></span></button>
+      <button class="imm-pill" id="hInfo" aria-label="홀 정보"><i class="imm-tgt"></i><span><b>거리 측정</b><small>${esc(holeName(h))} · 파 ${h.par}${(h.hdcpNine ?? h.hdcp ?? h.hdcpCard) ? ` · 핸디 ${h.hdcpNine ?? h.hdcp ?? h.hdcpCard}` : ''} · ${idx + 1}/${order.length}</small></span></button>
       <span class="imm-gps" id="gps"><i></i>GPS</span>
     </div>
     <button class="imm-mini" id="mini" aria-label="코스 지도 (2D로 보기)"></button>
@@ -286,7 +286,7 @@ function cards() {
   const cb = adv?.club ? S.bag.find(c => c.id === adv.club) : null, rel = adv?.rel || 0;
   box.innerHTML = `<div class="m-label">비거리 <span>${adv?.club ? `${esc(adv.clubName)} · 힘 ${adv.power}% (${esc(adv.swing.short)})` : '추천 계산 중…'}</span></div>
     <div class="m-big"><b>${f1(carry)}</b><small>m</small><i class="m-ico"></i></div>
-    <div class="m-row"><div><span>남은 거리</span><b>${f1(rest)}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div><div><span>${isBall ? '공→깃발' : '깃발까지'}</span><b>${f1(D)}<small>m</small></b></div></div>
+    <div class="m-row"><div><span>남은 거리</span><b>${f1(rest)}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div><div><span>${isBall ? '공→깃발' : '깃발까지'}</span><b>${f1(D)}<small>m</small></b>${h.front && h.back ? `<em class="m-fb">앞 ${Math.round(distance(me, h.front))} · 뒤 ${Math.round(distance(me, h.back))}</em>` : ''}</div></div>
     ${adv?.club ? `<div class="m-dir"><i style="transform:rotate(${Math.max(-60, Math.min(60, rel * 3))}deg)">⬆</i><span><b>${dirWords(rel)}</b> · 방위 ${Math.round(adv.aimBearing)}° ${compassName(adv.aimBearing)}${Math.abs(adv.lateral || 0) >= 2 ? ` · 깃발 줄에서 ${rel > 0 ? '오른쪽' : '왼쪽'} ${Math.round(Math.abs(adv.lateral))}m` : ''}</span></div>` : ''}
     ${last ? `<div class="m-foot">방금 샷 <b>${f1(last.dist)}m</b>${last.club ? ` · ${esc(last.club)}` : ''}</div>` : cb ? `<div class="m-foot">내 ${esc(cb.name)} 비거리 ${Math.round(cb.carry)}m · ${cb.learned ? `실제 ${cb.n}샷 학습 ✓` : `기본값 (${cb.n || 0}/3샷)`}${adv.pBad > 0.12 ? ` · ⚠ 위험 ${Math.round(adv.pBad * 100)}%` : ''}</div>` : ''}`;
 }
@@ -325,11 +325,65 @@ function actions() {
     return;
   }
   box.innerHTML = `<button class="a-main" id="hit">🏌️ 쳤어요!</button>
-    <div class="a-row"><button id="mark">📍 ${isBall ? '공 다시 찍기' : '공 위치'}</button>${isBall ? '<button id="useMe">🧍 내 위치</button>' : ''}<button id="nextH">다음 홀 ▶</button><a href="#/green">🟢 그린</a><a href="#/score">📝 점수</a></div>`;
+    <div class="a-row"><button id="mark">📍 ${isBall ? '공 다시 찍기' : '공 위치'}</button>${isBall ? '<button id="useMe">🧍 내 위치</button>' : ''}<button id="nextH">다음 홀 ▶</button><button id="yd">📋 거리표</button><a href="#/green">🟢 그린</a><a href="#/score">📝 점수</a></div>`;
   $('#hit').onclick = hit;
   $('#mark').onclick = () => markBall();
   $('#useMe')?.addEventListener('click', () => { P.ballPos = null; persist(); update(true); });
-  $('#nextH').onclick = () => App_.stepHole(1);
+  $('#nextH').onclick = quickScore;
+  $('#yd').onclick = yardBook;
+}
+
+// 📋 거리표: 그린 앞·중앙·뒤 + 해저드 앞/넘기기 (먼 순서)
+function yardBook() {
+  const h = activeHole(), me = ballPos() || shotOf()?.start;
+  if (!me) return toast('위치를 찾는 중이에요 · [📍 공 위치]로 찍어 주세요');
+  const pin = h.pin || h.green, rows = [];
+  if (h.back) rows.push(['그린 뒤', distance(me, h.back)]);
+  if (pin) rows.push([h.pin ? '깃발' : '그린 중앙', distance(me, pin), true]);
+  if (h.front) rows.push(['그린 앞', distance(me, h.front)]);
+  const brgP = pin ? bearing(me, pin) : 0;
+  for (const z of h.hazards || []) {
+    if (!HZ_NAME[z.type]) continue;
+    const d = distance(me, z); if (d < 10) continue;
+    const off = normAngle(bearing(me, z) - brgP), side = Math.abs(off) < 8 ? '가운데' : off > 0 ? '오른쪽' : '왼쪽';
+    if (pin && d - z.r > distance(me, pin) + 30) continue;
+    rows.push([`${side} ${HZ_NAME[z.type]} 넘기기`, d + z.r], [`${side} ${HZ_NAME[z.type]} 앞`, Math.max(0, d - z.r)]);
+  }
+  rows.sort((a, b) => b[1] - a[1]);
+  const clubOk = allowed('clubRec');
+  sheet({ title: `📋 ${holeName(h)} 거리표`, body: `<div class="yd">${rows.map(([n, d, main]) => { const c = clubOk ? clubFor(d) : null; return `<div class="yd-r ${main ? 'main' : ''}"><span>${esc(n)}</span><b>${Math.round(d)}<small>m</small></b><i>${c ? esc(c.id) : ''}</i></div>`; }).join('')}</div><p class="sub">지금 공 위치에서 잰 직선거리예요. 오른쪽은 내 클럽 비거리로 고른 클럽이에요.</p>`, actions: [{ label: '닫기' }] });
+}
+
+// 다음 홀로 가기 전 점수 한 번에: 큰 버튼(버디·파·보기…) + 퍼트 + 티샷 방향
+const TERMS = { '-3': '앨버트로스', '-2': '이글', '-1': '버디', 0: '파', 1: '보기', 2: '더블', 3: '트리플' };
+function quickScore() {
+  const r = S.round, h = activeHole();
+  const rh = r?.holes.find(x => x.n === h?.n), sc = rh?.scores[0];
+  if (!sc) return App_.stepHole(1);
+  const par = rh.par || h.par || 4;
+  let strokes = sc.strokes || par, putts = sc.putts || (strokes > 1 ? 2 : 0), fw = sc.fw || null;
+  const body = () => `<div class="qs">
+      <div class="qs-l">몇 타 쳤어요? ${sc.strokes ? `<span>(기록된 샷 ${sc.strokes}타)</span>` : ''}</div>
+      <div class="qs-g">${[-2, -1, 0, 1, 2, 3].map(d => `<button data-s="${par + d}" class="${strokes === par + d ? 'on' : ''} t${d}"><b>${par + d}</b><small>${TERMS[d]}</small></button>`).join('')}</div>
+      <div class="qs-step"><button data-sd="-1">−</button><b>${strokes}타 · ${strokes - par > 0 ? '+' : ''}${strokes - par === 0 ? 'E' : strokes - par}</b><button data-sd="1">+</button></div>
+      <div class="qs-l">퍼트는 몇 번?</div>
+      <div class="qs-g p">${[0, 1, 2, 3, 4].map(n => `<button data-p="${n}" class="${putts === n ? 'on' : ''}"><b>${n}</b></button>`).join('')}</div>
+      ${par >= 4 ? `<div class="qs-l">티샷은 어디로? <span>(선택)</span></div><div class="qs-g f">${[['L', '⬅ 왼쪽'], ['C', '⬆ 페어웨이'], ['R', '오른쪽 ➡']].map(([k, n]) => `<button data-f="${k}" class="${fw === k ? 'on' : ''}">${n}</button>`).join('')}</div>` : ''}
+    </div>`;
+  const s = sheet({ title: `${holeName(h)} · 파 ${par} 점수`, body: body(), actions: [{ label: '나중에' , onClick: () => App_.stepHole(1) }, { label: '저장하고 다음 홀 ▶', kind: 'primary', onClick: () => {
+    sc.strokes = strokes; sc.putts = Math.min(putts, strokes); if (fw) sc.fw = fw; else delete sc.fw;
+    save('round'); toast(`${holeName(h)} ${strokes}타 (${TERMS[strokes - par] || (strokes - par > 0 ? '+' + (strokes - par) : strokes - par)}) 저장`); App_.stepHole(1);
+  } }] });
+  const root = s?.el || document.querySelector('#sheet');
+  const wire = () => {
+    const box = root.querySelector('.qs'); if (!box) return;
+    box.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { strokes = +b.dataset.s; if (putts > strokes) putts = strokes; redraw(); });
+    box.querySelectorAll('[data-sd]').forEach(b => b.onclick = () => { strokes = Math.max(1, strokes + +b.dataset.sd); if (putts > strokes) putts = strokes; redraw(); });
+    box.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { putts = +b.dataset.p; if (putts > strokes) strokes = putts; redraw(); });
+    box.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { fw = fw === b.dataset.f ? null : b.dataset.f; redraw(); });
+  };
+  const redraw = () => { const box = root.querySelector('.qs'); if (box) { box.outerHTML = body(); wire(); } };
+  wire();
 }
 
 // 스코어카드(코스 DB): 파 · 핸디캡 · 티별 거리 · 공략 메모
@@ -410,7 +464,10 @@ async function mountView() {
     drawHole(map, h); lay = L.layerGroup().addTo(map); map.on('zoomend', () => drawRings(sceneData()));
     $('#zi').onclick = () => map.zoomIn(); $('#zo').onclick = () => map.zoomOut();
     map.on('click', e => {
-      if (!P.marking) return;
+      if (!P.marking) { // 아무 곳이나 누르면 그곳까지 거리 (목표점 이동)
+        if (!shotOf() && sceneData().from) { P.target = { hole: h.n, lat: e.latlng.lat, lon: e.latlng.lng }; persist(); drawRings(sceneData()); vibrate(20); }
+        return;
+      }
       if (P.marking === 'green') {
         P.marking = false; h.green = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) }; h.greenBy = 'user'; save('courses');
         vibrate(40); toast('🟢 그린 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); fit2d(); return;
@@ -537,6 +594,10 @@ function drawRings(sd) {
   };
   for (const k of [-2, -1, 1, 2]) { const r = rT + k * step; if (r > 15) ring(r, false); }
   const pl = ring(rT, true);
+  if (distance(tgt, pin) > 12) { // 목표에서 깃발까지 남는 거리
+    L.polyline([ll(tgt), ll(pin)], { color: '#ffc83d', weight: 2, dashArray: '3 6', interactive: false }).addTo(ringLay);
+    L.marker(ll(destination(tgt, bearing(tgt, pin), distance(tgt, pin) / 2)), { icon: divI(`<div>남은 ${Math.round(distance(tgt, pin))}m</div>`, 'rg-rest'), interactive: false }).addTo(ringLay);
+  }
   // 해저드: 앞까지 · 넘기기(캐리) 거리
   for (const z of h.hazards || []) {
     const dz = distance(from, z), off = Math.abs(normAngle(bearing(from, z) - brg));
@@ -589,9 +650,9 @@ function drawPlans(sd) {
 // 이번 홀에서 친 샷 기록 (휘어진 선 + 클럽 · 거리)
 function drawTrack() {
   const h = activeHole(), tr = (S.round?.track || []).filter(t => t.hole === h?.n);
-  tr.forEach(t => {
+  tr.forEach((t, k) => {
     L.polyline(curve(t.start, t.end, 0.08), { color: '#7dff9e', weight: 3, opacity: 0.95, interactive: false }).addTo(ringLay);
     L.circleMarker(ll(t.end), { radius: 5, color: '#fff', weight: 2, fillColor: '#2f9e5a', fillOpacity: 1, interactive: false }).addTo(ringLay);
-    L.marker(ll(t.start), { icon: divI(`<div><i>${esc(t.club || '')}</i>${Math.round(t.dist)}m</div>`, 'rg-shot'), interactive: false }).addTo(ringLay);
+    L.marker(ll(t.start), { icon: divI(`<div><u>${k + 1}</u><i>${esc(t.club || '')}</i>${Math.round(t.dist)}m</div>`, 'rg-shot'), interactive: false }).addTo(ringLay);
   });
 }

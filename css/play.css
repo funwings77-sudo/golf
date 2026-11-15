@@ -231,3 +231,42 @@ svg.arc3 { position: absolute; inset: 0; width: 100%; height: 100%; pointer-even
 .g3-ex button { border: 1px solid #ccd; background: #fff; border-radius: 8px; padding: 4px 8px; font-weight: 800; font-size: 12px; cursor: pointer; color: #333; }
 .g3-ex button.on { background: #1f6f45; color: #fff; border-color: #1f6f45; }
 .g3-note { margin: 4px 4px 0; font-size: 12px; color: #555; text-align: center; }
+
+/* 앞·뒤 거리, 거리표, 빠른 점수 */
+.m-row em.m-fb { font-style: normal; font-size: 11px; color: rgba(255,255,255,.7); padding-left: 4px; white-space: nowrap; }
+.rg-rest > div { transform: translate(-50%, -50%); background: rgba(17,17,17,.8); color: #ffc83d; font-size: 12px; padding: 2px 8px; border-radius: 999px; }
+.rg-shot u { text-decoration: none; background: #fff; color: #1a6a3a; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; margin: 0 0 0 4px; }
+.yd { display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; border: 1px solid var(--line, #ddd); }
+.yd-r { display: grid; grid-template-columns: 1fr auto 44px; align-items: baseline; gap: 10px; padding: 9px 14px; border-top: 1px solid var(--line, #e5e5e5); }
+.yd-r:first-child { border-top: 0; }
+.yd-r span { font-size: 14px; font-weight: 700; color: var(--ink, #222); }
+.yd-r b { font-size: 26px; font-weight: 900; font-variant-numeric: tabular-nums; text-align: right; }
+.yd-r b small { font-size: 13px; margin-left: 1px; opacity: .7; }
+.yd-r i { font-style: normal; font-weight: 900; color: #1f6fd1; text-align: right; }
+.yd-r.main { background: #eaf6ee; } .yd-r.main span, .yd-r.main b { color: #1a7a43; }
+.qs-l { font-weight: 800; margin: 12px 2px 6px; font-size: 15px; } .qs-l span { font-weight: 500; font-size: 12.5px; color: var(--sub, #777); }
+.qs-l:first-child { margin-top: 0; }
+.qs-g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.qs-g.p { grid-template-columns: repeat(5, 1fr); } .qs-g.f { grid-template-columns: repeat(3, 1fr); }
+.qs-g button { border: 1.5px solid var(--line, #ddd); background: var(--paper, #fff); border-radius: 14px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-weight: 800; color: var(--ink, #222); font-size: 14px; }
+.qs-g button b { font-size: 24px; line-height: 1; } .qs-g button small { font-size: 11.5px; font-weight: 700; opacity: .75; }
+.qs-g button.t-2, .qs-g button.t-1 { color: #1f6fd1; } .qs-g button.t1 { color: #b8860b; } .qs-g button.t2, .qs-g button.t3 { color: #d0452f; }
+.qs-g button.on { background: #1f6f45; border-color: #1f6f45; color: #fff; }
+.qs-step { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 8px; }
+.qs-step button { width: 44px; height: 40px; border-radius: 12px; border: 1px solid var(--line, #ddd); background: var(--paper, #fff); font-size: 20px; font-weight: 900; cursor: pointer; color: var(--ink, #222); }
+.qs-step b { font-size: 16px; min-width: 100px; text-align: center; }
+/* 스코어카드 표기: 버디 ○ · 이글 ◎ · 보기 □ · 더블 ▣ */
+table.score td.sc-b span, table.score td.sc-e span, table.score td.sc-o span, table.score td.sc-d span { display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center; }
+table.score td.sc-b span { border: 1.6px solid #1f6fd1; border-radius: 50%; }
+table.score td.sc-e span { border: 1.6px solid #1f6fd1; border-radius: 50%; box-shadow: 0 0 0 2px #fff, 0 0 0 3.6px #1f6fd1; }
+table.score td.sc-o span { border: 1.6px solid #c08a1e; }
+table.score td.sc-d span { border: 1.6px solid #d0452f; box-shadow: 0 0 0 2px #fff, 0 0 0 3.6px #d0452f; }
+/* 라운드 홀별 색 막대 */
+.hbar { display: flex; gap: 3px; margin-top: 8px; } .hbar i { flex: 1; height: 6px; border-radius: 3px; background: #ccc; }
+.hbar i.e { background: #7a4fd6; } .hbar i.b { background: #2b8be6; } .hbar i.p { background: #2fa35a; } .hbar i.o { background: #e3a92b; } .hbar i.d { background: #e0603a; }
+.legend-s { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--sub, #777); margin: 4px 0 8px; } .legend-s i { display: inline-block; width: 14px; height: 6px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+.prio { border: 1.5px solid #1f6f45; background: #eef8f1; }
+.prio .big { font-size: 22px; font-weight: 900; color: #1a6a3a; margin: 2px 0 4px; }
+.lvl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; align-items: end; }
+.lvl div { text-align: center; font-size: 12px; font-weight: 700; } .lvl i { display: block; margin: 0 auto 4px; width: 26px; border-radius: 6px 6px 0 0; background: #2fa35a; }
+.lvl i.bad { background: #e0603a; }
