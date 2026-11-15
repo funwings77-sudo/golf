@@ -4,6 +4,25 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.18",
+   "code": 19,
+   "date": "2026-11-15T10:27:11.728Z",
+   "bytes": 4922281,
+   "sha256": "82365b79cd4bccacfe55e1f57d0cbb4e062cf6fcda4d75e6cf388078e050d779",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.18/pinpoint-caddie-1.0.18.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.18",
+   "notes": [
+    "Easy hole screen in 18Birdies/Garmin style: hole bar (hole·distance·par·handicap), floating AI/green/locate buttons, one-line club card, shot button + bottom bar (scorecard · hole score · tools), tools list, 1-9 score grid with symbols + putts + fairway, point-the-direction step for lost ball",
+    "Nearby course suggestion by GPS, search ignoring spaces/CC with Korean romanization, birdie/bogey symbols on score buttons, GPS accuracy in words, explain location/camera use before asking",
+    "Easy screen by default: big distance, one-line how-to (club, power bar, direction), 4 big buttons, More sheet with every tool, 4-tab nav; detailed screen toggle keeps all expert views",
+    "Gemini: probe models with real JSON request, auto-fallback across working models, drop retired models, thinking off for speed, wind/aim as words",
+    "Gemini AI caddie: grounded facts (no coordinates), JSON schema output, anchored number verification with retry and engine fallback, rules Q&A grounded in rule summary, AI round review, photo/voice input, key stored on device, tournament lock",
+    "Register releases 1.0.8-1.0.13; push before creating GitHub release",
+    "In-app update check for the Android app: compare with published apk.json, prompt to download, menu shows version",
+    "AR rangefinder: crosshair distance (ground ray + GPS snap to flag/green/hazards), error range, bearing, angle vs flag line, elevation angle, distance rings on ground, compass tape, aim lock to target, height measurement"
+   ]
+  },
+  {
    "version": "1.0.17",
    "code": 18,
    "date": "2026-11-15T10:21:45.828Z",
@@ -237,6 +256,6 @@
    ]
   }
  ],
- "latest": "1.0.17",
- "updatedAt": "2026-11-15T10:21:50.887Z"
+ "latest": "1.0.18",
+ "updatedAt": "2026-11-15T10:27:16.079Z"
 }
