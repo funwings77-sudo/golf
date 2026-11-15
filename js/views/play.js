@@ -19,7 +19,7 @@ import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
-const persist = () => { try { sessionStorage.setItem(KEY, JSON.stringify({ view: P.view, step: P.step, q: P.q, ballPos: P.ballPos, ballHole: P.ballHole })); } catch {} };
+const persist = () => { try { sessionStorage.setItem(KEY, JSON.stringify({ view: P.view, step: P.step, q: P.q, ballPos: P.ballPos, ballHole: P.ballHole, ballSrc: P.ballSrc, ballAcc: P.ballAcc, target: P.target, plOff: P.plOff })); } catch {} };
 
 let el_, App_, map = null, lay = null, v3 = null, arStop = null, unPos = null, unOri = null, adv = null, advKey = '', advT = 0, timer = null;
 
@@ -583,7 +583,8 @@ function sceneData() {
   return {
     me: Sensors.pos || me, ball: shot ? shot.pred : (P.ballPos && P.ballHole === h?.n ? P.ballPos : null), from: me, pin: h ? (h.pin || h.green) : null,
     landing: !shot && adv?.landing && allowed('clubRec') ? adv.landing : null, ellipse: !shot && allowed('clubRec') ? adv?.ellipse : null,
-    hazards: h?.hazards || [], hole: h,
+    hazards: h?.hazards || [], hole: h, clubOk: allowed('clubRec'),
+    dzPin: (() => { const pn = h ? (h.pin || h.green) : null; const f = me; return pn && f ? pinDrop(f, pn, h)?.v ?? null : null; })(),
     apex: !shot && adv?.landing && allowed('clubRec') ? (conditionsEffect(adv.club && adv.club !== 'PT' ? adv.club : '7i', Math.max(10, adv.carry || 0)).apex || 20) : null,
   };
 }
@@ -645,7 +646,7 @@ async function mountView() {
     stage.innerHTML = '<div class="arbox" id="arb"></div>';
     const { startAR } = await import('./arview.js');
     if (!$('#arb')) return;
-    arStop = await startAR($('#arb'), () => { const sd = sceneData(); return { ...sd, me: Sensors.pos || sd.from }; });
+    arStop = await startAR($('#arb'), () => { const sd = sceneData(); return { ...sd, me: Sensors.pos || sd.from }; }, { onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); } });
   }
 }
 

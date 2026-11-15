@@ -205,3 +205,20 @@ test('3D 겹치기용 그린 데이터: 등고선·흐름 화살표·모서리',
   assert.ok(flow[1][1] < flow[0][1], '화살표는 남쪽(내리막)으로');
   const c = gridCorners(gg); assert.equal(c.length, 4); assert.ok(c[0][1] > c[3][1] && c[1][0] > c[0][0]);
 });
+
+import { unproject, groundHit } from '../js/core/arproj.js';
+test('AR 레인지파인더: 화면점 역투영 · 지면 거리', () => {
+  const R = rotationMatrix(30, 85, 3), opt = { f: 900, cx: 200, cy: 400, screenAngle: 0 };
+  for (const [x, y] of [[200, 400], [120, 300], [330, 620]]) {
+    const v = unproject(R, x, y, opt), q = project(R, { x: v.x * 50, y: v.y * 50, z: v.z * 50 }, opt);
+    assert.ok(Math.abs(q.x - x) < 1e-6 && Math.abs(q.y - y) < 1e-6, '역투영 왕복');
+  }
+  // 눈높이 1.5m에서 3° 내려다보면 약 28.6m
+  const dep = 3 * Math.PI / 180, g = groundHit({ x: 0, y: Math.cos(dep), z: -Math.sin(dep) }, { eye: 1.5 });
+  assert.ok(Math.abs(g.h - 1.5 / Math.tan(dep)) < 0.01 && Math.abs(g.bearing) < 1e-6);
+  assert.ok(g.err > 2 && g.err < 12, '오차 추정 ' + g.err);
+  // 수평 이상은 지면에 닿지 않음
+  assert.equal(groundHit({ x: 0, y: 1, z: 0.01 }).h, Infinity);
+  // 오르막(경사)이면 같은 각도에서 더 가까움
+  assert.ok(groundHit({ x: 0, y: Math.cos(dep), z: -Math.sin(dep) }, { eye: 1.5, slope: 0.02 }).h < g.h);
+});

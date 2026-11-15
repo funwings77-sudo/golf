@@ -300,3 +300,22 @@ table.score td.sc-d span { border: 1.6px solid #d0452f; box-shadow: 0 0 0 2px #f
 .drills { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #b9d9c5; } .drills > b { font-size: 14px; }
 .dr { display: flex; flex-direction: column; padding: 6px 0; } .dr span { font-weight: 800; font-size: 14px; } .dr small { color: var(--sub, #666); font-size: 12.5px; }
 .sheet-body .pick { margin-bottom: 8px; }
+
+/* ===== AR 레인지파인더 ===== */
+.imm:has(.imm-stage.ar) .imm-card, .imm:has(.imm-stage.ar) .imm-mini { display: none; }
+.imm .ar-bar { top: auto; left: 8px; bottom: 132px; }
+.ar-read { position: absolute; left: 50%; top: calc(44% + 46px); transform: translateX(-50%); z-index: 3; min-width: 230px; max-width: calc(100% - 100px); text-align: center; color: #fff; pointer-events: none; }
+.ar-big { display: inline-flex; align-items: baseline; gap: 4px; background: rgba(0,0,0,.6); border-radius: 16px; padding: 4px 14px 6px; backdrop-filter: blur(6px); }
+.ar-big em { font-style: normal; font-size: 12px; font-weight: 800; opacity: .85; align-self: center; margin-right: 4px; }
+.ar-big b { font-size: 46px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; color: #ffc83d; }
+.ar-big small { font-size: 16px; font-weight: 800; } .ar-big i { font-style: normal; font-size: 13px; opacity: .75; margin-left: 2px; }
+.ar-big u { text-decoration: none; margin-left: 8px; background: #2b7bff; border-radius: 8px; padding: 1px 8px; font-weight: 900; font-size: 16px; align-self: center; }
+.ar-big .far { font-size: 18px; font-weight: 800; padding: 6px 0; }
+.ar-sub { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 6px; }
+.ar-sub span { background: rgba(0,0,0,.55); border-radius: 999px; padding: 2px 9px; font-size: 12px; font-weight: 700; }
+.ar-hint, .ar-ht { margin-top: 6px; font-size: 12px; background: rgba(0,0,0,.6); border-radius: 10px; padding: 4px 10px; display: inline-block; }
+.ar-ht b { color: #5ee6a8; font-size: 16px; }
+.ar-tools { position: absolute; left: 10px; top: 120px; z-index: 3; display: flex; flex-direction: column; gap: 6px; }
+.ar-tools button { border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.55); color: #fff; border-radius: 12px; padding: 8px 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: left; }
+.ar-tools button.on { background: #5ee6a8; color: #072015; border-color: #5ee6a8; }
+.ar-big em { white-space: nowrap; }

@@ -48,6 +48,25 @@ export function yawCorrection(R, enuTarget, tapX, { f, cx }) {
   return (Math.atan((p.x - cx) / f) - Math.atan((tapX - cx) / f)) * 180 / Math.PI;
 }
 
+// 화면 점(x,y) → 그 방향의 ENU 단위벡터 (project의 역)
+export function unproject(R, x, y, { f, cx, cy, screenAngle = 0 }) {
+  let dx = (x - cx) / f, dy = -(y - cy) / f;
+  if (screenAngle) { const t = rad(screenAngle), c = Math.cos(t), s = Math.sin(t); [dx, dy] = [dx * c - dy * s, dx * s + dy * c]; }
+  const dz = -1;
+  const v = { x: R[0][0] * dx + R[0][1] * dy + R[0][2] * dz, y: R[1][0] * dx + R[1][1] * dy + R[1][2] * dz, z: R[2][0] * dx + R[2][1] * dy + R[2][2] * dz };
+  const n = Math.hypot(v.x, v.y, v.z); return { x: v.x / n, y: v.y / n, z: v.z / n };
+}
+// 조준 광선과 지면의 교차 (눈높이 eye, 지면 경사 slope = 거리 1m당 높이 변화)
+//  반환: 수평거리 h(m), 방위, 내려다보는 각, 예상 오차(기울기 센서 ±0.5°, 눈높이 ±10%)
+export function groundHit(v, { eye = 1.45, slope = 0, tiltErrDeg = 0.5 } = {}) {
+  const vh = Math.hypot(v.x, v.y), den = v.z - slope * vh;
+  const brg = (Math.atan2(v.x, v.y) * 180 / Math.PI + 360) % 360, elev = Math.atan2(v.z, vh) * 180 / Math.PI;
+  if (den >= -1e-4) return { h: Infinity, bearing: brg, elev, err: Infinity };
+  const t = -eye / den, h = t * vh;
+  const dep = Math.atan2(-den, vh), dH = eye / Math.sin(dep) ** 2 * rad(tiltErrDeg);
+  return { h, bearing: brg, elev, err: Math.hypot(dH, 0.1 * h) };
+}
+
 // 각도 흔들림 완화 (원형 평균)
 export function smoothAngle(prev, next, k = 0.25) {
   if (prev == null) return next;
