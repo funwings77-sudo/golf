@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.17",
+   "code": 18,
+   "date": "2026-11-15T10:21:45.828Z",
+   "bytes": 4919105,
+   "sha256": "47b27c7132049ae589a6e90fb2035580f428f174951a96c5189495d34ff3e9cd",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.17/pinpoint-caddie-1.0.17.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.17",
+   "notes": [
+    "Nearby course suggestion by GPS, search ignoring spaces/CC with Korean romanization, birdie/bogey symbols on score buttons, GPS accuracy in words, explain location/camera use before asking"
+   ]
+  },
+  {
    "version": "1.0.16",
    "code": 17,
    "date": "2026-11-15T06:24:37.856Z",
@@ -225,6 +237,6 @@
    ]
   }
  ],
- "latest": "1.0.16",
- "updatedAt": "2026-11-15T06:24:43.648Z"
+ "latest": "1.0.17",
+ "updatedAt": "2026-11-15T10:21:50.887Z"
 }
