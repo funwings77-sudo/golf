@@ -73,7 +73,7 @@ async function route() {
 function refreshHeader() {
   const c = activeCourse(), mode = currentMode();
   const chip = $('#modeChip');
-  chip.textContent = MODES[mode].short; chip.className = 'mode-chip ' + mode;
+  chip.textContent = S.settings.detail ? MODES[mode].short : ({ tournament: '🏆 대회', casual: '😊 친선', practice: '📚 연습' })[mode]; chip.className = 'mode-chip ' + mode;
   const nav = $('#holeNav');
   if (c) {
     const h = c.holes.find(x => x.n === S.ui.hole) || c.holes[0];
@@ -90,6 +90,7 @@ function applySettings() {
   const st = S.settings, root = document.documentElement;
   root.classList.toggle('outdoor', !!st.outdoor);
   root.classList.toggle('bigtext', !!st.bigText);
+  root.classList.toggle('easy', !st.detail);
   setVoice(!!st.voice);
   if (st.simGPS !== Sensors.sim) setSim(!!st.simGPS);
 }
@@ -232,6 +233,7 @@ function init() {
   onPos(autoHole);
   subscribe(keys => { if (keys.includes('settings')) { applySettings(); setupSwing(); refreshHeader(); } });
   $('#menuBtn').onclick = () => $('#drawer').classList.add('open');
+  $('#tabMore')?.addEventListener('click', e => { e.preventDefault(); $('#drawer').classList.add('open'); });
   $('#drawer .bg').onclick = () => $('#drawer').classList.remove('open');
   $('#modeChip').onclick = modeSheet;
   $('#holePrev').onclick = () => App.stepHole(-1);

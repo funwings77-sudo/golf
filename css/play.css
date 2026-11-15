@@ -344,3 +344,50 @@ table.score td.sc-d span { border: 1.6px solid #d0452f; box-shadow: 0 0 0 2px #f
 .spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #cfc6ff; border-top-color: #6a5acd; animation: spin 0.8s linear infinite; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .ai-set input { width: 100%; border: 1.5px solid var(--line, #ccc); border-radius: 10px; padding: 9px 10px; font: inherit; }
+
+/* ===== 쉬운 화면 (기본) ===== */
+.e-only, .easy-only { display: none !important; }
+html.easy .easy-only { display: flex !important; }
+html.easy nav.tabs { grid-template-columns: repeat(4, 1fr); }
+html.easy nav.tabs a[data-r="distance"], html.easy nav.tabs a[data-r="tee"], html.easy nav.tabs a[data-r="green"] { display: none; }
+html.easy nav.tabs a { font-size: 13px; font-weight: 800; }
+html.easy nav.tabs a .i { font-size: 24px; }
+html.easy #holeNav { display: none !important; }
+.e-hole { display: none; }
+.imm.easy .e-only { display: inline !important; }
+.imm.easy .e-hide, .imm.easy .imm-side, .imm.easy .imm-mini, .imm.easy .imm-tgt { display: none !important; }
+.imm.easy .e-hole { display: inline-flex; flex: none; width: 48px; height: 48px; border-radius: 50%; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,.15); background: var(--glass); color: #fff; font-size: 18px; cursor: pointer; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.imm.easy .imm-pill { justify-content: center; text-align: center; padding: 8px 10px; }
+.imm.easy .imm-pill b { font-size: 19px; } .imm.easy .imm-pill small { display: none; }
+.imm.easy .imm-gps small { display: none; }
+.imm.easy .m-row, .imm.easy .m-foot { display: none; }
+.imm.easy .imm-card { padding: 12px 16px 12px; }
+.e-lab { font-size: 15px; font-weight: 800; color: rgba(255,255,255,.85); }
+.e-big { display: flex; align-items: baseline; gap: 4px; margin: -2px 0 6px; }
+.e-big b { font-size: 72px; font-weight: 900; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.e-big small { font-size: 24px; font-weight: 800; opacity: .85; }
+.e-do { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center; background: rgba(0,0,0,.2); border-radius: 16px; padding: 10px 12px; }
+.e-club { grid-row: span 2; background: #2b7bff; color: #fff; font-weight: 900; font-size: 17px; padding: 10px 12px; border-radius: 12px; max-width: 120px; text-align: center; line-height: 1.2; }
+.e-pow { position: relative; height: 26px; border-radius: 13px; background: rgba(255,255,255,.15); overflow: hidden; }
+.e-pow i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #5ee6a8, #ffc83d); border-radius: 13px; }
+.e-pow span { position: relative; display: block; text-align: center; line-height: 26px; font-size: 13px; font-weight: 900; color: #08140e; text-shadow: 0 0 6px rgba(255,255,255,.6); }
+.e-dir { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; }
+.e-dir i { font-style: normal; font-size: 26px; color: #5ee6a8; display: inline-block; transition: transform .3s; }
+.e-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.e-tiles button { min-height: 64px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #fff; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.e-tiles button i { font-style: normal; font-size: 24px; line-height: 1; }
+.e-tiles #aiB { background: linear-gradient(135deg, #3b6cff, #8b5cf6); border-color: transparent; }
+.imm.easy .a-main { min-height: 64px; font-size: 23px; }
+/* 더보기 */
+.mo-h { font-weight: 900; font-size: 14px; color: var(--sub, #666); margin: 4px 2px 8px; }
+.mo-g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.mo-g.v { grid-template-columns: repeat(5, 1fr); }
+.mo-g button { min-height: 78px; border-radius: 16px; border: 1.5px solid var(--line, #ddd); background: var(--paper, #fff); color: var(--ink, #222); font-weight: 800; font-size: 13px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; line-height: 1.2; padding: 6px 4px; text-align: center; }
+.mo-g.v button { min-height: 70px; font-size: 11.5px; }
+.mo-g button i { font-style: normal; font-size: 26px; line-height: 1; }
+.mo-g button.on { border-color: #1f6f45; background: #eaf6ee; }
+.mo-detail { width: 100%; border: 1px dashed var(--line, #ccc); background: transparent; border-radius: 14px; padding: 12px; font-weight: 800; cursor: pointer; color: var(--ink, #333); }
+.mo-detail small { display: block; font-weight: 500; color: var(--sub, #777); margin-top: 2px; }
+.e-club { max-width: 150px; font-size: 16px; word-break: keep-all; padding: 10px; }
+.e-dir { font-size: 15px; word-break: keep-all; line-height: 1.3; }
+.imm.easy .m-big.e-big .m-arrow { font-size: 56px; margin-left: auto; }

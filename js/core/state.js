@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS = {
   weather: true, swingDetect: false, simGPS: false,
   aimSigma: 1.0, speedSigma: 0.06, roundsPerMonth: 3,
   tempoBpm: 76,
+  detail: false,           // false = 쉬운 화면(기본), true = 자세히 화면
 };
 
 // 핸디캡 18 남성 기준 캐리(m) → 핸디캡·성별로 스케일

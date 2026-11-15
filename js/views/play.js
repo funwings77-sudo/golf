@@ -164,10 +164,11 @@ function stepHole() {
   const c = activeCourse(), h = activeHole();
   if (!c || !h) { P.step = 'club'; return render(); }
   const order = App_.holeOrder(), idx = order.indexOf(h.n);
-  el_.innerHTML = `<div class="imm">
+  el_.innerHTML = `<div class="imm ${S.settings.detail ? '' : 'easy'}">
     <div class="stage imm-stage" id="stage"></div>
     <div class="imm-top">
-      <button class="imm-pill" id="hInfo" aria-label="홀 정보"><i class="imm-tgt"></i><span><b>거리 측정</b><small>${esc(holeName(h))} · 파 ${h.par}${(h.hdcpNine ?? h.hdcp ?? h.hdcpCard) ? ` · 핸디 ${h.hdcpNine ?? h.hdcp ?? h.hdcpCard}` : ''} · ${idx + 1}/${order.length}</small></span></button>
+      <button class="e-hole" id="eHp" aria-label="이전 홀">◀</button><button class="imm-pill" id="hInfo" aria-label="홀 정보"><i class="imm-tgt"></i><span><b class="e-hide">거리 측정</b><b class="e-only">${esc(holeName(h))} · 파 ${h.par}</b><small>${esc(holeName(h))} · 파 ${h.par}${(h.hdcpNine ?? h.hdcp ?? h.hdcpCard) ? ` · 핸디 ${h.hdcpNine ?? h.hdcp ?? h.hdcpCard}` : ''} · ${idx + 1}/${order.length}</small></span></button>
+<button class="e-hole" id="eHn" aria-label="다음 홀">▶</button>
       <span class="imm-gps" id="gps"><i></i>GPS</span>
     </div>
     <button class="imm-mini" id="mini" aria-label="코스 지도 (2D로 보기)"></button>
@@ -178,6 +179,7 @@ function stepHole() {
     <div class="imm-sheet"><div class="imm-card" id="cards"></div><div class="imm-act" id="act"></div></div>
   </div>`;
   $('#hPrev').onclick = () => App_.stepHole(-1);
+  $('#eHp').onclick = () => App_.stepHole(-1); $('#eHn').onclick = () => App_.stepHole(1);
   $('#hNext').onclick = () => App_.stepHole(1);
   $('#mini').onclick = () => { if (P.view !== '2d') { P.view = '2d'; persist(); render(); } };
   $('#hInfo').onclick = () => holeInfo(h);
@@ -373,7 +375,7 @@ function cards() {
   if (shot) {
     const t = toBall(Sensors.pos || me, shot.pred, Sensors.heading), drop = pinDrop(shot.pred, pin, h);
     box.innerHTML = `<div class="m-label">내 공까지 <span>${esc(shot.clubName)} · 찾을 범위 약 ${Math.round(shot.r80)}m</span></div>
-      <div class="m-big"><b>${f1(t.d)}</b><small>m</small><i class="m-arrow" id="ballArrow" style="transform:rotate(${t.rel ?? 0}deg)">⬆</i></div>
+      <div class="m-big ${S.settings.detail ? '' : 'e-big'}"><b>${S.settings.detail ? f1(t.d) : Math.round(t.d)}</b><small>m</small><i class="m-arrow" id="ballArrow" style="transform:rotate(${t.rel ?? 0}deg)">⬆</i></div>
       <p class="m-text">${t.rel == null ? `${t.compass}쪽 (${Math.round(t.bearing)}°)으로 걸어가요` : Math.abs(t.rel) < 12 ? '앞으로 쭉 걸어가요' : `${t.rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.round(Math.abs(t.rel))}° 돌아서 걸어가요`}</p>
       <div class="m-row"><div><span>예상 비거리</span><b>${f1(distance(shot.start, shot.pred))}<small>m</small></b></div><div><span>남은 거리</span><b>${f1(distance(shot.pred, pin))}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div></div>`;
     return;
@@ -399,6 +401,16 @@ function cards() {
   // ④ 다음 샷 추천: 비거리 · 남은 거리 · 핀 고저차
   const carry = adv?.carry ?? D, landing = adv?.landing || pin, rest = distance(landing, pin), drop = pinDrop(landing, pin, h);
   const cb = adv?.club ? S.bag.find(c => c.id === adv.club) : null, rel = adv?.rel || 0;
+  if (!S.settings.detail) { // 쉬운 화면: 큰 거리 + "이렇게 쳐요" 한 줄 (그림으로)
+    const side = Math.abs(rel) < 0.75 ? '깃발 보고 똑바로' : `깃발보다 ${rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.abs(rel) < 3 ? '조금' : '많이'}`;
+    box.innerHTML = `<div class="e-lab">⛳ 깃발까지</div>
+      <div class="e-big"><b>${Math.round(D)}</b><small>m</small></div>
+      ${adv?.club ? `<div class="e-do"><div class="e-club">${esc(adv.clubName)}</div>
+        <div class="e-pow"><i style="width:${adv.power}%"></i><span>힘 ${adv.power}% · ${esc(adv.swing.short)}</span></div>
+        <div class="e-dir"><i style="transform:rotate(${Math.max(-60, Math.min(60, rel * 3))}deg)">⬆</i>${side}</div></div>` : '<div class="e-do"><span class="sub">클럽을 고르는 중…</span></div>'}
+      ${trustLine(h, me, D)}${h.memo ? `<div class="m-memo">📝 ${esc(h.memo)}</div>` : ''}`;
+    return;
+  }
   box.innerHTML = `<div class="m-label">비거리 <span>${adv?.club ? `${esc(adv.clubName)} · 힘 ${adv.power}% (${esc(adv.swing.short)})` : '추천 계산 중…'}</span></div>
     <div class="m-big"><b>${f1(carry)}</b><small>m</small><i class="m-ico"></i></div>
     <div class="m-row"><div><span>남은 거리</span><b>${f1(rest)}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div><div><span>${isBall ? '공→깃발' : '깃발까지'}</span><b>${f1(D)}<small>m</small></b>${h.front && h.back ? `<em class="m-fb">앞 ${Math.round(distance(me, h.front))} · 뒤 ${Math.round(distance(me, h.back))}</em>` : ''}</div></div>
@@ -432,6 +444,16 @@ function arrowOnly() {
 function actions() {
   const box = $('#act'); if (!box) return;
   const shot = shotOf(), h = activeHole(), isBall = P.ballPos && P.ballHole === h.n;
+  if (!S.settings.detail) { // 쉬운 화면: 큰 버튼 1개 + 큰 그림 버튼 4개
+    box.innerHTML = shot
+      ? `<button class="a-main" id="found">✅ 공 찾았어요!</button><div class="e-tiles"><button id="lostb"><i>📡</i>안 보여요</button><button id="aiB"><i>🤖</i>물어보기</button><button id="cancel"><i>↩</i>취소</button><button id="more"><i>➕</i>더보기</button></div>`
+      : `<button class="a-main" id="hit">🏌️ 쳤어요!</button><div class="e-tiles"><button id="aiB"><i>🤖</i>물어보기</button><button id="mark"><i>📍</i>${isBall ? '공 다시' : '내 공'}</button><button id="nextH"><i>⛳</i>다음 홀</button><button id="more"><i>➕</i>더보기</button></div>`;
+    $('#aiB').onclick = () => openAICaddie({ getFacts: aiFacts });
+    $('#more').onclick = moreSheet;
+    if (shot) { $('#found').onclick = found; $('#lostb').onclick = () => App_.go('lost'); $('#cancel').onclick = () => { delete S.round.liveShot; save('round'); update(true); }; }
+    else { $('#hit').onclick = hit; $('#mark').onclick = () => markBall(); $('#nextH').onclick = quickScore; }
+    return;
+  }
   if (shot) {
     box.innerHTML = `<button class="a-main" id="found">✅ 공 찾았어요!</button>
       <div class="a-row"><button id="aiB" class="ai-b">🤖 AI 캐디</button><button id="lostb">📡 공이 안 보여요</button><button id="cancel">↩ 취소</button></div>`;
@@ -511,6 +533,24 @@ function scoreCard(h) {
   return `<div class="pcard scard"><div class="row" style="justify-content:space-between"><b>📋 스코어카드</b><span class="sub">파 ${h.par}${hd ? ` · 핸디캡 ${hd}` : ''}</span></div>
     <div class="tees">${tees.map(([n, v, c]) => `<span><i style="background:${c}"></i>${n} <b>${v}</b>${s.unit}</span>`).join('')}</div>
     ${h.note ? `<p class="sub" style="margin:6px 0 0">💡 ${esc(h.note)}</p>` : ''}</div>`;
+}
+
+// ➕ 더보기: 모든 기능을 큰 그림 버튼으로
+function moreSheet() {
+  const h = activeHole(), V = [['2d', '🗺️', '지도'], ['3d', '🏔️', '3D 땅 모양'], ['4d', '🎬', '공 날아가기'], ['ar', '📷', '카메라로 거리 재기'], ['big', '🔠', '큰 숫자']];
+  const T = [
+    ['yd', '📋', '거리표', yardBook], ['green', '🟢', '그린 읽기 (퍼팅)', () => App_.go('green')], ['score', '📝', '점수 적기', () => App_.go('score')],
+    ['prec', '📡', '정밀하게 재기', precise], ['me', '🧍', '내 위치로', () => { P.ballPos = null; persist(); update(true); }], ['info', 'ℹ️', '홀 정보 · 메모', () => holeInfo(h)],
+    ['lost', '🔍', '공 찾기 도우미', () => App_.go('lost')], ['rule', '⚖️', '규칙 도움', () => App_.go('rules')], ['tee', '🎯', '티샷 작전', () => App_.go('tee')],
+    ['dist', '⛳', '거리 · 바람 자세히', () => App_.go('distance')], ['lie', '📐', '공 놓인 경사', () => App_.go('lie')], ['bag', '🎒', '내 클럽 비거리', () => App_.go('bag')],
+  ];
+  sheet({ title: '➕ 더보기', body: `<div class="mo-h">보는 방법</div><div class="mo-g v">${V.map(([k, i, n]) => `<button data-mv="${k}" class="${P.view === k ? 'on' : ''}"><i>${i}</i>${n}</button>`).join('')}</div>
+    <div class="mo-h">도구</div><div class="mo-g">${T.map(([k, i, n]) => `<button data-mt="${k}"><i>${i}</i>${n}</button>`).join('')}</div>
+    <button class="mo-detail" id="moDet">🔧 자세히 화면으로 바꾸기 <small>(숫자·지도 표시가 많은 전문가 화면)</small></button>`, actions: [{ label: '닫기' }] });
+  const close = () => $('#sheet').classList.remove('open');
+  $$('[data-mv]').forEach(b => b.onclick = () => { close(); P.view = b.dataset.mv; persist(); render(); });
+  $$('[data-mt]').forEach(b => b.onclick = () => { close(); T.find(t => t[0] === b.dataset.mt)[3](); });
+  $('#moDet').onclick = () => { close(); S.settings.detail = true; save('settings'); render(); toast('자세히 화면이에요 · ☰ → 설정에서 쉬운 화면으로 돌아갈 수 있어요', 3500); };
 }
 
 // 🤖 AI에 보낼 사실(FACTS): 엔진이 계산한 숫자만 · 위치 좌표·이름 없음
@@ -746,7 +786,7 @@ function drawRings(sd) {
   const clubsOk = allowed('clubRec');
   // 화면에서 링 사이가 28px 이상 벌어지도록 간격 선택 (확대하면 촘촘하게)
   const ppm = map.latLngToContainerPoint(ll(tgt)).distanceTo(map.latLngToContainerPoint(ll(destination(tgt, brg, 10)))) / 10;
-  const step = [2, 3, 5, 10, 20, 25, 50].find(v => v * ppm >= 24) || 50, dense = step * ppm < 30;
+  const step = [2, 3, 5, 10, 20, 25, 50].find(v => v * ppm >= 24) || 50, dense = step * ppm < 30, easy = !S.settings.detail;
   const ring = (r, main) => {
     const span = Math.min(30, Math.atan2(main ? 30 : 24, r) * 180 / Math.PI);
     const pts = []; for (let a = -span; a <= span + 0.01; a += span / 16) pts.push(ll(destination(from, brg + a, r)));
@@ -762,7 +802,7 @@ function drawRings(sd) {
     if (!dense) L.marker(pts[0], { icon: divI(`<div>${left}</div>`, 'rg-l'), interactive: false }).addTo(ringLay);
     L.marker(pts.at(-1), { icon: divI(`<div>${Math.round(r)}m</div>`, 'rg-r'), interactive: false }).addTo(ringLay);
   };
-  for (const k of [-2, -1, 1, 2]) { const r = rT + k * step; if (r > 15) ring(r, false); }
+  if (!easy) for (const k of [-2, -1, 1, 2]) { const r = rT + k * step; if (r > 15) ring(r, false); }
   const pl = ring(rT, true);
   if (distance(tgt, pin) > 12) { // 목표에서 깃발까지 남는 거리
     L.polyline([ll(tgt), ll(pin)], { color: '#ffc83d', weight: 2, dashArray: '3 6', interactive: false }).addTo(ringLay);
@@ -780,6 +820,7 @@ function drawRings(sd) {
   ret.on('dragend', e => { const q = e.target.getLatLng(); P.target = { hole: h.n, lat: q.lat, lon: q.lng }; persist(); drawRings(sceneData()); });
   ret.on('dblclick', () => { P.target = null; persist(); drawRings(sceneData()); toast('목표를 추천 지점으로 되돌렸어요'); });
   // 보정 설명 + 바람 표시
+  if (easy) { drawPlansOff(); return; }
   if (box && allowed('playsLike') && P.plOff) { const hud = document.createElement('div'); hud.className = 'rg-hud'; hud.innerHTML = '<button class="rg-tog">체감 거리 <b>끔</b></button>'; box.appendChild(hud); hud.querySelector('button').onclick = () => { P.plOff = false; persist(); drawRings(sceneData()); }; }
   if (box && pl) {
     const pt = pl.parts, bits = [];
@@ -796,6 +837,7 @@ function drawRings(sd) {
   drawPlans(sd);
 }
 
+function drawPlansOff() {}
 // 휘어진 공 궤적(위에서 본 모습): 두 점 사이를 살짝 휜 곡선으로
 function curve(a, b, bend = 0.12, n = 24) {
   const d = distance(a, b), br = bearing(a, b), out = [];

@@ -4,6 +4,7 @@ import { $, $$, toast, confirmSheet, esc } from '../ui.js';
 import { getKey, setKey, getModel, setModel, hasKey, testConnection, usageToday } from '../core/gemini.js';
 
 const SW = [
+  ['detail', '자세히 화면 (전문가)', '끄면 쉬운 화면: 큰 거리 · 한 줄 안내 · 큰 버튼 4개 (기능은 [더보기]에 모두 있어요)'],
   ['voice', '음성 안내', '이어버드로 "핀까지 142미터" 안내'],
   ['outdoor', '야외 고대비 모드', '강한 햇빛 아래 가독성'],
   ['bigText', '큰 글씨 (시니어)', ''],
