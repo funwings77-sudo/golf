@@ -5,6 +5,8 @@ import { fetchWeather } from './core/weather.js';
 import { detectHoleByTee } from './core/course.js';
 import { syncPins, getNotices, getCatalog, pendingUpdates } from './core/remote.js';
 import { $, $$, sheet, toast, esc } from './ui.js';
+import { checkAppUpdate, openDownload, isNative } from './core/appupdate.js';
+import { APP_VERSION } from './core/appver.js';
 
 const ROUTES = {
   home: () => import('./views/home.js'),
@@ -162,6 +164,22 @@ async function remoteTick() {
 }
 App.remoteTick = remoteTick;
 
+// ---------- 설치형 앱 새 버전 알림 (시작할 때 · 6시간마다) ----------
+async function appUpdateTick(manual = false) {
+  const u = await checkAppUpdate();
+  if (!u) { if (manual) toast(isNative() ? `최신 버전이에요 (${APP_VERSION.name})` : '웹 버전은 항상 최신이에요'); return; }
+  const key = 'pinpoint.updSeen.' + u.code;
+  let seen = 0; try { seen = +localStorage.getItem(key) || 0; } catch {}
+  App.appUpdate = u; markVer(u);
+  if (!manual && (S.round || Date.now() - seen < 24 * 3600 * 1000)) return; // 라운드 중·하루 안에 다시는 묻지 않음 (메뉴에 표시)
+  try { localStorage.setItem(key, String(Date.now())) } catch {}
+  App.appUpdate = u;
+  sheet({ title: '🎉 새 버전이 나왔어요', body: `<p>지금 <b>${esc(u.current)}</b> → 새 버전 <b>${esc(u.name)}</b> (${u.mb}MB)</p><p class="sub">[업데이트]를 누르면 다운로드 페이지가 열려요. 받은 파일을 눌러 설치하면 <b>기록·코스·설정은 그대로</b> 남아요.</p>`,
+    actions: [{ label: '나중에' }, { label: '⬇ 업데이트', kind: 'primary', onClick: () => openDownload() }] });
+}
+App.checkUpdate = () => appUpdateTick(true);
+function markVer(u) { const vb = $('#verBtn'); if (vb) vb.innerHTML = `🎉 새 버전 ${esc(u.name)} 받기 <small style="color:var(--danger)">●</small>`; }
+
 // 홀 도착 시각 (골프장 제출용 리포트의 진행 속도 계산에 사용)
 function markHoleArrival(n) {
   const r = S.round; if (!r) return;
@@ -222,6 +240,8 @@ function init() {
   setInterval(() => { safetyTick(); hydrateTick(); }, 30000);
   setTimeout(safetyTick, 4000);
   setInterval(remoteTick, 5 * 60 * 1000);
+  setTimeout(() => appUpdateTick(), 4000); setInterval(() => appUpdateTick(), 6 * 3600 * 1000);
+  const vb = $('#verBtn'); if (vb) { vb.textContent = `🔄 업데이트 확인 · ${isNative() ? '앱 ' + APP_VERSION.name : '웹 (항상 최신)'}`; vb.onclick = () => { $('#drawer').classList.remove('open'); appUpdateTick(true); }; }
   setTimeout(remoteTick, 1500);
   window.addEventListener('online', () => remoteTick());
   subscribe(keys => { if (keys.includes('ui') && activeCourse()?.official && remoteTick._course !== activeCourse().id) { remoteTick._course = activeCourse().id; remoteTick(); } });

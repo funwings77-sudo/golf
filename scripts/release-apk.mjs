@@ -51,6 +51,8 @@ const name = `1.0.${code - 1}`;
 gradle = gradle.replace(/versionCode \d+/, `versionCode ${code}`).replace(/versionName "[^"]*"/, `versionName "${name}"`);
 await writeFile(gradlePath, gradle);
 console.log(`versionCode ${code}, versionName ${name}`);
+// 앱 안에서 새 버전을 알 수 있게 내 버전을 기록
+await writeFile(join(root, 'js', 'core', 'appver.js'), `// 앱(APK) 버전 — scripts/release-apk.mjs가 빌드할 때마다 자동으로 바꿉니다\nexport const APP_VERSION = { name: '${name}', code: ${code} };\n`);
 
 step(3, '웹 자산 → Android 동기화');
 run('npm run android:sync');
@@ -82,7 +84,7 @@ try {
   R.publishRelease({ version: name, code, apkPath: target, notes: notes.length ? notes : ['안정성 개선'] });
   console.log(`릴리스 v${name} 등록 · 노트 ${notes.length}줄`);
 } catch (e) { console.warn('⚠ GitHub 릴리스 등록 실패(최신 다운로드는 계속 제공): ' + e.message); }
-run('git add pinpoint-caddie.apk apk.json releases.json android/app/build.gradle');
+run('git add pinpoint-caddie.apk apk.json releases.json android/app/build.gradle js/core/appver.js');
 const who = out('git config user.name') ? '' : '-c user.name="PinPoint" -c user.email="noreply@users.noreply.github.com" ';
 run(`git ${who}commit -q -m "Android APK ${name} (versionCode ${code})"`);
 run('git push');
