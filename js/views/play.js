@@ -243,7 +243,7 @@ const sgn = (v, d = 2) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFix
 
 function cards() {
   const box = $('#cards'); if (!box) return;
-  const h = activeHole(), me = ballPos(), shot = shotOf();
+  const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start || null; // GPS가 없어도 친 곳에서 이어서 안내
   const pin = h.pin || h.green;
   if (!pin) {
     box.innerHTML = `<div class="m-label">그린 위치가 필요해요</div>
@@ -301,10 +301,11 @@ function mini() {
   const cx = (Math.max(...xs) + Math.min(...xs)) / 2, cy = (Math.max(...ys) + Math.min(...ys)) / 2, S_ = 76 / span;
   const X = p => (60 + (p.x - cx) * S_).toFixed(1), Y = p => (64 - (p.y - cy) * S_).toFixed(1);
   const a = q(sd.from), l = q(sd.landing), pn = q(sd.pin), b = q(sd.ball);
+  const line = (u, v, c) => (u && v ? `<line x1="${X(u)}" y1="${Y(u)}" x2="${X(v)}" y2="${Y(v)}" class="${c}"/>` : '');
+  const dot = (u, r, c) => (u ? `<circle cx="${X(u)}" cy="${Y(u)}" r="${r}" class="${c}"/>` : '');
   box.innerHTML = `<span class="mini-t">코스 지도</span><span class="mini-n">N</span><svg viewBox="0 0 120 120" aria-hidden="true">
-    ${l ? `<line x1="${X(a)}" y1="${Y(a)}" x2="${X(l)}" y2="${Y(l)}" class="mn-rec"/><line x1="${X(l)}" y1="${Y(l)}" x2="${X(pn)}" y2="${Y(pn)}" class="mn-rest"/>` : `<line x1="${X(a)}" y1="${Y(a)}" x2="${X(pn)}" y2="${Y(pn)}" class="mn-rec"/>`}
-    ${b ? `<circle cx="${X(b)}" cy="${Y(b)}" r="4" class="mn-ball"/>` : ''}
-    <circle cx="${X(a)}" cy="${Y(a)}" r="4" class="mn-me"/>${l ? `<circle cx="${X(l)}" cy="${Y(l)}" r="3" class="mn-land"/>` : ''}<circle cx="${X(pn)}" cy="${Y(pn)}" r="4.5" class="mn-pin"/></svg>`;
+    ${l ? line(a, l, 'mn-rec') + line(l, pn, 'mn-rest') : line(a, pn, 'mn-rec')}
+    ${dot(b, 4, 'mn-ball')}${dot(a, 4, 'mn-me')}${dot(l, 3, 'mn-land')}${dot(pn, 4.5, 'mn-pin')}</svg>`;
 }
 
 function arrowOnly() {
@@ -326,7 +327,7 @@ function actions() {
   box.innerHTML = `<button class="a-main" id="hit">🏌️ 쳤어요!</button>
     <div class="a-row"><button id="mark">📍 ${isBall ? '공 다시 찍기' : '공 위치'}</button>${isBall ? '<button id="useMe">🧍 내 위치</button>' : ''}<button id="nextH">다음 홀 ▶</button><a href="#/green">🟢 그린</a><a href="#/score">📝 점수</a></div>`;
   $('#hit').onclick = hit;
-  $('#mark').onclick = markBall;
+  $('#mark').onclick = () => markBall();
   $('#useMe')?.addEventListener('click', () => { P.ballPos = null; persist(); update(true); });
   $('#nextH').onclick = () => App_.stepHole(1);
 }
@@ -342,16 +343,16 @@ function scoreCard(h) {
 }
 
 // 지도에서 공 위치 찍기 (공이 내 위치와 다를 때 · 실내 연습)
-function markBall() {
+function markBall(then) {
   if (P.view !== '2d') { P.view = '2d'; persist(); render(); }
-  toast('🗺️ 지도에서 내 공이 있는 곳을 눌러요', 3500);
-  P.marking = true;
+  toast(then === 'hit' ? '📍 위치를 못 찾았어요 · 지도에서 공을 친 곳을 눌러 주세요' : '🗺️ 지도에서 내 공이 있는 곳을 눌러요', 4000);
+  P.marking = true; P.afterMark = then === 'hit' ? 'hit' : null;
 }
 
 async function hit() {
   const h = activeHole(), start = ballPos();
-  if (!start) return toast('위치를 찾는 중이에요');
   if (!S.round) return toast('라운드를 먼저 시작해요');
+  if (!start) { markBall('hit'); return; } // GPS가 없으면 지도에서 공 위치를 찍은 뒤 이어서 기록
   const club = adv?.club && adv.club !== 'PT' ? S.bag.find(c => c.id === adv.club) : null;
   const pick = club || S.bag.filter(c => c.enabled).sort((a, b) => Math.abs(a.carry - distance(start, h.pin || h.green)) - Math.abs(b.carry - distance(start, h.pin || h.green)))[0];
   const aim = adv?.aimBearing ?? bearing(start, h.pin || h.green), power = adv?.power ?? 100;
@@ -377,13 +378,16 @@ async function found() {
     S.round.lastShot = { hole: shot.hole, dist: total, club: shot.clubName, ts: Date.now() };
     toast(`잘했어요! ${Math.round(total)}m 날아갔어요`, 3000);
     P.ballPos = { lat: f.lat, lon: f.lon }; P.ballHole = shot.hole;
-  } else toast('잘했어요!');
+  } else { // GPS가 없으면 예상 위치에 공을 놓음 (다르면 다시 찍기)
+    P.ballPos = { lat: shot.pred.lat, lon: shot.pred.lon }; P.ballHole = shot.hole;
+    toast('잘했어요! 예상 위치에 공을 놓았어요 · 다르면 [📍 공 다시 찍기]', 3500);
+  }
   delete S.round.liveShot; save('round'); persist(); vibrate([60, 40, 60]); update(true);
 }
 
 // ---------------- 보기 (2D · 3D · 4D · AR) ----------------
 function sceneData() {
-  const h = activeHole(), me = ballPos(), shot = shotOf();
+  const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start || null;
   return {
     me: Sensors.pos || me, ball: shot ? shot.pred : (P.ballPos && P.ballHole === h?.n ? P.ballPos : null), from: me, pin: h ? (h.pin || h.green) : null,
     landing: !shot && adv?.landing && allowed('clubRec') ? adv.landing : null, ellipse: !shot && allowed('clubRec') ? adv?.ellipse : null,
@@ -409,7 +413,9 @@ async function mountView() {
         P.marking = false; h.green = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) }; h.greenBy = 'user'; save('courses');
         vibrate(40); toast('🟢 그린 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); fit2d(); return;
       }
-      P.marking = false; P.ballPos = { lat: e.latlng.lat, lon: e.latlng.lng }; P.ballHole = h.n; persist(); vibrate(40); update(true); fit2d();
+      P.marking = false; P.ballPos = { lat: e.latlng.lat, lon: e.latlng.lng }; P.ballHole = h.n; persist(); vibrate(40);
+      if (P.afterMark === 'hit') { P.afterMark = null; hit(); fit2d(); return; }
+      update(true); fit2d();
     });
     fit2d();
   } else if (P.view === '3d' || P.view === '4d') {
