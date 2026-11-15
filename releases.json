@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.15",
+   "code": 16,
+   "date": "2026-11-15T05:48:01.112Z",
+   "bytes": 4913115,
+   "sha256": "817c51da2b01261847b9b20171287d4877fffb273a76887b9206295bc5714dfa",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.15/pinpoint-caddie-1.0.15.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.15",
+   "notes": [
+    "Gemini: probe models with real JSON request, auto-fallback across working models, drop retired models, thinking off for speed, wind/aim as words"
+   ]
+  },
+  {
    "version": "1.0.14",
    "code": 15,
    "date": "2026-11-15T05:22:33.122Z",
@@ -201,6 +213,6 @@
    ]
   }
  ],
- "latest": "1.0.14",
- "updatedAt": "2026-11-15T05:22:37.431Z"
+ "latest": "1.0.15",
+ "updatedAt": "2026-11-15T05:48:06.956Z"
 }
