@@ -72,6 +72,7 @@ const POLICY = {
   score: ['tournament', 'casual', 'practice'],
   rules: ['tournament', 'casual', 'practice'],
   safety: ['tournament', 'casual', 'practice'],
+  aiCaddie: ['casual', 'practice'],
 };
 export const FEATURE_NAMES = { playsLike: '플레이즈라이크', lieSlope: '라이 경사 측정', greenSlope: '그린 경사 지도', puttLine: '퍼팅 라인·세기 계산', clubRec: '클럽·조준 추천', windAdjust: '바람 보정' };
 export function allowed(feature, mode = S.settings.mode) {

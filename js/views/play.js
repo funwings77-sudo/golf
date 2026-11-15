@@ -16,6 +16,7 @@ import { learnClub } from '../core/score.js';
 import { createMap, destroyMap, drawHole, ll, flagIcon, labelIcon } from '../map.js';
 import { $, $$, esc, toast, sheet, confirmSheet } from '../ui.js';
 import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
+import { openAICaddie } from './aisheet.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
@@ -433,18 +434,19 @@ function actions() {
   const shot = shotOf(), h = activeHole(), isBall = P.ballPos && P.ballHole === h.n;
   if (shot) {
     box.innerHTML = `<button class="a-main" id="found">✅ 공 찾았어요!</button>
-      <div class="a-row"><button id="lostb">📡 공이 안 보여요</button><button id="cancel">↩ 취소</button></div>`;
-    $('#found').onclick = found;
+      <div class="a-row"><button id="aiB" class="ai-b">🤖 AI 캐디</button><button id="lostb">📡 공이 안 보여요</button><button id="cancel">↩ 취소</button></div>`;
+    $('#found').onclick = found; $('#aiB').onclick = () => openAICaddie({ getFacts: aiFacts });
     $('#lostb').onclick = () => { App_.go('lost'); };
     $('#cancel').onclick = () => { delete S.round.liveShot; save('round'); update(true); };
     return;
   }
   box.innerHTML = `<button class="a-main" id="hit">🏌️ 쳤어요!</button>
-    <div class="a-row"><button id="mark">📍 ${isBall ? '공 다시 찍기' : '공 위치'}</button>${isBall ? '<button id="useMe">🧍 내 위치</button>' : ''}<button id="nextH">다음 홀 ▶</button><button id="yd">📋 거리표</button><a href="#/green">🟢 그린</a><a href="#/score">📝 점수</a></div>`;
+    <div class="a-row"><button id="aiB" class="ai-b">🤖 AI 캐디</button><button id="mark">📍 ${isBall ? '공 다시 찍기' : '공 위치'}</button>${isBall ? '<button id="useMe">🧍 내 위치</button>' : ''}<button id="nextH">다음 홀 ▶</button><button id="yd">📋 거리표</button><a href="#/green">🟢 그린</a><a href="#/score">📝 점수</a></div>`;
   $('#hit').onclick = hit;
   $('#mark').onclick = () => markBall();
   $('#useMe')?.addEventListener('click', () => { P.ballPos = null; persist(); update(true); });
   $('#nextH').onclick = quickScore;
+  $('#aiB').onclick = () => openAICaddie({ getFacts: aiFacts });
   $('#yd').onclick = yardBook;
 }
 
@@ -509,6 +511,31 @@ function scoreCard(h) {
   return `<div class="pcard scard"><div class="row" style="justify-content:space-between"><b>📋 스코어카드</b><span class="sub">파 ${h.par}${hd ? ` · 핸디캡 ${hd}` : ''}</span></div>
     <div class="tees">${tees.map(([n, v, c]) => `<span><i style="background:${c}"></i>${n} <b>${v}</b>${s.unit}</span>`).join('')}</div>
     ${h.note ? `<p class="sub" style="margin:6px 0 0">💡 ${esc(h.note)}</p>` : ''}</div>`;
+}
+
+// 🤖 AI에 보낼 사실(FACTS): 엔진이 계산한 숫자만 · 위치 좌표·이름 없음
+function aiFacts() {
+  const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start, pin = h?.pin || h?.green;
+  const r1 = x => (x == null || !isFinite(x) ? null : Math.round(x)), w = App_.weather;
+  const f = { mode: MODES[currentMode()]?.label, hole: { number: h.n, name: holeName(h), par: h.par, handicap: h.hdcpNine ?? h.hdcp ?? h.hdcpCard ?? null, course_note: h.note || null, my_memo: h.memo || null } };
+  if (me && pin) {
+    const D = distance(me, pin), drop = pinDrop(me, pin, h), pl = plays(sceneData(), D, bearing(me, pin), drop?.v || 0);
+    f.distances = { to_pin_m: r1(D), to_green_front_m: h.front ? r1(distance(me, h.front)) : null, to_green_back_m: h.back ? r1(distance(me, h.back)) : null, plays_like_m: pl ? r1(pl.total) : null, pin_elevation_m: drop ? Math.round(drop.v * 10) / 10 : null };
+    const pi = pinInfo(h), po = posInfo(h), e = pi ? Math.hypot(pi.err, po.err) : null;
+    f.accuracy = { pin_basis: pi?.txt || null, my_position: po.txt, error_m: r1(e), range_m: e != null ? [r1(Math.max(0, D - e)), r1(D + e)] : null, level: pi ? ['high', 'mid', 'low'][Math.max(pi.lvl, po.lvl)] : 'low' };
+    const brg = bearing(me, pin);
+    f.hazards = (h.hazards || []).map(z => { const d = distance(me, z), off = normAngle(bearing(me, z) - brg); return d < 10 || Math.abs(off) > 60 || d - z.r > D + 30 ? null : { type: { bunker: '벙커', water: '물(페널티 구역)', ob: 'OB', trees: '숲' }[z.type] || z.type, side: Math.abs(off) < 8 ? '가운데' : off > 0 ? '오른쪽' : '왼쪽', front_m: r1(Math.max(0, d - z.r)), carry_m: r1(d + z.r) }; }).filter(Boolean);
+    if (w && allowed('windAdjust')) { const rel = (w.windFrom - brg) * Math.PI / 180; f.weather = { wind_ms: Math.round(w.windSpeed * 10) / 10, headwind_ms: Math.round(w.windSpeed * Math.cos(rel) * 10) / 10, crosswind_from_right_ms: Math.round(w.windSpeed * Math.sin(rel) * 10) / 10, temp_c: r1(w.temp) }; }
+  }
+  if (w) f.safety = { lightning: ['없음', '조금', '높음', '지금 낙뢰'][w.lightningRisk || 0], heat: w.heat?.label || null };
+  if (adv && allowed('clubRec') && adv.club) {
+    f.engine = { club: adv.club, club_name: adv.clubName, power: adv.power ?? 100, swing: adv.swing || null, aim_deg: Math.round((adv.rel || 0) * 10) / 10, carry_m: r1(adv.carry), remaining_m: adv.landing && pin ? r1(distance(adv.landing, pin)) : null, risk_pct: adv.pBad != null ? Math.round(adv.pBad * 100) : null, expected_strokes: adv.es ? Math.round(adv.es * 10) / 10 : null, kind: adv.kind, alternatives: (adv.alternatives || []).map(a => ({ club: a.club, club_name: a.clubName, expected_strokes: a.es ? Math.round(a.es * 10) / 10 : null })) };
+  }
+  f.my_bag = S.bag.filter(c => c.enabled !== false && c.carry > 0).map(c => ({ id: c.id, name: c.name, carry_m: Math.round(c.carry), learned_from_shots: c.n || 0 }));
+  f.state = shot ? '공을 친 뒤 찾으러 가는 중' : '샷 준비';
+  const sc = S.round?.holes.find(x => x.n === h.n)?.scores[0];
+  if (sc) f.this_hole = { strokes_so_far: sc.strokes || 0 };
+  return f;
 }
 
 // 테스트 코스 만들기: 걸어서(내 위치에서 시작, 1/4 크기) 또는 실제 크기(가상 장소)

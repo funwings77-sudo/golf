@@ -319,3 +319,28 @@ table.score td.sc-d span { border: 1.6px solid #d0452f; box-shadow: 0 0 0 2px #f
 .ar-tools button { border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.55); color: #fff; border-radius: 12px; padding: 8px 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: left; }
 .ar-tools button.on { background: #5ee6a8; color: #072015; border-color: #5ee6a8; }
 .ar-big em { white-space: nowrap; }
+
+/* ===== 🤖 AI 캐디 ===== */
+.imm-act .a-row > .ai-b { background: linear-gradient(135deg, #3b6cff, #8b5cf6); border-color: transparent; }
+.ai-nokey { background: #fff7e0; border: 1px solid #f0d27a; border-radius: 12px; padding: 10px 12px; font-size: 13.5px; margin: 10px 0; color: #5a4300; }
+.ai-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.ai-chips button { border: 1px solid var(--line, #ddd); background: var(--paper, #fff); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--ink, #222); }
+.ai-in { display: flex; gap: 6px; align-items: center; }
+.ai-in input { flex: 1; min-width: 0; border: 1.5px solid var(--line, #ccc); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 15px; }
+.ai-in button, .ai-cam { flex: none; min-width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line, #ccc); background: var(--paper, #fff); font-size: 18px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-in .go { background: #3b6cff; color: #fff; border-color: #3b6cff; font-size: 15px; font-weight: 800; padding: 0 14px; }
+.ai-photo { margin-top: 6px; font-size: 13px; } .ai-photo button { border: 0; background: none; color: #d0452f; font-weight: 800; cursor: pointer; }
+.ai-res { margin-top: 12px; border-radius: 14px; padding: 12px 14px; border: 1.5px solid var(--line, #ddd); background: var(--paper, #fff); }
+.ai-res.ok { border-color: #8b5cf6; background: #f6f2ff; } .ai-res.warn { border-color: #f0b74a; background: #fff8ea; } .ai-res.eng { background: #f4f7f5; }
+.ai-res.wait { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #555; }
+.ai-h { font-weight: 900; font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; } .ai-h span { font-size: 11.5px; font-weight: 700; color: #6a5acd; }
+.ai-res.warn .ai-h span { color: #a06800; }
+.ai-a { font-size: 16px; line-height: 1.55; margin: 6px 0; color: var(--ink, #222); }
+.ai-lie { font-size: 13.5px; background: #fff; border-radius: 10px; padding: 6px 10px; margin: 6px 0; }
+.ai-c { margin: 4px 0; padding-left: 4px; list-style: none; font-size: 13.5px; color: #8a3b00; }
+.ai-eng { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; } .ai-eng span { background: #fff; border: 1px solid #ddd; border-radius: 999px; padding: 3px 10px; font-size: 12.5px; }
+.ai-rule { background: #fff; border-radius: 10px; padding: 8px 10px; margin-top: 6px; font-size: 13px; } .ai-rule ul { margin: 4px 0 0; padding-left: 18px; }
+.ai-foot { margin-top: 10px; font-size: 11.5px; }
+.spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #cfc6ff; border-top-color: #6a5acd; animation: spin 0.8s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-set input { width: 100%; border: 1.5px solid var(--line, #ccc); border-radius: 10px; padding: 9px 10px; font: inherit; }

@@ -222,3 +222,28 @@ test('AR 레인지파인더: 화면점 역투영 · 지면 거리', () => {
   // 오르막(경사)이면 같은 각도에서 더 가까움
   assert.ok(groundHit({ x: 0, y: Math.cos(dep), z: -Math.sin(dep) }, { eye: 1.5, slope: 0.02 }).h < g.h);
 });
+
+import { verifyCaddie, badNumbers, factNumbers, engineAnswer } from '../js/core/aicaddie.js';
+import { pickModel } from '../js/core/gemini.js';
+test('AI 캐디 검증: 근거 없는 숫자·클럽·힘·조준을 걸러 냄', () => {
+  const facts = { distances: { to_pin_m: 152, to_green_front_m: 137, plays_like_m: 156 }, engine: { club: '5i', club_name: '5번 아이언', power: 85, aim_deg: -2.3, carry_m: 146, remaining_m: 8, alternatives: [{ club: '6i' }] }, my_bag: [{ id: '5i', carry_m: 150 }, { id: '6i', carry_m: 141 }, { id: '7i', carry_m: 131 }], hazards: [{ type: '물', front_m: 120, carry_m: 135 }] };
+  const ok = { answer: '5번 아이언으로 힘 85% 정도로 치세요. 물은 135m만 넘기면 돼요. 깃발까지 152m예요.', club: '5i', power: 85, aim_deg: -2.3, cautions: ['오른쪽 물 앞 120m'], confidence: 'high' };
+  assert.deepEqual(verifyCaddie(ok, facts), []);
+  assert.ok(verifyCaddie({ ...ok, answer: '깃발까지 170m예요' }, facts).some(p => p.includes('170')), '없는 거리');
+  const f2 = { ...facts, my_bag: [...facts.my_bag, { id: 'D', carry_m: 200 }] };
+  assert.ok(verifyCaddie({ ...ok, answer: '깃발까지 199m예요' }, f2).length, '다른 값(드라이버 200m)과 비슷해도 깃발 거리와 다르면 거절');
+  assert.ok(verifyCaddie({ ...ok, answer: '깃발까지 153m예요' }, facts).length === 0, '±1m는 허용');
+  assert.ok(verifyCaddie({ ...ok, answer: '물은 140m 넘기면 돼요' }, facts).length, '해저드 넘기기 거리 불일치');
+  assert.ok(verifyCaddie({ ...ok, club: 'D' }, facts).length, '가방에 없는 클럽');
+  assert.ok(verifyCaddie({ ...ok, club: '7i' }, facts).length, '엔진·대안에 없는 클럽');
+  assert.deepEqual(verifyCaddie({ ...ok, club: '6i', power: null }, facts), [], '대안 클럽은 허용');
+  assert.ok(verifyCaddie({ ...ok, power: 70 }, facts).length, '다른 힘');
+  assert.ok(verifyCaddie({ ...ok, aim_deg: 5 }, facts).length, '다른 조준');
+  assert.deepEqual(badNumbers('2번 홀에서 3타째, 152m', factNumbers(facts)), [], '작은 수와 맞는 거리');
+  assert.ok(engineAnswer(facts).includes('5번 아이언') && engineAnswer(facts).includes('146m'));
+});
+test('Gemini 모델 자동 선택: 정식 flash 최신판', () => {
+  const g = n => ({ name: 'models/' + n, supportedGenerationMethods: ['generateContent'] });
+  assert.equal(pickModel([g('gemini-1.5-flash'), g('gemini-2.5-flash'), g('gemini-2.5-pro'), g('gemini-2.5-flash-lite'), g('gemini-3.0-flash-preview'), g('gemini-2.5-flash-preview-tts'), { name: 'models/text-embedding-004', supportedGenerationMethods: ['embedContent'] }]), 'gemini-2.5-flash');
+  assert.equal(pickModel([]), null);
+});

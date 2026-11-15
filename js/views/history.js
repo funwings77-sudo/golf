@@ -3,6 +3,8 @@ import { S, save, MODES } from '../core/state.js';
 import { totals } from '../core/score.js';
 import { buildRoundReport } from '../core/report.js';
 import { $, $$, esc, confirmSheet, DU, sheet, toast } from '../ui.js';
+import { reviewRounds } from '../core/aicaddie.js';
+import { hasKey } from '../core/gemini.js';
 
 // 홀별 색 막대 (이글 보라 · 버디 파랑 · 파 초록 · 보기 노랑 · 더블+ 주황)
 function holeBar(r) {
@@ -68,7 +70,7 @@ function drills(keys) {
 }
 
 // 거리별 핀 근접도: 그린을 노린 샷이 깃발에서 얼마나 멀리 멈췄나 (공 찾은 위치 기준)
-function proxCard(rounds) {
+function proxData(rounds) {
   const B = [[30, 75], [75, 125], [125, 175], [175, 260]], acc = B.map(() => ({ n: 0, sum: 0, on: 0 }));
   const R = 6371000, rad = Math.PI / 180;
   const dist = (a, b) => 2 * R * Math.asin(Math.sqrt(Math.sin((b.lat - a.lat) * rad / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin((b.lon - a.lon) * rad / 2) ** 2));
@@ -79,10 +81,42 @@ function proxCard(rounds) {
     const i = B.findIndex(([lo, hi]) => d0 >= lo && d0 < hi); if (i < 0) continue;
     acc[i].n++; acc[i].sum += d1; if (d1 <= 12) acc[i].on++;
   }
+  return { B, acc };
+}
+function proxCard(rounds) {
+  const { B, acc } = proxData(rounds);
   if (acc.reduce((x, y) => x + y.n, 0) < 3) return `<div class="card"><b>📍 거리별 핀 근접도</b><p class="sub">그린을 노린 샷 뒤 [✅ 공 찾았어요]를 GPS로 누르면, 거리마다 깃발에서 평균 몇 m에 멈추는지 보여 드려요. (어느 거리 연습이 필요한지 바로 알 수 있어요)</p></div>`;
   const worst = acc.map((x, i) => [x.n >= 2 ? x.sum / x.n / ((B[i][0] + B[i][1]) / 2) : -1, i]).sort((x, y) => y[0] - x[0])[0][1];
   return `<div class="card"><b>📍 거리별 핀 근접도</b><div class="tblwrap"><table class="score"><tr><th>남은 거리</th><th>샷</th><th>깃발까지 평균</th><th>그린 적중</th></tr>${acc.map((x, i) => `<tr ${i === worst && x.n >= 2 ? 'style="background:#fff3e6"' : ''}><td>${B[i][0]}~${B[i][1]}m</td><td>${x.n}</td><td>${x.n ? (x.sum / x.n).toFixed(1) + 'm' : '—'}</td><td>${x.n ? Math.round(x.on / x.n * 100) + '%' : '—'}</td></tr>`).join('')}</table></div>
     ${acc[worst].n >= 2 ? `<p class="sub" style="margin:6px 0 0">👉 <b>${B[worst][0]}~${B[worst][1]}m</b> 거리가 상대적으로 가장 멀어요. 이 거리 클럽을 집중 연습해 보세요.</p>` : ''}</div>`;
+}
+
+// 🤖 AI 라운드 분석: 통계(사실)를 보내고, 답의 숫자가 사실과 맞는지 검증
+async function aiReview(rounds, me) {
+  const out = $('#aiRevOut'); if (!out) return;
+  if (!hasKey()) { out.innerHTML = '<div class="card ai-nokey">🔑 ☰ → 설정 → AI 캐디에서 Gemini API 키를 넣으면 분석해 드려요. 아래 🎯 연습 우선순위는 키 없이도 볼 수 있어요.</div>'; return; }
+  const a = areaStats(rounds), { B, acc } = proxData(rounds), holes = me.reduce((x, t) => x + t.played, 0);
+  const NAME = { fw: '티샷 페어웨이 안착률', gir: '그린 적중률(GIR)', scr: '그린 놓친 뒤 파 세이브율', putt: '홀당 퍼트' };
+  const facts = {
+    rounds: me.length, holes_played: holes,
+    avg_to_par_per_round: me.length ? Math.round(me.reduce((x, t) => x + t.toPar, 0) / me.length * 10) / 10 : null,
+    putts_per_18: holes ? Math.round(me.reduce((x, t) => x + t.putts, 0) / holes * 18 * 10) / 10 : null,
+    three_putt_pct: holes ? Math.round(me.reduce((x, t) => x + t.threePutts, 0) / holes * 100) : null,
+    penalties_per_round: me.length ? Math.round(me.reduce((x, t) => x + (t.penalties || 0), 0) / me.length * 10) / 10 : null,
+    areas: Object.fromEntries(Object.entries(a).map(([k, v]) => [NAME[k], { value: v.txt, handicap_level: Math.round(v.hcp), samples: v.n }])),
+    approach_proximity: acc.map((x, i) => ({ range_m: `${B[i][0]}-${B[i][1]}`, shots: x.n, avg_to_pin_m: x.n ? Math.round(x.sum / x.n * 10) / 10 : null, green_hit_pct: x.n ? Math.round(x.on / x.n * 100) : null })),
+    note: '핸디캡 수준은 일반 아마추어 평균과 비교한 대략적 환산 (낮을수록 잘함)',
+  };
+  out.innerHTML = '<div class="card ai-res wait"><span class="spin"></span> AI가 라운드를 분석하는 중…</div>';
+  try {
+    const r = await reviewRounds(facts);
+    out.innerHTML = `<div class="card ai-res ${r.ok ? 'ok' : 'warn'}"><div class="ai-h">🤖 AI 라운드 분석 <span>${r.ok ? '✓ 숫자 검증됨' : '⚠ 확인 안 된 숫자: ' + esc(r.bad.join(', '))}</span></div>
+      <p class="ai-a">${esc(r.summary)}</p>
+      ${r.strengths?.length ? `<b>👍 잘한 점</b><ul>${r.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+      ${r.weaknesses?.length ? `<b>🔧 고칠 점</b><ul>${r.weaknesses.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+      ${r.drills?.length ? `<div class="drills"><b>다음 라운드 전 연습 2개</b>${r.drills.map(d => `<div class="dr"><span>🎯 ${esc(d.title)}</span><small>${esc(d.how)} · 목표: ${esc(d.goal)}</small></div>`).join('')}</div>` : ''}
+      <p class="sub" style="margin:8px 0 0">모델 ${esc(r.model)} · 통계 숫자는 PinPoint가 계산한 값이에요</p></div>`;
+  } catch (e) { out.innerHTML = `<div class="card ai-res warn">⚠ ${esc(e.message)}</div>`; }
 }
 
 // CSV 내보내기 (엑셀에서 바로 열림 · 한글 깨짐 방지 BOM)
@@ -124,12 +158,14 @@ export default {
           <div class="stat"><div class="v">${holes ? (me.reduce((a, t) => a + t.threePutts, 0) / holes * 100).toFixed(0) + '%' : '—'}</div><div class="l">3퍼트 비율</div></div></div>
         <div class="grid2" style="margin-top:8px"><div class="stat"><div class="v">${me.length ? avg('lost').toFixed(1) : '—'}</div><div class="l">라운드당 분실구</div></div><div class="stat"><div class="v">${shots.length}</div><div class="l">기록된 샷</div></div></div>
         <p class="sub">연습 모드 라운드는 통계에서 제외됩니다.</p>
+        ${counted.length ? '<button class="btn primary block" id="aiRev" style="margin:10px 0">🤖 AI 라운드 분석 · 연습 처방</button><div id="aiRevOut"></div>' : ''}
         ${practiceCard(counted)}${proxCard(counted)}${courseCard(counted)}
         ${rs.length ? '<button class="btn block" id="csv" style="margin-top:10px">⬇ 내 기록 CSV로 내보내기 (엑셀)</button>' : ''}
         ${Object.keys(byClub).length ? `<h3>클럽별 실제 캐리</h3><div class="tblwrap"><table class="score"><tr><th>클럽</th><th>샷</th><th>평균</th><th>최소~최대</th></tr>${Object.entries(byClub).map(([k, v]) => `<tr><td>${esc(S.bag.find(c => c.id === k)?.name || k)}</td><td>${v.length}</td><td>${DU(v.reduce((a, b) => a + b, 0) / v.length)}</td><td>${DU(Math.min(...v))}~${DU(Math.max(...v))}</td></tr>`).join('')}</table></div>` : ''}
         <h3>라운드</h3>
         ${rs.length ? rs.map((r, i) => { const t = (r.totals || totals(r))[0]; return `<div class="card tight"><div class="row"><div class="grow"><b>${esc(r.courseName)}</b> <span class="pill ${r.mode === 'tournament' ? 'danger' : r.mode === 'practice' ? 'warn' : ''}">${MODES[r.mode]?.label}</span><br><span class="sub">${new Date(r.date).toLocaleDateString()} · ${t.played}홀 · ${t.strokes}타 (${t.toPar >= 0 ? '+' : ''}${t.toPar}) · 퍼트 ${t.putts} · 분실 ${t.lost}</span>${holeBar(r)}</div><button class="btn small" data-rep="${i}" title="골프장 제출용 리포트">📤 리포트</button><button class="btn small" data-del="${i}">삭제</button></div></div>`; }).join('') : '<div class="empty">완료된 라운드가 없습니다</div>'}`;
       $('#csv')?.addEventListener('click', () => exportCSV(rs));
+      $('#aiRev')?.addEventListener('click', () => aiReview(counted, me));
       $$('[data-rep]').forEach(b => b.onclick = () => shareReport(rs[+b.dataset.rep]));
       $$('[data-del]').forEach(b => b.onclick = async () => { if (!(await confirmSheet('기록 삭제', '이 라운드 기록을 삭제할까요?', '삭제', 'danger'))) return; S.rounds.splice(+b.dataset.del, 1); save('rounds'); render(); });
     };
