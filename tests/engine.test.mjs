@@ -247,3 +247,10 @@ test('Gemini 모델 자동 선택: 정식 flash 최신판', () => {
   assert.equal(pickModel([g('gemini-1.5-flash'), g('gemini-2.5-flash'), g('gemini-2.5-pro'), g('gemini-2.5-flash-lite'), g('gemini-3.0-flash-preview'), g('gemini-2.5-flash-preview-tts'), { name: 'models/text-embedding-004', supportedGenerationMethods: ['embedContent'] }]), 'gemini-2.5-flash');
   assert.equal(pickModel([]), null);
 });
+
+import { matches } from '../js/core/search.js';
+test('골프장 검색: 띄어쓰기·CC·로마자', () => {
+  for (const q of ['남서울', '남 서울', '남서울CC', 'Namseoul', 'nam seoul', 'NAMSEOUL CC', 'The Namseoul']) assert.ok(matches(q, '남서울'), q);
+  assert.ok(matches('용인', '레이크사이드', '용인시'));
+  assert.ok(!matches('제주', '남서울', '성남시'));
+});

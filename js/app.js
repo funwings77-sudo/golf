@@ -225,9 +225,24 @@ function setupSwing() {
   });
 }
 
+// 📍 위치 권한: 처음 한 번은 왜 필요한지 먼저 설명하고 묻기
+async function askLocation() {
+  let state = 'prompt';
+  try { state = (await navigator.permissions.query({ name: 'geolocation' })).state; } catch {}
+  let asked = false; try { asked = !!localStorage.getItem('pinpoint.locWhy'); } catch {}
+  if (state !== 'prompt' || asked || S.settings.simGPS) { startGPS(); return; }
+  sheet({ title: '📍 위치를 쓸게요', body: `<div class="why">
+      <div><i>⛳</i><span><b>깃발까지 거리</b>를 재요</span></div>
+      <div><i>🗺️</i><span>지금 있는 <b>골프장을 자동으로</b> 찾아요</span></div>
+      <div><i>🔍</i><span>친 공이 <b>어디쯤 떨어졌는지</b> 알려 줘요</span></div>
+      <div><i>🌤️</i><span>그곳 <b>날씨·바람</b>을 알려 줘요 (설정에서 끌 수 있어요)</span></div>
+    </div><p class="sub">위치는 이 휴대폰 안에서만 써요. 앱을 쓰는 동안에만 필요해요. 다음 화면에서 <b>“앱 사용 중에만 허용”</b>을 눌러 주세요.</p>`,
+    actions: [{ label: '나중에', onClick: () => { try { localStorage.setItem('pinpoint.locWhy', '1'); } catch {} } }, { label: '확인', kind: 'primary', onClick: () => { try { localStorage.setItem('pinpoint.locWhy', '1'); } catch {} startGPS(); } }] });
+}
+
 function init() {
   applySettings();
-  startGPS();
+  askLocation();
   startOrientation();
   setupSwing();
   onPos(autoHole);

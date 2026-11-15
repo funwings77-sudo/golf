@@ -23,6 +23,14 @@ export async function startAR(box, getScene, { onLock = null } = {}) {
   let diagOn = false, lockPt = null, ringsOn = true, ht = null, readT = 0, aim = null;
   try { await requestMotionPermission(); } catch {}
   startOrientation();
+  let camState = 'prompt';
+  try { camState = (await navigator.permissions.query({ name: 'camera' })).state; } catch {}
+  if (camState === 'prompt') {
+    msg.innerHTML = `📷 <b>카메라를 쓸게요</b><br><small>앞을 비추면 그 자리까지 거리·방향을 보여 줘요. 사진은 저장하지 않고 이 휴대폰 밖으로 보내지 않아요.</small><br><button class="btn small" id="camOk" style="margin-top:8px">확인</button>`;
+    msg.classList.add('show');
+    await new Promise(r => { box.querySelector('#camOk').onclick = r; });
+    msg.classList.remove('show');
+  }
   try { stopCam = await openCamera(video); }
   catch (e) { msg.innerHTML = `📷 카메라를 켤 수 없어요<br><small>${e.name === 'NotAllowedError' ? '카메라 권한을 허용해 주세요' : e.message}</small>`; msg.classList.add('show'); }
 

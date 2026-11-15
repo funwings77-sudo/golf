@@ -17,6 +17,7 @@ import { createMap, destroyMap, drawHole, ll, flagIcon, labelIcon } from '../map
 import { $, $$, esc, toast, sheet, confirmSheet } from '../ui.js';
 import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
 import { openAICaddie } from './aisheet.js';
+import { matches } from '../core/search.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
@@ -47,14 +48,27 @@ function render() {
 }
 
 // ---------------- ① 골프장 고르기 ----------------
+// 📍 지금 있는 골프장 자동 제안: 내 위치에서 2.5km 안의 받은 코스 · 전국 골프장
+function nearSuggest(clubs) {
+  const box = $('#near'), me = Sensors.pos; if (!box || !me || P.q) return;
+  const ctr = c => c.center || c.holes?.find(h => h.green)?.green || c.holes?.find(h => h.tee)?.tee;
+  const mine = S.courses.filter(c => !c.demo && ctr(c)).map(c => ({ c, d: distance(me, ctr(c)) })).sort((a, b) => a.d - b.d)[0];
+  const club = clubs.filter(c => c.lat && c.loc !== 'sigungu').map(c => ({ c, d: distance(me, c) })).sort((a, b) => a.d - b.d)[0];
+  const pick = mine && mine.d < 2500 ? { name: mine.c.name, d: mine.d, go: () => choose(mine.c.id) } : club && club.d < 2500 ? { name: club.c.name, d: club.d, go: () => clubInfo(club.c) } : null;
+  if (!pick) { box.innerHTML = ''; return; }
+  box.innerHTML = `<button class="near-card" id="nearGo"><span class="pi">📍</span><span class="pt"><small>지금 여기 계신가요?</small><b>${esc(pick.name)}</b><small>내 위치에서 약 ${pick.d < 1000 ? Math.round(pick.d) + 'm' : (pick.d / 1000).toFixed(1) + 'km'}</small></span><span class="pa">›</span></button>`;
+  $('#nearGo').onclick = pick.go;
+}
+
 function stepClub() {
   const q = (P.q || '').trim();
-  const mine = S.courses.filter(c => !q || c.name.includes(q));
+  const mine = S.courses.filter(c => !q || matches(q, c.name, c.official?.region));
   el_.innerHTML = `<div class="pwrap">
     <div class="pstep"><span class="on">1 골프장</span><span>2 코스</span><span>3 치기</span></div>
     <h1 class="pq">⛳ 어느 골프장에서 쳐요?</h1>
-    <input type="search" id="pq" class="pin-search" placeholder="🔍 골프장 이름으로 찾기" value="${esc(P.q || '')}">
+    <input type="search" id="pq" class="pin-search" placeholder="🔍 골프장 이름 (한글·영문 · 예: 남서울, namseoul)" value="${esc(P.q || '')}">
     ${mine.length ? `<div class="picks">${mine.map(c => `<button class="pick" data-c="${esc(c.id)}"><span class="pi">${c.official ? '🏌️' : c.demo ? '🧪' : '🗺️'}</span><span class="pt"><b>${esc(c.name)}</b><small>${c.holes.length}홀${c.official?.region ? ' · ' + esc(c.official.region) : ''}${c.todayPins ? ' · 오늘 핀 ✓' : ''}</small></span><span class="pa">›</span></button>`).join('')}</div>` : '<p class="sub center">아직 받은 골프장이 없어요. 아래에서 골라 받아요.</p>'}
+    <div id="near"></div>
     <h2 class="ph2">📡 골프장 받기</h2><div class="picks" id="cat"><p class="sub center">불러오는 중…</p></div>
     <h2 class="ph2">🇰🇷 전국 골프장 찾기</h2><div class="picks" id="dir"><p class="sub center">불러오는 중…</p></div>
     <button class="pbtn ghost" id="demo">🧪 테스트 코스 만들기 (9홀 가상 골프장)</button>
@@ -64,7 +78,7 @@ function stepClub() {
   $('#demo').onclick = demoPick;
   getCatalog().then(cat => {
     const box = $('#cat'); if (!box) return;
-    const list = cat.filter(e => !findInstalled(e.id) && (!q || e.name.includes(q)));
+    const list = cat.filter(e => !findInstalled(e.id) && (!q || matches(q, e.name, e.region)));
     box.innerHTML = list.length ? list.map(e => `<button class="pick" data-get="${esc(e.id)}"><span class="pi">📥</span><span class="pt"><b>${esc(e.name)}</b><small>${e.holes}홀${e.region ? ' · ' + esc(e.region) : ''} · 눌러서 받기</small></span><span class="pa">＋</span></button>`).join('') : `<p class="sub center">${cat.length ? '받을 수 있는 골프장을 모두 받았어요' : '아직 골프장이 올린 코스가 없어요. 연습용 가상 골프장으로 해 볼 수 있어요'}</p>`;
     $$('[data-get]', box).forEach(b => b.onclick = async () => {
       b.disabled = true; b.querySelector('small').textContent = '받는 중…';
@@ -77,7 +91,8 @@ function stepClub() {
     const box = $('#dir'); if (!box) return;
     if (!clubs.length) { box.innerHTML = '<p class="sub center">목록을 불러오지 못했어요</p>'; return; }
     const me = Sensors.pos;
-    let list = clubs.filter(c => !q || c.name.includes(q) || c.sigungu.includes(q) || c.sido.includes(q));
+    let list = clubs.filter(c => !q || matches(q, c.name, c.sigungu, c.sido, (c.courses || []).map(x => x.name || x).join(' ')));
+    nearSuggest(clubs);
     if (me) list = list.map(c => ({ ...c, d: c.lat ? distance(me, c) : Infinity })).sort((a, b) => a.d - b.d);
     else list = list.sort((a, b) => (b.official ? 1 : 0) - (a.official ? 1 : 0) || a.name.localeCompare(b.name, 'ko'));
     const shown = list.slice(0, q ? 30 : 6);
@@ -335,7 +350,9 @@ function gpsChip() {
   const g = $('#gps'); if (!g) return;
   const p = Sensors.pos, acc = p?.acc;
   g.className = 'imm-gps ' + (!p ? 'off' : acc <= 6 ? 'ok' : acc <= 15 ? 'mid' : 'bad');
-  g.innerHTML = `<i></i>GPS${p ? ` <small>±${Math.round(acc || 0)}m</small>` : ''}`;
+  const word = !p ? '찾는 중' : acc <= 6 ? '좋음' : acc <= 15 ? '보통' : '약함';
+  g.innerHTML = S.settings.detail ? `<i></i>GPS${p ? ` <small>±${Math.round(acc || 0)}m</small>` : ''}` : `<i></i>GPS ${word}`;
+  g.title = p ? `GPS 정확도 ${word} (±${Math.round(acc || 0)}m)` : 'GPS 신호를 찾는 중';
 }
 
 // 핀 고저차: 두 점이 측량 그린맵 안이면 격자 높이(cm 정밀도), 아니면 공개 고도 자료(대략)
@@ -503,7 +520,7 @@ function quickScore() {
   let strokes = sc.strokes || par, putts = sc.putts || (strokes > 1 ? 2 : 0), fw = sc.fw || null;
   const body = () => `<div class="qs">
       <div class="qs-l">몇 타 쳤어요? ${sc.strokes ? `<span>(기록된 샷 ${sc.strokes}타)</span>` : ''}</div>
-      <div class="qs-g">${[-2, -1, 0, 1, 2, 3].map(d => `<button data-s="${par + d}" class="${strokes === par + d ? 'on' : ''} t${d}"><b>${par + d}</b><small>${TERMS[d]}</small></button>`).join('')}</div>
+      <div class="qs-g">${[-2, -1, 0, 1, 2, 3].map(d => `<button data-s="${par + d}" class="${strokes === par + d ? 'on' : ''} t${d}"><b class="sym ${d <= -2 ? 'eg' : d === -1 ? 'bd' : d === 1 ? 'bg' : d >= 2 ? 'db' : ''}">${par + d}</b><small>${TERMS[d]}</small></button>`).join('')}</div>
       <div class="qs-step"><button data-sd="-1">−</button><b>${strokes}타 · ${strokes - par > 0 ? '+' : ''}${strokes - par === 0 ? 'E' : strokes - par}</b><button data-sd="1">+</button></div>
       <div class="qs-l">퍼트는 몇 번?</div>
       <div class="qs-g p">${[0, 1, 2, 3, 4].map(n => `<button data-p="${n}" class="${putts === n ? 'on' : ''}"><b>${n}</b></button>`).join('')}</div>
