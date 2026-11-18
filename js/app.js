@@ -5,7 +5,7 @@ import { fetchWeather } from './core/weather.js';
 import { detectHoleByTee } from './core/course.js';
 import { syncPins, getNotices, getCatalog, pendingUpdates } from './core/remote.js';
 import { $, $$, sheet, toast, esc } from './ui.js';
-import { checkAppUpdate, openDownload, isNative } from './core/appupdate.js';
+import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
 
 const ROUTES = {
@@ -168,7 +168,7 @@ App.remoteTick = remoteTick;
 // ---------- 설치형 앱 새 버전 알림 (시작할 때 · 6시간마다) ----------
 async function appUpdateTick(manual = false) {
   const u = await checkAppUpdate();
-  if (!u) { if (manual) toast(isNative() ? `최신 버전이에요 (${APP_VERSION.name})` : '웹 버전은 항상 최신이에요'); return; }
+  if (!u) { if (manual) toast(isPlayBuild() ? `Play 스토어가 자동으로 업데이트해요 (${APP_VERSION.name})` : isNative() ? `최신 버전이에요 (${APP_VERSION.name})` : '웹 버전은 항상 최신이에요'); return; }
   const key = 'pinpoint.updSeen.' + u.code;
   let seen = 0; try { seen = +localStorage.getItem(key) || 0; } catch {}
   App.appUpdate = u; markVer(u);

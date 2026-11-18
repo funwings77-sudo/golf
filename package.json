@@ -10,7 +10,8 @@
     "build:www": "node scripts/build-www.mjs",
     "android:sync": "npm run build:www && npx cap sync android",
     "android:apk": "npm run android:sync && cd android && .\\gradlew.bat assembleDebug",
-    "release:apk": "node scripts/release-apk.mjs"
+    "release:apk": "node scripts/release-apk.mjs",
+    "release:aab": "node scripts/release-aab.mjs"
   },
   "devDependencies": {
     "@capacitor/android": "^6.2.3",

@@ -5,8 +5,11 @@ import { APP_VERSION } from './appver.js';
 export const SITE = 'https://funwings77-sudo.github.io/golf/';
 export const isNative = () => !!globalThis.window?.Capacitor?.isNativePlatform?.();
 
+// Google Play 판(dist: 'play')은 Play 스토어가 업데이트함 → APK 직접 받기 안내를 하지 않음 (Play 정책)
+export const isPlayBuild = () => APP_VERSION.dist === 'play';
+
 export async function checkAppUpdate() {
-  if (!isNative() || !navigator.onLine) return null;
+  if (!isNative() || isPlayBuild() || !navigator.onLine) return null;
   try {
     const r = await fetch(SITE + 'apk.json?t=' + Date.now(), { cache: 'no-store' });
     const j = await r.json();

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f5f3f">
+<meta name="description" content="PinPoint AI 캐디 앱의 개인정보처리방침">
+<title>PinPoint 개인정보처리방침</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<style>
+  :root { --bg: #f3f2ec; --paper: #ffffff; --ink: #18211d; --sub: #5b665f; --line: #e0ded3; --green: #1f5f3f; color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0f1613; --paper: #18221d; --ink: #e9f0ec; --sub: #9aaaa1; --line: #2a3832; --green: #7cc79c; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1613; --paper: #18221d; --ink: #e9f0ec; --sub: #9aaaa1; --line: #2a3832; --green: #7cc79c; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.7 "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 24px 16px 56px; }
+  h1 { font-size: 24px; margin: 8px 0 4px; }
+  h2 { font-size: 18px; margin: 28px 0 8px; color: var(--green); }
+  .sub { color: var(--sub); font-size: 14px; }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 4px 16px; margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 6px; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: 0; }
+  th { color: var(--sub); font-weight: 600; }
+  ul { padding-left: 20px; }
+  a { color: var(--green); }
+  @media (max-width: 480px) { table, tbody, tr, td { display: block; } thead { display: none; } td { border: 0; padding: 2px 0; } tr { border-bottom: 1px solid var(--line); padding: 10px 0; } td:first-child { font-weight: 700; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>개인정보처리방침</h1>
+  <p class="sub">PinPoint AI 캐디 (Android 앱 · 웹앱) · 시행일 2026년 11월 18일</p>
+
+  <h2>요약</h2>
+  <ul>
+    <li><b>회원가입·로그인이 없습니다.</b> 이름, 전화번호, 이메일을 받지 않습니다.</li>
+    <li>라운드 기록·코스·설정은 <b>내 휴대폰 안에만</b> 저장되고, 개발자 서버로 보내지 않습니다.</li>
+    <li>광고, 분석(트래킹) 도구, 개인정보 판매가 없습니다.</li>
+  </ul>
+
+  <h2>휴대폰 권한과 쓰는 곳</h2>
+  <div class="card"><table>
+    <thead><tr><th>권한</th><th>쓰는 곳</th></tr></thead>
+    <tbody>
+      <tr><td>위치 (앱 사용 중에만)</td><td>깃발·그린·해저드까지 거리 계산, 가까운 골프장 찾기, 친 공 위치 안내, 그 지점 날씨·바람. 위치 기록은 휴대폰 안에만 저장됩니다.</td></tr>
+      <tr><td>카메라</td><td>AR 거리 측정·그린 리딩, 깃대 거리 재기, 공 찾기. 영상은 휴대폰 안에서만 처리하며 저장·전송하지 않습니다(아래 AI 캐디 사진 기능을 직접 쓰는 경우 제외).</td></tr>
+      <tr><td>동작·방향 센서</td><td>경사 측정, 나침반 방향, 걸음 수, 스윙 감지.</td></tr>
+      <tr><td>진동 · 화면 켜두기</td><td>알림 진동, 라운드 중 화면이 꺼지지 않게 유지.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>외부로 나가는 정보</h2>
+  <p>앱은 아래 서비스에서 데이터를 받아 옵니다. 요청할 때 기기의 IP 주소와, 표에 적은 정보가 해당 서비스에 전달됩니다.</p>
+  <div class="card"><table>
+    <thead><tr><th>서비스</th><th>보내는 정보 · 목적</th></tr></thead>
+    <tbody>
+      <tr><td>Open-Meteo (날씨)</td><td>현재 위치의 대략적인 좌표 → 기온·바람·낙뢰 위험 정보</td></tr>
+      <tr><td>지도 타일 (Esri ArcGIS, AWS 지형 타일)</td><td>보고 있는 지도 영역 → 위성 사진·고도 타일</td></tr>
+      <tr><td>GitHub Pages (이 사이트)</td><td>골프장 코스 데이터·공지·오늘의 핀·새 버전 정보를 받음 (보내는 개인정보 없음)</td></tr>
+      <tr><td>Google Gemini API (선택)</td><td>설정에서 <b>본인의 Gemini API 키를 직접 넣고</b> AI 캐디를 쓸 때만, 질문 내용과 직접 첨부한 사진·음성, 코스 정보(좌표 제외)를 Google에 보냅니다. 키는 휴대폰에만 저장됩니다. Google의 처리는 <a href="https://policies.google.com/privacy" rel="noopener">Google 개인정보처리방침</a>을 따릅니다.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">골프장 제출용 라운드 리포트는 사용자가 직접 내보낼 때만 파일로 만들어지고, 사용자가 고른 곳으로만 전달됩니다. 내 스코어, 홀 도착 시각, 분실구 지점(약 1m 단위)만 들어 있으며 이름·동반자·이동 경로·기기 정보는 넣지 않습니다.</p>
+
+  <h2>보관과 삭제</h2>
+  <ul>
+    <li>모든 기록은 휴대폰의 앱 저장공간에 있습니다. 앱을 삭제하거나 휴대폰 설정 → 앱 → PinPoint 캐디 → 저장공간 → <b>데이터 삭제</b>를 누르면 모두 지워집니다.</li>
+    <li>개발자는 사용자의 기록을 받지 않으므로 따로 보관하거나 삭제 요청을 처리할 데이터가 없습니다.</li>
+  </ul>
+
+  <h2>아동</h2>
+  <p>만 14세 미만 아동의 개인정보를 따로 수집하지 않습니다.</p>
+
+  <h2>문의 · 변경</h2>
+  <p>문의는 <a href="https://github.com/funwings77-sudo/golf/issues" rel="noopener">GitHub 이슈</a> 또는 Google Play 스토어 앱 정보에 있는 개발자 연락처로 보내 주세요. 이 방침이 바뀌면 이 페이지에 시행일과 함께 게시합니다.</p>
+</main>
+</body>
+</html>

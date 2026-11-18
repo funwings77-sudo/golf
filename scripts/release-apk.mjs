@@ -7,25 +7,12 @@ import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { androidEnv } from './android-env.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const push = !process.argv.includes('--no-push');
 const PAGES_URL = 'https://funwings77-sudo.github.io/golf/pinpoint-caddie.apk';
-const env = { ...process.env };
-
-// Windows 기본 설치 경로에서 JDK·SDK 자동 탐색 (환경변수가 있으면 그대로 사용)
-if (!env.ANDROID_HOME && env.LOCALAPPDATA) {
-  const sdk = join(env.LOCALAPPDATA, 'Android', 'Sdk');
-  if (existsSync(sdk)) env.ANDROID_HOME = sdk;
-}
-if (!env.JAVA_HOME) {
-  const jdk = 'C:\\Program Files\\Microsoft\\jdk-17.0.19.10-hotspot';
-  if (existsSync(jdk)) env.JAVA_HOME = jdk;
-}
-// Gradle용 SDK 경로: properties 파일에서 '\'는 이스케이프 문자라 반드시 '/'로 적는다
-if (env.ANDROID_HOME) {
-  await writeFile(join(root, 'android', 'local.properties'), `sdk.dir=${env.ANDROID_HOME.replace(/\\/g, '/')}\n`);
-}
+const env = await androidEnv(root); // JDK·SDK 자동 탐색 (환경변수 → 기본 설치 경로)
 
 const step = (n, msg) => console.log(`\n[${n}/7] ${msg}`);
 const run = (cmd, cwd = root) => execSync(cmd, { cwd, env, stdio: 'inherit' });
