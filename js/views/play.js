@@ -18,6 +18,8 @@ import { $, $$, esc, toast, sheet, confirmSheet } from '../ui.js';
 import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
 import { openAICaddie } from './aisheet.js';
 import { matches } from '../core/search.js';
+import { analyzeShot, shotSummary, windAlongCross, kmh } from '../physics/shotfit.js';
+import { shotCardHtml } from './shotviz.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
@@ -437,6 +439,7 @@ function cards() {
     const t = toBall(Sensors.pos || me, shot.pred, Sensors.heading), drop = pinDrop(shot.pred, pin, h);
     box.innerHTML = `<div class="m-label">내 공까지 <span>${esc(shot.clubName)} · 찾을 범위 약 ${Math.round(shot.r80)}m</span></div>
       <div class="m-big ${S.settings.detail ? '' : 'e-big'}"><b>${S.settings.detail ? f1(t.d) : Math.round(t.d)}</b><small>m</small><i class="m-arrow" id="ballArrow" style="transform:rotate(${t.rel ?? 0}deg)">⬆</i></div>
+      ${shot.pf ? `<div class="m-pf">예상 · 공 속도 <b>${Math.round(kmh(shot.pf.est.ballSpeed))}km/h</b> · 각도 <b>${Math.round(shot.pf.est.launchDeg)}°</b> · 높이 <b>${Math.round(shot.pf.est.apex)}m</b> · <b>${shot.pf.est.time.toFixed(1)}초</b></div>` : ''}
       <p class="m-text">${t.rel == null ? `${t.compass}쪽${S.settings.detail ? ` (${Math.round(t.bearing)}°)` : ''}으로 걸어가요` : Math.abs(t.rel) < 12 ? '앞으로 쭉 걸어가요' : `${t.rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.round(Math.abs(t.rel))}° 돌아서 걸어가요`}</p>
       <div class="m-row"><div><span>예상 비거리</span><b>${f1(distance(shot.start, shot.pred))}<small>m</small></b></div><div><span>남은 거리</span><b>${f1(distance(shot.pred, pin))}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div></div>`;
     return;
@@ -658,10 +661,11 @@ function moreSheet() {
     ...(shotOf() ? [['point', '🧭', '날아간 쪽 가리키기', '공이 사라진 쪽으로 휴대폰을 2초 가리키면 찾을 곳을 좁혀요', pointShot]] : []),
     ['info', 'ℹ️', '홀 정보 · 메모', '스코어카드 · 메모 · 지도 미리 받기 · 배터리', () => holeInfo(h)],
     ['rule', '⚖️', '규칙 도움', 'OB · 물 · 언플레이어블 구제 방법', () => App_.go('rules')],
+    ['shots', '📈', '내 샷 기록', '클럽별 공 속도 · 각도 · 높이 · 거리 · 방향', () => App_.go('shots')],
     ['bag', '🎒', '내 클럽 비거리', '실제로 친 거리로 저절로 맞춰져요', () => App_.go('bag')],
   ];
   // 자주 쓰는 4개는 큰 타일, 나머지는 접어 두기 (처음 보는 사람이 고를 것을 줄임)
-  const FAV = [allowed('puttLine') ? 'greenar' : 'green', 'lost', 'yd', 'ai'], fav = FAV.map(k => T.find(t => t[0] === k)).filter(Boolean);
+  const FAV = [allowed('puttLine') ? 'greenar' : 'green', 'lost', 'shots', 'yd'], fav = FAV.map(k => T.find(t => t[0] === k)).filter(Boolean);
   const rest = T.filter(t => !FAV.includes(t[0]));
   sheet({ title: '🧰 더보기', body: `<div class="tl-fav">${fav.map(([k, i, n]) => `<button data-mt="${k}"><i>${i}</i><b>${n}</b></button>`).join('')}</div>
     <div class="tl-h">화면 바꾸기</div>
@@ -754,7 +758,9 @@ async function hit() {
   const pick = club || S.bag.filter(c => c.enabled).sort((a, b) => Math.abs(a.carry - distance(start, h.pin || h.green)) - Math.abs(b.carry - distance(start, h.pin || h.green)))[0];
   const aim = adv?.aimBearing ?? bearing(start, h.pin || h.green), power = adv?.power ?? 100;
   const pred = predictBall({ start, aimBearing: aim, club: pick, hole: h, power });
-  S.round.liveShot = { hole: h.n, start: { lat: start.lat, lon: start.lon }, aimBearing: aim, club: pick.id, clubName: pick.name, power, carry: pick.carry * power / 100, pred: pred.center, r80: pred.r80, ts: Date.now() };
+  const w = App_.weather, wind = w ? windAlongCross(w.windSpeed, w.windFrom, aim) : null, predTotal = distance(start, pred.center);
+  let pf = null; try { pf = shotSummary(analyzeShot({ clubId: pick.id, total: predTotal, err: 0, wind, rho: w?.rho })); } catch {}
+  S.round.liveShot = { hole: h.n, start: { lat: start.lat, lon: start.lon }, startAcc: P.ballPos && P.ballHole === h.n ? (P.ballAcc || 4) : (Sensors.pos?.acc || 5), aimBearing: aim, club: pick.id, clubName: pick.name, power, carry: pick.carry * power / 100, pred: pred.center, predTotal, pf, wind, rho: w?.rho, r80: pred.r80, ts: Date.now() };
   const sc = S.round.holes.find(x => x.n === h.n)?.scores[0];
   if (sc) { sc.strokes = (sc.strokes || 0) + 1; }
   save('round'); vibrate(80); speak(`공은 약 ${Math.round(distance(start, pred.center))}미터 앞에 있어요`);
@@ -765,15 +771,19 @@ async function hit() {
 async function found() {
   const shot = shotOf(); if (!shot) return;
   const f = Sensors.pos ? await sampleFix(1500) : null;
+  let rec = null;
   if (f) {
-    const total = distance(shot.start, f);
-    if (shot.power >= 95 && total > 20) {
-      S.shots.push({ id: Date.now(), club: shot.club, total, carry: total / 1.05, latDeg: normAngle(bearing(shot.start, f) - shot.aimBearing), start: shot.start, end: { lat: f.lat, lon: f.lon }, ts: Date.now(), fromPlay: true });
-      const i = S.bag.findIndex(c => c.id === shot.club); if (i >= 0) S.bag[i] = learnClub(S.bag[i], S.shots);
+    const total = distance(shot.start, f), w = App_.weather;
+    const latDeg = normAngle(bearing(shot.start, f) - shot.aimBearing), err = Math.round(Math.hypot(shot.startAcc || 5, f.acc || 5));
+    const wind = w ? windAlongCross(w.windSpeed, w.windFrom, bearing(shot.start, f)) : shot.wind || null, rho = w?.rho ?? shot.rho;
+    if (total > 5) {
+      let fit = null; try { fit = shotSummary(analyzeShot({ clubId: shot.club, total, err, latDeg, wind, rho })); } catch {}
+      rec = { id: Date.now(), club: shot.club, total: Math.round(total * 10) / 10, carry: fit?.est.carry ?? total / 1.05, latDeg: Math.round(latDeg * 10) / 10, err, wind, rho, power: shot.power, partial: shot.power < 95 || total <= 20, start: shot.start, end: { lat: f.lat, lon: f.lon }, hole: shot.hole, course: S.round.courseName, ts: Date.now(), fromPlay: true, fit };
+      S.shots.push(rec);
+      const i = S.bag.findIndex(c => c.id === shot.club); if (i >= 0 && !rec.partial) S.bag[i] = learnClub(S.bag[i], S.shots);
       save('shots', 'bag');
     }
     S.round.lastShot = { hole: shot.hole, dist: total, club: shot.clubName, ts: Date.now() };
-    toast(`잘했어요! ${Math.round(total)}m 날아갔어요`, 3000);
     P.ballPos = { lat: f.lat, lon: f.lon }; P.ballHole = shot.hole; P.ballSrc = 'fix'; P.ballAcc = f.acc;
     const pin0 = activeHole()?.pin || activeHole()?.green;
     (S.round.track ||= []).push({ hole: shot.hole, start: shot.start, end: { lat: f.lat, lon: f.lon }, club: shot.club, dist: total, pin: pin0 ? { lat: pin0.lat, lon: pin0.lon } : null });
@@ -783,6 +793,11 @@ async function found() {
     toast('잘했어요! 예상 위치에 공을 놓았어요 · 다르면 [📍 공 다시 찍기]', 3500);
   }
   delete S.round.liveShot; save('round'); persist(); vibrate([60, 40, 60]); update(true);
+  // 결과 화면: 측정(거리·방향) + 계산(공 속도·높이·시간…)
+  const card = rec || { club: shot.club, total: shot.predTotal || distance(shot.start, shot.pred), wind: shot.wind, rho: shot.rho, estPos: true };
+  speak(`${Math.round(card.total)}미터 ${rec ? '날아갔어요' : '쯤 갔을 거예요'}`);
+  sheet({ title: `🏌️ ${shot.clubName} · ${rec ? '내 공 결과' : '예상 결과 (위치를 못 재서)'}`, body: shotCardHtml(card, { kind: rec ? 'result' : 'predict' }),
+    actions: [{ label: '📈 클럽별 기록', onClick: () => App_.go('shots') }, { label: '확인', kind: 'primary' }] });
 }
 
 // ---------------- 보기 (2D · 3D · 4D · AR) ----------------

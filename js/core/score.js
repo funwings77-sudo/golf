@@ -74,7 +74,7 @@ export function minTransfers(names, net) {
 // ---------- 내 백(My Bag) ----------
 // 샷 기록으로 클럽별 캐리 평균/분산 학습 (사전값을 n0=5 샷 가중치로 둔 베이지안 갱신)
 export function learnClub(club, shots) {
-  const s = shots.filter(x => x.club === club.id && x.carry > 10 && !x.excluded);
+  const s = shots.filter(x => x.club === club.id && x.carry > 10 && !x.excluded && !x.partial); // 힘을 덜 준 샷은 비거리 학습에서 뺌
   if (s.length < 3) return { ...club, n: s.length, learned: false };
   const n0 = 5, prior = club.priorCarry ?? club.carry;
   const mean = (prior * n0 + s.reduce((a, x) => a + x.carry, 0)) / (n0 + s.length);

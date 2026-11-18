@@ -309,3 +309,32 @@ test('지면 투영: 높은 지점은 화면에서 더 위에', () => {
   assert.ok(b.v < a.v); near(a.u, 360, 1e-9);
   const g = pr.toGround(a.u, a.v, 720, 1280); near(g.y, 6, 1e-6);
 });
+
+import { analyzeShot, shotSummary, clubStats, windAlongCross, kmh } from '../js/physics/shotfit.js';
+test('친 공 분석: 잰 거리 → 공 속도·높이·시간 (투어 평균과 비교) · 바람 · 클럽별 통계', () => {
+  // 투어 평균(TrackMan): 7번 아이언 공 속도 ≈ 120mph(193km/h)·캐리 ≈ 157m, 드라이버 ≈ 167mph·캐리 ≈ 250m
+  const i7 = analyzeShot({ clubId: '7i', total: 162, err: 4 });
+  near(i7.est.carry + i7.est.roll, 162, 0.5);
+  near(kmh(i7.est.ballSpeed), 190, 12);
+  assert.ok(i7.est.apex > 20 && i7.est.apex < 35 && i7.est.time > 5 && i7.est.time < 7.5);
+  assert.ok(i7.est.ballSpeedRange[0] < i7.est.ballSpeed && i7.est.ballSpeed < i7.est.ballSpeedRange[1]);
+  const d = analyzeShot({ clubId: 'D', total: 275 });
+  near(kmh(d.est.ballSpeed), 268, 15);
+  // 더 멀리 = 더 빠름, 뒷바람이면 같은 거리에 공 속도가 덜 필요
+  assert.ok(analyzeShot({ clubId: '7i', total: 140 }).est.ballSpeed < i7.est.ballSpeed);
+  assert.ok(analyzeShot({ clubId: '7i', total: 162, wind: { along: 5, cross: 0 } }).est.ballSpeed < i7.est.ballSpeed);
+  // 좌우: 3° 오른쪽 → 오른쪽 약 8.5m
+  near(analyzeShot({ clubId: '7i', total: 162, latDeg: 3 }).measured.lateralM, 162 * Math.sin(3 * Math.PI / 180), 1e-9);
+  // 바람 성분: 북쪽으로 칠 때 남풍(남→북으로 붊) = 뒷바람
+  const w = windAlongCross(4, 180, 0); near(w.along, 4, 1e-9); near(w.cross, 0, 1e-9);
+  const w2 = windAlongCross(4, 270, 0); near(w2.cross, 4, 1e-9); // 서풍 → 오른쪽으로 밂
+  // 요약은 path 없이 작게
+  const sm = shotSummary(i7); assert.equal(sm.path, undefined); assert.ok(sm.est.ballSpeed > 0);
+  // 클럽별 통계: 힘 덜 준 샷은 평균에서 제외, 방향 퍼짐
+  const shots = [150, 160, 170].map((t, i) => ({ id: i, club: '7i', total: t, latDeg: [-2, 0, 2][i], ts: i, fit: shotSummary(analyzeShot({ clubId: '7i', total: t })) }));
+  shots.push({ id: 9, club: '7i', total: 90, latDeg: 0, partial: true, ts: 9 }, { id: 10, club: 'D', total: 230, latDeg: 4, ts: 10 });
+  const st = clubStats(shots), s7 = st.find(x => x.club === '7i');
+  assert.equal(st[0].club, 'D'); assert.equal(s7.n, 4); assert.equal(s7.nFull, 3);
+  near(s7.avgTotal, 160, 1e-9); near(s7.sdLat, Math.sqrt(8 / 3), 1e-9); assert.equal(s7.longest, 170);
+  assert.ok(s7.avgSpeed > 0 && s7.shots[0].id === 10 - 1);
+});

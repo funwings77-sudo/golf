@@ -19,6 +19,7 @@ const ROUTES = {
   score: () => import('./views/score.js'),
   courses: () => import('./views/courses.js'),
   bag: () => import('./views/bag.js'),
+  shots: () => import('./views/shots.js'),
   rules: () => import('./views/rules.js'),
   safety: () => import('./views/safety.js'),
   history: () => import('./views/history.js'),
