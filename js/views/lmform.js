@@ -87,6 +87,21 @@ export function addLMShot(lm, club) {
   const shot = { id: Date.now(), club, source: 'lm', ts: Date.now(), partial: false, total: 0 };
   applyLM(shot, lm); S.shots.push(shot); relearn(club); return shot;
 }
+// 파일에서 여러 샷 한꺼번에: 이미 불러온 샷(key 같음)은 건너뜀. 반환: 넣은 개수
+export function addLMShots(list) {
+  const seen = new Set(S.shots.map(x => x.importKey).filter(Boolean)), clubs = new Set();
+  let n = 0, t0 = Date.now();
+  for (const it of list) {
+    if (seen.has(it.key)) continue; seen.add(it.key);
+    const shot = { id: t0 + n, club: it.club, source: 'lm', ts: it.ts || t0 + n, partial: false, total: 0, importKey: it.key };
+    shot.lm = Object.fromEntries(Object.entries(it.lm).map(([k, v]) => [k, typeof v === 'number' ? (k === 'spinRpm' ? Math.round(v) : Math.round(v * 100) / 100) : v]));
+    const a = analyzeStored(shot); shot.carry = r1(a.est.carry); shot.total = r1(a.measured.total); shot.latDeg = a.measured.latDeg == null ? null : r1(a.measured.latDeg);
+    S.shots.push(shot); clubs.add(it.club); n++;
+  }
+  for (const c of clubs) { const i = S.bag.findIndex(b => b.id === c); if (i >= 0) S.bag[i] = learnClub(S.bag[i], S.shots); }
+  save('shots', 'bag');
+  return n;
+}
 function relearn(club) { const i = S.bag.findIndex(c => c.id === club); if (i >= 0) S.bag[i] = learnClub(S.bag[i], S.shots); save('shots', 'bag'); }
 
 // 샷 결과 화면 (모니터 수치 넣기/고치기 포함). extra: 더 붙일 버튼 [{label, onClick}]

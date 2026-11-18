@@ -360,3 +360,66 @@ test('론치 모니터 수치: 단위 변환 · 범위 확인 · 잰 값 우선 
   const only = analyzeStored({ club: 'D', source: 'lm', total: 0, lm: { ballSpeed: toMS(160, 'mph'), launchDeg: 12, spinRpm: 2600, total: 250, sideDeg: 2 } });
   assert.equal(only.measured.total, 250); assert.equal(only.src.total, 'lm'); assert.equal(only.measured.latDeg, 2);
 });
+
+import { parseCSV, readLaunchFile, toShots, clubIdOf, num, unitIn, decodeBytes } from '../js/core/lmcsv.js';
+// 아래 CSV는 각 회사 내보내기 파일의 열 이름·배치를 흉내 낸 예시 (실제 파일과 세부가 다를 수 있음 → 앱은 미리보기에서 고치게 함)
+const GARMIN_LIKE = `Date,Player,Club Name,Club Type,Club Speed,Ball Speed,Smash Factor,Launch Angle,Launch Direction,Backspin,Sidespin,Spin Rate,Apex Height,Carry Distance,Carry Deviation Distance,Total Distance
+,,,,[mph],[mph],,[deg],[deg],[rpm],[rpm],[rpm],[yds],[yds],[yds],[yds]
+2024-05-01 10:00:00,Me,7 Iron,7 Iron,85.1,118.5,1.39,17.2,-1.5,6800,-300,6807,30.1,165.2,-4.2,172.0
+2024-05-01 10:01:00,Me,Driver,Driver,101.0,148.0,1.47,12.0,2.0,2700,400,2730,32.0,230.5,"12.0",250.0
+2024-05-01 10:02:00,Me,Putter,Putter,5,8,,1,0,100,0,100,0,3,0,3`;
+const RAPSODO_LIKE = `Rapsodo MLM2PRO Export
+Player: Me
+"Club Type","Club Brand","Club Model","Carry Distance","Total Distance","Ball Speed","Launch Angle","Launch Direction","Apex","Side Carry","Club Speed","Smash Factor","Spin Rate"
+"PW","X","Y","120.5","126.0","95.2","24.1","0.8","25.0","3.1 R","72.0","1.32","8600"
+"56°","X","Y","80.0","82.0","72.0","30.5","-2.0","20.0","2.5 L","60.0","1.20","9500"`;
+const FS_LIKE = `Club;Ball (mph);Club (mph);Launch V (°);Launch H (°);Spin (rpm);Carry (yds);Total (yds);Lateral (yds);Height (ft)
+6i;125,0;90,0;15,0;1,0;5800;180;188;-5;90`;
+const KR_LIKE = `날짜,클럽,볼스피드(m/s),헤드스피드(m/s),발사각,백스핀,캐리(m),비거리(m),좌우(m)
+2024.06.01 09:10,드라이버,65.0,44.0,13.5,2600,215,232,7
+2024.06.01 09:12,7번 아이언,52.0,38.5,17.0,6900,140,146,-3`;
+test('론치 모니터 CSV: 머리줄·단위 줄 찾기 · 열 자동 연결 · 단위 변환 · 클럽 이름 · 중복 키', () => {
+  assert.deepEqual(parseCSV('a,"b,""c""",d\r\n1,2,3'), [['a', 'b,"c"', 'd'], ['1', '2', '3']]);
+  assert.equal(num('5.2 L'), -5.2); assert.equal(num('3.1 R'), 3.1); assert.equal(num('1,234'), 1234); assert.equal(num('-'), null);
+  assert.equal(unitIn('Ball Speed (mph)'), 'mph'); assert.equal(unitIn('[yds]'), 'yd'); assert.equal(unitIn('캐리(m)'), 'm'); assert.equal(unitIn('Height (ft)'), 'ft');
+  for (const [n, id] of [['Driver', 'D'], ['7 Iron', '7i'], ['7i', '7i'], ['3 Wood', '3W'], ['5W', '5W'], ['4 Hybrid', '4H'], ['Pitching Wedge', 'PW'], ['56°', 'SW'], ['Gap Wedge', 'GW'], ['LW', 'LW'], ['드라이버', 'D'], ['7번 아이언', '7i'], ['Putter', null], ['Mystery', undefined]]) assert.equal(clubIdOf(n), id, n);
+  // 가민형: 단위 줄([mph]·[yds]) → m/s·m, 퍼터 빼기
+  const g = readLaunchFile(GARMIN_LIKE);
+  assert.equal(g.unitRowUsed, true); assert.equal(g.device, 'Garmin'); assert.equal(g.rows.length, 3);
+  assert.equal(g.header[g.map.spinRpm], 'Backspin'); assert.equal(g.header[g.map.headSpeed], 'Club Speed'); assert.equal(g.header[g.map.club], 'Club Name');
+  const gs = toShots(g);
+  assert.equal(gs.shots.length, 2); assert.equal(gs.skipped.putter, 1);
+  const i7 = gs.shots[0]; assert.equal(i7.club, '7i');
+  near(i7.lm.ballSpeed, 118.5 / 2.23694, 1e-6); near(i7.lm.carry, 165.2 * 0.9144, 1e-6); near(i7.lm.offlineM, -4.2 * 0.9144, 1e-6); near(i7.lm.apex, 30.1 * 0.9144, 1e-6);
+  assert.ok(Number.isFinite(i7.ts)); assert.notEqual(gs.shots[0].key, gs.shots[1].key);
+  assert.equal(toShots(g).shots[0].key, i7.key); // 같은 파일을 다시 읽으면 같은 키 (중복 건너뛰기용)
+  assert.equal(toShots(g, { flipSide: true }).shots[0].lm.offlineM > 0, true);
+  // 랩소도형: 앞에 정보 줄 2개, 단위 없음 → 기본 단위(mph·yd), "3.1 R" / "2.5 L", 56° → SW
+  const r = readLaunchFile(RAPSODO_LIKE);
+  assert.equal(r.device, 'Rapsodo'); assert.equal(r.rows.length, 2);
+  const rs = toShots(r, { speedUnit: 'mph', distUnit: 'yd' }).shots;
+  assert.deepEqual(rs.map(x => x.club), ['PW', 'SW']);
+  near(rs[0].lm.offlineM, 3.1 * 0.9144, 1e-6); near(rs[1].lm.offlineM, -2.5 * 0.9144, 1e-6); near(rs[0].lm.ballSpeed, 95.2 / 2.23694, 1e-6);
+  // 플라이트스코프형: 세미콜론 · 소수점 쉼표 · "Club (mph)"는 헤드 속도, "Club"은 클럽 이름 · 높이 ft
+  const f = readLaunchFile(FS_LIKE);
+  assert.equal(f.header[f.map.club], 'Club'); assert.equal(f.header[f.map.headSpeed], 'Club (mph)');
+  const fs = toShots(f).shots[0];
+  assert.equal(fs.club, '6i'); near(fs.lm.apex, 90 * 0.3048, 1e-6); near(fs.lm.carry, 180 * 0.9144, 1e-6);
+  // 한글 열 이름: m/s · m
+  const k = readLaunchFile(KR_LIKE);
+  assert.equal(k.device, '국산 기기');
+  const ks = toShots(k).shots;
+  assert.deepEqual(ks.map(x => x.club), ['D', '7i']); assert.equal(ks[0].lm.ballSpeed, 65); assert.equal(ks[0].lm.carry, 215); assert.equal(ks[1].lm.offlineM, -3);
+  assert.ok(Number.isFinite(ks[0].ts));
+  // 클럽 열에 모르는 이름 → 고를 때까지 빼 둠, 골라 주면 들어감
+  const u = readLaunchFile('Club,Ball Speed (mph),Carry (yds)\nMystery,100,150');
+  assert.equal(toShots(u).skipped.noClub, 1);
+  assert.equal(toShots(u, { clubMap: { Mystery: '8i' } }).shots[0].club, '8i');
+  // 클럽 열이 없으면 '모든 샷의 클럽'
+  const nc = readLaunchFile('Ball Speed (mph),Launch Angle,Carry (yds)\n110,18,150');
+  assert.equal(toShots(nc, { defaultClub: '8i' }).shots[0].club, '8i');
+  assert.ok(readLaunchFile('hello,world\n1,2').error);
+  // EUC-KR로 저장된 한글 파일
+  const euc = new Uint8Array([0xC5, 0xAC, 0xB7, 0xB4, 0x2C, 0xBA, 0xBC, 0xBD, 0xBA, 0xC7, 0xC7, 0xB5, 0xE5]); // "클럽,볼스피드"
+  assert.equal(decodeBytes(euc.buffer), '클럽,볼스피드');
+});

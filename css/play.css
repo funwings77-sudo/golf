@@ -579,3 +579,16 @@ html.easy.in-hole #toast { bottom: auto; top: calc(86px + env(safe-area-inset-to
 .lmf-i small { font-size: 11px; color: var(--sub); }
 .lmf-i.bad input { border-color: var(--danger); background: var(--danger-soft, #fde8e5); }
 .lmf-i[data-k="ballSpeed"] > span:first-child::after { content: ' *'; color: var(--danger); }
+/* 📂 론치 모니터 파일 불러오기 */
+.lmi-f { margin: 0 0 8px; font-size: 14px; }
+.lmi-sec { margin: 10px 0; } .lmi-sec summary { cursor: pointer; font-weight: 800; padding: 6px 0; }
+.lmi-map, .lmi-clubs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 6px; }
+.lmi-map label, .lmi-clubs label, .lmi-one { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; font-weight: 700; position: relative; }
+.lmi-map select, .lmi-clubs select, .lmi-one select { min-height: 40px; font-size: 14px; }
+.lmi-map em { position: absolute; right: 30px; bottom: 11px; font-style: normal; font-size: 11px; color: var(--sub); pointer-events: none; }
+.lmi-u { display: grid; grid-template-columns: 1fr; gap: 6px; margin: 8px 0; } .lmi-u > span { font-size: 12.5px; font-weight: 700; color: var(--sub); }
+.lmi-flip { display: flex; align-items: center; gap: 8px; font-size: 13.5px; margin: 8px 0; } .lmi-flip input { width: 20px; height: 20px; }
+.lmi-warn { color: var(--danger); font-weight: 800; font-size: 13px; }
+.lmi-t td, .lmi-t th { font-size: 12.5px; white-space: nowrap; }
+.lmi-sum { font-size: 15px; margin: 10px 0 0; }
+@media (max-width: 380px) { .lmi-map, .lmi-clubs { grid-template-columns: 1fr; } }

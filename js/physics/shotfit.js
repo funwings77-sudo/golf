@@ -121,7 +121,8 @@ export function analyzeLM({ clubId, lm, wind = null, rho = RHO_STD, gpsTotal = n
   const f = flightFor(ct, lm.ballSpeed, { launchDeg, spinRpm, wind: w, rho, record: true });
   const carry = lm.carry ?? f.y;
   const total = gpsTotal ?? lm.total ?? carry + (f.total - f.y);
-  const latDeg = gpsLat ?? lm.sideDeg ?? (lm.offlineM != null && total > 0 ? Math.asin(Math.max(-1, Math.min(1, lm.offlineM / total))) * 180 / Math.PI : null);
+  // 방향: GPS > 모니터 좌우 거리(공이 실제로 간 곳) > 모니터 발사 방향(출발 각도)
+  const latDeg = gpsLat ?? (lm.offlineM != null && total > 0 ? Math.asin(Math.max(-1, Math.min(1, lm.offlineM / total))) * 180 / Math.PI : lm.sideDeg ?? null);
   const lateralM = lm.offlineM != null && gpsLat == null ? lm.offlineM : latDeg == null ? null : total * Math.sin(latDeg * Math.PI / 180);
   const head = lm.headSpeed ?? lm.ballSpeed / (SMASH[ct.id] || 1.3);
   const src = {

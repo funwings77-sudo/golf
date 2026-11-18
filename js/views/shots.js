@@ -3,6 +3,7 @@ import { S, save } from '../core/state.js';
 import { learnClub } from '../core/score.js';
 import { clubStats, kmh } from '../physics/shotfit.js';
 import { shotSheet, openLMForm, addLMShot } from './lmform.js';
+import { pickLaunchFile } from './lmimport.js';
 import { $, $$, esc, toast, confirmSheet } from '../ui.js';
 
 let el_, open = null;
@@ -29,13 +30,14 @@ function render() {
   const stats = clubStats(S.shots);
   if (!stats.length) {
     el_.innerHTML = `<h2>📈 내 샷 기록</h2><div class="card"><p><b>아직 기록한 샷이 없어요.</b></p><p class="sub">골프 치기에서 공을 치고 <b>[🏌️ 쳤어요]</b> → 공이 있는 곳에서 <b>[✅ 공 찾았어요]</b>를 누르면, 날아간 거리·방향을 재고 공 속도·높이·비행 시간을 계산해서 여기에 클럽별로 모아 보여 줘요.</p><a class="btn primary block" href="#/play">🏌️ 골프 치러 가기</a></div>
-      <button class="btn block" id="lmAdd">📟 론치 모니터 샷 추가 <small>(연습장 · 스크린 수치 옮겨 적기)</small></button>`;
-    $('#lmAdd').onclick = addShot;
+      <div class="grid2"><button class="btn" id="lmAdd">📟 샷 하나 적기</button><button class="btn" id="lmFile">📂 기록 파일 불러오기</button></div>
+      <p class="sub">론치 모니터 앱(가민·랩소도·플라이트스코프·트랙맨·국산 기기)에서 CSV로 내보낸 파일을 한꺼번에 불러올 수 있어요.</p>`;
+    $('#lmAdd').onclick = addShot; $('#lmFile').onclick = () => pickLaunchFile(() => render());
     return;
   }
   el_.innerHTML = `<h2>📈 내 샷 기록</h2>
     <p class="sub">클럽 ${stats.length}개 · 샷 ${S.shots.filter(s => s.club && s.total).length}개. 거리·방향은 GPS로 <b>잰 값</b>, 공 속도·높이는 잰 거리로 <b>계산한 값</b>이에요 (📟 론치 모니터 수치를 넣은 샷은 모니터 값). 힘을 덜 준 샷(흐린 점)은 평균에서 빼요.</p>
-    <button class="btn block" id="lmAdd" style="margin-bottom:10px">📟 론치 모니터 샷 추가 <small>(연습장 · 스크린 수치 옮겨 적기)</small></button>
+    <div class="grid2" style="margin-bottom:10px"><button class="btn" id="lmAdd">📟 모니터 샷 적기</button><button class="btn" id="lmFile">📂 기록 파일(CSV)</button></div>
     ${stats.map(st => `<div class="card sh-card">
       <button class="sh-head" data-open="${esc(st.club)}"><span class="sh-name"><b>${esc(st.name)}</b><small>${st.n}샷${st.nFull !== st.n ? ` (풀스윙 ${st.nFull})` : ''}</small></span>
         <span class="sh-main"><b>${f0(st.avgTotal)}<i>m</i></b><small>평균${st.sdTotal ? ` ±${f0(st.sdTotal)}` : ''} · 최장 ${f0(st.longest)}m</small></span><em>${open === st.club ? '▲' : '▼'}</em></button>
@@ -54,7 +56,7 @@ function render() {
     </div>`).join('')}`;
   $$('[data-open]').forEach(b => b.onclick = () => { open = open === b.dataset.open ? null : b.dataset.open; render(); });
   $$('[data-shot]').forEach(b => b.onclick = () => detail(S.shots.find(s => String(s.id) === b.dataset.shot)));
-  $('#lmAdd').onclick = addShot;
+  $('#lmAdd').onclick = addShot; $('#lmFile').onclick = () => pickLaunchFile(() => render());
 }
 function addShot() {
   openLMForm({ onSave: (lm, club) => { const s = addLMShot(lm, club); open = club; render(); toast('📟 샷을 추가했어요'); detail(s); } });
