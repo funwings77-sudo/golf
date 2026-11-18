@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.28",
+   "code": 29,
+   "date": "2026-11-18T04:46:11.027Z",
+   "bytes": 4973326,
+   "sha256": "3b802fb537f42ad2d94b821d7eb4196657a9d9657d3a87ffa18da129cfb5568b",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.28/pinpoint-caddie-1.0.28.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.28",
+   "notes": [
+    "Design v2 (premium golf app language): sage background, lime accent, black pill buttons with a lime arrow circle, big bold question titles over a contour-line pattern, satellite-photo course thumbnails and a full-photo 'play here' card, glass hole bar and glass map chips (wind relative to the shot, flag elevation, distance left after the shot), lime main button, floating pill tab bar, dark stats card with left/centre/right result bar, restyled score sheet, result card and map labels; night-green header and status bar; dark mode checked Nearby-course card now also appears when the GPS fix arrives after the list loads"
+   ]
+  },
+  {
    "version": "1.0.27",
    "code": 28,
    "date": "2026-11-18T04:09:04.451Z",
@@ -354,6 +366,6 @@
    ]
   }
  ],
- "latest": "1.0.27",
- "updatedAt": "2026-11-18T04:09:10.270Z"
+ "latest": "1.0.28",
+ "updatedAt": "2026-11-18T04:46:17.607Z"
 }
