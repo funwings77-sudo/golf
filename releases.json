@@ -4,6 +4,20 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.22",
+   "code": 23,
+   "date": "2026-11-18T02:35:11.255Z",
+   "bytes": 4935118,
+   "sha256": "a4e6d4ed9e61a748b351b330caaf52f72996be412ce1f892b96a15210cb4d31e",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.22/pinpoint-caddie-1.0.22.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.22",
+   "notes": [
+    "Download page: what to do with Samsung's harmful-app warning and Auto Blocker, privacy policy link",
+    "Google Play internal testing: signed AAB build (npm run release:aab) with upload key kept outside the repo, targetSdk/compileSdk 36 for Play's 2026 requirement, edge-to-edge insets so the web view is not hidden under system bars, Play build skips the in-app APK update prompt (Play self-update policy), privacy policy page, shared JDK/SDK detection (finds ~/android-sdk) for both release scripts",
+    "Play AAB 1.0.21 (versionCode 22)"
+   ]
+  },
+  {
    "version": "1.0.20",
    "code": 21,
    "date": "2026-11-18T01:57:13.769Z",
@@ -280,6 +294,6 @@
    ]
   }
  ],
- "latest": "1.0.20",
- "updatedAt": "2026-11-18T01:57:19.823Z"
+ "latest": "1.0.22",
+ "updatedAt": "2026-11-18T02:35:17.440Z"
 }
