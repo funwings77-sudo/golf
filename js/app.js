@@ -232,13 +232,10 @@ async function askLocation() {
   try { state = (await navigator.permissions.query({ name: 'geolocation' })).state; } catch {}
   let asked = false; try { asked = !!localStorage.getItem('pinpoint.locWhy'); } catch {}
   if (state !== 'prompt' || asked || S.settings.simGPS) { startGPS(); return; }
-  sheet({ title: '📍 위치를 쓸게요', body: `<div class="why">
-      <div><i>⛳</i><span><b>깃발까지 거리</b>를 재요</span></div>
-      <div><i>🗺️</i><span>지금 있는 <b>골프장을 자동으로</b> 찾아요</span></div>
-      <div><i>🔍</i><span>친 공이 <b>어디쯤 떨어졌는지</b> 알려 줘요</span></div>
-      <div><i>🌤️</i><span>그곳 <b>날씨·바람</b>을 알려 줘요 (설정에서 끌 수 있어요)</span></div>
-    </div><p class="sub">위치는 이 휴대폰 안에서만 써요. 앱을 쓰는 동안에만 필요해요. 다음 화면에서 <b>“앱 사용 중에만 허용”</b>을 눌러 주세요.</p>`,
-    actions: [{ label: '나중에', onClick: () => { try { localStorage.setItem('pinpoint.locWhy', '1'); } catch {} } }, { label: '확인', kind: 'primary', onClick: () => { try { localStorage.setItem('pinpoint.locWhy', '1'); } catch {} startGPS(); } }] });
+  // 한 줄 설명 + 버튼 하나 (다음 화면의 휴대폰 질문에서 '앱 사용 중에만 허용')
+  const done = () => { try { localStorage.setItem('pinpoint.locWhy', '1'); } catch {} };
+  sheet({ title: '📍 위치를 켜 주세요', body: `<p class="why1">깃발까지 거리를 재려면 필요해요.<br><small>다음에 나오는 질문에서 <b>“앱 사용 중에만 허용”</b>을 눌러 주세요.</small></p>`,
+    actions: [{ label: '나중에', onClick: done }, { label: '📍 켜기', kind: 'primary', onClick: () => { done(); startGPS(); } }] });
 }
 
 function init() {

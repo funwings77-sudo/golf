@@ -107,16 +107,6 @@ main#view.full, main#view.play { padding-bottom: calc(var(--nav-h) + 26px + env(
 .imm.easy .bd-nav, .bd-fab button { background: var(--glass-d); border: 1px solid var(--glass-b); border-radius: 50%; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .imm.easy .bd-nav { width: 46px; height: 46px; font-size: 24px; }
 .imm.easy .bd-fab #fabMe { border-radius: 999px; }
-/* 지도 위 유리 칩: 바람 · 고저차 · 친 뒤 남는 거리 */
-.e-chips { display: none; }
-.imm.easy .e-chips { display: flex; flex-direction: column; gap: 8px; position: absolute; left: 10px; top: 84px; z-index: 999; pointer-events: none; }
-.imm.easy:has(.imm-stage.ar) .e-chips, .imm.easy:has(.imm-stage.big) .e-chips { display: none; }
-.ec { min-width: 92px; padding: 8px 12px 9px; border-radius: 18px; background: var(--glass-d); border: 1px solid var(--glass-b); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
-.ec small { display: block; font-size: 10.5px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
-.ec b { display: flex; align-items: baseline; gap: 3px; font-size: 24px; font-weight: 900; letter-spacing: -.03em; line-height: 1.15; }
-.ec b em { font-style: normal; font-size: 12px; font-weight: 700; opacity: .8; }
-.ec b i { font-style: normal; display: inline-block; font-size: 18px; color: var(--lime); margin-right: 2px; }
-.ec span { display: block; font-size: 11.5px; font-weight: 700; color: var(--lime); }
 /* 지금 할 일 · 카드 · 버튼 */
 .e-now { background: var(--glass-l); color: #0e1410; border-radius: 999px; padding: 9px 16px 9px 9px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-size: 15px; }
 .e-now-i { width: 30px; height: 30px; border-radius: 50%; background: var(--lime); display: grid; place-items: center; font-size: 16px; }
@@ -181,3 +171,17 @@ main#view.full, main#view.play { padding-bottom: calc(var(--nav-h) + 26px + env(
 .rg-r > div { background: rgba(255,255,255,.9); border: 0; border-radius: 999px; padding: 1px 8px; }
 .pwrap > .sub.center { text-align: left; }
 .sv-big:last-child .sv-tag.c { background: rgba(255,255,255,.16); color: #fff; }
+
+/* ---------- 더 쉽게: 한 문장 클럽 안내 · 접힌 숫자 · 한 줄 위치 안내 ---------- */
+.e-rec { display: flex; align-items: center; gap: 12px; color: #fff; }
+.e-rec-a { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--lime); color: var(--lime-ink); display: grid; place-items: center; font-style: normal; font-size: 24px; font-weight: 900; transition: transform .3s; }
+.e-rec > span { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.e-rec b { font-size: 22px; font-weight: 900; color: var(--lime); letter-spacing: -.02em; }
+.e-rec small { display: block; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.78); }
+.e-wind { margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--gold); }
+.imm.easy .m-label { font-size: 15px; color: #fff; font-weight: 800; }
+.imm.easy .m-text { font-size: 14.5px; }
+.sv-more { margin-top: 8px; } .sv-more summary { cursor: pointer; font-weight: 800; padding: 8px 2px; color: var(--sub); }
+.why1 { font-size: 17px; font-weight: 700; line-height: 1.5; margin: 4px 0; } .why1 small { font-size: 13.5px; font-weight: 500; color: var(--sub); }
+.p-sub { margin: -6px 0 6px; font-size: 14px; color: var(--sub); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .e-rec-a { transition: none; } }

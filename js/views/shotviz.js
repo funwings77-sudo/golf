@@ -1,6 +1,7 @@
 // 친 공 결과 화면: 측정(거리·방향) + 추정(공 속도·높이·시간…) 숫자 카드 + 옆에서 본 비행 곡선
 import { analyzeStored, kmh, mph } from '../physics/shotfit.js';
 import { esc } from '../ui.js';
+import { S } from '../core/state.js';
 
 const f0 = v => (v == null || !Number.isFinite(v) ? '—' : Math.round(v));
 const f1 = v => (v == null || !Number.isFinite(v) ? '—' : (Math.round(v * 10) / 10).toFixed(1));
@@ -30,7 +31,7 @@ export function flightSvg(path, { carry, total, apex }) {
 export function shotCardHtml(s, { kind = 'result', title = '' } = {}) {
   const a = analyzeStored(s), e = a.est, predict = kind === 'predict' || s.estPos;
   const src = k => (predict && k === 'total' ? 'calc' : a.src[k] || 'calc');
-  const T = t => `<em class="sv-tag ${t === 'gps' ? 'm' : t === 'lm' ? 'l' : 'c'}">${t === 'gps' ? 'GPS' : t === 'lm' ? '모니터' : '계산'}</em>`; // 출처 종류로
+  const T = t => `<em class="sv-tag ${t === 'gps' ? 'm' : t === 'lm' ? 'l' : 'c'}">${t === 'gps' ? '잰 값' : t === 'lm' ? '기계' : '추정'}</em>`; // 출처 종류로
   const tag = k => T(src(k)); // 값 이름으로
   const rng = (lo, hi, f, u = '') => (src(f) === 'lm' || Math.abs(hi - lo) < 0.5 ? '' : ` <span>(${f0(lo)}~${f0(hi)}${u})</span>`);
   const total = a.measured.total, latDeg = a.measured.latDeg;
@@ -43,20 +44,26 @@ export function shotCardHtml(s, { kind = 'result', title = '' } = {}) {
       <div class="sv-big"><small>공 속도 ${tag('ballSpeed')}</small><b>${f0(kmh(e.ballSpeed))}<i>km/h</i></b><span>${f0(mph(e.ballSpeed))} mph${rng(kmh(e.ballSpeedRange[0]), kmh(e.ballSpeedRange[1]), 'ballSpeed')}</span></div>
     </div>
     ${flightSvg(a.path, { carry: e.carry, total, apex: e.apex })}
-    <div class="sv-grid">
-      <div><small>방향 ${latDeg == null ? '' : tag('latDeg')}</small><b>${predict ? '—' : side(latDeg, a.measured.lateralM)}</b></div>
-      <div><small>발사 각도 ${tag('launchDeg')}</small><b>${f1(e.launchDeg)}°${rng(e.launchRange[0], e.launchRange[1], 'launchDeg', '°')}</b></div>
-      <div><small>최고 높이 ${tag('apex')}</small><b>${f0(e.apex)}m${rng(e.apexRange[0], e.apexRange[1], 'apex')}</b></div>
-      <div><small>날아간 시간 ${T('calc')}</small><b>${f1(e.time)}초</b></div>
-      <div><small>공중 거리(캐리) ${tag('carry')}</small><b>${f0(e.carry)}m</b></div>
-      <div><small>굴러간 거리(런) ${T(a.lm && src('total') !== 'calc' && src('carry') === 'lm' ? 'lm' : 'calc')}</small><b>${f0(e.roll)}m</b></div>
-      <div><small>떨어질 때 각도 ${T('calc')}</small><b>${f0(e.landAngle)}°</b></div>
-      <div><small>떨어질 때 속도 ${T('calc')}</small><b>${f0(kmh(e.landSpeed))}km/h</b></div>
-      <div><small>헤드 속도 ${tag('headSpeed')}</small><b>${f0(kmh(e.headSpeed))}km/h <span>(${f0(mph(e.headSpeed))}mph)</span></b></div>
-      <div><small>백스핀 ${tag('spinRpm')}</small><b>${Math.round(e.spinRpm / 10) * 10}rpm</b></div>
-      ${a.lm ? `<div><small>스매시 팩터 ${T(src('headSpeed') === 'lm' ? 'lm' : 'calc')}</small><b>${e.smash.toFixed(2)}</b></div>` : ''}
-      ${dCarry != null ? `<div><small>물리식 캐리와 차이</small><b>${dCarry > 0 ? '+' : ''}${dCarry.toFixed(1)}% <span>(계산 ${f0(e.modelCarry)}m)</span></b></div>` : ''}
-    </div>
-    <p class="sv-note">${a.lm ? '<em class="sv-tag l">모니터</em> 론치 모니터에서 옮겨 적은 값 · ' : ''}<em class="sv-tag m">GPS</em> 휴대폰 GPS로 잰 값 · <em class="sv-tag c">계산</em> ${a.lm ? '잰 공 속도·발사 각도·스핀으로 공 비행 물리식을 풀어 낸 값이에요.' : `잰 거리${s.wind ? '·바람' : ''}·공기로 공 비행 물리식을 거꾸로 풀어 낸 값이에요. 휴대폰은 공 속도·각도·스핀을 직접 잴 수 없어서, 발사 각도·스핀은 ${esc(a.clubName)} 평균을 쓰고 괄호 안에 범위를 함께 보여 줘요. 론치 모니터 수치를 넣으면 더 정확해져요.`}</p>
+    ${(() => {
+      const items = [
+        ...(latDeg == null || predict ? [] : [['방향', tag('latDeg'), side(latDeg, a.measured.lateralM)]]), // 조준 방향을 모르면 빼기
+        ['최고 높이', tag('apex'), `${f0(e.apex)}m${rng(e.apexRange[0], e.apexRange[1], 'apex')}`],
+        ['날아간 시간', T('calc'), `${f1(e.time)}초`],
+        ['공중으로 간 거리', tag('carry'), `${f0(e.carry)}m`],
+        ['굴러간 거리', T(a.lm && src('total') !== 'calc' && src('carry') === 'lm' ? 'lm' : 'calc'), `${f0(e.roll)}m`],
+        ['뜬 각도', tag('launchDeg'), `${f1(e.launchDeg)}°${rng(e.launchRange[0], e.launchRange[1], 'launchDeg', '°')}`],
+        ['떨어진 각도', T('calc'), `${f0(e.landAngle)}°`],
+        ['떨어질 때 속도', T('calc'), `${f0(kmh(e.landSpeed))}km/h`],
+        ['채 속도 (헤드)', tag('headSpeed'), `${f0(kmh(e.headSpeed))}km/h <span>(${f0(mph(e.headSpeed))}mph)</span>`],
+        ['공 회전 (스핀)', tag('spinRpm'), `${Math.round(e.spinRpm / 10) * 10}rpm`],
+        ...(a.lm ? [['맞은 정도 (스매시)', T(src('headSpeed') === 'lm' ? 'lm' : 'calc'), e.smash.toFixed(2)]] : []),
+        ...(dCarry != null ? [['물리식과 차이', '', `${dCarry > 0 ? '+' : ''}${dCarry.toFixed(1)}% <span>(계산 ${f0(e.modelCarry)}m)</span>`]] : []),
+      ];
+      const cell = ([n, t, v]) => `<div><small>${n} ${t}</small><b>${v}</b></div>`;
+      const note = `<p class="sv-note">${a.lm ? '<em class="sv-tag l">기계</em> 론치 모니터에서 옮겨 적은 값 · ' : ''}<em class="sv-tag m">잰 값</em> 휴대폰 GPS로 잰 값 · <em class="sv-tag c">추정</em> ${a.lm ? '잰 공 속도·각도·회전으로 공 비행을 계산한 값이에요.' : `잰 거리${s.wind ? '·바람' : ''}로 공 비행을 거꾸로 계산한 값이에요. 휴대폰은 공 속도·각도를 직접 잴 수 없어서 ${esc(a.clubName)} 평균을 쓰고, 괄호 안에 범위를 보여 줘요.`}</p>`;
+      return !S.settings.detail
+        ? `<div class="sv-grid">${items.slice(0, 4).map(cell).join('')}</div><details class="sv-more"><summary>숫자 더 보기</summary><div class="sv-grid">${items.slice(4).map(cell).join('')}</div>${note}</details>`
+        : `<div class="sv-grid">${items.map(cell).join('')}</div>${note}`;
+    })()}
   </div>`;
 }
