@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.30",
+   "code": 31,
+   "date": "2026-11-18T06:33:01.244Z",
+   "bytes": 4979955,
+   "sha256": "16d8582be7ce324da143c3896f39ddc5e362895b9ffb7d78183a206a4f1ebe75",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.30/pinpoint-caddie-1.0.30.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.30",
+   "notes": [
+    "Precise live direction arrows: the pointing heading comes from the full rotation matrix (top edge of the phone, switching to the camera axis when held upright, so sideways roll or tilt no longer skews it), smoothed with a One-Euro filter and drawn with shortest-path animation stepped on every sensor reading Lost-ball direction step: north-up compass dial whose needle follows the phone, flag marker, '137.4° 남동 · 깃발에서 오른쪽 23°' text, live lime line on the map, hand-shake warning (residual from the smoothed direction, silent while turning) and 1 s capture that rejects shaky readings and reports ± spread Search guide arrow and the walk-to-ball arrow now turn smoothly as the phone turns"
+   ]
+  },
+  {
    "version": "1.0.29",
    "code": 30,
    "date": "2026-11-18T05:39:42.956Z",
@@ -378,6 +390,6 @@
    ]
   }
  ],
- "latest": "1.0.29",
- "updatedAt": "2026-11-18T05:39:54.576Z"
+ "latest": "1.0.30",
+ "updatedAt": "2026-11-18T06:33:08.675Z"
 }
