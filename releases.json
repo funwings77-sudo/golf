@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.24",
+   "code": 25,
+   "date": "2026-11-18T03:02:00.636Z",
+   "bytes": 4939258,
+   "sha256": "c15bc70ead9bb5d662e5c57b169e1b98aec33403ac969eea5897508c93e582a3",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.24/pinpoint-caddie-1.0.24.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.24",
+   "notes": [
+    "Very easy play flow (one screen = one thing to do): 👉 'what to do now' line, one big button that changes with the situation (쳤어요 → 공 찾았어요 → on the green 홀에 넣었어요 → score → 🏁 round end on the last hole), two helper buttons, app header and tabs hidden on the hole screen with menu/score/round-end inside 더보기 (4 big favourite tiles, other tools folded), 3 bottom tabs, mode chip and handicap hidden in easy mode Courses: one merged list where courses with data start in one tap ('바로 치기'), nearby course card starts directly, tournament option folded away Holes without green coordinates: stand on the green and press '여기가 그린이에요' (3 s GPS average) instead of finding the green on a regional satellite map; bar shows scorecard hole length Score sheet: plain words, default = 쳤어요 presses + 2 putts, '잘못 눌렀어요' also undoes the stroke; accuracy line only when the distance may be badly off"
+   ]
+  },
+  {
    "version": "1.0.23",
    "code": 24,
    "date": "2026-11-18T02:45:24.766Z",
@@ -306,6 +318,6 @@
    ]
   }
  ],
- "latest": "1.0.23",
- "updatedAt": "2026-11-18T02:45:30.791Z"
+ "latest": "1.0.24",
+ "updatedAt": "2026-11-18T03:02:05.618Z"
 }
