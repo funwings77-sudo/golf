@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.25",
+   "code": 26,
+   "date": "2026-11-18T03:14:56.066Z",
+   "bytes": 4949944,
+   "sha256": "eb60c431bebf88555e222bf0e1da8564a171178115ad75cd6364a733bdbde8d3",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.25/pinpoint-caddie-1.0.25.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.25",
+   "notes": [
+    "Shot analysis: right after '쳤어요' the predicted ball speed, launch angle, apex and flight time; on '찾았어요' a result card with measured distance (GPS, ± error) and direction, and ball speed, head speed, carry, roll, apex, flight time, landing angle/speed computed by solving the 3-DOF flight model backwards from the measured distance with wind and air density (launch ±3°, spin ±15% ranges), plus a side-view flight curve; every shot saved with its analysis '📈 내 샷 기록': per-club average/longest distance, ball speed, apex, direction mean and spread, top-view landing scatter, per-shot cards and delete; partial-power shots stay out of averages and club distance learning"
+   ]
+  },
+  {
    "version": "1.0.24",
    "code": 25,
    "date": "2026-11-18T03:02:00.636Z",
@@ -318,6 +330,6 @@
    ]
   }
  ],
- "latest": "1.0.24",
- "updatedAt": "2026-11-18T03:02:05.618Z"
+ "latest": "1.0.25",
+ "updatedAt": "2026-11-18T03:15:07.675Z"
 }
