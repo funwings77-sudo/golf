@@ -1,0 +1,183 @@
+/* =====================================================================
+   PinPoint 디자인 v2 — 프리미엄 골프 앱 디자인 언어
+   · 밝은 세이지 바탕 + 라임 포인트 + 검은 알약 버튼 (큰 굵은 제목, 등고선 무늬)
+   · 지도 위 반투명 유리 칩 · 유리 막대 (항공 사진 위 정보)
+   · 검은 통계 카드 · 노란 강조 · 떠 있는 하단 탭
+   다른 CSS 뒤에 읽어서 색·모양만 덮어씀 (기능·배치는 그대로)
+   ===================================================================== */
+:root {
+  --bg: #f1f4ec; --paper: #ffffff; --ink: #0e1410; --sub: #66706a; --line: #e2e7dd;
+  --green: #0f3d2a; --green2: #1e7a4c; --green-soft: #e3f0db;
+  --lime: #c8f169; --lime-2: #b4e04a; --lime-ink: #0e1410; --gold: #ffd23f;
+  --night: #0f1b14; --glass-d: rgba(14, 20, 16, .58); --glass-l: rgba(255, 255, 255, .9); --glass-b: rgba(255, 255, 255, .16);
+  --shadow: 0 1px 2px rgba(14, 30, 20, .05), 0 10px 28px rgba(14, 40, 24, .07);
+  --r: 22px; --r-lg: 28px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b110e; --paper: #141c17; --ink: #eef3ef; --sub: #98a69d; --line: #233029; --green-soft: #1a2e22; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35); }
+}
+:root[data-theme="dark"] { --bg: #0b110e; --paper: #141c17; --ink: #eef3ef; --sub: #98a69d; --line: #233029; --green-soft: #1a2e22; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35); }
+:root.outdoor { --lime: #a8e51e; --shadow: none; }
+
+body { letter-spacing: -.005em; }
+h2 { font-size: 24px; font-weight: 900; letter-spacing: -.03em; }
+h3 { letter-spacing: -.02em; }
+
+/* ---------- 머리줄: 짙은 숲색 (휴대폰 상태바와 같은 색) ---------- */
+.topbar { background: var(--night); }
+.topbar .ttl b { font-weight: 900; letter-spacing: -.02em; }
+
+/* ---------- 카드 · 버튼 · 입력 ---------- */
+.card, .stat, .list-btn { border: 0; border-radius: var(--r); box-shadow: var(--shadow); }
+.btn { border-radius: 999px; font-weight: 800; border-color: var(--line); }
+.btn.primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.btn.on { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+.seg { border-radius: 999px; border: 0; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); padding: 4px; }
+.seg button { border-radius: 999px; }
+.seg button.on { background: var(--ink); color: var(--paper); }
+input[type=text], input[type=number], input[type=search], select, textarea { border-radius: 14px; }
+.pill { background: var(--lime); color: var(--lime-ink); font-weight: 800; }
+input[type=range] { accent-color: var(--green2); }
+
+/* 아래에서 올라오는 창 */
+.sheet-bg { background: rgba(8, 14, 10, .5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.sheet-card { border-radius: var(--r-lg) var(--r-lg) 0 0; padding-top: 10px; }
+.sheet-card h3 { font-size: 20px; font-weight: 900; letter-spacing: -.03em; }
+.sheet-actions .btn { min-height: 54px; }
+
+/* ---------- 떠 있는 하단 탭 (켜진 탭 = 라임) ---------- */
+nav.tabs { bottom: calc(10px + env(safe-area-inset-bottom)); width: calc(100% - 24px); max-width: 560px; border: 0; border-radius: 999px; background: rgba(14, 20, 16, .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 6px; padding-bottom: 6px; box-shadow: 0 12px 30px rgba(0, 0, 0, .28); gap: 4px; }
+nav.tabs a { height: 54px; border-radius: 999px; color: rgba(255, 255, 255, .72); }
+nav.tabs a.on { background: var(--lime); color: var(--lime-ink); }
+nav.tabs a.on .i { transform: none; }
+main#view { padding-bottom: calc(var(--nav-h) + 34px + env(safe-area-inset-bottom)); }
+main#view.full, main#view.play { padding-bottom: calc(var(--nav-h) + 26px + env(safe-area-inset-bottom)); }
+#toast { bottom: calc(var(--nav-h) + 30px + env(safe-area-inset-bottom)); border-radius: 999px; background: var(--ink); color: var(--paper); }
+
+/* ---------- 골프장·코스 고르기 ---------- */
+.pwrap { padding: 0 16px 8px; }
+.p-hero { margin: 0 -16px 6px; padding: 18px 16px 8px; background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='220' viewBox='0 0 360 220' fill='none' stroke='%230f3d2a' stroke-opacity='.09' stroke-width='1.2'%3E%3Cpath d='M-20 60c60-30 110 20 170 0s90-50 150-20 70 30 90 10'/%3E%3Cpath d='M-20 85c60-30 110 20 170 0s90-50 150-20 70 30 90 10'/%3E%3Cpath d='M-20 110c60-30 110 20 170 0s90-50 150-20 70 30 90 10'/%3E%3Cpath d='M-20 135c60-30 110 20 170 0s90-50 150-20 70 30 90 10'/%3E%3Cpath d='M-20 160c60-30 110 20 170 0s90-50 150-20 70 30 90 10'/%3E%3Cpath d='M-20 185c60-30 110 20 170 0s90-50 150-20 70 30 90 10'/%3E%3Cellipse cx='290' cy='70' rx='40' ry='22'/%3E%3Cellipse cx='290' cy='70' rx='24' ry='12'/%3E%3C/svg%3E") right top / 360px 220px no-repeat; }
+.p-kicker { margin: 0; font-size: 12px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: var(--green2); }
+.pstep { justify-content: flex-start; margin: 0 0 8px; }
+.pstep span { border: 0; background: rgba(14, 20, 16, .06); padding: 4px 11px; }
+.pstep span.on { background: var(--ink); color: var(--paper); }
+.pstep span.done { background: var(--lime); color: var(--lime-ink); }
+.pq { text-align: left; font-size: 32px; font-weight: 900; line-height: 1.12; letter-spacing: -.04em; margin: 6px 0 14px; }
+.ph2 { font-size: 13px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--sub); margin: 22px 2px 8px; }
+.ph2 small { text-transform: none; letter-spacing: 0; }
+.pin-search { border-radius: 999px; border: 0; box-shadow: var(--shadow); min-height: 56px; padding: 0 22px; font-size: 17px; }
+.picks { gap: 10px; }
+.pick { border: 0; border-radius: var(--r); box-shadow: var(--shadow); min-height: 76px; padding: 10px 14px 10px 10px; }
+.pick.sel { background: var(--green-soft); box-shadow: inset 0 0 0 2px var(--green2); }
+.pick .pi { flex: none; width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-size: 26px; background: var(--green-soft); }
+.pick .pi.mono { font-size: 22px; font-weight: 900; color: var(--green); letter-spacing: -.02em; }
+.pick .pi.th { background: #335a3f center / cover no-repeat; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.pick .pt b { font-size: 17.5px; font-weight: 900; letter-spacing: -.02em; }
+.pick .pa .go { background: var(--lime); color: var(--lime-ink); padding: 6px 12px; font-size: 12.5px; }
+.pick.dim { opacity: .62; }
+.tile-note { text-align: center; font-size: 11px; color: var(--sub); margin: 8px 0 0; }
+/* 가까운 골프장: 사진을 꽉 채운 큰 카드 */
+.near-card { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 4px; min-height: 196px; padding: 18px; border: 0; border-radius: var(--r-lg); color: #fff; text-align: left;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 25%, rgba(5,15,9,.78) 100%), var(--img, linear-gradient(135deg, #2f6b45, #12301f)) center / cover no-repeat, #24503a; box-shadow: 0 16px 36px rgba(14, 40, 24, .25); }
+.near-card .nc-k { font-size: 12px; font-weight: 800; letter-spacing: .06em; background: var(--glass-d); border: 1px solid var(--glass-b); padding: 5px 10px; border-radius: 999px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); position: absolute; top: 14px; left: 14px; color: #fff; }
+.near-card b { font-size: 30px; font-weight: 900; letter-spacing: -.04em; line-height: 1.05; color: #fff; }
+.near-card small.nc-s { color: rgba(255,255,255,.82); font-weight: 600; font-size: 13px; }
+.near-card .nc-go { margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; background: var(--lime); color: var(--lime-ink); font-weight: 900; font-size: 16px; padding: 10px 8px 10px 18px; border-radius: 999px; }
+.near-card .nc-go i { font-style: normal; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--lime); display: grid; place-items: center; font-size: 15px; }
+/* 큰 버튼: 검은 알약 + → 동그라미 */
+.pbtn { border: 0; border-radius: 999px; box-shadow: var(--shadow); font-weight: 900; }
+.pbtn.primary { background: var(--ink); color: var(--paper); box-shadow: 0 14px 30px rgba(14, 20, 16, .25); position: relative; padding-right: 66px; }
+.pbtn.primary::after { content: '→'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 54px; height: 54px; border-radius: 50%; background: var(--lime); color: var(--lime-ink); display: grid; place-items: center; font-size: 22px; font-weight: 900; }
+.pbtn.ghost { border: 2px dashed var(--line); box-shadow: none; }
+.plink { color: var(--green2); }
+.chips.big button { border: 0; border-radius: 999px; box-shadow: var(--shadow); }
+.chips.big button.on { background: var(--ink); color: var(--paper); }
+.chips.big button:disabled { box-shadow: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .p-hero { background-image: none; } :root:not([data-theme="light"]) .pbtn.primary { background: var(--lime); color: var(--lime-ink); } :root:not([data-theme="light"]) .pbtn.primary::after { background: var(--lime-ink); color: var(--lime); } }
+
+/* ---------- 홀 화면: 지도 위 유리 · 라임 ---------- */
+.imm { --glow: var(--lime); --glass: var(--glass-d); }
+.imm.easy .bd-bar { background: var(--glass-d); border: 1px solid var(--glass-b); border-radius: 22px; backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); }
+.imm.easy .bd-n { background: var(--lime); color: var(--lime-ink); border-radius: 18px; margin: 5px; min-width: 52px; font-size: 28px; }
+.imm.easy .bd-n small { opacity: .7; text-transform: uppercase; letter-spacing: .08em; font-weight: 900; }
+.imm.easy .bd-d { background: transparent; padding-left: 8px !important; }
+.imm.easy .bd-d small, .imm.easy .bd-m small { text-transform: uppercase; letter-spacing: .06em; font-weight: 800; }
+.imm.easy .bd-d b { font-size: 32px; letter-spacing: -.03em; }
+.imm.easy .bd-nav, .bd-fab button { background: var(--glass-d); border: 1px solid var(--glass-b); border-radius: 50%; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.imm.easy .bd-nav { width: 46px; height: 46px; font-size: 24px; }
+.imm.easy .bd-fab #fabMe { border-radius: 999px; }
+/* 지도 위 유리 칩: 바람 · 고저차 · 친 뒤 남는 거리 */
+.e-chips { display: none; }
+.imm.easy .e-chips { display: flex; flex-direction: column; gap: 8px; position: absolute; left: 10px; top: 84px; z-index: 999; pointer-events: none; }
+.imm.easy:has(.imm-stage.ar) .e-chips, .imm.easy:has(.imm-stage.big) .e-chips { display: none; }
+.ec { min-width: 92px; padding: 8px 12px 9px; border-radius: 18px; background: var(--glass-d); border: 1px solid var(--glass-b); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+.ec small { display: block; font-size: 10.5px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+.ec b { display: flex; align-items: baseline; gap: 3px; font-size: 24px; font-weight: 900; letter-spacing: -.03em; line-height: 1.15; }
+.ec b em { font-style: normal; font-size: 12px; font-weight: 700; opacity: .8; }
+.ec b i { font-style: normal; display: inline-block; font-size: 18px; color: var(--lime); margin-right: 2px; }
+.ec span { display: block; font-size: 11.5px; font-weight: 700; color: var(--lime); }
+/* 지금 할 일 · 카드 · 버튼 */
+.e-now { background: var(--glass-l); color: #0e1410; border-radius: 999px; padding: 9px 16px 9px 9px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-size: 15px; }
+.e-now-i { width: 30px; height: 30px; border-radius: 50%; background: var(--lime); display: grid; place-items: center; font-size: 16px; }
+.e-now b { color: #0f3d2a; }
+.imm.easy .imm-card { background: var(--glass-d); border: 1px solid var(--glass-b); border-radius: 26px; backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3); }
+.bd-club { background: var(--lime); color: var(--lime-ink); border-radius: 16px; }
+.bd-pow { background: rgba(255,255,255,.14); }
+.bd-pow i { background: linear-gradient(90deg, var(--lime), var(--gold)); }
+.imm-act .a-main, .imm.easy .a-main { position: relative; border-radius: 999px; background: var(--lime); color: var(--lime-ink); box-shadow: 0 14px 30px rgba(200, 241, 105, .28); padding-right: 64px; }
+.imm.easy .a-main::after { content: '→'; position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%; background: var(--lime-ink); color: var(--lime); display: grid; place-items: center; font-size: 22px; }
+.bd-bot.two button { background: var(--glass-d); border: 1px solid var(--glass-b); border-radius: 999px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.m-pf b { color: var(--lime); }
+@keyframes e-pulse { 0%, 100% { box-shadow: 0 14px 30px rgba(200,241,105,.28), 0 0 0 0 rgba(200,241,105,.6); } 50% { box-shadow: 0 14px 30px rgba(200,241,105,.28), 0 0 0 14px rgba(200,241,105,0); } }
+
+/* ---------- 점수 입력: 라임 · 검정 ---------- */
+.qs-n button, .qs-p button { background: var(--green-soft); color: var(--ink); border-radius: 18px; }
+.qs-n button small { color: var(--sub); }
+.qs-n b.sym.eg, .qs-n b.sym.db { box-shadow: 0 0 0 2px var(--green-soft), 0 0 0 4px currentColor; }
+.qs-n button.on, .qs-p button.on { background: var(--night); color: var(--lime); }
+.qs-n button.on small { color: rgba(255,255,255,.75); }
+.qs-n button.on b.sym.eg, .qs-n button.on b.sym.db { box-shadow: 0 0 0 2px var(--night), 0 0 0 4px var(--lime); }
+.qs-f button { border: 0; background: var(--green-soft); color: var(--ink); }
+.qs-f button.on { background: var(--night); color: var(--lime); }
+.fin-n { color: var(--ink); font-size: 72px; letter-spacing: -.05em; }
+
+/* ---------- 더보기 ---------- */
+.tl-fav button { border: 0; border-radius: var(--r); background: var(--green-soft); }
+.tl-fav button:first-child { background: var(--night); color: var(--lime); }
+.tl-links button { border: 0; border-radius: 999px; background: var(--green-soft); }
+.tl-views button.on { background: var(--lime) !important; color: var(--lime-ink) !important; }
+
+/* ---------- 친 공 결과 · 내 샷 기록 ---------- */
+.sv-big { background: var(--green-soft); border-radius: var(--r); }
+.sv-big:last-child { background: var(--night); } .sv-big:last-child small, .sv-big:last-child span { color: rgba(255,255,255,.7); } .sv-big:last-child b { color: var(--lime); } .sv-big:last-child b i { color: rgba(255,255,255,.7); }
+.sv-grid > div { border: 0; background: var(--green-soft); border-radius: 16px; }
+.sv-fly { border-radius: var(--r); }
+.sv-p, .sv-r { stroke: var(--green2); } .sv-a { stroke: var(--green2); } .sv-t.b { fill: var(--green); } .sv-l { fill: var(--green2); }
+.sv-tag.m { background: var(--green2); } .sv-tag.c { background: rgba(14,20,16,.08); color: var(--ink); } .sv-tag.l { background: var(--gold); color: #3a2c00; }
+.sh-card { background: var(--paper); }
+.sh-head { padding: 14px 16px; }
+.sh-main b { font-size: 34px; letter-spacing: -.04em; }
+.sh-sc { border-radius: 18px; background: var(--green-soft); }
+.sh-p { fill: var(--green2); } .sh-pp { fill: var(--green2); } .sh-avg { stroke: var(--green); } .sh-t { fill: var(--green); }
+/* 검은 통계 카드: 왼쪽 미스 · 가운데 · 오른쪽 미스 */
+.sh-miss { margin: 0 14px 12px; padding: 12px 14px; border-radius: 20px; background: var(--night); color: #fff; }
+.sh-miss-h { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; margin-bottom: 8px; } .sh-miss-h span { color: var(--gold); }
+.sh-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; gap: 2px; background: rgba(255,255,255,.08); }
+.sh-bar i { display: block; height: 100%; } .sh-bar .l { background: var(--gold); } .sh-bar .c { background: var(--lime); } .sh-bar .r { background: rgba(255,255,255,.45); }
+.sh-leg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; font-size: 12.5px; }
+.sh-leg div { display: flex; align-items: center; gap: 6px; } .sh-leg b { margin-left: auto; font-size: 14px; }
+.sh-leg i { width: 8px; height: 8px; border-radius: 2px; } .sh-leg .l { background: var(--gold); } .sh-leg .c { background: var(--lime); } .sh-leg .r { background: rgba(255,255,255,.45); }
+
+/* ---------- 지도 위 표시: 검은 알약 · 라임 강조 (대시보드 지도 스타일) ---------- */
+.imm.easy .bd-d b small { text-transform: none; letter-spacing: 0; }
+.lbl-ic span { border-radius: 999px !important; }
+.lbl-ic.tgt span { background: var(--gold); color: #2a2000; } .lbl-ic.ang span { background: rgba(14,20,16,.86); color: var(--lime); }
+.lbl-ic.ball span { background: #e2552d; } .lbl-ic.pin span { background: var(--night); color: var(--lime); }
+.rg-tag > div { background: var(--night); color: var(--lime); border: 0; border-radius: 999px; padding: 5px 12px; box-shadow: 0 6px 16px rgba(0,0,0,.35); }
+.rg-pl > div { border-radius: 16px; }
+.rg-hz > div { background: rgba(14,20,16,.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.rg-hz b { color: var(--gold); }
+.rg-r > div { background: rgba(255,255,255,.9); border: 0; border-radius: 999px; padding: 1px 8px; }
+.pwrap > .sub.center { text-align: left; }
+.sv-big:last-child .sv-tag.c { background: rgba(255,255,255,.16); color: #fff; }

@@ -52,6 +52,9 @@ function render() {
           <div><small>좌우 퍼짐 (잰 값)</small><b>${st.sdLat ? `±${st.sdLat.toFixed(1)}°` : '—'}</b></div>
         </div>
       </div>
+      ${st.miss.n >= 2 ? (() => { const p = k => Math.round(st.miss[k] / st.miss.n * 100); return `<div class="sh-miss"><div class="sh-miss-h">좌우 결과 <span>가운데 ${p('c')}%</span></div>
+        <div class="sh-bar" role="img" aria-label="왼쪽 ${p('l')}% 가운데 ${p('c')}% 오른쪽 ${p('r')}%">${p('l') ? `<i class="l" style="width:${p('l')}%"></i>` : ''}${p('c') ? `<i class="c" style="width:${p('c')}%"></i>` : ''}${p('r') ? `<i class="r" style="width:${p('r')}%"></i>` : ''}</div>
+        <div class="sh-leg"><div><i class="l"></i>왼쪽<b>${p('l')}%</b></div><div><i class="c"></i>가운데<b>${p('c')}%</b></div><div><i class="r"></i>오른쪽<b>${p('r')}%</b></div></div></div>`; })() : ''}
       ${open === st.club ? `<div class="sh-list">${st.shots.map(s => `<button data-shot="${s.id}"><span>${s.lm ? '📟 ' : ''}${day(s.ts)}${s.hole ? ` · ${s.hole}번 홀` : ''}${s.partial ? ' · 힘 덜 줌' : ''}</span><b>${f0(s.total)}m</b><span>${s.fit?.est?.ballSpeed ? `${f0(kmh(s.fit.est.ballSpeed))}km/h` : ''}</span><span>${dir(s.latDeg)}</span><em>›</em></button>`).join('')}</div>` : ''}
     </div>`).join('')}`;
   $$('[data-open]').forEach(b => b.onclick = () => { open = open === b.dataset.open ? null : b.dataset.open; render(); });

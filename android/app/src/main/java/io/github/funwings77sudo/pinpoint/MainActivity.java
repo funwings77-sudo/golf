@@ -16,7 +16,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         View root = findViewById(android.R.id.content);
-        root.setBackgroundColor(Color.parseColor("#1f5f3f"));
+        root.setBackgroundColor(Color.parseColor("#0f1b14"));
         WindowCompat.getInsetsController(getWindow(), root).setAppearanceLightStatusBars(false);
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());

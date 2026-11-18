@@ -84,6 +84,8 @@ export function clubStats(shots) {
       nLM: list.filter(s => s.lm?.ballSpeed > 0).length, avgLaunchLM: mean(la), avgSpinLM: mean(spin),
       avgSpeed: mean(sp), maxSpeed: sp.length ? Math.max(...sp) : null, avgApex: mean(ap),
       avgLat: mLat, sdLat: sd(lat, mLat ?? 0), launchDeg: clubType(club)?.launch ?? null,
+      // 좌우 결과: 가운데 = 거리의 5% 안 (최소 ±5m), 왼쪽/오른쪽 미스
+      miss: (() => { const m = { l: 0, c: 0, r: 0, n: 0 }; for (const s of list) { if (!Number.isFinite(s.latDeg)) continue; const off = s.total * Math.sin(s.latDeg * Math.PI / 180), tol = Math.max(5, s.total * 0.05); m[off < -tol ? 'l' : off > tol ? 'r' : 'c']++; m.n++; } return m; })(),
       shots: [...list].sort((a, b) => b.ts - a.ts),
     };
   }).sort((a, b) => (b.avgTotal || 0) - (a.avgTotal || 0));
