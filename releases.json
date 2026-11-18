@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.31",
+   "code": 32,
+   "date": "2026-11-18T06:41:52.882Z",
+   "bytes": 4981336,
+   "sha256": "7998a2d70ecd2cb32c550bcc4d9b968b6c118224e9262128734c8dcdd405667d",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.31/pinpoint-caddie-1.0.31.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.31",
+   "notes": [
+    "Lost-ball flow joined to play and in plain words: '공이 안 보여요' hands over the shot position, club and direction (pointed or aimed) so '바로 찾으러 가기' works in one tap; '찾았어요' returns to play which measures the distance and shows the result card (one record, search learning kept); '못 찾았어요' explains the two options in plain words, adds the penalty, ends the live shot and returns to play; a newer hand-off replaces an old unfinished search All lost-ball labels rewritten without jargon (공을 친 곳, 얼마나 잘 맞았나요?, 친구가 본 곳, 여기는 없어요, 찾을 범위 반지름…); expert numbers only in the detail screen"
+   ]
+  },
+  {
    "version": "1.0.30",
    "code": 31,
    "date": "2026-11-18T06:33:01.244Z",
@@ -390,6 +402,6 @@
    ]
   }
  ],
- "latest": "1.0.30",
- "updatedAt": "2026-11-18T06:33:08.675Z"
+ "latest": "1.0.31",
+ "updatedAt": "2026-11-18T06:41:57.646Z"
 }
