@@ -428,6 +428,7 @@ function cards() {
     box.innerHTML = `<div class="m-label">퍼팅 거리 <span>${adv.kind === 'holed' ? '🎉 홀 바로 옆!' : '퍼터로 굴려요'}</span></div>
       <div class="m-big"><b>${f1(D)}</b><small>m</small><i class="m-ico"></i></div>
       <div class="m-row"><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, 2) + '<small>m</small>' : '—'}</b></div><div><span>${drop ? (drop.v > 0.05 ? '오르막' : drop.v < -0.05 ? '내리막' : '거의 평지') : '경사'}</span><b>${drop ? (drop.src === 'grid' ? '그린맵' : '지형') : '—'}</b></div><div><span>${last ? '방금 샷' : 'GPS'}</span><b>${last ? f1(last.dist) + '<small>m</small>' : '±' + Math.round(me.acc || 0) + '<small>m</small>'}</b></div></div>
+      <a class="m-btn primary" href="#/green?ar">📷 AR로 그린 보기</a>
       <a class="m-btn" href="#/green">🟢 굴릴 방향 · 세기 계산하기</a>`;
     return;
   }
@@ -594,6 +595,7 @@ function moreSheet() {
     ['mark', '📍', '내 공 위치 찍기', 'GPS가 약할 때 지도에서 공 자리를 눌러요', () => markBall()],
     ['prec', '📡', '정밀하게 재기', '5초 동안 여러 번 재서 평균 (±1~3m)', precise],
     ['green', '🟢', '그린 읽기 · 퍼팅', '경사 지도 · 굴릴 방향 · 세기 · 백스윙 크기', () => App_.go('green')],
+    ['greenar', '📷', 'AR로 그린 보기', '카메라에 경사 흐름 · 퍼팅 라인 · 홀까지 거리', () => App_.go('green?ar')],
     ['lie', '📐', '공 놓인 경사', '휴대폰을 땅에 2초 → 오르막·내리막과 셋업 팁', () => App_.go('lie')],
     ['tee', '🎯', '티샷 작전', '내 샷 퍼짐(타원)으로 가장 안전한 방향', () => App_.go('tee')],
     ['dist', '🌬️', '거리 · 바람 자세히', '체감 거리 · 고저차 · 바람 · 기온', () => App_.go('distance')],

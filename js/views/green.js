@@ -23,6 +23,8 @@ function saveG() { try { const { result, ...rest } = G; sessionStorage.setItem('
 export default {
   mount(el, App) {
     el_ = el; App_ = App; G = loadG();
+    // #/green?ar : 플레이 화면의 'AR로 그린 보기'에서 바로 AR 탭으로 (주소는 #/green으로 정리)
+    if (/\?(.*&)?ar\b/.test(location.hash)) { G.tab = 'ar'; G.arMode = null; history.replaceState(null, '', '#/green'); }
     const hole = activeHole();
     // 골프장이 발행한 오늘 그린 스피드가 있으면 그 값으로 시작 (사용자가 바꾸면 그 값 유지)
     const tp = activeCourse()?.todayPins;
