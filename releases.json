@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.20",
+   "code": 21,
+   "date": "2026-11-18T01:57:13.769Z",
+   "bytes": 4933908,
+   "sha256": "cabac11c4767e50ad5baf6338d86bf912671e5e8b27198791ba3e91fe2987924",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.20/pinpoint-caddie-1.0.20.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.20",
+   "notes": [
+    "AR green reading in smart-glasses style: distance ring grid bent by green height (1m solid, 0.5m dashed, vertex dots), slope flow particles running downhill, green dotted putt line with solid start and rolling-ball preview, hole distance tag, UPHILL/DOWNHILL badge, fall-line compass, shows at once from phone tilt with auto putt compute, one-tap hole calibration then compass yaw tracking"
+   ]
+  },
+  {
    "version": "1.0.19",
    "code": 20,
    "date": "2026-11-15T10:32:37.066Z",
@@ -268,6 +280,6 @@
    ]
   }
  ],
- "latest": "1.0.19",
- "updatedAt": "2026-11-15T10:32:42.734Z"
+ "latest": "1.0.20",
+ "updatedAt": "2026-11-18T01:57:19.823Z"
 }

@@ -1,8 +1,8 @@
 {
   "packageId": "io.github.funwings77sudo.pinpoint",
-  "versionName": "1.0.19",
-  "versionCode": 20,
-  "bytes": 4927608,
-  "sha256": "bcf81743ab7f63fd5c8c2e67a823bb540859e495919e7e97126934438bffd286",
-  "builtAt": "2026-11-15T10:32:33.890Z"
+  "versionName": "1.0.20",
+  "versionCode": 21,
+  "bytes": 4933908,
+  "sha256": "cabac11c4767e50ad5baf6338d86bf912671e5e8b27198791ba3e91fe2987924",
+  "builtAt": "2026-11-18T01:57:10.805Z"
 }
