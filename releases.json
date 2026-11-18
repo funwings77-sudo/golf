@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.33",
+   "code": 34,
+   "date": "2026-11-18T07:37:24.269Z",
+   "bytes": 4985749,
+   "sha256": "3d2b0f842386b4b8456963e426d3d83c58408e68bf2afa1310c22e3d4e39dc42",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.33/pinpoint-caddie-1.0.33.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.33",
+   "notes": [
+    "Settings and score sheet in plain words: settings ask easy questions (쉬운/자세히 화면, 보통 몇 타 치나요?, 치는 손, 내 키 → eye and chest height computed, 퍼팅 실력 잘해요/보통/연습 중 → aim and speed spread, 그린 빠르기 느려요/보통/빨라요, 경기 방식 대회/친구랑/연습); expert numbers (camera field of view, σ, raw handicap, Stimp, step length) and fake-GPS testing folded into '전문가 숫자'; AI caddie folded Score sheet: 기준 4타 (파 4), labelled 친 횟수 / 그린에서 steppers, 모두 기준타(파)로, plain legend and totals (기준보다 ±0, 그린에서 친 횟수, 잃어버린 공), 내기 계산 / 누가 누구에게, 오늘 라운드 끝내기; mode names 대회 · 친구랑 · 연습 everywhere; top bar '1번 홀 · 파 4 · 치는 중'"
+   ]
+  },
+  {
    "version": "1.0.32",
    "code": 33,
    "date": "2026-11-18T07:21:49.893Z",
@@ -414,6 +426,6 @@
    ]
   }
  ],
- "latest": "1.0.32",
- "updatedAt": "2026-11-18T07:21:55.039Z"
+ "latest": "1.0.33",
+ "updatedAt": "2026-11-18T07:37:29.177Z"
 }
