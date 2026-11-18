@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.29",
+   "code": 30,
+   "date": "2026-11-18T05:39:42.956Z",
+   "bytes": 4974761,
+   "sha256": "c06280c934ece3a1959b92f910aca69cd6131a2b3b2843ed2b13f5141481eed7",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.29/pinpoint-caddie-1.0.29.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.29",
+   "notes": [
+    "Even easier: tapping a course starts hole 1 right away (course order and players default, change them under 더보기 → 코스·친구 바꾸기); one-line location prompt; easy-mode map shows only me, landing dot and flag line (no rings, hazard numbers, angle labels or glass chips); club advice as one sentence with a direction arrow, wind mentioned only when strong Real courses without green data: the first shot position is learned as the tee, the spot where the hole score is saved (far enough from the tee) is learned as the green, an estimated distance (hole length minus distance from tee) is shown meanwhile, and shots can be recorded and measured without a green Plain words on the shot result card (잰 값 / 추정 / 기계, 공중으로 간 거리, 굴러간 거리, 뜬 각도, 공 회전…), 4 numbers shown and the rest folded"
+   ]
+  },
+  {
    "version": "1.0.28",
    "code": 29,
    "date": "2026-11-18T04:46:11.027Z",
@@ -366,6 +378,6 @@
    ]
   }
  ],
- "latest": "1.0.28",
- "updatedAt": "2026-11-18T04:46:17.607Z"
+ "latest": "1.0.29",
+ "updatedAt": "2026-11-18T05:39:54.576Z"
 }
