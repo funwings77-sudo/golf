@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.23",
+   "code": 24,
+   "date": "2026-11-18T02:45:24.766Z",
+   "bytes": 4935155,
+   "sha256": "38f8b628f6cffe34903e9c65f53d3f03bd819f4422a2611d74e929dd43aa5c46",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.23/pinpoint-caddie-1.0.23.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.23",
+   "notes": [
+    "One-tap AR green view: '📷 AR로 그린 보기' on the putt distance card and in the hole tools list open the green screen straight on the AR tab (#/green?ar)"
+   ]
+  },
+  {
    "version": "1.0.22",
    "code": 23,
    "date": "2026-11-18T02:35:11.255Z",
@@ -294,6 +306,6 @@
    ]
   }
  ],
- "latest": "1.0.22",
- "updatedAt": "2026-11-18T02:35:17.440Z"
+ "latest": "1.0.23",
+ "updatedAt": "2026-11-18T02:45:30.791Z"
 }
