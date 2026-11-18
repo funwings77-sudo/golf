@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.32",
+   "code": 33,
+   "date": "2026-11-18T07:21:49.893Z",
+   "bytes": 4983975,
+   "sha256": "c5c11af5bfe5a0b5e677ec77ea621208e7bd1d9e948c9ec4086269c59c601dbd",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.32/pinpoint-caddie-1.0.32.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.32",
+   "notes": [
+    "Green reading in plain words (easy screen): tabs ① 재기 · ② 그린 지도 · ③ 카메라로 보기; green speed as 느려요/보통/빨라요 (Stimp number folded away, μ hidden); slope readings as '오르막이에요 · 오른쪽이 높아요 → 공이 왼쪽으로 휘어요'; result as '어디를 보고: 홀 왼쪽으로 27cm (컵 2.5개)' and '얼마나 세게: 퍼터를 뒤로 30cm 빼서 쳐요' with a bar, plus '한 번에 들어갈 / 두 번 안에 넣을 확률'; speech, map legend, AR hints and buttons rewritten; Monte Carlo table, initial speed and error assumptions stay in the detail screen"
+   ]
+  },
+  {
    "version": "1.0.31",
    "code": 32,
    "date": "2026-11-18T06:41:52.882Z",
@@ -402,6 +414,6 @@
    ]
   }
  ],
- "latest": "1.0.31",
- "updatedAt": "2026-11-18T06:41:57.646Z"
+ "latest": "1.0.32",
+ "updatedAt": "2026-11-18T07:21:55.039Z"
 }
