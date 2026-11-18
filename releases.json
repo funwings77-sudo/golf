@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.26",
+   "code": 27,
+   "date": "2026-11-18T03:21:00.146Z",
+   "bytes": 4956230,
+   "sha256": "d192ee5a42c5ea4c2833e85981281264f1db75173dd1462e1bada21e4b4eede4",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.26/pinpoint-caddie-1.0.26.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.26",
+   "notes": [
+    "Launch monitor input: enter ball speed (required), launch angle, spin, club speed, carry, total, side angle/offline and apex from a launch monitor on the shot result card or any saved shot, or add a monitor-only shot (range / simulator, no GPS); km/h·mph·m/s and m·yd units remembered, range checks catch unit mix-ups, values tagged 모니터/GPS/계산 per field, empty fields computed by the flight model, GPS distance kept when present, model-vs-monitor carry difference and smash factor shown; per-club stats prefer monitor ball speed, launch and spin"
+   ]
+  },
+  {
    "version": "1.0.25",
    "code": 26,
    "date": "2026-11-18T03:14:56.066Z",
@@ -330,6 +342,6 @@
    ]
   }
  ],
- "latest": "1.0.25",
- "updatedAt": "2026-11-18T03:15:07.675Z"
+ "latest": "1.0.26",
+ "updatedAt": "2026-11-18T03:21:05.122Z"
 }
