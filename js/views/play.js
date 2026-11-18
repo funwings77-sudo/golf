@@ -36,6 +36,8 @@ export default {
     else if (!P.step || (P.step !== 'club' && !activeCourse())) P.step = 'club';
     if (P.step === 'hole' && !S.round) P.step = activeCourse() ? 'course' : 'club';
     render();
+    // 공 찾기 화면에서 [찾았어요] → 여기서 거리 재기·결과 카드 (#/play?found)
+    if (/\?found\b/.test(location.hash)) { history.replaceState(null, '', '#/play'); if (shotOf()) setTimeout(found, 300); }
   },
   unmount() { teardown(); unPos?.(); unOri?.(); clearInterval(timer); unPos = unOri = null; },
   onHole() { if (P.step === 'hole') { adv = null; advKey = ''; P.ballPos = null; persist(); render(); } },
@@ -551,7 +553,7 @@ function actions() {
       : main('hit', '🏌️ 쳤어요!') + two(btn('scoreB', '📝', '홀 끝 · 점수'), btn('more', '🧰', '더보기'));
     const seen = () => { try { localStorage.setItem('pinpoint.hint.main', '1'); } catch {} };
     $('.a-main', box).addEventListener('click', seen);
-    $('#found')?.addEventListener('click', found); $('#lostb')?.addEventListener('click', () => App_.go('lost'));
+    $('#found')?.addEventListener('click', found); $('#lostb')?.addEventListener('click', toLost);
     $('#cancel')?.addEventListener('click', () => { const sc = S.round?.holes.find(x => x.n === shot.hole)?.scores[0]; if (sc?.strokes) sc.strokes--; delete S.round.liveShot; save('round'); toast('취소했어요'); update(true); });
     $('#greenHere')?.addEventListener('click', greenHere);
     $('#holed')?.addEventListener('click', quickScore); $('#scoreB')?.addEventListener('click', quickScore);
@@ -563,7 +565,7 @@ function actions() {
     box.innerHTML = `<button class="a-main" id="found">✅ 공 찾았어요!</button>
       <div class="a-row"><button id="aiB" class="ai-b">🤖 AI 캐디</button><button id="lostb">📡 공이 안 보여요</button><button id="cancel">↩ 취소</button></div>`;
     $('#found').onclick = found; $('#aiB').onclick = () => openAICaddie({ getFacts: aiFacts });
-    $('#lostb').onclick = () => { App_.go('lost'); };
+    $('#lostb').onclick = toLost;
     $('#cancel').onclick = () => { delete S.round.liveShot; save('round'); update(true); };
     return;
   }
@@ -822,6 +824,14 @@ async function hit() {
   save('round'); vibrate(80); speak(`공은 약 ${Math.round(distance(start, pred.center))}미터 앞에 있어요`);
   toast(`${h.n}번 홀 ${sc?.strokes || 1}타째 기록 · 이제 공을 찾으러 가요`, 3000);
   P.ballPos = null; persist(); update(true);
+}
+
+// 공이 안 보여요 → 공 찾기 화면에 친 자리·클럽·방향(가리킨 방향 > 조준 방향)을 넘겨 다시 입력하지 않게
+function toLost() {
+  const shot = shotOf();
+  if (shot) App_.pendingShot = { lat: shot.start.lat, lon: shot.start.lon, club: shot.club, clubName: shot.clubName, hole: shot.hole, ts: Date.now(), fromPlay: true,
+    bearing: shot.pointed ?? shot.aimBearing ?? (shot.pred ? bearing(shot.start, shot.pred) : null), pointed: shot.pointed != null };
+  App_.go('lost');
 }
 
 // 그린 위치를 모르는 홀: 예측 없이 친 자리·클럽만 기록 → [찾았어요]에서 실제 거리

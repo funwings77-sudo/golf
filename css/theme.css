@@ -203,3 +203,8 @@ main#view.full, main#view.play { padding-bottom: calc(var(--nav-h) + 26px + env(
 .cmp-deg small { font-size: 18px; } .cmp-deg b { font-size: 18px; color: var(--green2); margin-left: 4px; }
 .cmp-warn { min-height: 18px; margin-top: 4px; font-size: 13px; font-weight: 800; color: var(--danger); }
 #gArrow, #ballArrow { will-change: transform; }
+
+/* ---------- 🔍 공 찾기: 쉬운 말 ---------- */
+.lost-go { min-height: 60px; font-size: 18px; margin: 6px 0 2px; }
+.lost-opt { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; margin: 8px 0; border-radius: 16px; background: var(--green-soft); }
+.lost-opt b { font-size: 16px; } .lost-opt span { font-size: 13.5px; color: var(--sub); }

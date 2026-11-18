@@ -30,7 +30,12 @@ let cam = null; // { stop, raf }
 let lostLog = (() => { try { return JSON.parse(localStorage.getItem('pinpoint.lostLog') || '[]'); } catch { return []; } })();
 
 export default {
-  mount(el, App) { el_ = el; App_ = App; S.lost ? searchUI() : setupUI(); },
+  mount(el, App) {
+    el_ = el; App_ = App;
+    const ps = App.pendingShot; // 골프 치기에서 새로 넘어온 샷이면 예전 찾기 기록 대신 새로
+    if (S.lost && ps?.fromPlay && (S.lost.createdAt || 0) < ps.ts) { S.lost = null; save('lost'); }
+    S.lost ? searchUI() : setupUI();
+  },
   unmount() { cleanup(); },
 };
 function cleanup() {
@@ -50,33 +55,37 @@ function setupUI() {
   cleanup();
   const ps = App_.pendingShot && Date.now() - App_.pendingShot.ts < 10 * 60 * 1000 ? App_.pendingShot : null;
   const hole = activeHole();
-  const draft = { start: ps ? { lat: ps.lat, lon: ps.lon } : null, startSrc: ps ? (ps.auto ? '스윙 감지 위치' : '샷 기록 위치') : null, club: ps?.club || (hole && hole.tee && Sensors.pos && distance(hole.tee, Sensors.pos) < 30 ? 'D' : '7i'), bearing: null, bSrc: null, feel: 'normal', curve: 'straight' };
-  el_.innerHTML = `<h2>📡 분실구 안내</h2>
-    <div class="card"><b>정직한 전제</b><p class="sub">공 자체가 신호를 내지 않는 한 GPS만으로 정확한 위치는 알 수 없습니다. 낙하 지점을 확률로 추정해 탐색 범위를 반경 10~15m로 좁히고, 가까이 가면 카메라가 마지막 몇 미터를 찾아줍니다.</p></div>
-    <div class="card"><div class="row"><b class="grow">1. 샷 위치</b><span id="startLbl" class="sub"></span></div>
-      <div class="grid2" style="margin-top:8px"><button class="btn" id="stHere">📍 지금 위치</button>${hole?.tee ? '<button class="btn" id="stTee">⛳ 이 홀 티</button>' : '<span></span>'}</div>
+  const draft = { start: ps ? { lat: ps.lat, lon: ps.lon } : null, startSrc: ps ? (ps.fromPlay ? '방금 친 자리 ✓' : ps.auto ? '스윙 감지 위치' : '샷 기록 위치') : null, club: ps?.club || (hole && hole.tee && Sensors.pos && distance(hole.tee, Sensors.pos) < 30 ? 'D' : '7i'), bearing: null, bSrc: null, feel: 'normal', curve: 'straight', fromPlay: !!ps?.fromPlay };
+  // 골프 치기에서 왔으면 방향도 미리 (가리켜 저장한 방향 > 조준 방향) → 바로 [공 찾으러 가기] 가능, 바꾸고 싶으면 가리키기
+  if (ps?.fromPlay && ps.bearing != null) { draft.bearing = ps.bearing; draft.bSrc = ps.pointed ? '가리킨 방향' : '조준한 방향 · 바꿔도 돼요'; }
+  el_.innerHTML = `<h2>🔍 공 찾기</h2>
+    <p class="sub">공에는 신호가 없어서, 떨어졌을 만한 곳을 좁혀서 안내해요. 가까이 가면 카메라로 풀 속을 비춰 찾아요.</p>
+    ${draft.fromPlay ? `<button class="btn primary block lost-go" id="go2">🔍 바로 찾으러 가기</button><p class="sub center">친 자리·클럽·방향은 방금 기록으로 채웠어요. 공이 간 쪽이 다르면 아래 2번에서 가리켜 주세요.</p>` : ''}
+    <div class="card"><div class="row"><b class="grow">1. 공을 친 곳</b><span id="startLbl" class="sub"></span></div>
+      <div class="grid2" style="margin-top:8px"><button class="btn" id="stHere">📍 여기서 쳤어요</button>${hole?.tee ? '<button class="btn" id="stTee">⛳ 티에서 쳤어요</button>' : '<span></span>'}</div>
       <label class="f"><span>클럽</span><select id="club">${clubOptions(draft.club)}</select></label></div>
     <div class="card"><div class="row"><b class="grow">2. 공이 사라진 방향</b><span id="brgLbl" class="sub"></span></div>
-      <p class="sub">휴대폰 윗부분을 공이 사라진(떨어진) 쪽으로 향하게 들고 버튼을 누르세요. 나침반이 없으면 지도에서 그 방향을 탭하세요.</p>
+      <p class="sub">휴대폰 윗부분을 공이 날아간 쪽으로 향하고 버튼을 눌러요. 지도에서 그쪽을 눌러도 돼요.</p>
       <div class="cmp-wrap"><div class="cmp" aria-hidden="true">${dialSvg()}<div class="cmp-flag" id="cmpFlag" hidden><i>⛳</i></div>
           <div class="cmp-needle" id="liveArrow"><svg viewBox="0 0 120 120"><path d="M60 10 L74 62 L60 54 L46 62 Z" class="nd"/><path d="M60 110 L70 64 L60 70 L50 64 Z" class="nt"/><circle cx="60" cy="60" r="6" class="nc"/></svg></div></div>
         <div class="grow"><div class="cmp-deg" id="liveHead">—</div><div class="sub" id="liveWord">휴대폰 윗부분이 가리키는 방향</div><div class="cmp-warn" id="liveWarn"></div></div></div>
       <button class="btn primary block" id="capDir" style="margin-top:8px">🧭 이 방향으로 날아갔어요</button>
       <div class="mapwrap half" style="margin-top:10px;border-radius:12px;overflow:hidden;height:34vh;min-height:220px"><div class="map" id="map"></div></div>
-      <label class="f"><span>거리감</span><div class="seg" id="feelSeg"><button data-v="short">짧게 맞음</button><button data-v="normal" class="on">보통</button><button data-v="long">잘 맞음</button></div></label>
-      <label class="f"><span>휨 (가리킨 방향 기준 마지막 휨)</span><div class="seg" id="curveSeg"><button data-v="left">왼쪽</button><button data-v="straight" class="on">직선</button><button data-v="right">오른쪽</button></div></label>
-      <label class="f"><span>방향 확신도</span><div class="seg" id="sureSeg"><button data-v="5">확실</button><button data-v="8" class="on">대략</button><button data-v="14">잘 못 봄</button></div></label>
+      <label class="f"><span>얼마나 잘 맞았나요?</span><div class="seg" id="feelSeg"><button data-v="short">덜 맞았어요</button><button data-v="normal" class="on">보통</button><button data-v="long">잘 맞았어요</button></div></label>
+      <label class="f"><span>공이 끝에 휘었나요?</span><div class="seg" id="curveSeg"><button data-v="left">왼쪽으로</button><button data-v="straight" class="on">안 휘었어요</button><button data-v="right">오른쪽으로</button></div></label>
+      <label class="f"><span>날아간 쪽을 잘 봤나요?</span><div class="seg" id="sureSeg"><button data-v="5">잘 봤어요</button><button data-v="8" class="on">대충 봤어요</button><button data-v="14">못 봤어요</button></div></label>
     </div>
-    <button class="btn primary block" id="go" disabled>낙하 예상 구역 계산</button>`;
+    <button class="btn primary block" id="go" disabled>🔍 공 찾으러 가기</button>`;
   let sigma = 8;
   const upd = () => {
-    $('#startLbl').textContent = draft.start ? `${draft.startSrc}` : '미지정';
-    $('#brgLbl').textContent = draft.bearing != null ? `${Math.round(draft.bearing)}° (${draft.bSrc})` : '미지정';
+    $('#startLbl').textContent = draft.start ? `${draft.startSrc}` : '아직 안 정했어요';
+    $('#brgLbl').textContent = draft.bearing != null ? `${Math.round(draft.bearing)}° ${dirName(draft.bearing)} (${draft.bSrc})` : '아직 안 정했어요';
     $('#go').disabled = !(draft.start && draft.bearing != null);
+    if ($('#go2')) $('#go2').disabled = $('#go').disabled;
     drawSetupMap();
   };
   map = createMap($('#map'), { center: ll(draft.start || Sensors.pos || hole?.tee || { lat: 37.5, lon: 127 }), zoom: 17 });
-  if (map) { drawHole(map, hole); layer = L.layerGroup().addTo(map); map.on('click', e => { if (!draft.start) return toast('먼저 샷 위치를 지정하세요'); draft.bearing = bearing(draft.start, { lat: e.latlng.lat, lon: e.latlng.lng }); draft.bSrc = '지도'; upd(); }); }
+  if (map) { drawHole(map, hole); layer = L.layerGroup().addTo(map); map.on('click', e => { if (!draft.start) return toast('먼저 1번에서 공을 친 곳을 정해 주세요'); draft.bearing = bearing(draft.start, { lat: e.latlng.lat, lon: e.latlng.lng }); draft.bSrc = '지도'; upd(); }); }
   // 나침반 판의 깃발 표시 (샷 위치 → 오늘 핀/그린)
   const flagBrg = () => { const o = draft.start || Sensors.pos, f = hole?.pin || hole?.green; return o && f && distance(o, f) > 5 ? bearing(o, f) : null; };
   function placeFlag() { const fb = flagBrg(), el = $('#cmpFlag'); if (!el) return; el.hidden = fb == null; if (fb != null) el.style.transform = `rotate(${fb}deg)`; }
@@ -104,7 +113,7 @@ function setupUI() {
   $('#club').onchange = e => { draft.club = e.target.value; upd(); };
   $('#capDir').onclick = async () => {
     if (pointDeg() == null) return toast('나침반을 사용할 수 없습니다 — 지도에서 방향을 탭하세요');
-    if (!draft.start) return toast('먼저 샷 위치를 지정하세요');
+    if (!draft.start) return toast('먼저 1번에서 공을 친 곳을 정해 주세요');
     toast('🧭 1초만 그대로 들고 있어요…', 1200);
     const hs = []; const un = onOrientation(() => { const d = pointDeg(); if (d != null) hs.push(d); });
     await new Promise(r => setTimeout(r, 1000)); un();
@@ -126,6 +135,7 @@ function setupUI() {
     $('#liveWord').textContent = off == null ? '휴대폰 윗부분이 가리키는 방향' : Math.abs(off) < 1 ? '깃발 쪽을 똑바로 가리켜요' : `깃발에서 ${off > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.abs(off).toFixed(1)}°`;
     $('#liveWarn').textContent = s.compassAcc > 20 ? '🧲 나침반이 부정확해요 · 휴대폰을 8자로 몇 번 흔들어 주세요' : s.pointJitter > 4 && s.pointSpeed < 60 ? '✋ 손이 흔들려요 · 잠깐 멈춰 주세요' : ''; // 일부러 돌리는 중이면 경고 안 함
   });
+  $('#go2')?.addEventListener('click', () => $('#go').click());
   $('#go').onclick = () => {
     S.lost = { ...draft, sigma, marks: [], searched: [], createdAt: Date.now(), searchStartAt: null, hole: hole?.n || null };
     save('lost'); App_.pendingShot = null;
@@ -162,12 +172,12 @@ function searchUI() {
     <div id="radarBox" style="margin-top:10px;${view === 'radar' ? '' : 'display:none'}"><div class="radar"><canvas id="radar" width="600" height="600"></canvas></div></div>
     <div id="mapBox" class="mapwrap half" style="margin-top:10px;border-radius:14px;overflow:hidden;${view === 'map' ? '' : 'display:none'}"><div class="map" id="map"></div></div>
     <div class="card" id="guide"></div>
-    <div class="card tight"><div class="row"><span class="sub grow">탐색 시간 (규칙 18.2: 3분)</span><b id="tLeft">3:00</b></div><div class="timebar" id="tbar"><i style="width:0%"></i></div>
-      <div class="row" style="margin-top:8px"><button class="btn small" id="tStart">⏱ 탐색 시작</button><span class="sub grow">구역 안에 들어서면 자동 시작</span></div></div>
-    <div class="grid2"><button class="btn" id="bCam">📷 카메라 탐지</button><button class="btn" id="bSearched">🔍 여기 없음</button>
-      <button class="btn" id="bMark">👥 동반자 마킹</button><button class="btn" id="bRedo">↺ 다시 입력</button></div>
-    <div class="grid2" style="margin-top:8px"><button class="btn primary" id="bFound">✅ 찾았다!</button><button class="btn danger" id="bLost">✖ 못 찾음</button></div>
-    <p class="sub">반경 80% 탐색원 ${DU(est.r80)} · 파티클 ${est.parts.length}개 · 방위 오차 σ ${(L0.sigma * sigmaScale()).toFixed(1)}° ${lostLog.length >= 3 ? `(발견 기록 ${lostLog.length}건으로 보정)` : ''}</p>`;
+    <div class="grid2" style="margin-top:8px"><button class="btn primary" id="bFound">✅ 찾았어요!</button><button class="btn danger" id="bLost">😢 못 찾았어요</button></div>
+    <div class="card tight"><div class="row"><span class="sub grow">찾는 시간 (3분 안에 찾아야 해요)</span><b id="tLeft">3:00</b></div><div class="timebar" id="tbar"><i style="width:0%"></i></div>
+      <div class="row" style="margin-top:8px"><button class="btn small" id="tStart">⏱ 시작</button><span class="sub grow">찾을 곳에 들어가면 저절로 시작해요</span></div></div>
+    <div class="grid2"><button class="btn" id="bCam">📷 카메라로 찾기</button><button class="btn" id="bSearched">🙅 여기는 없어요</button>
+      <button class="btn" id="bMark">👥 친구가 본 곳</button><button class="btn" id="bRedo">↺ 처음부터</button></div>
+    <p class="sub">${S.settings.detail ? `반경 80% 탐색원 ${DU(est.r80)} · 파티클 ${est.parts.length}개 · 방위 오차 σ ${(L0.sigma * sigmaScale()).toFixed(1)}° ${lostLog.length >= 3 ? `(발견 기록 ${lostLog.length}건으로 보정)` : ''}` : `찾을 범위: 반지름 약 ${DU(est.r80)}${lostLog.length >= 3 ? ` · 지난 ${lostLog.length}번 찾은 기록으로 맞췄어요` : ''}`}</p>`;
   $$('#viewSeg button').forEach(b => b.onclick = () => { view = b.dataset.v; $$('#viewSeg button').forEach(x => x.classList.toggle('on', x === b)); $('#radarBox').style.display = view === 'radar' ? '' : 'none'; $('#mapBox').style.display = view === 'map' ? '' : 'none'; if (view === 'map') { setTimeout(() => map?.invalidateSize(), 30); drawSearchMap(true); } });
   map = createMap($('#map'), { center: ll(L0.start), zoom: 18 });
   if (map) {
@@ -175,7 +185,7 @@ function searchUI() {
     map.on('click', e => {
       if (!markMode) return;
       S.lost.marks.push({ lat: e.latlng.lat, lon: e.latlng.lng, sigma: 8 }); save('lost'); markMode = false;
-      $('#bMark').classList.remove('on'); toast('동반자 마킹 반영 — 구역을 좁혔습니다'); est = computeEst(); update(true);
+      $('#bMark').classList.remove('on'); toast('친구가 본 곳을 넣었어요 · 찾을 곳을 좁혔어요'); est = computeEst(); update(true);
     });
   }
   $('#tStart').onclick = startTimer;
@@ -183,14 +193,14 @@ function searchUI() {
   $('#bSearched').onclick = () => {
     if (!Sensors.pos) return toast('위치를 확인 중입니다');
     S.lost.searched.push({ lat: Sensors.pos.lat, lon: Sensors.pos.lon, r: 6 }); save('lost');
-    est = computeEst(); toast('수색 완료 표시 — 다음 유력 지점으로 안내합니다'); update(true);
+    est = computeEst(); toast('여기는 없다고 표시했어요 · 다음으로 있을 만한 곳으로 안내해요'); update(true);
   };
   $('#bMark').onclick = e => {
     sheet({
-      title: '동반자 마킹', body: '<p class="sub">동반자가 공을 본 위치를 알려주면 확률 구역이 좁아집니다.</p>',
+      title: '👥 친구가 본 곳', body: '<p class="sub">친구가 공이 떨어지는 걸 봤다면 그곳을 알려 주세요. 찾을 곳이 좁아져요.</p>',
       actions: [
-        { label: '지도에서 탭', onClick: () => { markMode = true; view = 'map'; $('#viewSeg button[data-v=map]').click(); $('#bMark').classList.add('on'); toast('동반자가 본 위치를 지도에서 탭하세요'); } },
-        { label: '지금 내 위치 근처', kind: 'primary', onClick: () => { if (!Sensors.pos) return; S.lost.marks.push({ lat: Sensors.pos.lat, lon: Sensors.pos.lon, sigma: 10 }); save('lost'); est = computeEst(); update(true); toast('반영했습니다'); } },
+        { label: '지도에서 누르기', onClick: () => { markMode = true; view = 'map'; $('#viewSeg button[data-v=map]').click(); $('#bMark').classList.add('on'); toast('친구가 본 곳을 지도에서 눌러 주세요'); } },
+        { label: '지금 내가 선 곳 근처', kind: 'primary', onClick: () => { if (!Sensors.pos) return; S.lost.marks.push({ lat: Sensors.pos.lat, lon: Sensors.pos.lon, sigma: 10 }); save('lost'); est = computeEst(); update(true); toast('반영했습니다'); } },
       ],
     });
   };
@@ -214,12 +224,12 @@ function update(redrawMap = false) {
   const hd = pointDeg(), rel = relativeArrow(gd.bearing, hd);
   const trendTxt = { closer: '🔥 가까워짐', farther: '🧊 멀어짐', same: '' }[gd.trend];
   if (!$('#gArrow', g)) g.innerHTML = `<div class="row"><div class="arrow-big" id="gArrow">⬆</div>
-    <div class="grow"><div class="sub" id="gSub"></div><div class="big" id="gDist"></div><div><b id="gTrend"></b></div></div></div><p id="gNear" style="margin:8px 0 0" hidden><b>15m 이내 진입</b> — 카메라 탐지로 풀 속 공을 찾으세요.</p>`;
+    <div class="grow"><div class="sub" id="gSub"></div><div class="big" id="gDist"></div><div><b id="gTrend"></b></div></div></div><p id="gNear" style="margin:8px 0 0" hidden><b>가까워요!</b> 📷 카메라로 풀 속을 비춰 보세요.</p>`;
   spin($('#gArrow', g), rel);
-  $('#gSub', g).textContent = `유력 지점까지${hd == null ? ` (북쪽 기준 방위 ${Math.round(gd.bearing)}°)` : ''}`;
+  $('#gSub', g).textContent = `공이 있을 만한 곳까지${hd == null ? ` (${dirName(gd.bearing)}쪽)` : ''}`;
   $('#gDist', g).innerHTML = DU(gd.dist).replace(/(m|yd)$/, '<small>$1</small>'); $('#gTrend', g).textContent = trendTxt; $('#gNear', g).hidden = !gd.nearDetect;
   if (gd.inZone && !S.lost.searchStartAt) startTimer(true);
-  if (gd.nearDetect && !update._prompted) { update._prompted = true; vibrate([100, 60, 100]); speak('15미터 이내입니다. 카메라 탐지를 켜세요'); }
+  if (gd.nearDetect && !update._prompted) { update._prompted = true; vibrate([100, 60, 100]); speak('가까워요. 카메라로 풀 속을 비춰 보세요'); }
   drawRadar();
   if (redrawMap || view === 'map') drawSearchMap(redrawMap);
 }
@@ -331,6 +341,11 @@ function stopCam() { if (cam) { clearTimeout(cam.t); cam.stop && cam.stop(); cam
 // ---------- 결과 처리 ----------
 async function found() {
   const L0 = S.lost;
+  // 골프 치기에서 온 공: 거리 재기·결과 카드는 골프 치기 쪽 [찾았어요]가 맡음 (기록 한 번만)
+  if (L0.fromPlay && S.round?.liveShot) {
+    if (Sensors.pos && est?.stats) { const q = toLocal(L0.start, Sensors.pos), st = est.stats, dx = q.x - st.mean.x, dy = q.y - st.mean.y, c = Math.cos(st.angle), s = Math.sin(st.angle); lostLog.push({ ts: Date.now(), z2: ((dx * c + dy * s) / Math.max(2, st.sd1)) ** 2 + ((-dx * s + dy * c) / Math.max(2, st.sd2)) ** 2, err: Math.hypot(dx, dy), club: L0.club }); try { localStorage.setItem('pinpoint.lostLog', JSON.stringify(lostLog.slice(-50))); } catch {} }
+    vibrate([80, 60, 80]); S.lost = null; save('lost'); App_.go('play?found'); return;
+  }
   const f = Sensors.pos ? await sampleFix(1500) : null;
   if (f) {
     const q = toLocal(L0.start, f);
@@ -356,12 +371,14 @@ async function found() {
 function notFound() {
   const rule = RULES.find(r => r.id === 'lost');
   sheet({
-    title: '분실구 처리', body: `<p class="sub">규칙 ${rule.rule}</p><ul class="tips">${rule.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ul>
-      ${S.round ? '<p class="sub">선택하면 현재 홀 스코어에 벌타와 분실구 1개가 기록됩니다 (공 소모 추적).</p>' : ''}`,
+    title: '😢 공을 못 찾았어요', body: `<p>둘 중 하나로 이어서 쳐요. 점수에 벌타가 저절로 더해져요.</p>
+      <div class="lost-opt"><b>① 친 곳에서 다시 치기</b><span>1타를 더해요 (벌타 1). 어디서나 되는 기본 방법이에요.</span></div>
+      <div class="lost-opt"><b>② 잃어버린 곳 근처에 공 놓고 치기</b><span>2타를 더해요 (벌타 2). 골프장이 허락할 때만 돼요 (친선 경기에서 많이 써요).</span></div>
+      <details class="sub"><summary>규칙 자세히 (${esc(rule.rule)})</summary><ul class="tips">${rule.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>`,
     actions: [
       { label: '취소' },
-      { label: 'E-5 (2벌타)', onClick: () => finishLost(2) },
-      { label: '스트로크와 거리 (1벌타)', kind: 'primary', onClick: () => finishLost(1) },
+      { label: '② 근처에서 (+2)', onClick: () => finishLost(2) },
+      { label: '① 다시 치기 (+1)', kind: 'primary', onClick: () => finishLost(1) },
     ],
   });
 }
@@ -378,6 +395,9 @@ function finishLost(pen) {
     const h = S.round.holes.find(x => x.n === (S.lost.hole || S.ui.hole));
     if (h) { const sc = h.scores[0]; sc.penalties += pen; sc.lost += 1; sc.strokes += pen; save('round'); }
   }
-  toast(`${pen}벌타 · 분실구 1개 기록` + (pen === 1 ? ' — 직전 샷 위치에서 다시 치세요' : ' — 분실 지점 근처 페어웨이 쪽에 드롭'));
-  S.lost = null; save('lost'); setupUI();
+  toast(`벌타 ${pen}타를 더했어요` + (pen === 1 ? ' · 친 곳에서 다시 쳐요' : ' · 잃어버린 곳 근처 페어웨이 쪽에 공을 놓고 쳐요'), 4000);
+  const back = S.lost?.fromPlay && S.round?.liveShot;
+  if (back) { delete S.round.liveShot; save('round'); } // 골프 치기의 '찾으러 가는 중' 끝내기
+  S.lost = null; save('lost');
+  if (back) App_.go('play'); else setupUI();
 }
