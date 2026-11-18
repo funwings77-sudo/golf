@@ -7,8 +7,8 @@ android {
         applicationId "io.github.funwings77sudo.pinpoint"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "1.0.20"
+        versionCode 22
+        versionName "1.0.21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +16,23 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Google Play 업로드 키: 저장소 밖 ~/.android/pinpoint-upload.properties (PINPOINT_UPLOAD_PROPS로 다른 위치 지정)
+    def uploadProps = new Properties()
+    def uploadFile = file(System.getenv('PINPOINT_UPLOAD_PROPS') ?: "${System.getProperty('user.home')}/.android/pinpoint-upload.properties")
+    if (uploadFile.exists()) uploadFile.withInputStream { uploadProps.load(it) }
+    signingConfigs {
+        if (uploadProps['storeFile']) {
+            upload {
+                storeFile file(uploadProps['storeFile'])
+                storePassword uploadProps['storePassword']
+                keyAlias uploadProps['keyAlias']
+                keyPassword uploadProps['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (uploadProps['storeFile']) signingConfig signingConfigs.upload
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
