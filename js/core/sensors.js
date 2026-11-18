@@ -33,19 +33,31 @@ function kalman(fix) {
 }
 function pushPos(p) { Sensors.pos = p; posSubs.forEach(f => f(p)); }
 
+// 위치 상태 (화면 안내용): waiting 찾는 중 · ok · weak 신호 약함(오차 80m 넘음) · denied 허락 안 됨 · unsupported
+//  gpsSince: 찾기 시작한 시각 (30초 넘게 못 찾으면 '지도에서 내 위치 누르기' 안내)
 export function startGPS() {
   if (simOn) return;
-  if (watchId != null || !('geolocation' in navigator)) return;
+  if (!('geolocation' in navigator)) { Sensors.gpsState = 'unsupported'; return; }
+  if (watchId != null) return;
+  if (Sensors.gpsState !== 'ok') { Sensors.gpsState = 'waiting'; Sensors.gpsSince = Date.now(); }
   watchId = navigator.geolocation.watchPosition(
     g => {
       const fix = { lat: g.coords.latitude, lon: g.coords.longitude, acc: g.coords.accuracy || 10, alt: g.coords.altitude, ts: Date.now() };
-      if (fix.acc > 80) return;
+      if (fix.acc > 80) { Sensors.gpsWeakAcc = Math.round(fix.acc); if (!Sensors.pos) Sensors.gpsState = 'weak'; posSubs.forEach(f => f(Sensors.pos, null)); return; }
+      Sensors.gpsState = 'ok'; Sensors.gpsWeakAcc = null;
       pushPos(kalman(fix));
     },
-    err => { console.warn('GPS', err.message); posSubs.forEach(f => f(null, err)); },
+    err => {
+      console.warn('GPS', err.code, err.message);
+      if (err.code === 1) { Sensors.gpsState = 'denied'; stopGPS(); } // 허락이 안 되면 감시를 멈춰야 나중에 다시 시작할 수 있음
+      else if (!Sensors.pos) Sensors.gpsState = 'weak';
+      posSubs.forEach(f => f(null, err));
+    },
     { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 },
   );
 }
+// 다시 시도 (설정에서 허락한 뒤 앱으로 돌아왔을 때 · [다시 찾기] 버튼)
+export function restartGPS() { stopGPS(); Sensors.gpsState = 'waiting'; Sensors.gpsSince = Date.now(); startGPS(); }
 export function stopGPS() { if (watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null; }
 export function onPos(fn) { posSubs.add(fn); if (Sensors.pos) fn(Sensors.pos); return () => posSubs.delete(fn); }
 

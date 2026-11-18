@@ -33,12 +33,16 @@ function render() {
   $$('.stepper button', el_).forEach(b => b.onclick = () => {
     const sc = h.scores[+b.dataset.p], k = b.dataset.k, d = +b.dataset.d;
     if (k === 'strokes') sc.strokes = Math.max(0, (sc.strokes || (d > 0 ? h.par - 1 : 0)) + d);
-    else sc.putts = Math.max(0, sc.putts + d);
+    else {
+      const before = sc.putts; sc.putts = Math.max(0, sc.putts + d);
+      // 아직 저장 안 한 홀의 타수는 [쳤어요] 횟수(퍼트 빼고) → 그린에서 친 횟수를 더하면 합계에도 더함
+      if (!sc.saved && sc.strokes) sc.strokes = Math.max(sc.putts, sc.strokes + (sc.putts - before));
+    }
     if (k === 'putts' && sc.strokes && sc.putts > sc.strokes) sc.strokes = sc.putts;
     sc.saved = true; save('round'); render();
   });
   $$('td[data-h]', el_).forEach(td => td.onclick = () => App_.setHole(+td.dataset.h));
-  $('#par').onclick = () => { h.scores.forEach(s => { if (!s.strokes) s.strokes = h.par; s.saved = true; }); save('round'); render(); };
+  $('#par').onclick = () => { h.scores.forEach(s => { if (!s.strokes) { s.strokes = h.par; s.saved = true; } }); save('round'); render(); }; // 이미 친 기록이 있는 사람은 그대로
   $('#next').onclick = () => App_.stepHole(1);
   $('#share')?.addEventListener('click', async () => {
     const txt = `[PinPoint] ${r.courseName} 내기 계산\n` + st.lines.join('\n') + '\n' + st.transfers.map(t => `${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
@@ -47,7 +51,9 @@ function render() {
   $('#end').onclick = async () => {
     if (!(await confirmSheet('오늘 라운드 끝내기', '점수를 저장하고 오늘 라운드를 끝낼까요?', '저장하고 끝내기', 'danger'))) return;
     r.endedAt = new Date().toISOString(); r.totals = totals(r);
-    S.rounds.unshift(r); S.round = null; save('rounds', 'round');
+    S.rounds.unshift(r);
+    if (!save('rounds')) { S.rounds.shift(); delete r.endedAt; toast('⚠ 저장 공간이 부족해서 저장하지 못했어요 · 설정 → 내 기록 지키기', 5000); return; }
+    S.round = null; S.lost = null; save('round', 'lost');
     keepAwake(false); toast('🎉 라운드를 저장했어요'); App_.go('history');
   };
 }

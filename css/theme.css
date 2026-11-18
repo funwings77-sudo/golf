@@ -227,3 +227,9 @@ main#view.full, main#view.play { padding-bottom: calc(var(--nav-h) + 26px + env(
 .sc-row .stepper { border-radius: 999px; }
 details.card > summary { cursor: pointer; list-style-position: outside; padding: 2px 0; }
 details.card[open] > summary { margin-bottom: 8px; }
+.st-bar { height: 10px; border-radius: 5px; background: var(--green-soft); overflow: hidden; margin: 12px 0 4px; }
+.st-bar i { display: block; height: 100%; background: var(--green2); border-radius: 5px; } .st-bar i.hot { background: var(--danger); }
+.bd-bot.three { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 6px; background: transparent; box-shadow: none; }
+.bd-bot.three button { min-height: 56px; border-radius: 16px; font-size: 13.5px; flex-direction: column; gap: 2px; background: var(--glass-d); border: 1px solid var(--glass-b); color: #fff; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.bd-bot.three button i { font-style: normal; font-size: 20px; }
+.qs-fr { display: grid; gap: 6px; } .qs-fr > div { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 14px; background: var(--green-soft); } .qs-fr .stepper b { min-width: 30px; text-align: center; font-size: 19px; }

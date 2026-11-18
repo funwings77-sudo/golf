@@ -1,6 +1,7 @@
 // ⚙️ 설정: 쉬운 질문으로 (키·실력·빠르기를 고르면 필요한 숫자는 앱이 계산) · 전문가 숫자는 맨 아래에 접어 둠
-import { S, save, MODES, defaultBag } from '../core/state.js';
-import { requestMotionPermission, Sensors, startOrientation } from '../core/sensors.js';
+import { S, save, MODES, defaultBag, exportAll, importAll, storageReport } from '../core/state.js';
+import { saveFile, pickTextFile } from '../core/files.js';
+import { requestMotionPermission, Sensors, startOrientation, restartGPS } from '../core/sensors.js';
 import { $, $$, toast, confirmSheet, esc } from '../ui.js';
 import { getKey, setKey, getModel, setModel, hasKey, testConnection, usageToday } from '../core/gemini.js';
 
@@ -46,7 +47,7 @@ export default {
         <label class="f"><span>우리 골프장 그린 빠르기</span>${seg('spdSeg', SPEED, near(st.stimp, SPEED))}</label></div>
       <div class="card"><b>경기 방식</b>${seg('mode', Object.entries(MODES).map(([k, m]) => [k, m.label]), st.mode)}<p class="sub">${MODES[st.mode].desc}</p></div>
       <div class="card">${SW.map(([k, n, d]) => `<label class="switch"><span><b>${n}</b>${d ? `<br><span class="sub">${d}</span>` : ''}</span><input type="checkbox" data-sw="${k}" ${st[k] ? 'checked' : ''}></label>`).join('')}</div>
-      <div class="card"><b>🧭 나침반·기울기</b><p class="sub">${sensorOk ? '✅ 쓰고 있어요' : '아이폰은 한 번 허락해야 나침반·기울기를 쓸 수 있어요.'} · 위치 ${Sensors.pos ? '✅' : '아직'}</p>${sensorOk ? '' : '<button class="btn block" id="perm">허락하기</button>'}</div>
+      <div class="card"><b>📍 위치 · 🧭 나침반</b><p class="sub">위치 ${Sensors.pos ? '✅ 쓰고 있어요' : Sensors.gpsState === 'denied' ? '❌ 꺼져 있어요 · 휴대폰 설정 → 애플리케이션 → PinPoint 캐디 → 권한 → 위치를 허용해 주세요' : '아직 못 찾았어요'} · 나침반·기울기 ${sensorOk ? '✅' : '아직'}</p>${sensorOk && Sensors.pos ? '' : '<button class="btn block" id="perm">↻ 다시 허락받기 · 찾기</button>'}</div>
       <details class="card ai-set" id="aiSet" ${hasKey() ? '' : ''}><summary><b>🤖 AI 캐디 (선택)</b> <span class="sub">${hasKey() ? '✓ 켜짐' : '꺼짐 · 구글 키가 있으면 켤 수 있어요'}</span></summary>
         <p class="sub">질문에 쉬운 말로 답하고, 라운드를 돌아보며 연습할 거리를 알려 줘요. <b>거리·클럽·힘·방향 숫자는 PinPoint가 계산</b>하고, AI 답에 다른 숫자가 있으면 저절로 걸러 내요.</p>
         <label class="f"><span>Gemini API 키 ${hasKey() ? '<b style="color:var(--green)">✓ 저장됨</b>' : ''}</span><input type="password" id="gKey" autocomplete="off" spellcheck="false" placeholder="AIza… (Google AI Studio에서 무료 발급)" value="${esc(getKey())}"></label>
@@ -56,6 +57,17 @@ export default {
       <details class="card"><summary><b>🔧 전문가 숫자</b> <span class="sub">(보통은 안 바꿔도 돼요)</span></summary>
         <div class="grid2">${num('hcp', '핸디캡', 0, 54, 1)}${num('stimp', '그린 스피드 (스팀프)', 6, 14, 0.5, 'ft')}${num('eyeHeight', '눈높이 (AR 퍼팅)', 1.0, 2.0, 0.01, 'm')}${num('phoneHeight', '가슴 높이 (공 탐지)', 0.8, 1.8, 0.01, 'm')}${num('stepLen', '한 걸음 길이', 0.4, 1.2, 0.01, 'm')}${num('cameraVFov', '카메라 세로 화각', 40, 90, 1, '°')}${num('aimSigma', '조준 오차 σ', 0.3, 4, 0.1, '°')}${num('speedSigma', '세기 오차 σ (0.06=6%)', 0.02, 0.2, 0.01)}${num('roundsPerMonth', '한 달 라운드 수 (공 소모 예측)', 0, 30, 1, '회')}</div>
         <label class="switch"><span><b>가짜 위치로 테스트</b><br><span class="sub">집 안에서 시험할 때 지도를 눌러 내 위치를 정해요 (GPS 시뮬레이션)</span></span><input type="checkbox" data-sw="simGPS" ${st.simGPS ? 'checked' : ''}></label></details>
+      ${(() => {
+        const rep = storageReport(), mb = rep.total / 1024, pct = Math.min(100, mb / 5 * 100), lb = +localStorage.getItem('pinpoint.lastBackup') || 0;
+        const days = lb ? Math.floor((Date.now() - lb) / 86400000) : null;
+        return `<div class="card" id="storageCard"><b>💾 내 기록 지키기</b>
+          <p class="sub">기록은 이 휴대폰 안에만 있어요. <b>앱을 지웠다 다시 깔거나 휴대폰을 바꾸면 사라져요.</b> 가끔 백업 파일을 만들어 카톡·드라이브에 보관하세요.</p>
+          <p class="sub">마지막 백업: <b>${days == null ? '아직 안 했어요' : days === 0 ? '오늘' : `${days}일 전`}</b> · 라운드 ${S.rounds.length}개 · 샷 ${S.shots.length}개</p>
+          <div class="grid2"><button class="btn primary" id="bkSave">💾 백업 파일 만들기</button><button class="btn" id="bkLoad">📂 백업에서 되살리기</button></div>
+          <div class="st-bar" aria-label="저장 공간 ${pct.toFixed(0)}% 사용"><i style="width:${pct}%" class="${pct > 80 ? 'hot' : ''}"></i></div>
+          <p class="sub">저장 공간 ${mb < 1 ? `${Math.round(rep.total)}KB` : `${mb.toFixed(1)}MB`} / 약 5MB 사용 중${pct > 80 ? ' · <b style="color:var(--danger)">거의 찼어요</b>' : ''}</p>
+          <button class="btn block" id="bkClean">🧹 받아 둔 골프장 목록·공지 지우기 <small>(다시 받을 수 있어요)</small></button></div>`;
+      })()}
       <button class="btn danger block" id="wipe">🗑 모든 기록 지우기</button>`;
     const re = () => this.mount(el);
     const onSeg = (id, fn) => $$(`#${id} button`).forEach(b => b.onclick = () => { fn(b.dataset.v); save('settings'); re(); });
@@ -69,7 +81,7 @@ export default {
     $('#myH').onchange = e => { const cm = Math.round(+e.target.value); if (!(cm >= 100 && cm <= 210)) return toast('키를 cm로 넣어 주세요 (예: 170)'); st.myHeight = cm; Object.assign(st, fromHeight(cm)); save('settings'); toast(`눈높이 ${st.eyeHeight}m로 맞췄어요`); };
     $$('[data-num]').forEach(i => i.onchange = () => { const v = +i.value; if (isFinite(v)) { st[i.dataset.num] = v; save('settings'); toast('저장했어요'); } });
     $$('[data-sw]').forEach(i => i.onchange = () => { st[i.dataset.sw] = i.checked; save('settings'); });
-    $('#perm')?.addEventListener('click', async () => { const ok = await requestMotionPermission(); startOrientation(); if ('geolocation' in navigator) navigator.geolocation.getCurrentPosition(() => {}, () => {}); toast(ok ? '허락했어요' : '허락이 안 됐거나 필요 없는 휴대폰이에요'); setTimeout(re, 1200); });
+    $('#perm')?.addEventListener('click', async () => { const ok = await requestMotionPermission(); startOrientation(); restartGPS(); toast(ok ? '허락했어요 · 위치를 다시 찾고 있어요' : '위치를 다시 찾고 있어요'); setTimeout(re, 1200); });
     $('#gTest').onclick = async () => {
       const k = $('#gKey').value.trim(), st2 = $('#gStat');
       if (!/^[A-Za-z0-9_\-]{20,}$/.test(k)) { st2.textContent = '⚠ 키 모양이 이상해요. 복사한 키 전체를 붙여 넣어 주세요'; return; }
@@ -78,6 +90,26 @@ export default {
       catch (e) { st2.textContent = '❌ ' + e.message; }
     };
     $('#gDel').onclick = () => { setKey(''); setModel(''); $('#gKey').value = ''; $('#gStat').textContent = '키를 지웠어요. AI 기능이 꺼졌어요'; };
+    $('#bkSave').onclick = async () => {
+      try {
+        const txt = JSON.stringify(exportAll());
+        const r = await saveFile(`pinpoint-backup-${new Date().toISOString().slice(0, 10)}.json`, txt, 'application/json', 'PinPoint 백업');
+        if (r.ok) { localStorage.setItem('pinpoint.lastBackup', String(Date.now())); toast(`💾 백업 파일을 만들었어요 (${Math.round(txt.length / 1024)}KB) · 카톡·드라이브에 보관하세요`, 4000); re(); }
+      } catch (e) { toast('백업하지 못했어요: ' + e.message, 4000); }
+    };
+    $('#bkLoad').onclick = async () => {
+      try {
+        const txt = await pickTextFile(); if (!txt) return;
+        const data = JSON.parse(txt);
+        if (!(await confirmSheet('백업에서 되살리기', '백업 파일의 라운드·샷 기록을 지금 기록에 합치고, 설정·클럽 거리는 백업 값으로 바꿔요. 계속할까요?', '되살리기'))) return;
+        const r = importAll(data); toast(`되살렸어요 · 라운드 ${r.rounds}개 · 샷 ${r.shots}개`, 3000); setTimeout(() => location.reload(), 1200);
+      } catch (e) { toast('되살리지 못했어요: ' + (e instanceof SyntaxError ? '백업 파일이 아니에요' : e.message), 4000); }
+    };
+    $('#bkClean').onclick = () => {
+      const keys = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith('pinpoint.remote.') || k?.startsWith('pinpoint.corrupt.') || k === 'pinpoint.errlog') keys.push(k); }
+      keys.forEach(k => localStorage.removeItem(k)); toast(`정리했어요 (${keys.length}개)`); re();
+    };
+    if (/\?storage/.test(location.hash)) setTimeout(() => $('#storageCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
     $('#wipe').onclick = async () => {
       if (!(await confirmSheet('모든 기록 지우기', '골프장·라운드·샷 기록·설정을 모두 지워요. 되돌릴 수 없어요.', '모두 지우기', 'danger'))) return;
       Object.keys(localStorage).filter(k => k.startsWith('pinpoint.')).forEach(k => localStorage.removeItem(k));

@@ -25,15 +25,18 @@ async function fetchJSON(path, { timeout = 8000, cacheKey = null } = {}) {
     return j;
   } catch (e) {
     if (cacheKey) { const c = cacheGet(cacheKey); if (c) return c.data; }
+    // 처음 쓰는데 인터넷이 약하면: 앱에 함께 넣어 둔 목록(골프장 목록·코스 목록)으로
+    if (BUNDLED.has(path)) { try { const b = await fetch('data/' + path); if (b.ok) return await b.json(); } catch {} }
     throw e;
   } finally { clearTimeout(t); }
 }
+const BUNDLED = new Set(['clubs.json', 'catalog.json']);
 
 export const officialId = c => c?.official?.id || null;
 export const findInstalled = id => S.courses.find(c => officialId(c) === id) || null;
 
 export async function getCatalog() {
-  const j = await fetchJSON('catalog.json', { cacheKey: 'catalog' });
+  const j = await fetchJSON('catalog.json', { cacheKey: 'catalog', timeout: 5000 });
   return j?.courses || [];
 }
 
@@ -79,8 +82,9 @@ export async function syncPins(course) {
     if (!h.pin || h.pin.src !== 'official' || h.pin.lat !== q.lat || h.pin.lon !== q.lon) changed++;
     h.pin = { lat: q.lat, lon: q.lon, ts, src: 'official', depth: q.depth, side: q.side };
   }
+  const prev = JSON.stringify(course.todayPins || null);
   course.todayPins = { date: p.date, stimp: p.stimp, note: p.note || '', updatedAt: p.updatedAt };
-  save('courses');
+  if (changed || prev !== JSON.stringify(course.todayPins)) save('courses'); // 5분마다 전체 골프장 데이터를 다시 쓰지 않게
   return { changed, ...course.todayPins };
 }
 
@@ -99,6 +103,6 @@ export function pendingUpdates(catalog) {
 
 // 전국 골프장 목록 (KGBA 회원사 209곳 · 기본정보·요금·대략 위치)
 export async function getClubs() {
-  const j = await fetchJSON('clubs.json', { cacheKey: 'clubs' });
+  const j = await fetchJSON('clubs.json', { cacheKey: 'clubs', timeout: 5000 });
   return j?.clubs || [];
 }

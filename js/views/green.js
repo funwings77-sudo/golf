@@ -144,7 +144,7 @@ function measureTab(body, canSlope) {
   $('#dSteps')?.addEventListener('click', stepsSheet);
   $('#dCam')?.addEventListener('click', () => { G.tab = 'ar'; G.arMode = 'distance'; render(); });
   $('#dGps')?.addEventListener('click', () => {
-    const h = activeHole(), pin = h?.pin; if (!pin || !Sensors.pos) return toast('기록된 핀 위치와 GPS가 필요합니다');
+    const h = activeHole(), pin = h?.pin; if (!pin || !Sensors.pos) return toast('깃발 위치와 내 위치를 알아야 잴 수 있어요 · 걸어서 재기를 써 보세요', 3500);
     G.D = +distance(Sensors.pos, pin).toFixed(1); G.distSrc = `GPS ±${Math.round(Sensors.pos.acc || 4)}m`; saveG(); render();
   });
   $('#calc').onclick = compute;
@@ -156,7 +156,7 @@ function slopeText(m) {
 
 // 기울기 센서 측정 (gx: 오른쪽 방향 경사, gy: 홀 방향 경사). 정밀 모드는 180° 회전 2회로 센서 바이어스 상쇄
 async function measureSlope(key) {
-  if (Sensors.beta == null) return toast('기울기 센서를 사용할 수 없습니다 (설정 → 센서 권한)');
+  if (Sensors.beta == null) return toast('기울기를 읽을 수 없어요 · 설정 → 📍 위치·🧭 나침반에서 다시 허락해 주세요', 3500);
   const bias = S.calib.tilt || { beta: 0, gamma: 0 };
   const run = async () => {
     const a = await sampleTilt(2000);

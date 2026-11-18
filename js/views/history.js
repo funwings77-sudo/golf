@@ -5,6 +5,7 @@ import { buildRoundReport } from '../core/report.js';
 import { $, $$, esc, confirmSheet, DU, sheet, toast } from '../ui.js';
 import { reviewRounds } from '../core/aicaddie.js';
 import { hasKey } from '../core/gemini.js';
+import { saveFile } from '../core/files.js';
 
 // 홀별 색 막대 (이글 보라 · 버디 파랑 · 파 초록 · 보기 노랑 · 더블+ 주황)
 function holeBar(r) {
@@ -120,14 +121,13 @@ async function aiReview(rounds, me) {
 }
 
 // CSV 내보내기 (엑셀에서 바로 열림 · 한글 깨짐 방지 BOM)
-function exportCSV(rounds) {
+async function exportCSV(rounds) {
   const rows = [['날짜', '골프장', '모드', '홀', '파', '타수', '퍼트', '티샷', '벌타', '분실구']];
   const FW = { L: '왼쪽', C: '페어웨이', R: '오른쪽' };
   for (const r of rounds) for (const h of r.holes) { const sc = h.scores?.[0] || {}; if (!sc.strokes) continue; rows.push([new Date(r.date).toLocaleDateString(), r.courseName, MODES[r.mode]?.label || r.mode, h.n, h.par, sc.strokes, sc.putts || 0, FW[sc.fw] || '', sc.penalties || 0, sc.lost || 0]); }
   const csv = '\ufeff' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `pinpoint-rounds-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  toast(`${rows.length - 1}개 홀 기록을 CSV로 저장했어요`);
+  try { const r = await saveFile(`pinpoint-rounds-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv', 'PinPoint 라운드 기록'); if (r.ok) toast(`${rows.length - 1}개 홀 기록을 내보냈어요`); }
+  catch (e) { toast('내보내지 못했어요: ' + e.message, 4000); }
 }
 
 // 골프장별 성적
@@ -189,13 +189,8 @@ function shareReport(r) {
     actions: [{ label: '닫기' }, {
       label: '📤 파일 보내기', kind: 'primary', onClick: async () => {
         const txt = JSON.stringify(rep), name = `pinpoint-round-${rep.courseId || 'course'}-${rep.date}.json`;
-        try {
-          const file = new File([txt], name, { type: 'application/json' });
-          if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'PinPoint 라운드 리포트' }); return; }
-        } catch (e) { if (e.name === 'AbortError') return; }
-        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = name; a.click();
-        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-        toast('리포트 파일을 저장했습니다');
+        try { const r = await saveFile(name, txt, 'application/json', 'PinPoint 라운드 리포트'); if (r.ok && r.how === 'download') toast('리포트 파일을 저장했어요'); }
+        catch (e) { toast('보내지 못했어요: ' + e.message, 4000); }
       },
     }],
   });

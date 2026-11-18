@@ -10,10 +10,29 @@ export const HZ_STYLE = {
 };
 export const SAT_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 
+let CachedTiles = null;
+function cachedTileLayer() {
+  return CachedTiles ||= L.TileLayer.extend({
+    createTile(coords, done) {
+      const img = document.createElement('img'), url = this.getTileUrl(coords);
+      img.alt = ''; img.setAttribute('role', 'presentation');
+      img.onload = () => done(null, img); img.onerror = e => done(e, img);
+      const net = () => { img.src = url; };
+      caches.open('pinpoint-tiles').then(c => c.match(url)).then(r => {
+        if (!r || r.type === 'opaque') return net();
+        return r.blob().then(b => { const u = URL.createObjectURL(b); img.onload = () => { URL.revokeObjectURL(u); done(null, img); }; img.src = u; });
+      }).catch(net);
+      return img;
+    },
+  });
+}
+
 export function createMap(el, { center = [37.5, 127], zoom = 17, me = true } = {}) {
   if (!window.L) { el.innerHTML = '<div class="map-off">지도 라이브러리를 불러오지 못했습니다 (오프라인). 거리 계산은 계속 동작합니다.</div>'; return null; }
   const map = L.map(el, { zoomControl: false, attributionControl: true, maxZoom: 21, tap: true }).setView(center, zoom);
-  L.tileLayer(SAT_URL, { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' }).addTo(map);
+  // 앱(APK)에는 서비스 워커가 없어서, 미리 받은 타일(Cache Storage)을 지도 칸이 직접 꺼내 씀 → 신호 없는 코스에서도 위성 지도
+  const native = !!window.Capacitor?.isNativePlatform?.() && 'caches' in window;
+  (native ? new (cachedTileLayer())(SAT_URL, { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' }) : L.tileLayer(SAT_URL, { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' })).addTo(map);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   if (me) {
     const dot = L.circleMarker(center, { radius: 7, color: '#fff', weight: 2, fillColor: '#2b7bff', fillOpacity: 1, interactive: false });

@@ -10,6 +10,9 @@ await mkdir(out, { recursive: true });
 for (const f of ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons']) {
   await cp(join(root, f), join(out, f), { recursive: true });
 }
+// 처음 실행 때 인터넷이 약해도 골프장 목록이 보이도록 목록 파일 2개를 앱에 함께 넣음 (코스 상세는 받아서)
+await mkdir(join(out, 'data'), { recursive: true });
+for (const f of ['clubs.json', 'catalog.json']) await cp(join(root, 'data', f), join(out, 'data', f));
 const lf = join(root, 'node_modules', 'leaflet', 'dist');
 await cp(lf, join(out, 'vendor', 'leaflet'), { recursive: true });
 

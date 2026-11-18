@@ -5,6 +5,7 @@ import { getCatalog, installCourse, findInstalled } from '../core/remote.js';
 import { Sensors, sampleFix } from '../core/sensors.js';
 import { createMap, destroyMap, drawHole, fitHole, ll, HZ_STYLE, SAT_URL } from '../map.js';
 import { $, $$, esc, toast, sheet, confirmSheet, DU } from '../ui.js';
+import { saveFile } from '../core/files.js';
 
 let el_, App_, map, layer, editId = null, holeN = 1, tool = null, hzType = 'bunker', hzR = 12;
 const TOOLS = [['tee', '티'], ['green', '그린 중앙'], ['front', '그린 앞'], ['back', '그린 뒤'], ['pin', '핀'], ['ip', 'IP(공략점)'], ['hazard', '해저드'], ['shelter', '대피소'], ['erase', '지우기']];
@@ -23,7 +24,7 @@ async function official() {
     if (!cat.length) { box.innerHTML = '<p class="sub" style="margin:0">아직 골프장이 발행한 공식 코스가 없습니다.</p>'; return; }
     box.innerHTML = cat.map(e => {
       const mine = findInstalled(e.id), upd = mine && e.rev > (mine.official.rev || 0);
-      return `<div class="kv" style="align-items:center"><span style="color:var(--ink)"><b>${esc(e.name)}</b>${e.region ? ` <span class="sub">${esc(e.region)}</span>` : ''}<br><span class="sub">${e.holes}홀 · 파 ${e.par}${e.length ? ` · ${(e.length / 1000).toFixed(1)}km` : ''} · 그린맵 ${e.greens || 0}/${e.holes}</span></span>
+      return `<div class="kv" style="align-items:center"><span style="color:var(--ink)"><b>${esc(e.name)}</b>${e.region ? ` <span class="sub">${esc(e.region)}</span>` : ''}<br><span class="sub">${+e.holes || 0}홀 · 파 ${+e.par || 0}${e.length ? ` · ${(+e.length / 1000).toFixed(1)}km` : ''} · 그린맵 ${+e.greens || 0}/${+e.holes || 0}</span></span>
         ${!mine ? `<button class="btn small primary" data-inst="${esc(e.id)}">설치</button>` : upd ? `<button class="btn small primary" data-inst="${esc(e.id)}">업데이트 (v${e.rev})</button>` : '<span class="pill">설치됨 · 최신</span>'}</div>`;
     }).join('');
     $$('[data-inst]', box).forEach(b => b.onclick = async () => {
@@ -70,7 +71,7 @@ function more(c) {
   sheet({
     title: c.name, body: '<p class="sub">코스 파일에는 홀 위치·해저드·핀 기록이 포함됩니다. 개인 위치 기록은 포함되지 않습니다.</p>',
     actions: [
-      { label: '📤 내보내기', onClick: async () => { const txt = exportCourse(c), name = c.name.replace(/[^\w가-힣-]+/g, '_') + '.json'; try { const file = new File([txt], name, { type: 'application/json' }); if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: c.name }); return; } } catch {} const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); } },
+      { label: '📤 내보내기', onClick: async () => { const txt = exportCourse(c), name = c.name.replace(/[^\w가-힣-]+/g, '_') + '.json'; try { await saveFile(name, txt, 'application/json', c.name); } catch (e) { toast('내보내지 못했어요: ' + e.message, 4000); } } },
       { label: '🗺️ 지도 오프라인 저장', onClick: () => { prefetchTiles(c); } },
       { label: '삭제', kind: 'danger', onClick: async () => { if (S.round?.courseId === c.id) { toast('진행 중 라운드의 코스는 삭제할 수 없습니다'); return; } if (!(await confirmSheet('코스 삭제', `'${c.name}'을(를) 삭제할까요? 되돌릴 수 없습니다.`, '삭제', 'danger'))) return; S.courses = S.courses.filter(x => x.id !== c.id); if (S.ui.courseId === c.id) S.ui.courseId = null; save('courses', 'ui'); App_.refreshHeader(); list(); } },
     ],
@@ -110,7 +111,7 @@ function editor() {
   map = createMap($('#map'), { center: ll(h.green || h.tee || Sensors.pos || { lat: 37.5, lon: 127 }), zoom: h.tee ? 17 : 16 });
   if (map) {
     layer = drawHole(map, h);
-    for (const s of c.shelters) L.marker(ll(s), { title: s.name }).bindTooltip('대피소: ' + s.name).addTo(layer);
+    for (const s of c.shelters) L.marker(ll(s), { title: s.name }).bindTooltip('대피소: ' + esc(s.name)).addTo(layer); // 툴팁은 HTML로 들어감
     if (h.tee && h.green) fitHole(map, h);
     map.on('click', e => apply({ lat: e.latlng.lat, lon: e.latlng.lng }));
   }

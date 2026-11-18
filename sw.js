@@ -1,7 +1,7 @@
 // 오프라인 우선 서비스 워커: 앱 셸·물리 엔진은 캐시 우선, 지도 타일은 런타임 캐시
-const VER = 'pinpoint-v31';
+const VER = 'pinpoint-v32';
 const SHELL = [
-  './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'css/theme.css', 'icons/icon.svg', 'icons/icon-192.png',
+  './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'css/theme.css', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'js/core/files.js',
   'js/app.js', 'js/ui.js', 'js/map.js',
   'js/core/geo.js', 'js/core/state.js', 'js/core/sensors.js', 'js/core/weather.js', 'js/core/camera.js', 'js/core/score.js', 'js/core/rules.js', 'js/core/course.js', 'js/core/remote.js', 'js/core/report.js', 'js/core/appver.js', 'js/core/appupdate.js', 'js/core/search.js', 'js/core/gemini.js', 'js/core/aicaddie.js', 'js/views/aisheet.js', 'js/core/offline.js',
   'js/physics/putt.js', 'js/physics/putt.worker.js', 'js/physics/flight.js', 'js/physics/strategy.js', 'js/physics/lostball.js',
@@ -30,9 +30,15 @@ self.addEventListener('fetch', e => {
     }));
     return;
   }
-  // 앱 파일: 네트워크 우선(업데이트 반영) → 실패 시 캐시 (오프라인)
-  e.respondWith(fetch(e.request).then(r => {
-    if (r.ok && (url.origin === location.origin || url.hostname === 'cdnjs.cloudflare.com')) { const cp = r.clone(); caches.open(VER).then(c => c.put(e.request, cp)); }
-    return r;
-  }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(r => r || caches.match('index.html'))));
+  // 앱 파일: 네트워크 우선(업데이트 반영). 단 신호가 약해 3초 안에 안 오면 저장본으로 먼저 열고, 받아지면 저장본을 새로 바꿔 둠
+  //  저장본도 없고 네트워크도 안 되면: 화면 이동만 첫 화면(index.html)으로, 그 밖의 파일은 504 (HTML을 JS로 주지 않게)
+  e.respondWith((async () => {
+    const net = fetch(e.request).then(r => {
+      if (r.ok && (url.origin === location.origin || url.hostname === 'cdnjs.cloudflare.com')) { const cp = r.clone(); caches.open(VER).then(c => c.put(e.request, cp)); }
+      return r;
+    });
+    const cached = await caches.match(e.request, { ignoreSearch: true });
+    if (cached) return Promise.race([net.catch(() => cached), new Promise(res => setTimeout(() => res(cached), 3000))]);
+    try { return await net; } catch { return e.request.mode === 'navigate' ? (await caches.match('index.html')) || new Response('', { status: 504 }) : new Response('', { status: 504 }); }
+  })());
 });

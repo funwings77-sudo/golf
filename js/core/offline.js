@@ -41,8 +41,14 @@ export async function prefetchCourse(course, onProgress = () => {}) {
     while (i < urls.length) {
       const u = urls[i++];
       try {
-        if (cache && await cache.match(u)) ok++;
-        else { const r = await fetch(u, { mode: 'no-cors' }); if (cache && (r.ok || r.type === 'opaque')) await cache.put(u, r.clone()); ok++; }
+        const hit = cache ? await cache.match(u) : null;
+        if (hit && !(hit.type === 'opaque' && window.Capacitor?.isNativePlatform?.())) ok++; // 앱에서는 예전에 읽을 수 없게 받은 타일은 다시 받음
+        else {
+          // 읽을 수 있는 응답(CORS)으로 저장해야 앱(APK)의 지도가 꺼내 쓸 수 있음. 안 되면 웹(서비스 워커)용으로만
+          let r = null; try { r = await fetch(u, { mode: 'cors' }); } catch {}
+          if (r?.ok) { if (cache) await cache.put(u, r.clone()); ok++; }
+          else if (!window.Capacitor?.isNativePlatform?.()) { r = await fetch(u, { mode: 'no-cors' }); if (cache && r.type === 'opaque') { await cache.put(u, r.clone()); ok++; } }
+        }
       } catch {}
       done++; if (done % 10 === 0 || done === urls.length) onProgress(done, urls.length);
     }

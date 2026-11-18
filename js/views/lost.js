@@ -34,6 +34,7 @@ export default {
     el_ = el; App_ = App;
     const ps = App.pendingShot; // 골프 치기에서 새로 넘어온 샷이면 예전 찾기 기록 대신 새로
     if (S.lost && ps?.fromPlay && (S.lost.createdAt || 0) < ps.ts) { S.lost = null; save('lost'); }
+    if (S.lost && (S.lost.roundId || null) !== (S.round?.id || null)) { S.lost = null; save('lost'); } // 다른(끝난) 라운드의 찾기는 버림
     S.lost ? searchUI() : setupUI();
   },
   unmount() { cleanup(); },
@@ -137,7 +138,7 @@ function setupUI() {
   });
   $('#go2')?.addEventListener('click', () => $('#go').click());
   $('#go').onclick = () => {
-    S.lost = { ...draft, sigma, marks: [], searched: [], createdAt: Date.now(), searchStartAt: null, hole: hole?.n || null };
+    S.lost = { ...draft, sigma, marks: [], searched: [], createdAt: Date.now(), searchStartAt: null, hole: hole?.n || null, roundId: S.round?.id || null };
     save('lost'); App_.pendingShot = null;
     searchUI();
   };
@@ -168,7 +169,7 @@ function searchUI() {
   est = computeEst(); prevDist = null;
   const L0 = S.lost;
   el_.innerHTML = `<div class="row" style="margin-bottom:8px"><h2 class="grow" style="margin:0">📡 공 찾는 중</h2>${confBadge(est.confidence)}</div>
-    <div class="seg" id="viewSeg"><button data-v="radar" class="${view === 'radar' ? 'on' : ''}">레이더</button><button data-v="map" class="${view === 'map' ? 'on' : ''}">지도</button></div>
+    <div class="seg" id="viewSeg"><button data-v="radar" class="${view === 'radar' ? 'on' : ''}">🧭 방향 보기</button><button data-v="map" class="${view === 'map' ? 'on' : ''}">지도</button></div>
     <div id="radarBox" style="margin-top:10px;${view === 'radar' ? '' : 'display:none'}"><div class="radar"><canvas id="radar" width="600" height="600"></canvas></div></div>
     <div id="mapBox" class="mapwrap half" style="margin-top:10px;border-radius:14px;overflow:hidden;${view === 'map' ? '' : 'display:none'}"><div class="map" id="map"></div></div>
     <div class="card" id="guide"></div>
@@ -237,7 +238,7 @@ function update(redrawMap = false) {
 function startTimer(auto) {
   if (S.lost.searchStartAt) return;
   S.lost.searchStartAt = Date.now(); save('lost');
-  toast(auto === true ? '탐색 구역 진입 — 3분 타이머 시작' : '3분 타이머 시작');
+  toast(auto === true ? '찾을 곳에 왔어요 · 3분 시계 시작' : '3분 시계 시작');
 }
 function tick() {
   const t = S.lost?.searchStartAt; const bar = $('#tbar'); if (!bar) return;
@@ -246,7 +247,7 @@ function tick() {
   $('#tLeft').textContent = left > 0 ? mmss(left) : '시간 초과';
   bar.firstElementChild.style.width = Math.min(100, el / SEARCH_MS * 100) + '%';
   bar.classList.toggle('late', left < 30000);
-  if (left <= 0 && !tick._done) { tick._done = true; vibrate([300, 150, 300]); speak('탐색 시간 3분이 지났습니다'); toast('3분 경과 — 분실구 처리(못 찾음)를 진행하세요'); }
+  if (left <= 0 && !tick._done) { tick._done = true; vibrate([300, 150, 300]); speak('3분이 지났어요'); toast('3분이 지났어요 · [😢 못 찾았어요]를 눌러 이어서 쳐요', 4000); }
 }
 function buzzLoop() {
   clearTimeout(buzzT);
@@ -333,14 +334,16 @@ async function cameraUI() {
     };
     loop();
   } catch (e) {
-    $('#camStat', box).textContent = '카메라를 열 수 없습니다: ' + e.message + ' (HTTPS 또는 권한 확인)';
+    $('#camStat', box).textContent = '카메라를 열 수 없어요 · 휴대폰 설정에서 이 앱의 카메라를 허용해 주세요';
   }
 }
 function stopCam() { if (cam) { clearTimeout(cam.t); cam.stop && cam.stop(); cam = null; } }
 
 // ---------- 결과 처리 ----------
 async function found() {
-  const L0 = S.lost;
+  const L0 = S.lost; if (!L0 || found._busy) return; // 두 번 눌러도 한 번만
+  found._busy = true; setTimeout(() => { found._busy = false; }, 3000);
+  const fb = $('#bFound'); if (fb) { fb.disabled = true; fb.textContent = '📡 재는 중…'; }
   // 골프 치기에서 온 공: 거리 재기·결과 카드는 골프 치기 쪽 [찾았어요]가 맡음 (기록 한 번만)
   if (L0.fromPlay && S.round?.liveShot) {
     if (Sensors.pos && est?.stats) { const q = toLocal(L0.start, Sensors.pos), st = est.stats, dx = q.x - st.mean.x, dy = q.y - st.mean.y, c = Math.cos(st.angle), s = Math.sin(st.angle); lostLog.push({ ts: Date.now(), z2: ((dx * c + dy * s) / Math.max(2, st.sd1)) ** 2 + ((-dx * s + dy * c) / Math.max(2, st.sd2)) ** 2, err: Math.hypot(dx, dy), club: L0.club }); try { localStorage.setItem('pinpoint.lostLog', JSON.stringify(lostLog.slice(-50))); } catch {} }
@@ -390,6 +393,7 @@ function recordLostEvent(L0, at, found, penalty) {
   save('round');
 }
 function finishLost(pen) {
+  if (!S.lost) return;
   if (S.lost && est?.stats) recordLostEvent(S.lost, fromLocal(S.lost.start, est.stats.mean), false, pen);
   if (S.round) {
     const h = S.round.holes.find(x => x.n === (S.lost.hole || S.ui.hole));

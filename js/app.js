@@ -1,6 +1,6 @@
 // PinPoint AI 캐디 — 앱 셸 (라우터 · 상단바 · 모드 · 안전 감시 · 스윙 감지)
-import { S, save, MODES, activeCourse, currentMode, subscribe } from './core/state.js';
-import { startGPS, onPos, setSim, setVoice, startOrientation, startSwingDetect, vibrate, speak, Sensors, sampleFix } from './core/sensors.js';
+import { S, save, MODES, activeCourse, currentMode, subscribe, onSaveFail } from './core/state.js';
+import { startGPS, restartGPS, onPos, setSim, setVoice, startOrientation, startSwingDetect, vibrate, speak, Sensors, sampleFix, keepAwake } from './core/sensors.js';
 import { fetchWeather } from './core/weather.js';
 import { detectHoleByTee } from './core/course.js';
 import { syncPins, getNotices, getCatalog, pendingUpdates } from './core/remote.js';
@@ -38,8 +38,19 @@ export const App = {
   refreshHeader,
   // 칠 홀 순서 (라운드 중이면 라운드 순서, 아니면 코스 순서)
   holeOrder() { const c = activeCourse(); return S.round?.courseId === c?.id ? S.round.holes.map(h => h.n) : (c?.holes || []).map(h => h.n); },
-  stepHole(d) { const o = App.holeOrder(); if (!o.length) return; const i = Math.max(0, o.indexOf(S.ui.hole)); App.setHole(o[(i + d + o.length) % o.length]); },
-  setHole(n) {
+  stepHole(d) {
+    const o = App.holeOrder(); if (!o.length) return;
+    const i = Math.max(0, o.indexOf(S.ui.hole)), j = i + d;
+    if (S.round && j >= o.length) { // 마지막 홀에서 ▶ → 라운드 끝 화면 (1번 홀로 몰래 돌아가지 않게)
+      if (current?.finishRound) current.finishRound(); else { App.pendingFinish = true; App.go('play'); }
+      return;
+    }
+    if (S.round && j < 0) return toast('첫 홀이에요');
+    App.setHole(o[(j + o.length) % o.length]);
+  },
+  manualAt: 0,
+  setHole(n, { auto = false } = {}) {
+    if (!auto) App.manualAt = Date.now();
     const c = activeCourse(); if (!c) return;
     if (!c.holes.some(h => h.n === n)) { const max = c.holes.length; n = ((n - 1 + max) % max) + 1; }
     S.ui.hole = n; save('ui');
@@ -66,7 +77,9 @@ async function route() {
     await mod.mount(view, App);
   } catch (e) {
     console.error(e);
-    view.innerHTML = `<div class="card"><b>화면을 여는 중 오류가 발생했습니다</b><p class="sub">${esc(e.message)}</p></div>`;
+    logError(e);
+    view.innerHTML = `<div class="card"><b>이 화면을 여는 중에 문제가 생겼어요</b><p class="sub">기록은 그대로 있어요. 다시 해 보거나 골프 치기로 돌아가 주세요.</p>
+      <div class="grid2"><button class="btn" onclick="location.reload()">↻ 다시 시도</button><a class="btn primary" href="#/play">🏌️ 골프 치기</a></div>${S.settings.detail ? `<p class="sub">${esc(e.message)}</p>` : ''}</div>`;
   }
   refreshHeader();
 }
@@ -194,7 +207,7 @@ function markHoleArrival(n) {
       const par = rh?.par || h?.par, hd = h?.hdcpNine ?? h?.hdcp ?? h?.hdcpCard, pin = h?.pin || h?.green;
       const R = 6371000, rad = Math.PI / 180, me = Sensors.pos;
       const d = me && pin ? 2 * R * Math.asin(Math.sqrt(Math.sin((pin.lat - me.lat) * rad / 2) ** 2 + Math.cos(me.lat * rad) * Math.cos(pin.lat * rad) * Math.sin((pin.lon - me.lon) * rad / 2) ** 2)) : null;
-      speak(`${n}번 홀, 파 ${par}${hd ? `, 핸디캡 ${hd}` : ''}${d && d < 700 ? `. 깃발까지 ${Math.round(d)}미터` : ''}`);
+      speak(`${h?.nineHole ?? n}번 홀, 파 ${par}${hd ? `, 핸디캡 ${hd}` : ''}${d && d < 700 ? `. 깃발까지 ${Math.round(d)}미터` : ''}`);
     }
   }
 }
@@ -207,10 +220,15 @@ function hydrateTick() {
 // ---------- 자동 홀 전환 ----------
 function autoHole(p) {
   if (!S.round || !p || S.settings.autoHoleOff) return; // 사용자가 홀을 고정하면 자동 전환 안 함
+  if (S.round.liveShot || document.querySelector('#sheet.open')) return; // 공을 찾으러 가는 중·점수 입력 중
   const c = activeCourse(); if (!c) return;
-  const n = detectHoleByTee(c, p, S.ui.hole);
-  const o = App.holeOrder(), next = o[o.indexOf(S.ui.hole) + 1];
-  if (n && n === next) { App.setHole(n); toast(`${n}번 홀 티잉 구역 도착`); speak(`${n}번 홀`); }
+  const o = App.holeOrder(), next = o[o.indexOf(S.ui.hole) + 1], nh = c.holes.find(h => h.n === next);
+  if (!nh?.tee) return;
+  const done = S.round.holes.find(x => x.n === S.ui.hole)?.scores?.[0]?.saved;
+  if (!done && Date.now() - App.manualAt < 3 * 60 * 1000) return;
+  const R = 6371000, rad = Math.PI / 180, dLat = (nh.tee.lat - p.lat) * rad, dLon = (nh.tee.lon - p.lon) * rad;
+  const d = 2 * R * Math.asin(Math.sqrt(Math.sin(dLat / 2) ** 2 + Math.cos(p.lat * rad) * Math.cos(nh.tee.lat * rad) * Math.sin(dLon / 2) ** 2));
+  if (d < 22) { const nm = `${nh.nineHole ?? nh.n}번 홀`; App.setHole(next, { auto: true }); toast(`${nm} 티에 왔어요`); speak(nm); }
 }
 
 // ---------- 스윙 감지 → 샷 시작점 기록 ----------
@@ -238,8 +256,50 @@ async function askLocation() {
     actions: [{ label: '나중에', onClick: done }, { label: '📍 켜기', kind: 'primary', onClick: () => { done(); startGPS(); } }] });
 }
 
+// ---------- 안전망: 오류 기록 · 저장 실패 알림 · 뒤로 가기 · 앱으로 돌아올 때 ----------
+export function logError(e) {
+  try {
+    const L = JSON.parse(localStorage.getItem('pinpoint.errlog') || '[]');
+    L.push({ t: new Date().toISOString(), m: String(e?.message || e).slice(0, 200), s: String(e?.stack || '').split('\n').slice(0, 3).join(' | ').slice(0, 300), r: location.hash });
+    localStorage.setItem('pinpoint.errlog', JSON.stringify(L.slice(-20)));
+  } catch {}
+}
+let errToastAt = 0;
+function safetyNets() {
+  const onErr = e => { logError(e); if (Date.now() - errToastAt > 15000) { errToastAt = Date.now(); toast('앗, 잠깐 문제가 생겼어요 · 다시 눌러 주세요 (기록은 그대로예요)', 3500); } };
+  window.addEventListener('error', e => onErr(e.error || e.message));
+  window.addEventListener('unhandledrejection', e => onErr(e.reason));
+  let failShown = 0;
+  onSaveFail(key => {
+    if (Date.now() - failShown < 60000) return; failShown = Date.now();
+    sheet({ title: '⚠ 저장 공간이 부족해요', body: `<p>휴대폰에 기록을 더 저장할 수 없어요. <b>지금 백업</b>해 두고, 오래된 기록이나 받아 둔 골프장 정보를 정리해 주세요.</p><p class="sub">저장하지 못한 것: ${esc(key)}</p>`,
+      actions: [{ label: '나중에' }, { label: '💾 백업 · 정리하기', kind: 'primary', onClick: () => App.go('settings?storage') }] });
+  });
+  // 안드로이드 뒤로 가기: 열린 창 닫기 → 이전 화면 → 골프 치기 화면에서는 두 번 눌러야 나가기
+  const back = window.Capacitor?.Plugins?.App;
+  if (back?.addListener) {
+    let lastBack = 0;
+    back.addListener('backButton', () => {
+      const sh = $('#sheet');
+      if (sh?.classList.contains('open')) { sh.classList.remove('open'); sh.innerHTML = ''; return; }
+      if ($('#drawer')?.classList.contains('open')) { $('#drawer').classList.remove('open'); return; }
+      if (currentName && currentName !== 'play') { App.go('play'); return; }
+      if (Date.now() - lastBack < 2000) { back.exitApp?.(); return; }
+      lastBack = Date.now(); toast('한 번 더 누르면 앱을 닫아요', 2000);
+    });
+  }
+  // 앱으로 돌아오면: 화면 켜짐 다시 · 위치를 못 받고 있었으면 다시 찾기 (설정에서 허락하고 돌아온 경우)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (S.round) keepAwake(true);
+    if (!S.settings.simGPS && Sensors.gpsState !== 'ok') restartGPS();
+  });
+  if (S.round) keepAwake(true);
+}
+
 function init() {
   applySettings();
+  safetyNets();
   askLocation();
   startOrientation();
   setupSwing();
