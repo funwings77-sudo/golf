@@ -208,3 +208,16 @@ main#view.full, main#view.play { padding-bottom: calc(var(--nav-h) + 26px + env(
 .lost-go { min-height: 60px; font-size: 18px; margin: 6px 0 2px; }
 .lost-opt { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; margin: 8px 0; border-radius: 16px; background: var(--green-soft); }
 .lost-opt b { font-size: 16px; } .lost-opt span { font-size: 13.5px; color: var(--sub); }
+
+/* ---------- 🟢 그린 읽기: 어디를 보고 · 얼마나 세게 ---------- */
+.pt-card { border: 0; }
+.pt-row { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; }
+.pt-row + .pt-row { border-top: 1px solid var(--line); }
+.pt-row > i { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--lime); display: grid; place-items: center; font-style: normal; font-size: 22px; }
+.pt-row > span { display: flex; flex-direction: column; gap: 2px; }
+.pt-row small { font-size: 12px; font-weight: 800; color: var(--sub); text-transform: uppercase; letter-spacing: .04em; }
+.pt-row b { font-size: 21px; font-weight: 900; letter-spacing: -.02em; line-height: 1.25; }
+.pt-row em { font-style: normal; font-size: 13.5px; color: var(--sub); }
+.pt-bs { position: relative; height: 26px; margin: 4px 0 0 56px; border-radius: 13px; background: var(--green-soft); overflow: hidden; }
+.pt-bs i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--lime), var(--gold)); border-radius: 13px; }
+.pt-bs span { position: relative; display: block; text-align: center; line-height: 26px; font-size: 13px; font-weight: 900; color: var(--lime-ink); }

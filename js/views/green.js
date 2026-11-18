@@ -70,7 +70,7 @@ function geometry() {
   return { spec: { kind: 'quad', coeffs: surf.coeffs }, ball: { x: 0, y: 0 }, hole: { x: 0, y: D }, inside: p => Math.abs(p.x) <= half && p.y >= -1.5 && p.y <= D + 2, D, kind: 'onsite', name: '현장 측정', nMeas: pts.length };
 }
 function measurePoints(D) {
-  return [{ key: 'ball', label: '공 위치', y: 0 }, { key: 'mid', label: '중간 지점', y: D / 2 }, { key: 'hole', label: '홀 1m 앞', y: Math.max(0, D - 1) }].map(p => ({ ...p, m: G.meas[p.key] }));
+  return [{ key: 'ball', label: '공 있는 곳', y: 0 }, { key: 'mid', label: '가운데', y: D / 2 }, { key: 'hole', label: '홀 바로 앞', y: Math.max(0, D - 1) }].map(p => ({ ...p, m: G.meas[p.key] }));
 }
 // 사전 맵 + 현장 측정 융합: 측정(라인 좌표계)을 그리드 좌표계로 회전해 평균 차이를 보정 평면으로
 function fusionCorrection(surf, ball, hole) {
@@ -97,10 +97,11 @@ function render() {
   const hole = activeHole(), mode = currentMode();
   const canSlope = allowed('greenSlope'), canLine = allowed('puttLine');
   const gridName = hole?.greenGrid ? (hole.greenGrid.source || '사전 측량 그린') : null;
-  el_.innerHTML = `<h2>🟢 그린 리딩 · 퍼팅</h2>
-    <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">현장 측정</button>${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">그린맵</button>` : ''}<button data-v="demo" class="${G.src === 'demo' ? 'on' : ''}">데모 그린</button></div>
-    ${G.src === 'demo' ? `<div class="seg" id="demoSeg" style="margin-top:6px">${[['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']].map(([k, n]) => `<button data-v="${k}" class="${G.demoKind === k ? 'on' : ''}">${n}</button>`).join('')}</div><p class="sub">가상의 사전 측량 그린입니다 (실제 코스 아님). 그린맵 탭에서 공·홀 위치를 탭으로 바꿔 보세요.</p>` : ''}
-    <div class="seg" id="tabSeg" style="margin-top:10px"><button data-v="measure" class="${G.tab === 'measure' ? 'on' : ''}">③ 측정</button><button data-v="map" class="${G.tab === 'map' ? 'on' : ''}">④ 그린맵</button><button data-v="ar" class="${G.tab === 'ar' ? 'on' : ''}">⑤ AR 리딩</button></div>
+  const E = easy();
+  el_.innerHTML = `<h2>🟢 ${E ? '그린 읽기' : '그린 리딩 · 퍼팅'}</h2>
+    <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">${E ? '직접 재기' : '현장 측정'}</button>${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">${E ? '그린 지도' : '그린맵'}</button>` : ''}<button data-v="demo" class="${G.src === 'demo' ? 'on' : ''}">${E ? '연습 그린' : '데모 그린'}</button></div>
+    ${G.src === 'demo' ? `<div class="seg" id="demoSeg" style="margin-top:6px">${[['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']].map(([k, n]) => `<button data-v="${k}" class="${G.demoKind === k ? 'on' : ''}">${n}</button>`).join('')}</div><p class="sub">${E ? '연습용 가짜 그린이에요. ② 그린 지도에서 공·홀 위치를 눌러 바꿔 보세요.' : '가상의 사전 측량 그린입니다 (실제 코스 아님). 그린맵 탭에서 공·홀 위치를 탭으로 바꿔 보세요.'}</p>` : ''}
+    <div class="seg" id="tabSeg" style="margin-top:10px"><button data-v="measure" class="${G.tab === 'measure' ? 'on' : ''}">${E ? '① 재기' : '③ 측정'}</button><button data-v="map" class="${G.tab === 'map' ? 'on' : ''}">${E ? '② 그린 지도' : '④ 그린맵'}</button><button data-v="ar" class="${G.tab === 'ar' ? 'on' : ''}">${E ? '③ 카메라로 보기' : '⑤ AR 리딩'}</button></div>
     <div id="tabBody"></div><div id="result"></div>`;
   $$('#srcSeg button').forEach(b => b.onclick = () => { G.src = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
   $$('#demoSeg button').forEach(b => b.onclick = () => { G.demoKind = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
@@ -116,22 +117,27 @@ function render() {
 function measureTab(body, canSlope) {
   const geo = geometry();
   const isGrid = geo.kind === 'grid';
-  body.innerHTML = `<div class="card"><div class="row"><b class="grow">③ 공 ↔ 홀컵 거리</b>${isGrid ? '<span class="pill">그린맵 좌표</span>' : G.distSrc ? `<span class="pill">${esc(G.distSrc)}</span>` : ''}</div>
-      ${isGrid ? `<div class="big" style="margin-top:6px">${geo.D.toFixed(1)}<small>m</small></div><p class="sub">그린맵 탭에서 공·홀 위치를 바꿀 수 있습니다.</p>`
+  const E = easy();
+  body.innerHTML = `<div class="card"><div class="row"><b class="grow">${E ? '공에서 홀까지 거리' : '③ 공 ↔ 홀컵 거리'}</b>${isGrid ? `<span class="pill">${E ? '그린 지도' : '그린맵 좌표'}</span>` : G.distSrc ? `<span class="pill">${esc(G.distSrc)}</span>` : ''}</div>
+      ${isGrid ? `<div class="big" style="margin-top:6px">${geo.D.toFixed(1)}<small>m</small></div><p class="sub">${E ? '② 그린 지도에서 공·홀 위치를 바꿀 수 있어요.' : '그린맵 탭에서 공·홀 위치를 바꿀 수 있습니다.'}</p>`
       : `<div class="row" style="margin-top:6px"><input type="number" id="dIn" inputmode="decimal" step="0.1" min="0.5" max="40" value="${G.D || ''}" placeholder="거리 (m)" style="max-width:140px;font-size:22px;font-weight:800"><span class="sub">m</span></div>
-         <div class="grid3" style="margin-top:8px"><button class="btn small" id="dSteps">👣 걸음</button><button class="btn small" id="dCam">📷 카메라 탭</button><button class="btn small" id="dGps">📍 GPS·핀</button></div>
-         <p class="sub">10m 이상은 걸음 측정, 5m 이내는 카메라 탭이 정확합니다. GPS는 오차 3~5m라 참고용.</p>`}</div>
-    <div class="card"><b>그린 스피드 (스팀프)</b> <span class="sub">${G.stimp} ft · μ=${muFromStimp(G.stimp).toFixed(3)}</span>
-      <input type="range" id="stimp" min="6" max="14" step="0.5" value="${G.stimp}"><div class="row sub"><span>느림 6</span><span class="grow"></span><span>보통 10</span><span class="grow"></span><span>빠름 14</span></div></div>
-    ${canSlope ? `<div class="card"><div class="row"><b class="grow">경사 측정 ${isGrid ? '(선택: 현장 보정)' : ''}</b><label class="row sub"><input type="checkbox" id="precise" ${G.precise ? 'checked' : ''}> 정밀(180° 2회)</label></div>
-      <p class="sub">휴대폰을 화면이 위로, <b>윗부분이 홀을 향하게</b> 그린 위에 내려놓고 [측정]을 누르세요. 2초간 움직이지 마세요.</p>
-      ${measurePoints(G.D || geo.D).map(p => `<div class="kv"><span>${p.label}${!isGrid && G.D ? ` <span class="sub">(${p.y.toFixed(1)}m)</span>` : ''}</span><span>${p.m ? slopeText(p.m) : '<span class="sub">미측정</span>'} <button class="btn small" data-meas="${p.key}">${p.m ? '다시' : '측정'}</button></span></div>`).join('')}
-      ${Object.values(G.meas).some(Boolean) ? '<button class="btn small ghost" id="clrMeas">측정값 지우기</button>' : ''}
+         <div class="grid3" style="margin-top:8px"><button class="btn small" id="dSteps">👣 걸어서</button><button class="btn small" id="dCam">📷 카메라로</button><button class="btn small" id="dGps">📍 위치로</button></div>
+         <p class="sub">${E ? '먼 거리(10m 넘게)는 걸어서, 가까운 거리(5m 안)는 카메라로 재면 정확해요. 위치로 재기는 몇 m 틀릴 수 있어요.' : '10m 이상은 걸음 측정, 5m 이내는 카메라 탭이 정확합니다. GPS는 오차 3~5m라 참고용.'}</p>`}</div>
+    ${E ? `<div class="card"><b>그린 빠르기</b> <span class="sub">공이 얼마나 잘 굴러가나요?</span>
+      <div class="seg" id="spdSeg" style="margin-top:8px">${[[8, '🐢 느려요'], [10, '🙂 보통'], [12, '🐇 빨라요']].map(([v, n]) => `<button data-st="${v}" class="${speedWord(G.stimp) === speedWord(v) ? 'on' : ''}">${n}</button>`).join('')}</div>
+      <details class="sub" style="margin-top:6px"><summary>숫자로 고르기 (스팀프 ${G.stimp})</summary><input type="range" id="stimp" min="6" max="14" step="0.5" value="${G.stimp}"></details></div>`
+    : `<div class="card"><b>그린 스피드 (스팀프)</b> <span class="sub">${G.stimp} ft · μ=${muFromStimp(G.stimp).toFixed(3)}</span>
+      <input type="range" id="stimp" min="6" max="14" step="0.5" value="${G.stimp}"><div class="row sub"><span>느림 6</span><span class="grow"></span><span>보통 10</span><span class="grow"></span><span>빠름 14</span></div></div>`}
+    ${canSlope ? `<div class="card"><div class="row"><b class="grow">${E ? `기울기 재기 ${isGrid ? '(안 해도 돼요)' : ''}` : `경사 측정 ${isGrid ? '(선택: 현장 보정)' : ''}`}</b><label class="row sub"><input type="checkbox" id="precise" ${G.precise ? 'checked' : ''}> ${E ? '더 정확하게 (두 번)' : '정밀(180° 2회)'}</label></div>
+      <p class="sub">휴대폰 화면을 위로, <b>윗부분이 홀 쪽</b>을 보게 그린에 눕혀 놓고 [재기]를 눌러요. 2초 동안 움직이지 마세요.</p>
+      ${measurePoints(G.D || geo.D).map(p => `<div class="kv"><span>${p.label}${!isGrid && G.D ? ` <span class="sub">(${p.y.toFixed(1)}m)</span>` : ''}</span><span>${p.m ? (E ? slopeEasy(p.m) : slopeText(p.m)) : `<span class="sub">${E ? '아직' : '미측정'}</span>`} <button class="btn small" data-meas="${p.key}">${p.m ? '다시' : E ? '재기' : '측정'}</button></span></div>`).join('')}
+      ${Object.values(G.meas).some(Boolean) ? `<button class="btn small ghost" id="clrMeas">${E ? '잰 기울기 지우기' : '측정값 지우기'}</button>` : ''}
     </div>` : lockedCard(FEATURE_NAMES.greenSlope)}
-    <button class="btn primary block" id="calc" ${!isGrid && !(G.D > 0) ? 'disabled' : ''}>퍼팅 계산</button>`;
+    <button class="btn primary block" id="calc" ${!isGrid && !(G.D > 0) ? 'disabled' : ''}>${E ? '🎯 어떻게 칠지 보기' : '퍼팅 계산'}</button>`;
   $('#dIn')?.addEventListener('change', e => { G.D = Math.max(0, +e.target.value || 0); G.distSrc = '직접 입력'; G.result = null; saveG(); render(); });
-  $('#stimp').oninput = e => { G.stimp = +e.target.value; e.target.previousElementSibling.textContent = `${G.stimp} ft · μ=${muFromStimp(G.stimp).toFixed(3)}`; };
-  $('#stimp').onchange = () => { S.settings.stimp = G.stimp; save('settings'); G.result = null; saveG(); };
+  $('#stimp').oninput = e => { G.stimp = +e.target.value; const lab = e.target.previousElementSibling; if (lab?.tagName === 'SPAN') lab.textContent = `${G.stimp} ft · μ=${muFromStimp(G.stimp).toFixed(3)}`; };
+  $('#stimp').onchange = () => { S.settings.stimp = G.stimp; save('settings'); G.result = null; saveG(); if (easy()) render(); };
+  $$('[data-st]').forEach(b => b.onclick = () => { G.stimp = +b.dataset.st; S.settings.stimp = G.stimp; save('settings'); G.result = null; saveG(); render(); });
   $('#precise')?.addEventListener('change', e => { G.precise = e.target.checked; saveG(); });
   $$('[data-meas]').forEach(b => b.onclick = () => measureSlope(b.dataset.meas));
   $('#clrMeas')?.addEventListener('click', () => { G.meas = {}; G.result = null; saveG(); render(); });
@@ -206,6 +212,29 @@ function compute() {
   function fallback() { setTimeout(() => { const s = buildSurface(msg.spec); done(optimizePutt(s, msg.mu, msg.ball, msg.hole, msg.skill, { bounds: s.bounds })); }, 20); }
 }
 
+// ---------- 쉬운 말 (쉬운 화면) ----------
+const easy = () => !S.settings.detail;
+const speedWord = st => (st < 9 ? '느려요' : st <= 11 ? '보통' : '빨라요');
+const confWord = c => (c >= 0.75 ? '믿을 만해요' : c >= 0.5 ? '대략이에요' : '참고만 하세요');
+// 조준: 홀 왼쪽/오른쪽으로 몇 cm (컵 개수는 괄호)
+function aimText(r) {
+  const cm = Math.round(Math.abs(r.aimOffset) * 100), a = Math.abs(r.aimCups);
+  if (cm < 5) return '홀 가운데를 보고';
+  return `홀 ${r.aimCups > 0 ? '왼쪽' : '오른쪽'}으로 ${cm}cm${a >= 0.5 ? ` (컵 ${a.toFixed(1)}개)` : ''}`;
+}
+// 소리로 읽기: '홀 왼쪽 27센티 지점을 보고, 퍼터를 뒤로 30센티 빼서 치세요'
+function sayPutt(r, bs) {
+  const cm = Math.round(Math.abs(r.aimOffset) * 100);
+  return `${cm < 5 ? '홀 가운데를 보고' : `홀 ${r.aimCups > 0 ? '왼쪽' : '오른쪽'} ${cm}센티 지점을 보고`}, 퍼터를 뒤로 ${Math.round(bs)}센티 빼서 치세요`;
+}
+// 경사 한 줄: 오르막/내리막 + 어느 쪽이 높은지 → 공이 휘는 쪽
+function slopeEasy(m) {
+  const along = m.gy * 100, cross = m.gx * 100;
+  const a = Math.abs(along) < 0.5 ? '평평해요' : `${along > 0 ? '오르막' : '내리막'}${Math.abs(along) >= 2 ? '이 커요' : '이에요'}`;
+  const c = Math.abs(cross) < 0.3 ? '' : ` · ${cross > 0 ? '오른쪽' : '왼쪽'}이 높아요 → 공이 ${cross > 0 ? '왼쪽' : '오른쪽'}으로 휘어요`;
+  return `<b>${a}</b>${c}${m.precise ? ' <span class="pill">두 번 잼</span>' : ''}`;
+}
+
 function cupsText(r) {
   const c = r.aimCups, a = Math.abs(c);
   if (a < 0.25) return '홀 정중앙';
@@ -215,18 +244,22 @@ function cupsText(r) {
 function announce() {
   const r = G.result; if (!r || !allowed('puttLine')) return;
   const bs = backswingCm(r.flatEquiv, S.calib);
-  speak(`${cupsText(r)}, 평지 ${r.flatEquiv.toFixed(1)}미터 세기, 백스윙 ${Math.round(bs)}센티`);
+  speak(easy() ? sayPutt(r, bs) : `${cupsText(r)}, 평지 ${r.flatEquiv.toFixed(1)}미터 세기, 백스윙 ${Math.round(bs)}센티`);
 }
 
 function renderResult(canLine) {
   const box = $('#result'); if (!box) return;
   const r = G.result; if (!r) { box.innerHTML = ''; return; }
-  const dhTxt = Math.abs(r.dh) < 0.01 ? '평지' : `${r.dh > 0 ? '오르막' : '내리막'} ${Math.abs(r.dh * 100).toFixed(0)}cm`;
-  const head = `<div class="card"><div class="row"><b class="grow">실제 ${r.D.toFixed(1)}m · ${dhTxt}</b>${confBadge(r.conf)}</div>
+  const E = easy();
+  const dhTxt = Math.abs(r.dh) < 0.01 ? (E ? '평평해요' : '평지') : `${r.dh > 0 ? '오르막' : '내리막'} ${Math.abs(r.dh * 100).toFixed(0)}cm`;
+  const head = E ? `<div class="card"><div class="row"><b class="grow">${r.D.toFixed(1)}m · ${dhTxt}</b><span class="pill">${confWord(r.conf)}</span></div></div>`
+    : `<div class="card"><div class="row"><b class="grow">실제 ${r.D.toFixed(1)}m · ${dhTxt}</b>${confBadge(r.conf)}</div>
       <p class="sub" style="margin:4px 0 0">공 위치 경사: ${r.slopeAtBall.along >= 0 ? '오르막' : '내리막'} ${Math.abs(r.slopeAtBall.along).toFixed(1)}% · 옆경사 ${Math.abs(r.slopeAtBall.cross).toFixed(1)}% (${r.slopeAtBall.cross > 0 ? '왼쪽 높음 → 오른쪽으로 휨' : r.slopeAtBall.cross < 0 ? '오른쪽 높음 → 왼쪽으로 휨' : '휨 없음'})</p></div>`;
+  if (E && canLine && r.conf >= 0.4 && !(currentMode() === 'practice' && G.training && !G.revealed)) return renderEasyResult(box, r, head);
   if (!canLine) { box.innerHTML = head.replace(/<p class="sub"[\s\S]*?<\/p>/, '') + lockedCard(FEATURE_NAMES.puttLine); return; }
   if (r.conf < 0.4) {
-    box.innerHTML = head + `<div class="card"><b>신뢰도가 낮아 라인 대신 경사 정보만 표시합니다</b><p class="sub">경사를 2곳 이상 측정하거나 정밀(180°) 모드를 쓰면 라인을 보여드립니다.</p></div>`; return;
+    box.innerHTML = head + (E ? `<div class="card"><b>기울기를 더 재야 어떻게 칠지 알려 드릴 수 있어요</b><p class="sub">① 재기에서 기울기를 두 곳 이상 재 주세요.</p></div>`
+      : `<div class="card"><b>신뢰도가 낮아 라인 대신 경사 정보만 표시합니다</b><p class="sub">경사를 2곳 이상 측정하거나 정밀(180°) 모드를 쓰면 라인을 보여드립니다.</p></div>`); return;
   }
   const training = currentMode() === 'practice' && G.training && !G.revealed;
   const bs = backswingCm(r.flatEquiv, S.calib);
@@ -259,28 +292,48 @@ function renderResult(canLine) {
   $('#train')?.addEventListener('change', e => { G.training = e.target.checked; G.revealed = false; saveG(); renderResult(true); });
 }
 
+// 쉬운 화면 결과: 어디를 보고 · 얼마나 세게(퍼터를 뒤로 몇 cm) · 들어갈 확률
+function renderEasyResult(box, r, head) {
+  const bs = Math.round(backswingCm(r.flatEquiv, S.calib)), past = Math.round(r.pastDist * 100);
+  const brk = Math.abs(r.breakM * 100);
+  box.innerHTML = head + `<div class="card pt-card">
+      <div class="pt-row"><i>🎯</i><span><small>어디를 보고</small><b>${aimText(r)}</b>${brk >= 5 ? `<em>공이 ${r.breakM > 0 ? '왼쪽' : '오른쪽'}으로 ${Math.round(brk)}cm 부풀었다가 홀로 휘어 들어가요</em>` : '<em>거의 똑바로 굴러가요</em>'}</span></div>
+      <div class="pt-row"><i>🏌️</i><span><small>얼마나 세게</small><b>퍼터를 뒤로 ${bs}cm 빼서 쳐요</b><em>평평한 곳에서 ${r.flatEquiv.toFixed(1)}m 굴리는 힘이에요 · 안 들어가면 홀을 ${past}cm쯤 지나가게</em></span></div>
+      <div class="pt-bs" aria-hidden="true"><i style="width:${Math.min(100, bs / 60 * 100)}%"></i><span>${bs}cm</span></div>
+      <div class="grid2" style="margin-top:10px"><div class="stat"><div class="v">${(r.mc.pMake * 100).toFixed(0)}%</div><div class="l">한 번에 들어갈 확률</div></div>
+        <div class="stat"><div class="v">${(r.mc.pTwoPuttOrBetter * 100).toFixed(0)}%</div><div class="l">두 번 안에 넣을 확률</div></div></div>
+      <div class="row" style="margin-top:10px"><button class="btn grow ${metroOn ? 'on' : ''}" id="metro">🎵 ${metroOn ? '박자 소리 끄기' : '박자 소리 (똑-딱에 맞춰 치기)'}</button><button class="btn" id="spk" aria-label="소리로 듣기">🔊</button></div>
+      ${currentMode() === 'practice' ? `<label class="switch"><span>먼저 맞혀 보기 (연습)</span><input type="checkbox" id="train" ${G.training ? 'checked' : ''}></label>` : ''}
+    </div>
+    <p class="sub">퍼터를 뒤로 빼는 길이는 보통 사람 기준이에요. <a href="#/calib">연습 그린에서 내 힘 맞추기</a>를 하면 더 정확해져요.</p>`;
+  $('#metro').onclick = () => { metroOn = !metroOn; metronome(metroOn, S.settings.tempoBpm); renderResult(true); };
+  $('#spk').onclick = () => speak(sayPutt(r, bs), true);
+  $('#train')?.addEventListener('change', e => { G.training = e.target.checked; G.revealed = false; saveG(); renderResult(true); });
+}
+
 // ---------- ④ 그린맵 ----------
 let tapMode = null;
 function mapTab(body) {
   const geo = geometry();
-  if (geo.D < 0.3 && geo.kind === 'onsite') { body.innerHTML = '<div class="card">측정 탭에서 거리를 먼저 입력하세요.</div>'; return; }
+  if (geo.D < 0.3 && geo.kind === 'onsite') { body.innerHTML = `<div class="card">${easy() ? '① 재기에서 공에서 홀까지 거리를 먼저 넣어 주세요.' : '측정 탭에서 거리를 먼저 입력하세요.'}</div>`; return; }
   if (G.g3 && geo.kind === 'grid') {
     const gi = gridInfo(), b = gridBounds(gi.grid), surf = buildSurface(geo.spec);
     const ins = gi.grid.mask ? geo.inside : ovalInside(b);
     const th = Math.atan2(geo.hole.y - geo.ball.y, geo.hole.x - geo.ball.x) * 180 / Math.PI;
-    body.innerHTML = `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d">평면 지도</button><button data-v="3d" class="on">⛰️ 3D 그린</button></div><div id="g3wrap"></div>`;
+    body.innerHTML = `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d">${easy() ? '위에서 보기' : '평면 지도'}</button><button data-v="3d" class="on">⛰️ ${easy() ? '입체로 보기' : '3D 그린'}</button></div><div id="g3wrap"></div>`;
     mountGreen3D($('#g3wrap'), () => ({ surf, bounds: b, inside: ins, ball: geo.ball, hole: geo.hole, yaw0: 90 - th }));
     $$('#g3Seg button').forEach(x => x.onclick = () => { G.g3 = x.dataset.v === '3d'; saveG(); mapTab(body); });
     return;
   }
-  body.innerHTML = `${geo.kind === 'grid' ? '<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d" class="on">평면 지도</button><button data-v="3d">⛰️ 3D 그린</button></div>' : ''}<div class="card tight" style="padding:6px"><canvas class="view" id="gcv" width="900" height="1100"></canvas></div>
-    ${geo.kind === 'grid' ? `<div class="grid2"><button class="btn ${tapMode === 'ball' ? 'on' : ''}" id="tBall">⚪ 공 위치 탭</button><button class="btn ${tapMode === 'hole' ? 'on' : ''}" id="tHole">⛳ 홀 위치 탭</button></div>` : ''}
-    <p class="sub">${esc(geo.name)} · 색 = 경사 크기, 흰 선 = 등고선(${'1~5'}cm), 화살표 = 물이 흐르는(공이 휘는) 방향. ${geo.kind === 'onsite' ? '현장 측정 범위(라인 주변)만 표시합니다.' : ''}</p>
-    ${!G.result ? '<button class="btn primary block" id="calc2">퍼팅 계산</button>' : ''}`;
+  const E = easy();
+  body.innerHTML = `${geo.kind === 'grid' ? `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d" class="on">${E ? '위에서 보기' : '평면 지도'}</button><button data-v="3d">⛰️ ${E ? '입체로 보기' : '3D 그린'}</button></div>` : ''}<div class="card tight" style="padding:6px"><canvas class="view" id="gcv" width="900" height="1100"></canvas></div>
+    ${geo.kind === 'grid' ? `<div class="grid2"><button class="btn ${tapMode === 'ball' ? 'on' : ''}" id="tBall">⚪ ${E ? '공 위치 바꾸기' : '공 위치 탭'}</button><button class="btn ${tapMode === 'hole' ? 'on' : ''}" id="tHole">⛳ ${E ? '홀 위치 바꾸기' : '홀 위치 탭'}</button></div>` : ''}
+    <p class="sub">${E ? `색이 진할수록 많이 기울었어요 · 흰 선은 높이가 같은 곳 · 화살표는 공이 굴러 내려가는 쪽이에요.${geo.kind === 'onsite' ? ' 직접 잰 곳(공~홀 사이)만 보여요.' : ''}` : `${esc(geo.name)} · 색 = 경사 크기, 흰 선 = 등고선(${'1~5'}cm), 화살표 = 물이 흐르는(공이 휘는) 방향. ${geo.kind === 'onsite' ? '현장 측정 범위(라인 주변)만 표시합니다.' : ''}`}</p>
+    ${!G.result ? `<button class="btn primary block" id="calc2">${E ? '🎯 어떻게 칠지 보기' : '퍼팅 계산'}</button>` : ''}`;
   const cv = $('#gcv');
   const surf = buildSurface(geo.spec);
   const showLine = !(currentMode() === 'practice' && G.training && !G.revealed) && allowed('puttLine') && G.result && G.result.conf >= 0.4;
-  const V = drawGreen(cv, surf, { ball: geo.ball, hole: geo.hole, result: showLine ? G.result : null, inside: geo.inside, stimpNote: `스팀프 ${G.stimp}ft · ${geo.D.toFixed(1)}m` });
+  const V = drawGreen(cv, surf, { ball: geo.ball, hole: geo.hole, result: showLine ? G.result : null, inside: geo.inside, stimpNote: easy() ? `빠르기 ${speedWord(G.stimp)} · ${geo.D.toFixed(1)}m` : `스팀프 ${G.stimp}ft · ${geo.D.toFixed(1)}m` });
   $$('#g3Seg button').forEach(x => x.onclick = () => { G.g3 = x.dataset.v === '3d'; saveG(); mapTab(body); });
   $('#calc2')?.addEventListener('click', compute);
   $('#tBall')?.addEventListener('click', () => { tapMode = tapMode === 'ball' ? null : 'ball'; mapTab(body); });
@@ -304,7 +357,7 @@ function arTab(body, canLine) {
   body.innerHTML = `<div class="cam" id="cam"><video autoplay playsinline muted></video><canvas id="arcv"></canvas>
       <div class="hud top" id="arHud"><b>${distMode ? '카메라로 거리 재기' : 'AR 그린 리딩'}</b><div class="sub" id="arMsg"></div></div>
       <div class="hud bottom"><div class="row"><button class="btn small" id="arCal">${distMode ? '취소' : '🎯 홀컵 탭으로 보정'}</button><span class="sub grow" id="arInfo"></span></div></div></div>
-    <p class="sub">공 뒤 ${STAND_BACK}m에 서서 휴대폰을 눈높이(${S.settings.eyeHeight}m, 설정에서 변경)로 들고 홀 쪽을 비추세요. 흰 링 = 내 위치에서 1m 간격 거리(지형 높이 따라 휨), 흐르는 흰 줄 = 물이 흘러가는(공이 휘는) 방향, 초록 점선 = 퍼팅 라인. LiDAR 없이 카메라 높이·기울기로 지면을 투영하는 근사 AR이며, 화면의 홀컵을 한 번 탭하면 각도가 보정됩니다.</p>`;
+    <p class="sub">${easy() ? `공 뒤에 서서 휴대폰을 눈높이로 들고 홀 쪽을 비춰요. 화면의 홀을 한 번 누르면 더 정확해져요.<br>흰 줄 = 1m마다 거리 · 흘러가는 줄 = 공이 굴러 내려가는 쪽 · 초록 점 = 공이 갈 길` : `공 뒤 ${STAND_BACK}m에 서서 휴대폰을 눈높이(${S.settings.eyeHeight}m, 설정에서 변경)로 들고 홀 쪽을 비추세요. 흰 링 = 내 위치에서 1m 간격 거리(지형 높이 따라 휨), 흐르는 흰 줄 = 물이 흘러가는(공이 휘는) 방향, 초록 점선 = 퍼팅 라인. LiDAR 없이 카메라 높이·기울기로 지면을 투영하는 근사 AR이며, 화면의 홀컵을 한 번 탭하면 각도가 보정됩니다.`}</p>`;
   const video = $('#cam video'), cv = $('#arcv'), msg = $('#arMsg'), info = $('#arInfo');
   const proj = new GroundProjector({ height: S.settings.eyeHeight, vfovDeg: S.settings.cameraVFov });
   let cal = null, head = null, head0 = null; // cal: { pitch, beta, yaw, heading }
@@ -322,7 +375,7 @@ function arTab(body, canLine) {
   if (distMode) msg.textContent = '화면에서 홀컵을 탭하세요 (휴대폰 기울기로 거리 계산)';
   else if (!canLine) msg.textContent = '토너먼트 모드: 퍼팅 라인 표시가 차단됩니다';
   else if (geo.D < 0.3) msg.textContent = '먼저 측정 탭에서 거리를 입력하세요';
-  else msg.textContent = '홀 쪽을 비추고, 화면의 홀컵을 한 번 탭하면 정확해집니다';
+  else msg.textContent = '홀 쪽을 비추고, 화면의 홀을 한 번 누르면 정확해져요';
   // 결과가 없으면 바로 계산 (영상처럼 비추자마자 라인이 보이도록)
   if (!distMode && canLine && geo.D >= 0.3 && !G.result) compute();
 
@@ -411,7 +464,7 @@ function arTab(body, canLine) {
         ctx.shadowBlur = 0;
         const ap = P({ ...frame.toView(r.aimPoint), z: zOf(r.aimPoint) });
         if (ap) { ctx.strokeStyle = 'rgba(255,226,122,.9)'; ctx.lineWidth = 2 * k; ctx.beginPath(); ctx.arc(ap.x, ap.y, 9 * k, 0, 7); ctx.stroke(); ctx.fillStyle = '#ffe27a'; ctx.font = `700 ${13 * k}px system-ui, sans-serif`; ctx.fillText('조준점', ap.x + 12 * k, ap.y + 4 * k); }
-        info.textContent = `${cupsText(r)} · 평지 ${r.flatEquiv.toFixed(1)}m 세기 · 백스윙 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm`;
+        info.textContent = easy() ? `${aimText(r)} · 퍼터를 뒤로 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm` : `${cupsText(r)} · 평지 ${r.flatEquiv.toFixed(1)}m 세기 · 백스윙 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm`;
       } else {
         ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2 * k; ctx.setLineDash([8 * k, 8 * k]);
         poly([{ x: 0, y: STAND_BACK, z: zOf(geo.ball) }, { ...hv, z: hz }]); ctx.setLineDash([]);
