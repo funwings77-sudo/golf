@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.34",
+   "code": 35,
+   "date": "2026-11-18T07:58:53.657Z",
+   "bytes": 5039431,
+   "sha256": "41503b44620eb3048e069aecacbcf083be3a6c91e33840c72ad2e9625e06f8be",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.34/pinpoint-caddie-1.0.34.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.34",
+   "notes": [
+    "Customer-convenience and reliability pass from a three-part audit (UX flows, system robustness, scoring correctness) Scoring: last-hole save now shows the round-end sheet (it was closed by the score sheet), ▶ on the last hole ends the round instead of wrapping to hole 1, '공 찾았어요' and lost-ball '찾았어요' can't record twice, cancel in both screens removes the stroke and an auto-learned tee, friends' scores are entered in the same score sheet, putts added on an unsaved hole count toward the total, '모두 기준타' no longer finalises partial holes, a chip within 25 m of the flag can still be recorded, an old lost-ball search can't add a penalty to a new round Auto hole/green: no hole switch while a shot is live or the score sheet is open, only the next hole's tee counts, 3-minute pause after a manual hole change unless the hole is saved; greens are not learned when scoring a hole after reaching the next one; voice and toasts use scorecard hole numbers Data safety: save failures return false and raise a backup/cleanup sheet, round end saves rounds before clearing the live round, corrupt stored values kept aside, full backup/restore (merge rounds and shots) with native file sharing (@capacitor/filesystem, @capacitor/share), storage meter and cache cleanup, green height grids stored as 16-bit 0.1 mm base64 (one 9-hole course 2.6 MB → 0.4 MB) Comfort: Android back closes sheets/drawer, goes back to play, double press to exit (@capacitor/app); location denied/weak signal explained with fix steps, map-tap fallback and retry; GPS and screen-on resume when returning to the app; error log and retry card; plain words in remaining lost-ball and green messages System: APK reads pre-downloaded map tiles from Cache Storage (tiles now stored CORS-readable), bundled course lists for first run on weak signal, pins saved only when changed, service worker falls back to the cached copy after 3 s and only serves index.html for navigations, small escaping fixes"
+   ]
+  },
+  {
    "version": "1.0.33",
    "code": 34,
    "date": "2026-11-18T07:37:24.269Z",
@@ -426,6 +438,6 @@
    ]
   }
  ],
- "latest": "1.0.33",
- "updatedAt": "2026-11-18T07:37:29.177Z"
+ "latest": "1.0.34",
+ "updatedAt": "2026-11-18T07:58:59.599Z"
 }
