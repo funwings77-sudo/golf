@@ -338,3 +338,25 @@ test('친 공 분석: 잰 거리 → 공 속도·높이·시간 (투어 평균�
   near(s7.avgTotal, 160, 1e-9); near(s7.sdLat, Math.sqrt(8 / 3), 1e-9); assert.equal(s7.longest, 170);
   assert.ok(s7.avgSpeed > 0 && s7.shots[0].id === 10 - 1);
 });
+
+import { analyzeLM, analyzeStored, lmErrors, toMS, fromMS, toM } from '../js/physics/shotfit.js';
+test('론치 모니터 수치: 단위 변환 · 범위 확인 · 잰 값 우선 · 빈칸만 계산', () => {
+  near(toMS(120, 'mph'), 53.645, 0.01); near(toMS(193, 'kmh'), 53.61, 0.01); near(fromMS(53.645, 'mph'), 120, 0.01); near(toM(170, 'yd'), 155.448, 1e-6);
+  assert.deepEqual(lmErrors({ launchDeg: 16 }), ['ballSpeed']);
+  assert.deepEqual(lmErrors({ ballSpeed: 53, launchDeg: 90 }), ['launchDeg']); // 단위 착오(예: mph를 m/s 칸에) 잡기
+  assert.deepEqual(lmErrors({ ballSpeed: 120 }), ['ballSpeed']);
+  assert.deepEqual(lmErrors({ ballSpeed: 53.6, launchDeg: 16.3, spinRpm: 7097, carry: 157 }), []);
+  // 투어 평균 7번 아이언: 120mph · 16.3° · 7097rpm → 캐리 ≈ 157m(172yd), 높이 ≈ 29m(32yd)
+  const a = analyzeLM({ clubId: '7i', lm: { ballSpeed: toMS(120, 'mph'), launchDeg: 16.3, spinRpm: 7097 } });
+  near(a.est.modelCarry, 157, 10); near(a.est.apex, 29, 6);
+  assert.equal(a.src.ballSpeed, 'lm'); assert.equal(a.src.carry, 'calc'); assert.equal(a.src.headSpeed, 'calc');
+  // 잰 캐리·높이·좌우는 그대로, GPS 총거리가 있으면 그게 우선
+  const b = analyzeLM({ clubId: '7i', lm: { ballSpeed: 53.6, launchDeg: 16, spinRpm: 7000, carry: 150, apex: 27, offlineM: -6, headSpeed: 40 }, gpsTotal: 158, gpsErr: 4 });
+  assert.equal(b.est.carry, 150); assert.equal(b.est.apex, 27); near(b.est.roll, 8, 1e-9); assert.equal(b.src.total, 'gps');
+  near(b.est.smash, 53.6 / 40, 1e-9); assert.equal(b.measured.lateralM, -6);
+  // 저장된 샷: 모니터 값이 있으면 모니터로, 없으면 거리 역산으로
+  assert.equal(analyzeStored({ club: '7i', total: 150, lm: { ballSpeed: 50 } }).lm, true);
+  assert.equal(analyzeStored({ club: '7i', total: 150 }).lm, undefined);
+  const only = analyzeStored({ club: 'D', source: 'lm', total: 0, lm: { ballSpeed: toMS(160, 'mph'), launchDeg: 12, spinRpm: 2600, total: 250, sideDeg: 2 } });
+  assert.equal(only.measured.total, 250); assert.equal(only.src.total, 'lm'); assert.equal(only.measured.latDeg, 2);
+});

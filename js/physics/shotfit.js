@@ -42,6 +42,7 @@ export function analyzeShot({ clubId, total, err = 5, latDeg = null, wind = null
   const lateralM = latDeg == null ? null : total * Math.sin(latDeg * Math.PI / 180);
   return {
     club: ct.id, clubName: ct.name,
+    src: { total: 'gps', latDeg: latDeg == null ? null : 'gps' }, // 나머지는 모두 'calc'
     measured: { total, err, latDeg, lateralM },
     est: {
       ballSpeed: speed, ballSpeedRange: [Math.min(...sp), Math.max(...sp)],
@@ -73,12 +74,14 @@ export function clubStats(shots) {
   const sd = (a, m) => (a.length > 1 ? Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)) : null);
   return [...by.entries()].map(([club, list]) => {
     const tot = list.map(s => s.total), full = list.filter(s => !s.partial), ftot = full.map(s => s.total);
-    const sp = list.map(s => s.fit?.est?.ballSpeed).filter(Number.isFinite), ap = list.map(s => s.fit?.est?.apex).filter(Number.isFinite);
+    const sp = list.map(s => s.lm?.ballSpeed ?? s.fit?.est?.ballSpeed).filter(Number.isFinite), ap = list.map(s => s.lm?.apex ?? s.fit?.est?.apex).filter(Number.isFinite);
+    const la = list.map(s => s.lm?.launchDeg).filter(Number.isFinite), spin = list.map(s => s.lm?.spinRpm).filter(Number.isFinite);
     const lat = list.map(s => s.latDeg).filter(Number.isFinite), mLat = mean(lat), mT = mean(ftot.length ? ftot : tot);
     return {
       club, name: clubType(club)?.name || club, n: list.length, nFull: full.length,
       avgTotal: mT, sdTotal: sd(ftot.length ? ftot : tot, mT), longest: Math.max(...tot),
-      avgCarry: mean(list.map(s => s.fit?.est?.carry ?? s.carry).filter(Number.isFinite)),
+      avgCarry: mean(list.map(s => s.lm?.carry ?? s.fit?.est?.carry ?? s.carry).filter(Number.isFinite)),
+      nLM: list.filter(s => s.lm?.ballSpeed > 0).length, avgLaunchLM: mean(la), avgSpinLM: mean(spin),
       avgSpeed: mean(sp), maxSpeed: sp.length ? Math.max(...sp) : null, avgApex: mean(ap),
       avgLat: mLat, sdLat: sd(lat, mLat ?? 0), launchDeg: clubType(club)?.launch ?? null,
       shots: [...list].sort((a, b) => b.ts - a.ts),
@@ -92,4 +95,56 @@ export function windAlongCross(windSpeed, windFromDeg, shotBearingDeg) {
   if (!windSpeed) return { along: 0, cross: 0 };
   const to = (windFromDeg + 180 - shotBearingDeg) * Math.PI / 180;
   return { along: windSpeed * Math.cos(to), cross: windSpeed * Math.sin(to) };
+}
+
+// ---------- 📟 론치 모니터 수치 ----------
+// 저장 단위: 속도 m/s, 거리 m, 각도 °, 스핀 rpm. 입력 단위 변환
+export const SPEED_UNITS = { kmh: { label: 'km/h', k: 1 / 3.6 }, mph: { label: 'mph', k: 1 / 2.23694 }, ms: { label: 'm/s', k: 1 } };
+export const DIST_UNITS = { m: { label: 'm', k: 1 }, yd: { label: 'yd', k: 0.9144 } };
+export const toMS = (v, u) => v * (SPEED_UNITS[u]?.k ?? 1), fromMS = (v, u) => v / (SPEED_UNITS[u]?.k ?? 1);
+export const toM = (v, u) => v * (DIST_UNITS[u]?.k ?? 1), fromM = (v, u) => v / (DIST_UNITS[u]?.k ?? 1);
+// 입력 확인: 범위를 벗어나면 고칠 곳을 알려 줌
+export const LM_LIMITS = { ballSpeed: [8, 95], headSpeed: [8, 70], launchDeg: [-10, 60], spinRpm: [0, 14000], carry: [1, 400], total: [1, 450], sideDeg: [-45, 45], offlineM: [-120, 120], apex: [0, 80] };
+export function lmErrors(lm) {
+  const out = [];
+  if (!(lm.ballSpeed > 0)) out.push('ballSpeed');
+  for (const [k, [a, b]] of Object.entries(LM_LIMITS)) if (lm[k] != null && (!Number.isFinite(lm[k]) || lm[k] < a || lm[k] > b)) out.push(k);
+  return [...new Set(out)];
+}
+
+// 론치 모니터 값으로 분석: 잰 공 속도·발사각·스핀으로 비행을 계산하고, 잰 값(캐리·총거리·높이·방향)은 그대로 씀
+//  gpsTotal/gpsErr/gpsLat: 같은 샷을 GPS로도 쟀다면 함께 (총거리·방향은 GPS가 없을 때만 모니터 값 사용)
+export function analyzeLM({ clubId, lm, wind = null, rho = RHO_STD, gpsTotal = null, gpsErr = null, gpsLat = null }) {
+  const ct = clubType(clubId) || clubType('7i');
+  const launchDeg = lm.launchDeg ?? ct.launch, spinRpm = lm.spinRpm ?? ct.spin;
+  const w = wind ? { x: wind.cross || 0, y: wind.along || 0 } : { x: 0, y: 0 };
+  const f = flightFor(ct, lm.ballSpeed, { launchDeg, spinRpm, wind: w, rho, record: true });
+  const carry = lm.carry ?? f.y;
+  const total = gpsTotal ?? lm.total ?? carry + (f.total - f.y);
+  const latDeg = gpsLat ?? lm.sideDeg ?? (lm.offlineM != null && total > 0 ? Math.asin(Math.max(-1, Math.min(1, lm.offlineM / total))) * 180 / Math.PI : null);
+  const lateralM = lm.offlineM != null && gpsLat == null ? lm.offlineM : latDeg == null ? null : total * Math.sin(latDeg * Math.PI / 180);
+  const head = lm.headSpeed ?? lm.ballSpeed / (SMASH[ct.id] || 1.3);
+  const src = {
+    ballSpeed: 'lm', launchDeg: lm.launchDeg != null ? 'lm' : 'calc', spinRpm: lm.spinRpm != null ? 'lm' : 'calc', headSpeed: lm.headSpeed != null ? 'lm' : 'calc',
+    carry: lm.carry != null ? 'lm' : 'calc', apex: lm.apex != null ? 'lm' : 'calc',
+    total: gpsTotal != null ? 'gps' : lm.total != null ? 'lm' : 'calc', latDeg: gpsLat != null ? 'gps' : lm.sideDeg != null || lm.offlineM != null ? 'lm' : null,
+  };
+  const k = carry / Math.max(1, f.y); // 잰 캐리에 맞춰 곡선 길이만 맞춤 (모양은 물리식)
+  return {
+    club: ct.id, clubName: ct.name, src, lm: true,
+    measured: { total, err: gpsTotal != null ? gpsErr : 0, latDeg, lateralM },
+    est: {
+      ballSpeed: lm.ballSpeed, ballSpeedRange: [lm.ballSpeed, lm.ballSpeed], headSpeed: head, smash: lm.headSpeed ? lm.ballSpeed / lm.headSpeed : SMASH[ct.id] || 1.3,
+      launchDeg, launchRange: [launchDeg, launchDeg], spinRpm, carry, roll: Math.max(0, total - carry),
+      apex: lm.apex ?? f.apex, apexRange: [lm.apex ?? f.apex, lm.apex ?? f.apex], time: f.time, landAngle: f.landAngle, landSpeed: f.landSpeed,
+      modelCarry: f.y, // 물리식이 계산한 캐리 (잰 캐리와 비교용)
+    },
+    path: f.path ? f.path.filter((_, i) => i % 4 === 0).map(([, y, z]) => [y * k, z]).concat([[carry, 0]]) : [],
+  };
+}
+// 저장된 샷 하나 분석 (모니터 값이 있으면 그것 우선)
+export function analyzeStored(s) {
+  return s.lm?.ballSpeed > 0
+    ? analyzeLM({ clubId: s.club, lm: s.lm, wind: s.wind, rho: s.rho, gpsTotal: s.source === 'lm' ? null : s.total, gpsErr: s.err, gpsLat: s.source === 'lm' ? null : s.latDeg })
+    : analyzeShot({ clubId: s.club, total: s.total, err: s.err ?? 5, latDeg: s.latDeg, wind: s.wind, rho: s.rho });
 }

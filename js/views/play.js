@@ -19,7 +19,7 @@ import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
 import { openAICaddie } from './aisheet.js';
 import { matches } from '../core/search.js';
 import { analyzeShot, shotSummary, windAlongCross, kmh } from '../physics/shotfit.js';
-import { shotCardHtml } from './shotviz.js';
+import { shotSheet } from './lmform.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
@@ -796,8 +796,7 @@ async function found() {
   // 결과 화면: 측정(거리·방향) + 계산(공 속도·높이·시간…)
   const card = rec || { club: shot.club, total: shot.predTotal || distance(shot.start, shot.pred), wind: shot.wind, rho: shot.rho, estPos: true };
   speak(`${Math.round(card.total)}미터 ${rec ? '날아갔어요' : '쯤 갔을 거예요'}`);
-  sheet({ title: `🏌️ ${shot.clubName} · ${rec ? '내 공 결과' : '예상 결과 (위치를 못 재서)'}`, body: shotCardHtml(card, { kind: rec ? 'result' : 'predict' }),
-    actions: [{ label: '📈 클럽별 기록', onClick: () => App_.go('shots') }, { label: '확인', kind: 'primary' }] });
+  shotSheet(card, { title: `🏌️ ${shot.clubName} · ${rec ? '내 공 결과' : '예상 결과 (위치를 못 재서)'}`, kind: rec ? 'result' : 'predict', extra: [{ label: '📈 클럽별', onClick: () => App_.go('shots') }] });
 }
 
 // ---------------- 보기 (2D · 3D · 4D · AR) ----------------
