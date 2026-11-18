@@ -1,5 +1,6 @@
 // 센서 퓨전: GNSS(칼만 필터), 나침반, 기울기, 걸음, 스윙 감지, 진동, 음성
 import { toLocal, fromLocal } from './geo.js';
+import { pointingHeading, AngleFilter, wrap180 } from './heading.js';
 
 const posSubs = new Set(), oriSubs = new Set();
 let watchId = null, kf = null, simPos = null, simOn = false;
@@ -7,6 +8,8 @@ let watchId = null, kf = null, simPos = null, simOn = false;
 export const Sensors = {
   pos: null,            // { lat, lon, acc, raw, ts }
   heading: null,        // 나침반 방위 (0=북)
+  point: null,          // 휴대폰 윗부분이 가리키는 방위 (자세 보정 + 떨림 필터, 정밀 화살표용)
+  pointJitter: null,    // 최근 1초 원시 방위 흔들림(°): 크면 '잠깐 멈춰 주세요'
   beta: null, gamma: null,
   orientationOn: false,
   get sim() { return simOn; },
@@ -83,6 +86,7 @@ export async function requestMotionPermission() {
     return true;
   } catch { return false; }
 }
+const pointFilter = new AngleFilter({ minCutoff: 0.8, beta: 0.03 }), recent = [];
 function onOri(e) {
   let h = null;
   if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
@@ -95,6 +99,16 @@ function onOri(e) {
     Sensors.heading = (h + so + 360) % 360;
   }
   if (e.beta != null) { Sensors.beta = e.beta; Sensors.gamma = e.gamma; }
+  // 가리키는 방위: 회전행렬(윗변/카메라) → One-Euro 필터. 행렬을 못 만들면 나침반 방위로
+  const ph = pointingHeading(Sensors.alphaAbs, e.beta, e.gamma), raw = ph ? ph.deg : Sensors.heading;
+  if (raw != null) {
+    const t = performance.now();
+    Sensors.point = pointFilter.update(raw, t);
+    // 손떨림 = 부드러운 방향(필터 값)에서 벗어난 정도의 RMS (일부러 천천히 돌리는 건 떨림이 아님)
+    recent.push([t, wrap180(raw - Sensors.point)]); while (recent.length && t - recent[0][0] > 1000) recent.shift();
+    Sensors.pointJitter = Math.sqrt(recent.reduce((a, r) => a + r[1] * r[1], 0) / recent.length);
+    Sensors.pointSpeed = pointFilter.speed;
+  }
   oriSubs.forEach(f => f(Sensors));
 }
 export function startOrientation() {

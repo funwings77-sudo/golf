@@ -20,6 +20,7 @@ import { openAICaddie } from './aisheet.js';
 import { matches } from '../core/search.js';
 import { analyzeShot, shotSummary, windAlongCross, kmh } from '../physics/shotfit.js';
 import { shotSheet } from './lmform.js';
+import { spin } from '../core/heading.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
@@ -377,7 +378,7 @@ function renderBig() {
   if (!pin) { box.innerHTML = '<div class="bg-msg">그린 위치가 필요해요<br><small>2D 지도에서 그린을 찍어 주세요</small></div>'; return; }
   if (!me) { box.innerHTML = '<div class="bg-msg">위치를 찾는 중이에요…<br><small>[📍 공 위치]로 지도에 찍어도 돼요</small></div>'; return; }
   if (shot) {
-    const t = toBall(Sensors.pos || me, shot.pred, Sensors.heading);
+    const t = toBall(Sensors.pos || me, shot.pred, Sensors.point ?? Sensors.heading);
     box.innerHTML = `<div class="bg-hole">${esc(holeName(h))} · 공 찾으러 가요</div><div class="bg-l">내 공까지</div><div class="bg-main">${Math.round(t.d)}<small>m</small></div><div class="bg-arrow" style="transform:rotate(${t.rel ?? 0}deg)">⬆</div><div class="bg-sub">${t.rel == null ? `${t.compass}쪽으로` : Math.abs(t.rel) < 12 ? '앞으로 쭉' : `${t.rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.round(Math.abs(t.rel))}°`}</div>`;
     return;
   }
@@ -467,7 +468,7 @@ function cards() {
   const D = distance(me, pin), last = S.round?.lastShot?.hole === h.n ? S.round.lastShot : null;
   // ① 친 공을 찾으러 가는 중
   if (shot) {
-    const t = toBall(Sensors.pos || me, shot.pred, Sensors.heading), drop = pinDrop(shot.pred, pin, h);
+    const t = toBall(Sensors.pos || me, shot.pred, Sensors.point ?? Sensors.heading), drop = pinDrop(shot.pred, pin, h);
     box.innerHTML = `<div class="m-label">내 공까지 <span>${esc(shot.clubName)} · 찾을 범위 약 ${Math.round(shot.r80)}m</span></div>
       <div class="m-big ${S.settings.detail ? '' : 'e-big'}"><b>${S.settings.detail ? f1(t.d) : Math.round(t.d)}</b><small>m</small><i class="m-arrow" id="ballArrow" style="transform:rotate(${t.rel ?? 0}deg)">⬆</i></div>
       ${shot.pf ? `<div class="m-pf">예상 · 공 속도 <b>${Math.round(kmh(shot.pf.est.ballSpeed))}km/h</b> · 각도 <b>${Math.round(shot.pf.est.launchDeg)}°</b> · 높이 <b>${Math.round(shot.pf.est.apex)}m</b> · <b>${shot.pf.est.time.toFixed(1)}초</b></div>` : ''}
@@ -533,7 +534,7 @@ function mini() {
 
 function arrowOnly() {
   const shot = shotOf(), a = $("#ballArrow"); if (!shot?.pred || !a || !Sensors.pos) return;
-  const t = toBall(Sensors.pos, shot.pred, Sensors.heading); if (t.rel != null) a.style.transform = `rotate(${t.rel}deg)`;
+  const t = toBall(Sensors.pos, shot.pred, Sensors.point ?? Sensors.heading); if (t.rel != null) spin(a, t.rel); // 휴대폰을 돌리면 부드럽게 따라 돎
 }
 
 function actions() {

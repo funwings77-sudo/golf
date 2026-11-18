@@ -1,6 +1,6 @@
 // ⑦ 분실구 위치 안내: 샷 위치 → 날아간 방향 가리키기 → 낙하 확률 구역 → 레이더 길안내(핫/콜드·3분) → 근접 카메라 탐지
 import { S, save, activeHole } from '../core/state.js';
-import { toLocal, fromLocal, distance, bearing, normAngle, toRad } from '../core/geo.js';
+import { toLocal, fromLocal, distance, bearing, toRad } from '../core/geo.js';
 import { Sensors, onPos, onOrientation, sampleFix, vibrate, speak } from '../core/sensors.js';
 import { estimateLanding, addMark, markSearched, guidance, hapticInterval, relativeArrow } from '../physics/lostball.js';
 import { conditionsEffect, clubType } from '../physics/flight.js';
@@ -9,6 +9,20 @@ import { RULES } from '../core/rules.js';
 import { createMap, destroyMap, drawHole, ll, toLL } from '../map.js';
 import { $, $$, esc, toast, sheet, DU, clubOptions, confBadge, mmss } from '../ui.js';
 import { learnClub } from '../core/score.js';
+import { spin, circMean, circStd, dirName, wrap180 } from '../core/heading.js';
+
+// 지금 가리키는 방위: 자세 보정 + 떨림 필터 값 우선 (없으면 나침반 방위)
+const pointDeg = () => Sensors.point ?? Sensors.heading;
+// 북쪽이 위인 나침반 판 (10° 눈금 · 30° 긴 눈금 · 북동남서)
+function dialSvg() {
+  let t = '';
+  for (let a = 0; a < 360; a += 10) {
+    const long = a % 30 === 0, r1 = long ? 45 : 49, r = a * Math.PI / 180;
+    t += `<line x1="${(60 + Math.sin(r) * r1).toFixed(1)}" y1="${(60 - Math.cos(r) * r1).toFixed(1)}" x2="${(60 + Math.sin(r) * 54).toFixed(1)}" y2="${(60 - Math.cos(r) * 54).toFixed(1)}" class="${long ? 'tl' : 'ts'}"/>`;
+  }
+  return `<svg viewBox="0 0 120 120" class="cmp-dial"><circle cx="60" cy="60" r="56" class="cr"/>${t}
+    <text x="60" y="30" class="cn">북</text><text x="92" y="64" class="cd">동</text><text x="60" y="97" class="cd">남</text><text x="28" y="64" class="cd">서</text></svg>`;
+}
 
 const SEARCH_MS = 3 * 60 * 1000;
 let el_, App_, unPos, unOri, map, layer, est = null, prevDist = null, buzzT = null, tickT = null, view = 'radar', markMode = false;
@@ -44,7 +58,9 @@ function setupUI() {
       <label class="f"><span>클럽</span><select id="club">${clubOptions(draft.club)}</select></label></div>
     <div class="card"><div class="row"><b class="grow">2. 공이 사라진 방향</b><span id="brgLbl" class="sub"></span></div>
       <p class="sub">휴대폰 윗부분을 공이 사라진(떨어진) 쪽으로 향하게 들고 버튼을 누르세요. 나침반이 없으면 지도에서 그 방향을 탭하세요.</p>
-      <div class="row"><span class="arrow-big" id="liveArrow">⬆</span><div class="grow"><div class="mid" id="liveHead">—</div><div class="sub">현재 휴대폰 방위</div></div></div>
+      <div class="cmp-wrap"><div class="cmp" aria-hidden="true">${dialSvg()}<div class="cmp-flag" id="cmpFlag" hidden><i>⛳</i></div>
+          <div class="cmp-needle" id="liveArrow"><svg viewBox="0 0 120 120"><path d="M60 10 L74 62 L60 54 L46 62 Z" class="nd"/><path d="M60 110 L70 64 L60 70 L50 64 Z" class="nt"/><circle cx="60" cy="60" r="6" class="nc"/></svg></div></div>
+        <div class="grow"><div class="cmp-deg" id="liveHead">—</div><div class="sub" id="liveWord">휴대폰 윗부분이 가리키는 방향</div><div class="cmp-warn" id="liveWarn"></div></div></div>
       <button class="btn primary block" id="capDir" style="margin-top:8px">🧭 이 방향으로 날아갔어요</button>
       <div class="mapwrap half" style="margin-top:10px;border-radius:12px;overflow:hidden;height:34vh;min-height:220px"><div class="map" id="map"></div></div>
       <label class="f"><span>거리감</span><div class="seg" id="feelSeg"><button data-v="short">짧게 맞음</button><button data-v="normal" class="on">보통</button><button data-v="long">잘 맞음</button></div></label>
@@ -61,7 +77,19 @@ function setupUI() {
   };
   map = createMap($('#map'), { center: ll(draft.start || Sensors.pos || hole?.tee || { lat: 37.5, lon: 127 }), zoom: 17 });
   if (map) { drawHole(map, hole); layer = L.layerGroup().addTo(map); map.on('click', e => { if (!draft.start) return toast('먼저 샷 위치를 지정하세요'); draft.bearing = bearing(draft.start, { lat: e.latlng.lat, lon: e.latlng.lng }); draft.bSrc = '지도'; upd(); }); }
+  // 나침반 판의 깃발 표시 (샷 위치 → 오늘 핀/그린)
+  const flagBrg = () => { const o = draft.start || Sensors.pos, f = hole?.pin || hole?.green; return o && f && distance(o, f) > 5 ? bearing(o, f) : null; };
+  function placeFlag() { const fb = flagBrg(), el = $('#cmpFlag'); if (!el) return; el.hidden = fb == null; if (fb != null) el.style.transform = `rotate(${fb}deg)`; }
+  let liveLine = null, liveT = 0;
+  function liveMap(deg) { // 지금 가리키는 방향을 지도에 (0.1초마다)
+    const o = draft.start || Sensors.pos; if (!map || !o || deg == null || Date.now() - liveT < 100) return; liveT = Date.now();
+    const len = (S.bag.find(c => c.id === draft.club)?.carry || 150) * 1.2;
+    const end = fromLocal(o, { x: Math.sin(toRad(deg)) * len, y: Math.cos(toRad(deg)) * len });
+    if (!liveLine) liveLine = L.polyline([ll(o), ll(end)], { color: '#c8f169', weight: 4, opacity: 0.95, interactive: false }).addTo(map);
+    else liveLine.setLatLngs([ll(o), ll(end)]);
+  }
   function drawSetupMap() {
+    placeFlag();
     if (!map || !layer) return; layer.clearLayers();
     if (draft.start) { L.circleMarker(ll(draft.start), { radius: 6, color: '#fff', fillColor: '#ffe27a', fillOpacity: 1 }).addTo(layer); }
     if (draft.start && draft.bearing != null) {
@@ -75,16 +103,29 @@ function setupUI() {
   $('#stTee') && ($('#stTee').onclick = () => { draft.start = { ...hole.tee }; draft.startSrc = `${hole.n}번 홀 티`; upd(); });
   $('#club').onchange = e => { draft.club = e.target.value; upd(); };
   $('#capDir').onclick = async () => {
-    if (Sensors.heading == null) return toast('나침반을 사용할 수 없습니다 — 지도에서 방향을 탭하세요');
+    if (pointDeg() == null) return toast('나침반을 사용할 수 없습니다 — 지도에서 방향을 탭하세요');
     if (!draft.start) return toast('먼저 샷 위치를 지정하세요');
-    const hs = []; const un = onOrientation(s => s.heading != null && hs.push(s.heading));
-    await new Promise(r => setTimeout(r, 900)); un();
-    const ref = hs[0] ?? Sensors.heading; const mean = ref + hs.reduce((a, h) => a + normAngle(h - ref), 0) / Math.max(1, hs.length);
-    draft.bearing = (mean + 360) % 360; draft.bSrc = '나침반'; vibrate(50); upd();
+    toast('🧭 1초만 그대로 들고 있어요…', 1200);
+    const hs = []; const un = onOrientation(() => { const d = pointDeg(); if (d != null) hs.push(d); });
+    await new Promise(r => setTimeout(r, 1000)); un();
+    if (!hs.length) hs.push(pointDeg());
+    const sd = circStd(hs);
+    if (sd > 6) return toast(`흔들려서 다시 재야 해요 (±${sd.toFixed(0)}°) · 멈춘 채로 다시 눌러 주세요`, 3500);
+    draft.bearing = circMean(hs); draft.bSrc = `나침반 ±${Math.max(1, sd).toFixed(0)}°`; vibrate(50); upd();
   };
   const seg = (id, fn) => $$(`#${id} button`).forEach(b => b.onclick = () => { $$(`#${id} button`).forEach(x => x.classList.toggle('on', x === b)); fn(b.dataset.v); });
   seg('feelSeg', v => draft.feel = v); seg('curveSeg', v => draft.curve = v); seg('sureSeg', v => sigma = +v);
-  unOri = onOrientation(s => { if (s.heading == null) return; const a = $('#liveArrow'), h = $('#liveHead'); if (!a) return; h.textContent = Math.round(s.heading) + '°'; });
+  let lastTxt = 0;
+  unOri = onOrientation(s => {
+    const deg = pointDeg(), a = $('#liveArrow'); if (!a) return;
+    if (deg == null) { $('#liveWarn').textContent = '나침반을 쓸 수 없어요 · 아래 지도에서 방향을 눌러 주세요'; return; }
+    spin(a, deg); liveMap(deg);
+    if (Date.now() - lastTxt < 80) return; lastTxt = Date.now(); // 글자는 초당 12번이면 충분
+    $('#liveHead').innerHTML = `${deg.toFixed(1)}<small>°</small> <b>${dirName(deg)}</b>`;
+    const fb = flagBrg(), off = fb == null ? null : wrap180(deg - fb);
+    $('#liveWord').textContent = off == null ? '휴대폰 윗부분이 가리키는 방향' : Math.abs(off) < 1 ? '깃발 쪽을 똑바로 가리켜요' : `깃발에서 ${off > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.abs(off).toFixed(1)}°`;
+    $('#liveWarn').textContent = s.compassAcc > 20 ? '🧲 나침반이 부정확해요 · 휴대폰을 8자로 몇 번 흔들어 주세요' : s.pointJitter > 4 && s.pointSpeed < 60 ? '✋ 손이 흔들려요 · 잠깐 멈춰 주세요' : ''; // 일부러 돌리는 중이면 경고 안 함
+  });
   $('#go').onclick = () => {
     S.lost = { ...draft, sigma, marks: [], searched: [], createdAt: Date.now(), searchStartAt: null, hole: hole?.n || null };
     save('lost'); App_.pendingShot = null;
@@ -157,7 +198,7 @@ function searchUI() {
   $('#bFound').onclick = found;
   $('#bLost').onclick = notFound;
   unPos = onPos(() => update());
-  unOri = onOrientation(() => drawRadar());
+  unOri = onOrientation(() => { drawRadar(); const gd = update._gd, a = $('#gArrow'); if (gd && a) spin(a, relativeArrow(gd.bearing, pointDeg())); }); // 휴대폰을 돌리면 화살표도 바로
   tickT = setInterval(tick, 500);
   update(true); buzzLoop();
 }
@@ -169,11 +210,14 @@ function update(redrawMap = false) {
   if (!me) { g.innerHTML = '<b>위치 확인 중…</b>'; drawRadar(); return; }
   const gd = guidance(est, me, prevDist);
   if (prevDist == null || Math.abs(gd.dist - prevDist) > 0.7) prevDist = gd.dist;
-  const rel = relativeArrow(gd.bearing, Sensors.heading);
+  update._gd = gd;
+  const hd = pointDeg(), rel = relativeArrow(gd.bearing, hd);
   const trendTxt = { closer: '🔥 가까워짐', farther: '🧊 멀어짐', same: '' }[gd.trend];
-  g.innerHTML = `<div class="row"><div class="arrow-big" style="transform:rotate(${rel}deg)">⬆</div>
-    <div class="grow"><div class="sub">유력 지점까지 ${Sensors.heading == null ? '(북쪽 기준 방위 ' + Math.round(gd.bearing) + '°)' : ''}</div><div class="big">${DU(gd.dist).replace(/(m|yd)$/, '<small>$1</small>')}</div><div><b>${trendTxt}</b></div></div></div>
-    ${gd.nearDetect ? '<p style="margin:8px 0 0"><b>15m 이내 진입</b> — 카메라 탐지로 풀 속 공을 찾으세요.</p>' : ''}`;
+  if (!$('#gArrow', g)) g.innerHTML = `<div class="row"><div class="arrow-big" id="gArrow">⬆</div>
+    <div class="grow"><div class="sub" id="gSub"></div><div class="big" id="gDist"></div><div><b id="gTrend"></b></div></div></div><p id="gNear" style="margin:8px 0 0" hidden><b>15m 이내 진입</b> — 카메라 탐지로 풀 속 공을 찾으세요.</p>`;
+  spin($('#gArrow', g), rel);
+  $('#gSub', g).textContent = `유력 지점까지${hd == null ? ` (북쪽 기준 방위 ${Math.round(gd.bearing)}°)` : ''}`;
+  $('#gDist', g).innerHTML = DU(gd.dist).replace(/(m|yd)$/, '<small>$1</small>'); $('#gTrend', g).textContent = trendTxt; $('#gNear', g).hidden = !gd.nearDetect;
   if (gd.inZone && !S.lost.searchStartAt) startTimer(true);
   if (gd.nearDetect && !update._prompted) { update._prompted = true; vibrate([100, 60, 100]); speak('15미터 이내입니다. 카메라 탐지를 켜세요'); }
   drawRadar();
@@ -207,7 +251,7 @@ function drawRadar() {
   const me = meLocal() || { x: 0, y: 0 };
   const dc = Math.hypot(est.center.x - me.x, est.center.y - me.y);
   const range = Math.max(30, dc + est.r80 * 1.6); const sc = (C - 20) / range;
-  const rot = Sensors.heading != null ? -toRad(Sensors.heading) : 0; // 헤드업
+  const hd = pointDeg(), rot = hd != null ? -toRad(hd) : 0; // 헤드업 (자세 보정 + 떨림 필터 방위)
   const P = (x, y) => { const dx = (x - me.x) * sc, dy = (y - me.y) * sc; return [C + dx * Math.cos(rot) - dy * Math.sin(rot), C - (dx * Math.sin(rot) + dy * Math.cos(rot))]; };
   ctx.clearRect(0, 0, W, W);
   ctx.fillStyle = '#13261b'; ctx.beginPath(); ctx.arc(C, C, C, 0, 7); ctx.fill();

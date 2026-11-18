@@ -423,3 +423,25 @@ test('론치 모니터 CSV: 머리줄·단위 줄 찾기 · 열 자동 연결 ·
   const euc = new Uint8Array([0xC5, 0xAC, 0xB7, 0xB4, 0x2C, 0xBA, 0xBC, 0xBD, 0xBA, 0xC7, 0xC7, 0xB5, 0xE5]); // "클럽,볼스피드"
   assert.equal(decodeBytes(euc.buffer), '클럽,볼스피드');
 });
+
+import { pointingHeading, AngleFilter, circMean, circStd, wrap180, dirName } from '../js/core/heading.js';
+test('휴대폰이 가리키는 방위: 눕혀도·세워도 같은 방향 · 떨림 필터 · 최단 경로', () => {
+  // 눕혀서 윗변이 북쪽 → 0°, 세워서 카메라가 북쪽 → 0°, 45° 기울여도 0°
+  near(pointingHeading(0, 0, 0).deg, 0, 1e-6); near(pointingHeading(0, 90, 0).deg, 0, 1e-6); near(pointingHeading(0, 45, 0).deg, 0, 1e-6);
+  // 나침반 방위 h → alphaAbs = 360 − h 와 같은 규칙: 137° 를 가리킴
+  for (const beta of [5, 40, 80]) near(pointingHeading(360 - 137, beta, 0).deg, 137, 1e-6);
+  // 옆으로 조금 비틀어(gamma) 들어도 크게 틀어지지 않음
+  near(pointingHeading(360 - 137, 60, 15).deg, 137, 0.5);
+  near(pointingHeading(360 - 137, 20, -25).deg, 137, 0.5);
+  assert.equal(pointingHeading(null, 10, 0), null);
+  // 떨림: ±3° 잡음 → 출력 흔들림이 크게 줄고, 359°↔1° 경계에서 튀지 않음
+  const f = new AngleFilter(); let t = 0; const outs = [];
+  for (let i = 0; i < 200; i++) { t += 16; const raw = (360 + (i % 2 ? 3 : -3)) % 360; outs.push(f.update(raw, t)); }
+  assert.ok(circStd(outs.slice(50)) < 1.0, 'filtered jitter');
+  assert.ok(outs.slice(50).every(o => Math.abs(wrap180(o)) < 2));
+  // 빨리 90° 돌리면 0.3초 안에 따라감
+  for (let i = 0; i < 20; i++) { t += 16; f.update(90, t); }
+  near(f.update(90, t + 16), 90, 8);
+  near(circMean([350, 10]), 0, 1e-9); near(circMean([170, 190]), 180, 1e-9);
+  assert.equal(dirName(137), '남동'); assert.equal(dirName(359), '북'); assert.equal(dirName(90), '동');
+});
