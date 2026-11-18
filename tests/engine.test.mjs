@@ -264,3 +264,48 @@ test('깃대 높이로 거리: d = f·H/h', () => {
   assert.ok(flagError(40, f * 2.13 / 40) < 4, '40m는 더 정확');
   assert.equal(flagDistance(0, f), Infinity);
 });
+
+import { lineFrame, distanceRings, SlopeFlow, resamplePath, slopeVerdict, fallLine } from '../js/core/greenar.js';
+import { GroundProjector } from '../js/core/camera.js';
+test('AR 그린 리딩: 시야 좌표 · 거리 링 · 흐름 · 점선 · 오르막 판정', () => {
+  const ball = { x: 3, y: 1 }, hole = { x: 3, y: 9 }; // 공→홀 = 북쪽 8m
+  const F = lineFrame(ball, hole, 0.6);
+  near(F.D, 8, 1e-9);
+  const hv = F.toView(hole); near(hv.x, 0, 1e-9); near(hv.y, 8.6, 1e-9);
+  const e = F.toView({ x: 4, y: 1 }); near(e.x, 1, 1e-9); // 동쪽 = 오른쪽
+  const back = F.toSurf(F.toView({ x: 5.2, y: 7.1 })); near(back.x, 5.2, 1e-9); near(back.y, 7.1, 1e-9);
+  // 홀 쪽이 2% 오르막, 오른쪽(동)이 1% 높음
+  const surf = P.planeSurface(0.01, 0.02);
+  const sc = distanceRings(surf, F, () => true, { rMax: 10 });
+  assert.equal(sc.rings.length, 20);
+  assert.ok(sc.rings[1].major && !sc.rings[0].major);
+  const r5 = sc.rings.find(r => r.r === 5).segs[0], mid = r5[Math.floor(r5.length / 2)];
+  near(mid.z, 0.1, 1e-6); // 5m 앞 = 10cm 높음
+  assert.ok(sc.dots.length > 20);
+  const flat = distanceRings(surf, F, () => true, { rMax: 10, heights: false });
+  assert.ok(flat.rings.every(r => r.segs.every(s => s.every(p => p.z === 0))));
+  const cut = distanceRings(surf, F, p => p.x < 3.5, { rMax: 4 });
+  assert.ok(cut.rings.every(r => r.segs.every(s => s.every(p => F.toSurf(p).x < 3.5))));
+  // 흐름: 내리막(−∇h)으로 이동
+  const fl = new SlopeFlow(surf, F, () => true, { n: 20, rMax: 8, seed: 5 });
+  const p0 = fl.ps.map(p => ({ x: p.x, y: p.y, life: p.life, age: p.age }));
+  fl.ps.forEach(p => { p.age = 0; p.life = 9; });
+  fl.step(0.1);
+  fl.ps.forEach((p, i) => { assert.ok(p.x < p0[i].x && p.y < p0[i].y); });
+  assert.equal(new SlopeFlow(P.planeSurface(0, 0), F, () => true, { n: 10 }).ps.length, 0); // 평지 = 흐름 없음
+  // 점선 재표본
+  const d = resamplePath([[0, 0], [1, 0], [1, 1]], 0.25);
+  near(d[d.length - 1].s, 2, 1e-9); assert.equal(d.length, 9);
+  for (let i = 1; i < d.length; i++) near(d[i].s - d[i - 1].s, 0.25, 1e-9);
+  // 오르막/내리막
+  assert.equal(slopeVerdict(0.16, 8).en, 'UPHILL'); near(slopeVerdict(0.16, 8).pct, 2, 1e-9);
+  assert.equal(slopeVerdict(-0.05, 8).en, 'DOWNHILL'); assert.equal(slopeVerdict(0.01, 8).en, 'FLAT');
+  // 물 흐름: 홀 쪽 오르막 + 오른쪽 높음 → 내 쪽 왼쪽으로 (각도 ≈ 180+26.6 = −153.4°)
+  const fa = fallLine(surf, F, ball); near(fa.deg, -180 + Math.atan(0.5) * 180 / Math.PI, 1e-6); near(fa.pct, Math.hypot(1, 2), 1e-9);
+});
+test('지면 투영: 높은 지점은 화면에서 더 위에', () => {
+  const pr = new GroundProjector({ height: 1.5, vfovDeg: 60, pitchDeg: 20 });
+  const a = pr.toImage(0, 6, 720, 1280, 0), b = pr.toImage(0, 6, 720, 1280, 0.2);
+  assert.ok(b.v < a.v); near(a.u, 360, 1e-9);
+  const g = pr.toGround(a.u, a.v, 720, 1280); near(g.y, 6, 1e-6);
+});

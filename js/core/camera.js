@@ -22,12 +22,12 @@ export function cameraPitchDeg() { return Sensors.beta == null ? null : 90 - Sen
 export class GroundProjector {
   constructor({ height = 1.45, vfovDeg = 63, pitchDeg = 20, yawDeg = 0 } = {}) { Object.assign(this, { height, vfovDeg, pitchDeg, yawDeg }); }
   focal(vh) { return (vh / 2) / Math.tan(this.vfovDeg * Math.PI / 360); }
-  // 지면점 (x: 오른쪽, y: 앞) → 비디오 픽셀
-  toImage(x, y, vw, vh) {
-    const f = this.focal(vh), p = this.pitchDeg * Math.PI / 180, yw = this.yawDeg * Math.PI / 180;
+  // 지면점 (x: 오른쪽, y: 앞, z: 내 발 기준 높이) → 비디오 픽셀
+  toImage(x, y, vw, vh, z = 0) {
+    const f = this.focal(vh), p = this.pitchDeg * Math.PI / 180, yw = this.yawDeg * Math.PI / 180, H = this.height - z;
     const X = x * Math.cos(yw) - y * Math.sin(yw), Y = x * Math.sin(yw) + y * Math.cos(yw); // 요 보정
-    const cz = Y * Math.cos(p) + this.height * Math.sin(p);      // 광축 방향 깊이
-    const cy = -Y * Math.sin(p) + this.height * Math.cos(p);     // 아래쪽(+)
+    const cz = Y * Math.cos(p) + H * Math.sin(p);      // 광축 방향 깊이
+    const cy = -Y * Math.sin(p) + H * Math.cos(p);     // 아래쪽(+)
     if (cz <= 0.05) return null;
     return { u: vw / 2 + f * X / cz, v: vh / 2 + f * cy / cz, depth: cz };
   }

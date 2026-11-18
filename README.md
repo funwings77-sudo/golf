@@ -38,7 +38,7 @@ node scripts/import-kgba.mjs <golf_courses.sql> [--geocode]
 | ② 라이 경사 (접촉 모드 ±0.3°, 셋업 안내) | `views/lie.js` |
 | ③ 그린 위 거리 (걸음·카메라 탭·GPS) | `views/green.js`, `core/camera.js` |
 | ④ 그린 경사 지도 (사전 격자 + 현장 융합) | `physics/putt.js`, `views/greencanvas.js` |
-| ⑤ 퍼팅 라인·세기·백스윙 (물리 역문제 + 몬테카를로) | `physics/putt.js`, `putt.worker.js` |
+| ⑤ 퍼팅 라인·세기·백스윙 (물리 역문제 + 몬테카를로) · AR 그린 리딩(거리 링 격자·경사 흐름·라인 점선·오르막/내리막) | `physics/putt.js`, `putt.worker.js`, `core/greenar.js`, `views/green.js` |
 | ⑥ 티샷 클럽·조준 (3DOF 탄도 + 기대 타수) | `physics/flight.js`, `physics/strategy.js`, `views/tee.js` |
 | ⑦ 분실구 (낙하 확률 → 레이더 → 카메라 탐지) | `physics/lostball.js`, `views/lost.js` |
 | 토너먼트/캐주얼/연습 모드 (규칙 4.3a) | `core/state.js` `allowed()` |

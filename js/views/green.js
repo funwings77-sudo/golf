@@ -3,11 +3,13 @@ import { mountGreen3D, ovalInside } from './green3d.js';
 import { todayKey } from '../core/remote.js';
 import { S, save, allowed, activeHole, activeCourse, currentMode, FEATURE_NAMES } from '../core/state.js';
 import { distance, toLocal, toRad } from '../core/geo.js';
-import { Sensors, sampleTilt, startSteps, onOrientation, vibrate, speak } from '../core/sensors.js';
+import { Sensors, sampleTilt, startSteps, onOrientation, startOrientation, vibrate, speak } from '../core/sensors.js';
+import { smoothAngle } from '../core/arproj.js';
+import { lineFrame, distanceRings, SlopeFlow, resamplePath, slopeVerdict, fallLine } from '../core/greenar.js';
 import { muFromStimp, buildSurface, fitQuadFromGradients, optimizePutt, backswingCm, demoGreen, CUP_W } from '../physics/putt.js';
 import { openCamera, GroundProjector, coverTransform } from '../core/camera.js';
 import { drawGreen, makeView } from './greencanvas.js';
-import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed } from '../ui.js';
+import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed, DU } from '../ui.js';
 
 const STAND_BACK = 0.6; // 공 뒤에 서는 거리 (m)
 let el_, App_, G, worker = null, reqId = 0, camStop = null, arT = null, unOri = null, metroOn = false;
@@ -96,7 +98,7 @@ function render() {
   el_.innerHTML = `<h2>🟢 그린 리딩 · 퍼팅</h2>
     <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">현장 측정</button>${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">그린맵</button>` : ''}<button data-v="demo" class="${G.src === 'demo' ? 'on' : ''}">데모 그린</button></div>
     ${G.src === 'demo' ? `<div class="seg" id="demoSeg" style="margin-top:6px">${[['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']].map(([k, n]) => `<button data-v="${k}" class="${G.demoKind === k ? 'on' : ''}">${n}</button>`).join('')}</div><p class="sub">가상의 사전 측량 그린입니다 (실제 코스 아님). 그린맵 탭에서 공·홀 위치를 탭으로 바꿔 보세요.</p>` : ''}
-    <div class="seg" id="tabSeg" style="margin-top:10px"><button data-v="measure" class="${G.tab === 'measure' ? 'on' : ''}">③ 측정</button><button data-v="map" class="${G.tab === 'map' ? 'on' : ''}">④ 그린맵</button><button data-v="ar" class="${G.tab === 'ar' ? 'on' : ''}">⑤ AR 라인</button></div>
+    <div class="seg" id="tabSeg" style="margin-top:10px"><button data-v="measure" class="${G.tab === 'measure' ? 'on' : ''}">③ 측정</button><button data-v="map" class="${G.tab === 'map' ? 'on' : ''}">④ 그린맵</button><button data-v="ar" class="${G.tab === 'ar' ? 'on' : ''}">⑤ AR 리딩</button></div>
     <div id="tabBody"></div><div id="result"></div>`;
   $$('#srcSeg button').forEach(b => b.onclick = () => { G.src = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
   $$('#demoSeg button').forEach(b => b.onclick = () => { G.demoKind = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
@@ -290,21 +292,39 @@ function mapTab(body) {
   };
 }
 
-// ---------- ⑤ AR 라인 (단안 지면 투영, 1탭 보정) ----------
+// ---------- ⑤ AR 그린 리딩 (스마트 글라스식 화면) ----------
+//  거리 링 격자(지형 따라 휨) · 경사 흐름 입자 · 퍼팅 라인 점선(굴러가는 공 미리보기) · 홀 거리 태그 · 오르막/내리막 · 물 흐름 나침반
+//  휴대폰 기울기로 바로 표시, 홀컵 1탭으로 피치·요 보정, 이후 나침반으로 좌우 회전을 따라감
 function arTab(body, canLine) {
   const geo = geometry();
   const distMode = G.arMode === 'distance' && geo.kind === 'onsite';
+  const canSlope = allowed('greenSlope');
   body.innerHTML = `<div class="cam" id="cam"><video autoplay playsinline muted></video><canvas id="arcv"></canvas>
-      <div class="hud top" id="arHud"><b>${distMode ? '카메라로 거리 재기' : 'AR 퍼팅 라인'}</b><div class="sub" id="arMsg"></div></div>
+      <div class="hud top" id="arHud"><b>${distMode ? '카메라로 거리 재기' : 'AR 그린 리딩'}</b><div class="sub" id="arMsg"></div></div>
       <div class="hud bottom"><div class="row"><button class="btn small" id="arCal">${distMode ? '취소' : '🎯 홀컵 탭으로 보정'}</button><span class="sub grow" id="arInfo"></span></div></div></div>
-    <p class="sub">공 뒤 ${STAND_BACK}m에 서서 휴대폰을 눈높이(${S.settings.eyeHeight}m, 설정에서 변경)로 들고 홀 쪽을 비추세요. LiDAR 없이 카메라 높이·기울기로 지면을 투영하는 근사 AR이며, 화면의 홀컵을 한 번 탭하면 각도가 보정됩니다.</p>`;
+    <p class="sub">공 뒤 ${STAND_BACK}m에 서서 휴대폰을 눈높이(${S.settings.eyeHeight}m, 설정에서 변경)로 들고 홀 쪽을 비추세요. 흰 링 = 내 위치에서 1m 간격 거리(지형 높이 따라 휨), 흐르는 흰 줄 = 물이 흘러가는(공이 휘는) 방향, 초록 점선 = 퍼팅 라인. LiDAR 없이 카메라 높이·기울기로 지면을 투영하는 근사 AR이며, 화면의 홀컵을 한 번 탭하면 각도가 보정됩니다.</p>`;
   const video = $('#cam video'), cv = $('#arcv'), msg = $('#arMsg'), info = $('#arInfo');
   const proj = new GroundProjector({ height: S.settings.eyeHeight, vfovDeg: S.settings.cameraVFov });
-  let cal = null; // { pitch, beta }
-  if (!distMode && !G.result) msg.textContent = '먼저 측정 탭에서 퍼팅 계산을 하세요. 지금은 거리·조준선만 표시합니다.';
-  else msg.textContent = distMode ? '화면에서 홀컵을 탭하세요 (휴대폰 기울기로 거리 계산)' : '화면에서 홀컵을 탭해 보정하세요';
-  if (!canLine && !distMode) msg.textContent = '토너먼트 모드: 퍼팅 라인 표시가 차단됩니다';
-  $('#arCal').onclick = () => { if (distMode) { G.arMode = null; G.tab = 'measure'; render(); } else { cal = null; msg.textContent = '화면에서 홀컵을 탭하세요'; } };
+  let cal = null, head = null, head0 = null; // cal: { pitch, beta, yaw, heading }
+  startOrientation();
+  // 정적 장면(한 번만 계산): 표면·시야 좌표·거리 링
+  const surf = buildSurface(geo.spec), D = geo.D || 1, frame = lineFrame(geo.ball, geo.hole, STAND_BACK);
+  const rMax = D + STAND_BACK + 3;
+  const scene = distMode || geo.D < 0.3 ? null : distanceRings(surf, frame, geo.inside, { rMax, heights: canSlope });
+  const flow = scene && canSlope ? new SlopeFlow(surf, frame, geo.inside, { rMax, rMin: STAND_BACK + 0.3 }) : null;
+  const zOf = s => (scene && canSlope ? surf.height(s.x, s.y) - scene.h0 : 0);
+  const verdict = canSlope && scene ? slopeVerdict(surf.height(geo.hole.x, geo.hole.y) - surf.height(geo.ball.x, geo.ball.y), D) : null;
+  const fall = canSlope && scene ? fallLine(surf, frame, geo.ball) : null;
+  let dots = null, dotsFor = null, t0 = performance.now(), last = t0;
+
+  if (distMode) msg.textContent = '화면에서 홀컵을 탭하세요 (휴대폰 기울기로 거리 계산)';
+  else if (!canLine) msg.textContent = '토너먼트 모드: 퍼팅 라인 표시가 차단됩니다';
+  else if (geo.D < 0.3) msg.textContent = '먼저 측정 탭에서 거리를 입력하세요';
+  else msg.textContent = '홀 쪽을 비추고, 화면의 홀컵을 한 번 탭하면 정확해집니다';
+  // 결과가 없으면 바로 계산 (영상처럼 비추자마자 라인이 보이도록)
+  if (!distMode && canLine && geo.D >= 0.3 && !G.result) compute();
+
+  $('#arCal').onclick = () => { if (distMode) { G.arMode = null; G.tab = 'measure'; render(); } else { cal = null; head0 = head; msg.textContent = '화면에서 홀컵을 탭하세요'; } };
   openCamera(video).then(stop => { camStop = stop; loop(); }).catch(e => { msg.textContent = '카메라를 열 수 없습니다: ' + e.message + ' (HTTPS·권한 확인)'; });
   cv.onclick = e => {
     const r = cv.getBoundingClientRect(), T = coverTransform(video, cv);
@@ -316,41 +336,114 @@ function arTab(body, canLine) {
       if (!g) return toast('수평선 아래(지면)를 탭하세요');
       G.D = +Math.max(0.3, g.dist - STAND_BACK).toFixed(1); G.distSrc = '카메라'; G.arMode = null; G.tab = 'measure'; G.result = null; saveG(); vibrate(50); toast(`거리 ${G.D}m`); render(); return;
     }
-    const D = geometry().D; if (!(D > 0)) return toast('거리를 먼저 입력하세요');
-    proj.calibrateFromTap(u, v, D + STAND_BACK, video.videoWidth, video.videoHeight);
-    cal = { pitch: proj.pitchDeg, beta };
-    vibrate(40); msg.textContent = '보정 완료 · 휴대폰을 기울여도 라인이 따라갑니다';
+    if (!(geo.D > 0)) return toast('거리를 먼저 입력하세요');
+    proj.calibrateFromTap(u, v, geo.D + STAND_BACK, video.videoWidth, video.videoHeight);
+    cal = { pitch: proj.pitchDeg, beta, yaw: proj.yawDeg, heading: head };
+    vibrate(40); msg.textContent = '보정 완료 · 휴대폰을 움직여도 화면이 따라갑니다';
   };
+
   function loop() {
     if (!camStop) return;
+    const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now;
     cv.width = cv.clientWidth * devicePixelRatio; cv.height = cv.clientHeight * devicePixelRatio;
     const ctx = cv.getContext('2d'), k = devicePixelRatio, T = coverTransform(video, cv);
     ctx.clearRect(0, 0, cv.width, cv.height);
-    if (!distMode && cal) {
-      proj.pitchDeg = cal.pitch + (cal.beta != null && Sensors.beta != null ? cal.beta - Sensors.beta : 0);
-      const g = geometry(), D = g.D || 1;
-      const ux = (g.hole.x - g.ball.x) / D, uy = (g.hole.y - g.ball.y) / D;
-      const toLine = (p) => { const dx = p.x - g.ball.x, dy = p.y - g.ball.y; return { x: dx * uy - dy * ux, y: dx * ux + dy * uy + STAND_BACK }; };
-      const S2 = q => { const im = proj.toImage(q.x, q.y, video.videoWidth, video.videoHeight); return im ? [(T.ox + im.u * T.s) * k, (T.oy + im.v * T.s) * k] : null; };
-      // 홀 링
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 * k; ctx.beginPath();
-      for (let i = 0; i <= 24; i++) { const a = i / 24 * Math.PI * 2; const p = S2({ x: Math.cos(a) * 0.054, y: D + STAND_BACK + Math.sin(a) * 0.054 }); if (p) i ? ctx.lineTo(...p) : ctx.moveTo(...p); }
-      ctx.stroke();
+    if (Sensors.heading != null) { head = smoothAngle(head, Sensors.heading, 0.2); if (head0 == null) head0 = head; }
+    if (!distMode && scene) {
+      // 자세: 보정 전엔 센서 그대로(피치 = 90 − β, 처음 방향 = 홀 쪽), 보정 후엔 보정값 + 변화량
+      const turn = ref => (head != null && ref != null ? ((head - ref + 540) % 360) - 180 : 0);
+      if (cal) { proj.pitchDeg = cal.pitch + (cal.beta != null && Sensors.beta != null ? cal.beta - Sensors.beta : 0); proj.yawDeg = cal.yaw + turn(cal.heading); }
+      else { proj.pitchDeg = Sensors.beta != null ? 90 - Sensors.beta : 25; proj.yawDeg = turn(head0); }
+      const vw = video.videoWidth, vh = video.videoHeight, f = proj.focal(vh) * T.s * k;
+      const P = q => { const im = proj.toImage(q.x, q.y, vw, vh, q.z || 0); return im ? { x: (T.ox + im.u * T.s) * k, y: (T.oy + im.v * T.s) * k, d: im.depth } : null; };
+      const poly = (pts, close) => { ctx.beginPath(); let pen = false; for (const q of pts) { const p = P(q); if (!p) { pen = false; continue; } pen ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); pen = true; } if (close) ctx.closePath(); ctx.stroke(); };
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+      // ① 거리 링 격자: 1m 실선 + 0.5m 점선, 1m 간격 점
+      for (const ring of scene.rings) {
+        ctx.strokeStyle = `rgba(255,255,255,${ring.major ? 0.6 : 0.38})`; ctx.lineWidth = (ring.major ? 1.6 : 1.2) * k;
+        ctx.setLineDash(ring.major ? [] : [7 * k, 9 * k]);
+        for (const seg of ring.segs) poly(seg);
+      }
+      ctx.setLineDash([]); ctx.fillStyle = 'rgba(255,255,255,.85)';
+      for (const q of scene.dots) { const p = P(q); if (!p) continue; ctx.beginPath(); ctx.arc(p.x, p.y, clamp(0.035 * f / p.d, 1.2 * k, 4.5 * k), 0, 7); ctx.fill(); }
+
+      // ② 경사 흐름: 내리막으로 흘러가는 흰 줄
+      if (flow) {
+        for (const tr of flow.step(dt)) {
+          if (tr.pts.length < 3) continue;
+          ctx.strokeStyle = `rgba(255,255,255,${0.55 * tr.fade})`; ctx.lineWidth = 1.6 * k;
+          poly(tr.pts.map(q => ({ x: q.x, y: q.y, z: zOf(q.s) })));
+        }
+      }
+
+      // ③ 홀: 컵 테두리 + 거리 태그 (│10 yd)
+      const hv = frame.toView(geo.hole), hz = zOf(geo.hole);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5 * k;
+      poly(Array.from({ length: 25 }, (_, i) => { const a = i / 24 * Math.PI * 2; return { x: hv.x + Math.cos(a) * 0.054, y: hv.y + Math.sin(a) * 0.054, z: hz }; }), true);
+      const hp = P({ ...hv, z: hz });
+      if (hp) {
+        const txt = DU(geo.D, S.settings.unit === 'yd' ? 0 : 1);
+        ctx.font = `700 ${17 * k}px system-ui, sans-serif`;
+        const w = ctx.measureText(txt).width, bx = hp.x - 4 * k, by = hp.y - 34 * k;
+        ctx.fillStyle = 'rgba(40,40,40,.55)'; roundRect(ctx, bx, by, w + 18 * k, 26 * k, 5 * k); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.fillRect(bx, by, 3 * k, 26 * k); ctx.fillRect(hp.x - 1 * k, by + 26 * k, 2 * k, hp.y - by - 26 * k);
+        ctx.fillText(txt, bx + 10 * k, by + 19 * k);
+      }
+
+      // ④ 퍼팅 라인: 초록 점선 + 출발 방향 실선 + 굴러가는 공 미리보기
       const r = G.result, showLine = r && canLine && r.conf >= 0.4 && !(currentMode() === 'practice' && G.training && !G.revealed);
       if (showLine) {
-        ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 6 * k; ctx.setLineDash([3 * k, 10 * k]); ctx.lineCap = 'round'; ctx.beginPath();
-        let first = true; for (const [x, y] of r.path) { const p = S2(toLine({ x, y })); if (!p) continue; first ? ctx.moveTo(...p) : ctx.lineTo(...p); first = false; }
-        ctx.stroke(); ctx.setLineDash([]);
-        const ap = S2(toLine(r.aimPoint)); if (ap) { ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 3 * k; ctx.beginPath(); ctx.arc(ap[0], ap[1], 12 * k, 0, 7); ctx.stroke(); ctx.fillStyle = '#ffe27a'; ctx.font = `bold ${15 * k}px sans-serif`; ctx.fillText('조준점', ap[0] + 16 * k, ap[1]); }
-        info.textContent = `${cupsText(r)} · 평지 ${r.flatEquiv.toFixed(1)}m · 백스윙 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm`;
+        if (dotsFor !== r) { dots = resamplePath(r.path, 0.22); dotsFor = r; t0 = now; }
+        const L = dots[dots.length - 1].s, roll = ((now - t0) / 1000) % (2.6 + 0.9), sHead = Math.min(1, roll / 2.6) ** 0.6 * L; // 감속하듯 이동
+        for (const d of dots) {
+          if (d.s < 0.6) continue;
+          const p = P({ ...frame.toView(d), z: zOf(d) }); if (!p) continue;
+          const near = Math.max(0, 1 - Math.abs(d.s - sHead) / 0.5);
+          ctx.fillStyle = `rgba(${110 + 145 * near},255,${120 + 100 * near},${0.85})`;
+          ctx.shadowColor = '#3dff6a'; ctx.shadowBlur = 8 * k;
+          ctx.beginPath(); ctx.arc(p.x, p.y, clamp(0.03 * f / p.d, 1.6 * k, 5 * k) * (1 + near * 0.6), 0, 7); ctx.fill();
+        }
+        ctx.shadowBlur = 10 * k; ctx.strokeStyle = '#4dff73'; ctx.lineWidth = 4 * k;
+        poly(dots.filter(d => d.s <= 0.6).map(d => ({ ...frame.toView(d), z: zOf(d) })));
+        ctx.shadowBlur = 0;
+        const ap = P({ ...frame.toView(r.aimPoint), z: zOf(r.aimPoint) });
+        if (ap) { ctx.strokeStyle = 'rgba(255,226,122,.9)'; ctx.lineWidth = 2 * k; ctx.beginPath(); ctx.arc(ap.x, ap.y, 9 * k, 0, 7); ctx.stroke(); ctx.fillStyle = '#ffe27a'; ctx.font = `700 ${13 * k}px system-ui, sans-serif`; ctx.fillText('조준점', ap.x + 12 * k, ap.y + 4 * k); }
+        info.textContent = `${cupsText(r)} · 평지 ${r.flatEquiv.toFixed(1)}m 세기 · 백스윙 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm`;
       } else {
-        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2 * k; ctx.setLineDash([8 * k, 8 * k]); ctx.beginPath();
-        const a = S2({ x: 0, y: STAND_BACK }), b = S2({ x: 0, y: D + STAND_BACK }); if (a && b) { ctx.moveTo(...a); ctx.lineTo(...b); } ctx.stroke(); ctx.setLineDash([]);
-        info.textContent = `${D.toFixed(1)}m`;
+        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2 * k; ctx.setLineDash([8 * k, 8 * k]);
+        poly([{ x: 0, y: STAND_BACK, z: zOf(geo.ball) }, { ...hv, z: hz }]); ctx.setLineDash([]);
+        info.textContent = G.result || !canLine ? DU(geo.D, 1) : '퍼팅 라인 계산 중…';
+      }
+      // 공 표시
+      const bp = P({ x: 0, y: STAND_BACK, z: zOf(geo.ball) });
+      if (bp) { ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2 * k; ctx.beginPath(); ctx.arc(bp.x, bp.y, clamp(0.06 * f / bp.d, 5 * k, 16 * k), 0, 7); ctx.stroke(); }
+
+      // ⑤ 오르막/내리막 배지(오른쪽 위) + 물 흐름 나침반(왼쪽 위)
+      const top = 74 * k;
+      if (verdict) {
+        const t1 = verdict.en, t2 = verdict.en === 'FLAT' ? verdict.ko : `${verdict.ko} ${Math.abs(verdict.dh * 100).toFixed(0)}cm`;
+        ctx.font = `800 ${20 * k}px system-ui, sans-serif`; const w1 = ctx.measureText(t1).width;
+        ctx.font = `600 ${12 * k}px system-ui, sans-serif`; const w = Math.max(w1, ctx.measureText(t2).width) + 22 * k, x = cv.width - w - 10 * k;
+        ctx.fillStyle = 'rgba(30,30,30,.55)'; roundRect(ctx, x, top, w, 46 * k, 8 * k); ctx.fill();
+        ctx.fillStyle = verdict.en === 'UPHILL' ? '#ffd27a' : verdict.en === 'DOWNHILL' ? '#8fd3ff' : '#e6e6e6';
+        ctx.font = `800 ${20 * k}px system-ui, sans-serif`; ctx.fillText(t1, x + 11 * k, top + 23 * k);
+        ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = `600 ${12 * k}px system-ui, sans-serif`; ctx.fillText(t2, x + 11 * k, top + 39 * k);
+      }
+      if (fall && fall.pct >= 0.3) {
+        const cx = 40 * k, cy = top + 30 * k, R0 = 26 * k, a = (fall.deg - proj.yawDeg) * Math.PI / 180;
+        ctx.fillStyle = 'rgba(30,30,30,.55)'; ctx.beginPath(); ctx.arc(cx, cy, R0, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5 * k; ctx.stroke();
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(a); ctx.fillStyle = '#8fd3ff';
+        ctx.beginPath(); ctx.moveTo(0, -R0 + 5 * k); ctx.lineTo(8 * k, 4 * k); ctx.lineTo(0, 0); ctx.lineTo(-8 * k, 4 * k); ctx.closePath(); ctx.fill(); ctx.restore();
+        ctx.fillStyle = '#fff'; ctx.font = `700 ${11 * k}px system-ui, sans-serif`; ctx.textAlign = 'center';
+        ctx.fillText(`${fall.pct.toFixed(1)}%`, cx, cy + R0 + 13 * k); ctx.fillText('물 흐름', cx, cy + R0 + 26 * k); ctx.textAlign = 'start';
       }
     }
     arT = requestAnimationFrame(loop);
   }
 }
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 function stopAR() { if (arT) cancelAnimationFrame(arT); arT = null; if (camStop) { camStop(); camStop = null; } }
 void makeView; void onOrientation; void unOri;
