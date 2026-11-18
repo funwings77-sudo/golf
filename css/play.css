@@ -484,3 +484,49 @@ html.easy #holeNav { display: none !important; }
 .fc-res b { font-size: 48px; font-weight: 900; color: #ffc83d; line-height: 1; } .fc-res b small { width: auto; font-size: 18px; } .fc-res i { font-style: normal; opacity: .8; }
 .fc-cmp { font-size: 13px; margin-top: 6px; opacity: .9; }
 .fc-pin { width: 100%; margin-top: 10px; min-height: 48px; border-radius: 12px; border: 0; background: #5ee6a8; color: #072015; font-weight: 900; font-size: 15px; cursor: pointer; }
+
+/* ---------- 아주 쉬운 화면 (초등학생도 처음 한 번에): 한 화면 = 할 일 하나 + 큰 버튼 하나 ---------- */
+html.easy nav.tabs { grid-template-columns: repeat(3, 1fr); }
+html.easy nav.tabs a[data-r="lost"] { display: none; }
+.e-show-t { display: none; } html.easy .e-show-t { display: inline; } html.easy .e-hide-t { display: none; }
+html.easy .mode-chip { display: none; }
+/* 홀 화면: 앱 머리줄·하단 탭을 숨겨 버튼 층을 하나로 (메뉴는 [🧰 더보기] 안에) */
+html.easy.in-hole .topbar, html.easy.in-hole nav.tabs { display: none; }
+html.easy.in-hole main#view.play, html.easy.in-hole main#view.play:has(.imm) { padding: 0; }
+html.easy.in-hole .imm { height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+html.easy.in-hole #toast { bottom: auto; top: calc(86px + env(safe-area-inset-top)); }
+.imm.easy .bd-hd, .imm.easy #fabAI, .imm.easy #fabGreen, .imm.easy .zoomb { display: none !important; }
+.imm.easy .bd-fab { top: 84px; }
+.imm.easy .imm-top { top: 140px; } .imm.easy #gps.ok { display: none; }
+.bd-fab #fabMe small { display: none; }
+.imm.easy .bd-fab #fabMe { width: auto; padding: 0 12px; display: flex; align-items: center; gap: 6px; font-size: 18px; }
+.imm.easy .bd-fab #fabMe small { display: inline; font-size: 13px; font-weight: 800; }
+/* 👉 지금 할 일 */
+.e-now { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 16px; background: #fff7d6; color: #2a2205; font-size: 15.5px; font-weight: 700; line-height: 1.35; box-shadow: 0 6px 18px rgba(0,0,0,.3); }
+.e-now[hidden] { display: none; }
+.e-now b { color: #0b5d34; white-space: nowrap; }
+.e-now-i { font-size: 22px; flex: none; }
+/* 큰 버튼 하나 + 보조 버튼 둘 */
+.bd-bot.two { grid-template-columns: 1fr 1fr; gap: 6px; background: transparent; box-shadow: none; }
+.bd-bot.two button { min-height: 56px; flex-direction: row; gap: 8px; font-size: 15px; border-radius: 16px; background: rgba(20,24,22,.9); box-shadow: 0 6px 18px rgba(0,0,0,.3); }
+.bd-bot.two button i { font-size: 22px; }
+.a-main.pulse { animation: e-pulse 1.6s ease-in-out infinite; }
+@keyframes e-pulse { 0%, 100% { box-shadow: 0 6px 20px rgba(94,230,168,.35), 0 0 0 0 rgba(94,230,168,.55); } 50% { box-shadow: 0 6px 20px rgba(94,230,168,.35), 0 0 0 12px rgba(94,230,168,0); } }
+@media (prefers-reduced-motion: reduce) { .a-main.pulse { animation: none; } }
+/* 더보기: 자주 쓰는 4개 큰 타일 */
+.tl-fav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.tl-fav button { min-height: 84px; border-radius: 16px; border: 1px solid var(--line); background: var(--green-soft); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 15px; cursor: pointer; }
+.tl-fav button i { font-style: normal; font-size: 28px; }
+.tl-h { font-size: 13px; font-weight: 800; color: var(--sub); margin: 4px 2px 6px; }
+.tl-more { margin: 12px 0 4px; } .tl-more summary { cursor: pointer; font-weight: 800; padding: 10px 2px; }
+.tl-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.tl-links button { min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 800; font-size: 13.5px; cursor: pointer; }
+/* 골프장 고르기 */
+.pick.dim { opacity: .72; }
+.pick .pa .go { font-style: normal; font-size: 12.5px; font-weight: 900; color: #fff; background: var(--green2); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.ph2 small { font-weight: 600; color: var(--sub); font-size: 12.5px; }
+.p-opt { margin-top: 14px; color: var(--sub); } .p-opt summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
+/* 라운드 끝 */
+.fin { text-align: center; padding: 6px 0; }
+.fin-n { font-size: 56px; font-weight: 900; line-height: 1; color: var(--green); } .fin-n small { font-size: 20px; margin-left: 2px; }
+.fin-s { font-size: 17px; margin-top: 6px; }

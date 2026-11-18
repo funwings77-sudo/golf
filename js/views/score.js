@@ -12,7 +12,7 @@ export default {
 
 function render() {
   const r = S.round;
-  if (!r) { el_.innerHTML = `<div class="empty"><p>진행 중인 라운드가 없습니다.</p><a class="btn primary" href="#/home">라운드 시작</a></div>`; return; }
+  if (!r) { el_.innerHTML = `<div class="empty"><p>진행 중인 라운드가 없습니다.</p><a class="btn primary" href="#/play">🏌️ 골프 치러 가기</a></div>`; return; }
   const n = S.ui.hole, h = r.holes.find(x => x.n === n) || r.holes[0];
   const tot = totals(r), st = settle(r);
   el_.innerHTML = `<div class="row"><h2 class="grow" style="margin:0">📝 ${esc(r.courseName)}</h2><span class="pill">${MODES[r.mode].label}</span></div>
@@ -35,10 +35,10 @@ function render() {
     if (k === 'strokes') sc.strokes = Math.max(0, (sc.strokes || (d > 0 ? h.par - 1 : 0)) + d);
     else sc.putts = Math.max(0, sc.putts + d);
     if (k === 'putts' && sc.strokes && sc.putts > sc.strokes) sc.strokes = sc.putts;
-    save('round'); render();
+    sc.saved = true; save('round'); render();
   });
   $$('td[data-h]', el_).forEach(td => td.onclick = () => App_.setHole(+td.dataset.h));
-  $('#par').onclick = () => { h.scores.forEach(s => { if (!s.strokes) s.strokes = h.par; }); save('round'); render(); };
+  $('#par').onclick = () => { h.scores.forEach(s => { if (!s.strokes) s.strokes = h.par; s.saved = true; }); save('round'); render(); };
   $('#next').onclick = () => App_.stepHole(1);
   $('#share')?.addEventListener('click', async () => {
     const txt = `[PinPoint] ${r.courseName} 정산\n` + st.lines.join('\n') + '\n' + st.transfers.map(t => `${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
