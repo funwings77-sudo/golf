@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.27",
+   "code": 28,
+   "date": "2026-11-18T04:09:04.451Z",
+   "bytes": 4966070,
+   "sha256": "ff3b35f0c77940a610692784aec7418fb82eb53ec27c358ef8a0ff845dbd17f8",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.27/pinpoint-caddie-1.0.27.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.27",
+   "notes": [
+    "Launch monitor CSV import: finds the header row (skipping info lines), unit row ([mph], [yds]) and units in column names, auto-maps common column names from Garmin R10, Rapsodo MLM2PRO, FlightScope, TrackMan and Korean devices, reads quoted CSV with comma/semicolon/tab, decimal commas, '5.2 L' style sides and EUC-KR files; preview lets the user fix column mapping, default units, club-name mapping and left/right sign before importing; putters dropped, re-imported shots skipped by key Direction for monitor shots now prefers offline distance (where the ball went) over launch direction"
+   ]
+  },
+  {
    "version": "1.0.26",
    "code": 27,
    "date": "2026-11-18T03:21:00.146Z",
@@ -342,6 +354,6 @@
    ]
   }
  ],
- "latest": "1.0.26",
- "updatedAt": "2026-11-18T03:21:05.122Z"
+ "latest": "1.0.27",
+ "updatedAt": "2026-11-18T04:09:10.270Z"
 }
