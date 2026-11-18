@@ -39,7 +39,7 @@ export function confirmSheet(title, text, okLabel = '확인', kind = 'primary') 
 }
 
 export function lockedCard(featureName) {
-  return `<div class="card locked"><div class="lock-ic">⛔</div><div><b>토너먼트 모드에서 사용할 수 없습니다</b><p class="sub">${esc(featureName)}은(는) 골프 규칙 4.3a에 따라 공식 경기 중 사용이 금지됩니다. 직선 거리와 스코어, 공 찾기는 계속 사용할 수 있어요.</p></div></div>`;
+  return `<div class="card locked"><div class="lock-ic">⛔</div><div><b>대회 모드에서는 쓸 수 없어요</b><p class="sub">${esc(featureName)}은(는) 골프 규칙(4.3a)상 대회 중에 쓰면 안 돼요. 깃발까지 거리, 점수, 공 찾기는 계속 쓸 수 있어요.</p></div></div>`;
 }
 
 export function confBadge(p) {

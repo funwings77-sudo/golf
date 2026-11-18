@@ -57,9 +57,9 @@ export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().to
 
 // ---------- 규칙 엔진 (골프 규칙 4.3a) ----------
 export const MODES = {
-  tournament: { label: '토너먼트', short: 'TOUR', desc: '공식 경기: 직선 거리만 표시. 경사·플레이즈라이크·클럽/라인 추천 자동 차단 (규칙 4.3a)' },
-  casual: { label: '캐주얼', short: 'CASUAL', desc: '친선 라운드: 모든 기능 사용' },
-  practice: { label: '연습', short: 'PRACTICE', desc: '연습 라운드: 모든 기능 + 캘리브레이션·그린 리딩 훈련. 통계에서 제외' },
+  tournament: { label: '대회', short: 'TOUR', desc: '대회 규칙대로 직선 거리만 보여 줘요. 경사·클럽 추천·퍼팅 길은 꺼져요 (규칙 4.3a)' },
+  casual: { label: '친구랑', short: 'CASUAL', desc: '모든 기능을 써요' },
+  practice: { label: '연습', short: 'PRACTICE', desc: '모든 기능 + 연습 도구(힘 맞추기·그린 읽기 연습). 기록 통계에는 안 들어가요' },
 };
 const POLICY = {
   distance: ['tournament', 'casual', 'practice'],

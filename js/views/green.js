@@ -373,7 +373,7 @@ function arTab(body, canLine) {
   let dots = null, dotsFor = null, t0 = performance.now(), last = t0;
 
   if (distMode) msg.textContent = '화면에서 홀컵을 탭하세요 (휴대폰 기울기로 거리 계산)';
-  else if (!canLine) msg.textContent = '토너먼트 모드: 퍼팅 라인 표시가 차단됩니다';
+  else if (!canLine) msg.textContent = '대회 모드: 퍼팅 길은 규칙상 보여 줄 수 없어요';
   else if (geo.D < 0.3) msg.textContent = '먼저 측정 탭에서 거리를 입력하세요';
   else msg.textContent = '홀 쪽을 비추고, 화면의 홀을 한 번 누르면 정확해져요';
   // 결과가 없으면 바로 계산 (영상처럼 비추자마자 라인이 보이도록)

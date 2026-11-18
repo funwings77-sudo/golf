@@ -81,9 +81,9 @@ function refreshHeader() {
     nav.hidden = false;
     $('#holeLbl').textContent = h.nine ? `${h.nine.slice(0, 2)}${h.nineHole}` : 'H' + h.n;
     $('#ttlMain').textContent = c.name;
-    $('#ttlSub').textContent = `Par ${h.par}` + (S.round ? ` · 라운드 진행 중` : '');
+    $('#ttlSub').textContent = `${h.nineHole ?? h.n}번 홀 · 파 ${h.par}` + (S.round ? ' · 치는 중' : '');
   } else {
-    nav.hidden = true; $('#ttlMain').textContent = 'PinPoint AI 캐디'; $('#ttlSub').textContent = '셀프 라운드의 디지털 캐디';
+    nav.hidden = true; $('#ttlMain').textContent = 'PinPoint AI 캐디'; $('#ttlSub').textContent = '내 손안의 골프 캐디';
   }
 }
 
