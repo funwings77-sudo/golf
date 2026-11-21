@@ -1143,6 +1143,8 @@ function sceneData() {
     dzPin: (() => { const pn = h ? (h.pin || h.green) : null; const f = me; return pn && f ? pinDrop(f, pn, h)?.v ?? null : null; })(),
     plan: (() => { if (shot || !allowed('clubRec') || !me || !adv?.club || adv.club === 'PT' || !(adv.kind === 'full' || adv.kind === 'partial')) return null; const cb = S.bag.find(c => c.id === adv.club), w = allowed('windAdjust') ? wx() : null; return cb ? { from: me, aim: adv.aimBearing, club: adv.club, stdCarry: cb.carry * (adv.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: w?.rho } : null; })(),
     live: (() => { if (!shot || shot.aimBearing == null || !shot.club) return null; const cb = S.bag.find(c => c.id === shot.club), w = allowed('windAdjust') ? wx() : null; return cb ? { ts: shot.ts, from: shot.start, aim: shot.aimBearing, club: shot.club, stdCarry: cb.carry * (shot.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: shot.rho ?? w?.rho } : null; })(),
+    // 🧭 '지금 할 일' 카드(내비의 회전 안내처럼): 추천 클럽 · 보낼 거리 · 조준 방향
+    rec: !shot && allowed('clubRec') && adv?.club && adv.kind !== 'holed' ? { club: adv.clubName, carry: adv.kind === 'putt' ? adv.D : adv.carry, rel: adv.rel || 0, swing: adv.swing?.short || '', putt: adv.kind === 'putt' } : null,
     apex: !shot && adv?.landing && allowed('clubRec') ? (conditionsEffect(adv.club && adv.club !== 'PT' ? adv.club : '7i', Math.max(10, adv.carry || 0)).apex || 20) : null,
   };
 }

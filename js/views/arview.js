@@ -5,7 +5,7 @@
 //  · 지도: 오른쪽 위 작은 위성 지도 → 휴대폰을 아래로 내리면(땅을 보면) 화면 전체가 지도, 세우면 다시 카메라
 //  · 정밀도: 회전행렬(α·β·γ) 투영 + 표시 영상의 실제 초점거리(object-fit 보정) + 방위 1탭 보정 + 흔들림 완화
 //           조준한 곳 거리 = 시선과 실제 지형이 만나는 곳 (평지 가정 대신 지형을 따라 광선 추적)
-import { openCamera, coverTransform } from '../core/camera.js';
+import { openCamera, coverTransform, zoomed, attachZoom } from '../core/camera.js';
 import { Sensors, startOrientation, requestMotionPermission, onOrientation } from '../core/sensors.js';
 import { rotationMatrix, project, enuOf, focalPx, cameraAxis, yawCorrection, smoothAngle, unproject, groundHit, rayHit } from '../core/arproj.js';
 import { distance, bearing, destination, normAngle, geodesic } from '../core/geo.js';
@@ -27,6 +27,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   box.innerHTML = `<div class="ar"><video playsinline muted></video><canvas></canvas>
     <div class="ar-map mini" id="arMap"><div class="ar-map-in"></div><button class="ar-map-catch" id="arMapCatch" aria-label="지도 크게 보기"></button><button class="ar-map-close" id="arMapClose">📷 카메라로</button></div>
     <div class="ar-msg" id="arMsg"></div><div class="ar-diag" id="arDiag"><div class="ar-diag-h"><b>🩺 AR 점검</b><button id="arDiagX" aria-label="점검 닫기">✕ 닫기</button></div><div class="ar-diag-b" id="arDiagB"></div></div>
+    <button class="cam-zoom ar-zoom" id="arZoomB" aria-label="화면 확대">1×</button>    <div class="ar-nav" id="arNav" hidden></div><div class="ar-poi" id="arPoi" hidden></div><div class="ar-warn" id="arWarn" hidden role="status"></div>
     <div class="ar-read" id="arRead"></div><div class="ar-walk" id="arWalk" hidden></div><div class="ar-trk" id="arTrk" hidden></div><div class="ar-fly" id="arFlyInfo"></div><input type="range" class="ar-slide" id="arT" min="0" max="1000" value="0" aria-label="공 비행 시간" hidden>
     <button class="ar-tbtn" id="arTools" aria-label="카메라 도구" aria-expanded="false">🛠</button>
     <button class="ar-chip" id="arAim0" hidden>⊙ 가운데로</button>
@@ -155,12 +156,14 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   const ctx = cv.getContext('2d');
   let last = { R: null, f: 0, cx: 0, cy: 0 };
   let flight = null, flightKey = '', anim = null, autoTs = null;
+  const camZoom = attachZoom(box.querySelector('.ar'), video, box.querySelector('#arZoomB'), 'pinpoint.arZoom'); // 🔍 두 손가락·버튼으로 확대
   function frame() {
     if (!alive) return;
     raf = requestAnimationFrame(frame);
     const dpr = Math.min(2, window.devicePixelRatio || 1), W = box.clientWidth, H = box.clientHeight;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    labQ = [];
     const sc = getScene();
     if (!sc?.me) { say('📍 위치를 찾는 중이에요…'); return; }
     ensureTerrain(sc);
@@ -174,7 +177,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     if (ax.pitch < -55) { highSince = 0; lowSince ||= now; if (!mapManual && !mapFull && now - lowSince > 350) setMap(true); }
     else if (ax.pitch > -38) { lowSince = 0; highSince ||= now; if (now - highSince > 350) { if (mapManual && !mapFull) mapManual = false; if (!mapManual && mapFull) setMap(false); } }
     if (mapFull) { hide(); return; } // 지도만 보일 때는 카메라 위 그림을 쉼 (배터리)
-    const t = video.videoWidth ? coverTransform(video, box) : { s: 1, ox: 0, oy: 0, vw: W, vh: H };
+    const t = zoomed(video.videoWidth ? coverTransform(video, box) : { s: 1, ox: 0, oy: 0, vw: W, vh: H }, camZoom?.z || 1); // 🔍 확대 배율만큼 선·위치도
     const f = focalPx(S.settings.cameraVFov || 63, t.vh) * t.s, cx = t.ox + t.vw * t.s / 2, cy = t.oy + t.vh * t.s / 2;
     const so = (screen.orientation && screen.orientation.angle) || 0;
     const opt = { f, cx, cy, screenAngle: so };
@@ -210,11 +213,11 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     trackStep(sc, R, opt, eye, f, t);
     walkStep(sc, R, opt, eye, f, t, ax);
     // 해저드 이름
-    for (const z of sc.hazards || []) { const q = P(z); if (q.visible && q.depth < 400) label(q.x, q.y, `${HZ[z.type]?.[0] || ''} ${Math.round(distance(sc.me, z))}m`, 'rgba(0,0,0,.55)', 12); }
+    for (const z of sc.hazards || []) { const q = P(z); if (q.visible && q.depth < 400) label(q.x, q.y, `${HZ[z.type]?.[0] || ''} ${Math.round(distance(sc.me, z))}m`, 'rgba(0,0,0,.55)', 12, 1); }
     // 떨어질 곳
-    if (landing && !anim) { const q = P(landing); if (q.visible) { ring(q.x, q.y, Math.max(10, f * 6 / q.depth)); label(q.x, q.y - 24, `🎯 떨어질 곳 ${Math.round(distance(sc.me, landing))}m`, 'rgba(160,120,0,.9)', 15); } }
+    if (landing && !anim) { const q = P(landing); if (q.visible) { ring(q.x, q.y, Math.max(10, f * 6 / q.depth)); label(q.x, q.y - 24, `🎯 떨어질 곳 ${Math.round(distance(sc.me, landing))}m`, 'rgba(160,120,0,.9)', 15, 2); } }
     // 내 공 (친 뒤)
-    if (sc.ball) { const q = P(sc.ball); if (q.visible) { ctx.fillStyle = '#fff'; ctx.strokeStyle = '#d93b2b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(7, f * 0.6 / q.depth), 0, 7); ctx.fill(); ctx.stroke(); label(q.x, q.y - 22, `⚪ 내 공 ${Math.round(distance(sc.me, sc.ball))}m`, 'rgba(217,59,43,.92)', 15); } else edge(sc.ball, '내 공', ax); }
+    if (sc.ball) { const q = P(sc.ball); if (q.visible) { ctx.fillStyle = '#fff'; ctx.strokeStyle = '#d93b2b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(7, f * 0.6 / q.depth), 0, 7); ctx.fill(); ctx.stroke(); label(q.x, q.y - 22, `⚪ 내 공 ${Math.round(distance(sc.me, sc.ball))}m`, 'rgba(217,59,43,.92)', 15, 3); } else edge(sc.ball, '내 공', ax); }
     // 깃발 (실제 깃대 2.1m)
     if (sc.pin) {
       const top = P(sc.pin, 2.1), base = P(sc.pin);
@@ -222,10 +225,12 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(base.x, base.y); ctx.lineTo(top.x, top.y); ctx.stroke();
         ctx.fillStyle = '#e53935'; ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(top.x + 18, top.y + 7); ctx.lineTo(top.x, top.y + 14); ctx.fill();
         const dz = hgt(sc.pin, sc);
-        label(top.x, top.y - 16, `⛳ 깃발 ${Math.round(distance(sc.me, sc.pin))}m${Math.abs(dz) >= 1 ? ` · ${dz > 0 ? '↑' : '↓'}${Math.abs(dz).toFixed(1)}m` : ''}`, 'rgba(31,95,63,.95)', 17);
+        label(top.x, top.y - 16, `⛳ 깃발 ${Math.round(distance(sc.me, sc.pin))}m${Math.abs(dz) >= 1 ? ` · ${dz > 0 ? '↑' : '↓'}${Math.abs(dz).toFixed(1)}m` : ''}`, 'rgba(31,95,63,.95)', 17, 3);
       } else edge(sc.pin, '깃발', ax);
     }
     rangefinder(sc, R, ax, opt, eye, f);
+    flushLabels();
+    navCards(sc, now);
     if (diagOn) diag(sc, ax);
     acc.textContent = `GPS ±${Math.round(sc.me.acc || 0)}m · 방위 ${Math.round(ax.bearing)}°${Sensors.compassAcc != null ? ` (±${Math.round(Sensors.compassAcc)}°)` : ''}${yaw ? ` · 보정 ${yaw > 0 ? '+' : ''}${yaw.toFixed(1)}°` : ''}${terr ? ' · ⛰️ 지형' : terrLoading ? ' · 지형 받는 중' : ''}`;
   }
@@ -347,7 +352,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       const pts = F.path.map(q => project(R, enuOf(sc.me, q, { eye, dz: q.h + z0 + (z1 - z0) * Math.min(1, q.t / F.time) }), opt)).filter(q => q.visible && q.depth > 1);
       line(pts, 'rgba(255,90,60,.35)', 12, []); line(pts, '#ff5a3c', 3.5, []);
       const lq = project(R, enuOf(sc.me, F.landing, { eye, dz: z1 }), opt);
-      if (lq.visible) { ring(lq.x, lq.y, Math.max(10, f * 5 / lq.depth)); label(lq.x, lq.y - 24, `🎯 착지 ${(Math.round(F.carry * 10) / 10).toLocaleString('ko-KR', { minimumFractionDigits: 1 })}m ±${F.sd.toFixed(1)}`, 'rgba(200,60,40,.92)', 14); }
+      if (lq.visible) { ring(lq.x, lq.y, Math.max(10, f * 5 / lq.depth)); label(lq.x, lq.y - 24, `🎯 착지 ${(Math.round(F.carry * 10) / 10).toLocaleString('ko-KR', { minimumFractionDigits: 1 })}m ±${F.sd.toFixed(1)}`, 'rgba(200,60,40,.92)', 14, 2); }
       const f1 = x => x.toFixed(1);
       el.hidden = false;
       el.innerHTML = `<div class="trk-g"><span><small>공 속도</small><b>${f1(F.kmh)}km/h</b></span><span><small>발사 각</small><b>${f1(F.launch)}°</b></span><span><small>좌우</small><b>${Math.abs(F.sideDeg) < 0.05 ? '정면' : `${F.sideDeg > 0 ? '오른쪽' : '왼쪽'} ${f1(Math.abs(F.sideDeg))}°`}</b></span>
@@ -520,8 +525,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     if (now - readT < 120) return; readT = now;
     const read = box.querySelector('#arRead');
     // 숫자 판: 조준점 아래 · 아래 메뉴에 닿으면 조준점 위로
-    const rh = read.offsetHeight || 150, below = ry + 44 + rh < H - 200;
-    read.style.top = `${below ? ry + 44 : Math.max(120, ry - 44 - rh)}px`; read.style.left = `${Math.max(150, Math.min(W - 150, rx))}px`;
+    // 📱 가운데(조준점 둘레)는 비워 둠: 숫자 판은 화면 아래 '쳤어요' 버튼 위에 고정 (CSS .ar-read)
     const too = !snap && (!isFinite(gh.h) || gh.h > 10000 || err > Math.max(15, dist * 0.5));
     const f1 = x => (Math.round(x * 10) / 10).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); // 1,234.5
     const toPin = pt && sc.pin && !(snap && snap.p === sc.pin) ? geodesic(pt, sc.pin) : null;
@@ -537,8 +541,8 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     } else if (ht?.done) htLine = `<div class="ar-ht">🌳 높이 <b>${ht.done.h.toFixed(1)}m</b> <small>${Math.round(ht.done.d)}m 앞 · ${esc(ht.done.note)}</small></div>`;
     else if (ht) htLine = '<div class="ar-ht">🌳 나무·벽의 <b>밑동</b>을 조준하고 [높이]를 누르세요</div>';
     const cell = (k, v2) => `<span><small>${k}</small>${v2}</span>`;
-    read.innerHTML = `<div class="ar-big">${too ? `<span class="far">${!isFinite(gh.h) ? (gh.elev > 0 ? '하늘이에요' : '10km보다 멀어요') : '오차가 너무 커요 · 땅이나 산을 조준해 주세요'}</span>` : `<em>${snap ? esc(snap.name) : gh.crest ? '⛰️ 능선 근처' : '조준한 곳까지'}</em><b>${f1(dist)}</b><small>m</small><i>±${f1(err)}</i>${club ? `<u>${esc(CLUBN(club))}</u>` : ''}`}</div>
-      ${too ? `<div class="ar-sub"><span>🧭 ${compass(brg)} ${f1(brg)}°</span><span>${gh.elev >= 0 ? '⬆' : '⬇'} ${f1(Math.abs(gh.elev))}°</span></div>` : `<div class="ar-grid">
+    read.innerHTML = `<div class="ar-big">${too ? `<span class="far">${!isFinite(gh.h) ? (gh.elev > 0 ? '하늘이에요' : '10km보다 멀어요') : '오차가 너무 커요 · 땅이나 산을 조준해 주세요'}</span>` : `<em>${snap ? esc(snap.name) : gh.crest ? '⛰️ 능선 근처' : '조준한 곳까지'}</em><b>${f1(dist)}</b><small>m</small><i>±${f1(err)}</i>${club ? `<u>${esc(CLUBN(club))}</u>` : ''}${too ? '' : `<button class="ar-more" data-rd="${readMore ? 0 : 1}" aria-label="${readMore ? '숫자 접기' : '숫자 더 보기'}">${readMore ? '▴' : '▾'}</button>`}`}</div>
+      ${!too && !readMore ? '' : too ? `<div class="ar-sub"><span>🧭 ${compass(brg)} ${f1(brg)}°</span><span>${gh.elev >= 0 ? '⬆' : '⬇'} ${f1(Math.abs(gh.elev))}°</span></div>` : `<div class="ar-grid">
         ${cell('직선 거리', `${f1(Math.hypot(dist, dzPt))}m`)}
         ${cell('높이 차이', Math.abs(dzPt) < 0.05 ? '평평 0.0m' : `${dzPt > 0 ? '⬆' : '⬇'} ${f1(Math.abs(dzPt))}m · ${f1(Math.abs(dzPt / dist * 100))}%`)}
         ${cell('방향', `${compass(brg)} ${f1(brg)}°`)}
@@ -549,7 +553,8 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       ${htLine}`;
   }
   function reticle(x, y) { ctx.beginPath(); ctx.arc(x, y, 18, 0, 7); ctx.moveTo(x - 34, y); ctx.lineTo(x - 22, y); ctx.moveTo(x + 22, y); ctx.lineTo(x + 34, y); ctx.moveTo(x, y - 34); ctx.lineTo(x, y - 22); ctx.moveTo(x, y + 22); ctx.lineTo(x, y + 34); ctx.stroke(); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 7); ctx.fill(); }
-  function tag(x, y, t) { ctx.font = '800 12px system-ui, sans-serif'; const w = richWidth(ctx, t) + 10; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x, y - 9, w, 18); ctx.fillStyle = '#fff'; drawRich(ctx, t, x + 5, y + 4); }
+  function tag(x, y, t) { if (labQ) { labQ.push({ x, y, text: t, tag: true, pr: 0.5, size: 12 }); return; } drawTag(x, y, t); }
+  function drawTag(x, y, t) { ctx.font = '800 12px system-ui, sans-serif'; const w = richWidth(ctx, t) + 10; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x, y - 9, w, 18); ctx.fillStyle = '#fff'; drawRich(ctx, t, x + 5, y + 4); }
   function line(pts, color, w, dash) {
     if (pts.length < 2) return;
     ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.setLineDash(dash); ctx.beginPath();
@@ -619,7 +624,78 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   };
   box.querySelector('#arRings').onclick = e => { ringsOn = !ringsOn; e.target.classList.toggle('on', ringsOn); };
 
-  function label(x, y, text, bg, size) {
+  // 🏷️ 글자 겹침 없애기 (내비처럼 표시끼리 겹치지 않게): 프레임 동안 모았다가 중요한 것부터 빈자리에 놓음
+  //   pr: 3 = 깃발·내 공·화면 밖 안내 · 2 = 떨어질 곳·착지 · 1 = 해저드 이름 (자리가 없으면 1부터 뺌)
+  let labQ = null;
+  function label(x, y, text, bg, size, pr = 1) { if (labQ) labQ.push({ x, y, text, bg, size, pr }); else drawLabel(x, y, text, bg, size); }
+  function flushLabels() {
+    const q = labQ || []; labQ = null; const put = [];
+    // 가운데 조준 원 둘레는 비워 둠 · 화면 카드 아래로 글자가 숨지 않게
+    try { const { rx, ry } = aimXY(); put.push({ x0: rx - 40, y0: ry - 40, x1: rx + 40, y1: ry + 40 }); } catch {}
+    const bb = box.getBoundingClientRect();
+    for (const sel of ['#arNav', '#arPoi', '#arWarn', '#arRead', '#arMap']) {
+      const e = box.querySelector(sel); if (!e || e.hidden || !e.offsetWidth) continue;
+      const r = e.getBoundingClientRect(); put.push({ x0: r.left - bb.left - 4, y0: r.top - bb.top - 4, x1: r.right - bb.left + 4, y1: r.bottom - bb.top + 4 });
+    }
+    q.sort((a, b) => b.pr - a.pr);
+    for (const L of q) {
+      ctx.font = `800 ${L.size}px system-ui, sans-serif`;
+      const w = richWidth(ctx, L.text, L.size) + (L.tag ? 10 : 16), h = L.tag ? 18 : L.size + 12, gap = h + 4;
+      const x0 = L.tag ? L.x : L.x - w / 2, top = L.tag ? L.y - 9 : L.y - L.size - 6;
+      let ok = null;
+      // 위아래로 먼저, 안 되면 좌우로도 비켜 봄 (화면 밖으로는 안 나가게)
+      const BW = box.clientWidth;
+      outer: for (const dx of [0, -40, 40, -80, 80, -120]) for (const dy of [0, -gap, gap, -2 * gap, 2 * gap]) {
+        const r = { x0: x0 + dx, y0: top + dy, x1: x0 + dx + w, y1: top + dy + h };
+        if (r.x0 < 4 || r.x1 > BW - 4) continue;
+        if (!put.some(p => r.x0 < p.x1 && r.x1 > p.x0 && r.y0 < p.y1 && r.y1 > p.y0)) { ok = { r, dy, dx }; break outer; }
+      }
+      if (!ok) { if (L.pr < 3) continue; ok = { r: { x0: L.x - w / 2, y0: L.y - L.size - 6, x1: L.x + w / 2, y1: L.y - L.size + 6 + L.size }, dy: 0 }; }
+      put.push(ok.r); const lx = L.x + (ok.dx || 0); if (L.tag) drawTag(lx, L.y + ok.dy, L.text); else drawLabel(lx, L.y + ok.dy, L.text, L.bg, L.size);
+    }
+  }
+  // 🧭 내비식 안내 (이미지 분석: 왼쪽 위 = 지금 할 일 · 오른쪽 = 앞으로 나올 곳 · 위험할 때만 노란 표지판)
+  let readMore = false, navT = 0;
+  box.addEventListener('click', e => { const b = e.target.closest('[data-rd]'); if (b) { readMore = b.dataset.rd === '1'; readT = 0; } });
+  const NAV_HZ = { ob: ['⚠', 'OB'], water: ['💧', '물'], bunker: ['🏖', '벙커'], trees: ['🌳', '숲'] };
+  function navCards(sc, now) {
+    if (now - navT < 300) return; navT = now;
+    const nav = box.querySelector('#arNav'), poi = box.querySelector('#arPoi'), warn = box.querySelector('#arWarn');
+    const from = sc.ball || sc.from || sc.me, h = sc.hole, pin = sc.pin;
+    // ① 지금 할 일: 큰 화살표 + 클럽 + 보낼 거리
+    const r = sc.rec;
+    if (r && !anim) {
+      const side = r.putt ? '홀 보고 굴려요' : Math.abs(r.rel) < 0.75 ? '깃발 보고 똑바로' : `깃발보다 ${r.rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.abs(r.rel) < 3 ? '조금' : '많이'}`;
+      nav.innerHTML = `<i class="ar-nav-a" style="transform:rotate(${Math.max(-60, Math.min(60, r.rel * 3))}deg)" aria-hidden="true">⬆</i><span><b>${esc(r.club)}</b><small>${r.putt ? `홀까지 ${Math.round(r.carry)}m` : `${Math.round(r.carry)}m 보내기`}${r.swing ? ` · ${esc(r.swing)}` : ''}</small><em>${side}</em></span>`;
+      nav.hidden = false;
+    } else nav.hidden = true;
+    // ② 앞으로 나올 곳: 해저드 앞·넘기기 · 그린 앞·깃발·뒤 (가까운 순 4개)
+    const items = [];
+    if (from && pin) {
+      const dPin = distance(from, pin), bPin = bearing(from, pin);
+      for (const z of sc.hazards || []) {
+        const d = distance(from, z), off = normAngle(bearing(from, z) - bPin);
+        if (Math.abs(off) > 50 || d > dPin + 15 || d - z.r < 15) continue;
+        const [ic, nm] = NAV_HZ[z.type] || ['⚠', '해저드'], sd = Math.abs(off) < 8 ? '' : off > 0 ? '오른 ' : '왼 '; // 좁은 목록에 맞게 짧게
+        items.push({ ic, t: `${sd}${nm} 앞`, d: d - z.r }, { ic, t: `${sd}${nm} 넘기기`, d: d + z.r });
+      }
+      if (h?.front) items.push({ ic: '⛳', t: '그린 앞', d: distance(from, h.front) });
+      items.push({ ic: '⛳', t: '깃발', d: dPin, main: true });
+      if (h?.back) items.push({ ic: '⛳', t: '그린 뒤', d: distance(from, h.back) });
+    }
+    const list = items.filter(x => x.d > 5).sort((a, b) => a.d - b.d).slice(0, 4);
+    if (list.length >= 2 && !anim) { poi.innerHTML = list.map(x => `<div class="${x.main ? 'main' : ''}"><i>${x.ic}</i><span>${esc(x.t)}</span><b>${Math.round(x.d)}<small>m</small></b></div>`).join(''); poi.hidden = false; }
+    else poi.hidden = true;
+    // ③ 경고 표지판: 떨어질 곳 가까이에 해저드가 있을 때만
+    let w = null;
+    if (sc.landing && !anim) for (const z of sc.hazards || []) {
+      const gap = distance(sc.landing, z) - z.r;
+      if (gap < 10 && (!w || gap < w.gap)) w = { gap, nm: (NAV_HZ[z.type] || ['⚠', '해저드'])[1] };
+    }
+    if (w) { warn.innerHTML = `<i aria-hidden="true">⚠</i><span><b>${esc(w.nm)} 조심</b><small>${w.gap <= 0 ? '떨어질 곳이 걸쳐 있어요' : `떨어질 곳에서 ${Math.round(w.gap)}m`}</small></span>`; warn.hidden = false; }
+    else warn.hidden = true;
+  }
+  function drawLabel(x, y, text, bg, size) {
     ctx.font = `800 ${size}px system-ui, sans-serif`; const w = richWidth(ctx, text, size) + 16;
     ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - w / 2, y - size - 6, w, size + 12, 9) : ctx.rect(x - w / 2, y - size - 6, w, size + 12); ctx.fill();
     ctx.fillStyle = '#fff'; drawRich(ctx, text, x, y, { size, align: 'center' }); ctx.textAlign = 'left';
@@ -630,7 +706,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     const left = rel < 0, x = left ? 34 : W - 34, y = H * 0.42;
     ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.beginPath(); ctx.arc(x, y, 28, 0, 7); ctx.fill();
     ctx.fillStyle = '#ffe27a'; ctx.font = '900 26px system-ui'; ctx.textAlign = 'center'; ctx.fillText(left ? '◀' : '▶', x, y + 9);
-    label(x + (left ? 60 : -60), y + 52, `${name}은 ${left ? '왼쪽' : '오른쪽'} ${Math.abs(rel).toFixed(0)}°`, 'rgba(0,0,0,.65)', 13); ctx.textAlign = 'left';
+    label(x + (left ? 60 : -60), y + 52, `${name}은 ${left ? '왼쪽' : '오른쪽'} ${Math.abs(rel).toFixed(0)}°`, 'rgba(0,0,0,.65)', 13, 3); ctx.textAlign = 'left';
   }
   let diagT = 0;
   function diag(sc, ax) {

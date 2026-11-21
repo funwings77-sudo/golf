@@ -16,6 +16,36 @@ export function coverTransform(video, el) {
   return { s, ox: (cw - vw * s) / 2, oy: (ch - vh * s) / 2, vw, vh, cw, ch };
 }
 
+// 🔍 카메라 화면 확대 (1×~4×): 영상을 가운데 기준으로 키우고, 위에 그리는 선·눌러 재기도 같은 배율로 맞춤
+//   zoomed(t, z): coverTransform 결과를 확대 배율만큼 바꿈 → 초점거리(f = focalPx·t.s)와 화면 위치가 함께 맞음
+//   attachZoom(target, video, btn): 두 손가락 벌리기·오므리기 + 버튼(1× → 2× → 3× → 1×) · 배율은 기억
+export function zoomed(t, z) {
+  if (!z || z <= 1.001) return t;
+  const cx = t.ox + t.vw * t.s / 2, cy = t.oy + t.vh * t.s / 2;
+  return { ...t, s: t.s * z, ox: cx - (cx - t.ox) * z, oy: cy - (cy - t.oy) * z };
+}
+export function attachZoom(target, video, btn, key = 'pinpoint.camZoom') {
+  let z = 1; try { z = Math.min(4, Math.max(1, +localStorage.getItem(key) || 1)); } catch {}
+  const apply = (v, keep = true) => {
+    z = Math.min(4, Math.max(1, Math.round(v * 10) / 10));
+    video.style.transform = z > 1 ? `scale(${z})` : ''; video.style.transformOrigin = 'center center';
+    if (btn) { btn.textContent = `${z % 1 ? z.toFixed(1) : z}×`; btn.classList.toggle('on', z > 1); btn.setAttribute('aria-label', `화면 확대 ${z}배 (누르면 바꿔요)`); }
+    if (keep) try { localStorage.setItem(key, String(z)); } catch {}
+  };
+  apply(z, false);
+  if (btn) btn.onclick = e => { e.stopPropagation(); apply(z < 1.95 ? 2 : z < 2.95 ? 3 : 1); };
+  // 두 손가락: 벌리면 확대 · 오므리면 축소 (한 손가락 누르기는 그대로 '눌러 재기')
+  const pts = new Map(); let d0 = 0, z0 = 1, pinched = false;
+  const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  target.addEventListener('pointerdown', e => { pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2) { d0 = dist(); z0 = z; pinched = true; } });
+  target.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2 && d0 > 20) apply(z0 * dist() / d0); });
+  const up = e => { pts.delete(e.pointerId); if (!pts.size) setTimeout(() => { pinched = false; }, 50); };
+  target.addEventListener('pointerup', up); target.addEventListener('pointercancel', up);
+  // 벌리기 직후 손가락을 뗄 때 '눌러 재기'로 잘못 처리되지 않게
+  target.addEventListener('click', e => { if (pinched) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  return { get z() { return z; }, set: v => apply(v) };
+}
+
 // 휴대폰을 세로로 들었을 때 beta=90 이 수평. 아래로 기울이면 beta 감소 → 하향각 = 90 - beta
 export function cameraPitchDeg() { return Sensors.beta == null ? null : 90 - Sensors.beta; }
 

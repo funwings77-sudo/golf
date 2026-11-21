@@ -777,3 +777,43 @@ html.msheet-on .m-map .leaflet-top { top: max(env(safe-area-inset-top), var(--cu
 .gp-note { margin: 4px 0 0; font-size: 12px; opacity: .7; text-align: center; }
 .cam.pan-on .hud.bottom { visibility: hidden; } /* 판이 열려 있으면 아래 버튼 줄은 판 뒤로 (겹치지 않게) */
 .err-why { margin-top: 10px; font-size: 12.5px; color: var(--sub, #777); } .err-why code { display: block; margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: rgba(127,127,127,.12); white-space: pre-wrap; word-break: break-all; font-size: 12px; }
+/* 🧭 골프 치기 카메라 화면: 내비게이션식 정보 배치 (가운데는 비우고 가장자리에)
+   · 왼쪽 위 = 지금 할 일(큰 화살표 + 클럽 + 보낼 거리) · 오른쪽 = 앞으로 나올 곳(가까운 순) · 위험할 때만 노란 표지판
+   · 조준 숫자 판은 아래 버튼 위 · 표시 글자는 서로 겹치지 않게(arview flushLabels) */
+.ar-nav { position: absolute; left: 64px; top: calc(110px + var(--cut-top, 0px)); z-index: 6; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 64px - 134px); padding: 8px 12px 8px 8px; border-radius: 16px; background: rgba(10,16,12,.78); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); color: #fff; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+.ar-nav-a { flex: none; width: 46px; height: 46px; border-radius: 12px; background: #c8f169; color: #14241c; display: grid; place-items: center; font-style: normal; font-size: 28px; font-weight: 900; transition: transform .3s; }
+.ar-nav span { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.ar-nav b { font-size: 19px; font-weight: 900; line-height: 1.15; word-break: keep-all; } /* 긴 클럽 이름은 잘리지 않고 두 줄 */
+.ar-nav small { font-size: 13.5px; font-weight: 800; color: #ffc83d; word-break: keep-all; }
+.ar-nav em { font-style: normal; font-size: 12px; font-weight: 700; opacity: .85; word-break: keep-all; }
+.ar-poi { position: absolute; right: 8px; top: calc(250px + var(--cut-top, 0px)); z-index: 6; width: 152px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+.ar-poi > div { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 10px; background: rgba(10,16,12,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: #fff; }
+.ar-poi i { flex: none; font-style: normal; display: grid; } .ar-poi i .ic { width: 16px; height: 16px; }
+.ar-poi span { flex: 1; min-width: 0; font-size: 11px; letter-spacing: -.02em; font-weight: 700; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ar-poi b { font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; } .ar-poi b small { font-size: 10px; opacity: .8; margin-left: 1px; }
+.ar-poi > div.main { background: rgba(31,95,63,.92); } .ar-poi > div.main b { color: #c8f169; }
+.ar-warn { position: absolute; left: 64px; top: calc(186px + var(--cut-top, 0px)); z-index: 6; display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border-radius: 12px; background: #ffc83d; color: #1a1300; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.35); border: 2px solid #1a1300; }
+.ar-warn i { font-style: normal; display: grid; } .ar-warn i .ic { width: 26px; height: 26px; } .ar-warn i .ic .a { fill: #ffc83d; }
+.ar-warn span { display: flex; flex-direction: column; line-height: 1.15; } .ar-warn b { font-size: 15px; font-weight: 900; } .ar-warn small { font-size: 12px; font-weight: 800; }
+.imm .ar-read { top: auto !important; bottom: calc(176px + env(safe-area-inset-bottom)); left: 50% !important; }
+.ar-more { pointer-events: auto; margin-left: 8px; align-self: center; width: 30px; height: 30px; border: 0; border-radius: 50%; background: rgba(255,255,255,.18); color: #fff; font-size: 15px; font-weight: 900; cursor: pointer; }
+.ar.flying .ar-nav, .ar.flying .ar-poi, .ar.flying .ar-warn { display: none; }
+/* 🔍 카메라 화면 확대 버튼 (두 손가락으로도 확대) · 영상만 키우고 위의 선·글자는 배율에 맞춰 다시 그림 */
+.cam-zoom { position: absolute; z-index: 7; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(10,16,12,.62); color: #fff; font-weight: 900; font-size: 15px; font-variant-numeric: tabular-nums; cursor: pointer; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.cam-zoom.on { background: #c8f169; color: #14241c; border-color: #c8f169; }
+#cam .cam-zoom { right: 12px; bottom: calc(96px + env(safe-area-inset-bottom)); }
+#cam.pan-on .cam-zoom { display: none; }
+.ar-zoom { right: 10px; bottom: calc(250px + env(safe-area-inset-bottom)); }
+.ar.flying .ar-zoom { display: none; }
+#cam > video, #cam > canvas, .ar > video, .ar > canvas { touch-action: none; } /* 두 손가락 확대를 브라우저가 가로채지 않게 (설정 판 스크롤은 그대로) */
+.ar { overflow: hidden; }
+#cam video, .ar > video { transition: transform .15s; }
+/* 🗺️ 퍼팅 길 단면 그래프 · 선 보는 법 (AR 그린 설정 판) */
+.gp-prof { display: block; width: 100%; height: 64px; background: rgba(255,255,255,.05); border-radius: 10px; }
+.gp-prof .z { stroke: rgba(255,255,255,.25); stroke-dasharray: 4 4; } .gp-prof .f { fill: rgba(200,241,105,.16); } .gp-prof .l { fill: none; stroke: #c8f169; stroke-width: 2.5; stroke-linejoin: round; }
+.gp-prof .b { fill: #fff; } .gp-prof .h { fill: #ff5a4f; stroke: #fff; stroke-width: 1.5; }
+.gp-axis { display: flex; justify-content: space-between; font-size: 11px; opacity: .75; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.gp-end { float: right; font-weight: 800; opacity: 1; color: #ffc83d; }
+.gp-key { margin: 6px 0 0; font-size: 11.5px; opacity: .8; line-height: 1.6; }
+.gp-key i { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin: 0 3px 0 6px; }
+.gp-key .k1 { background: #58b4ff; } .gp-key .k2 { background: #ff9f43; } .gp-key .k3 { background: repeating-linear-gradient(90deg, #ffe066 0 5px, transparent 5px 8px); } .gp-key .k4 { background: repeating-linear-gradient(90deg, #58b4ff 0 5px, transparent 5px 8px); }
