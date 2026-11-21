@@ -41,7 +41,7 @@ export function validateCourse(c) {
   if (!COURSE_ID_RE.test(c.id || '')) E('코스 ID는 영문 소문자·숫자·하이픈 2~40자여야 합니다 (예: hanwha-jeju)');
   if (!String(c.name || '').trim()) E('코스 이름이 비어 있습니다');
   if (!Array.isArray(c.holes) || !c.holes.length) { E('홀이 없습니다'); return { errors, warnings, ok: false }; }
-  if (c.holes.length > 36) E(`홀 수 ${c.holes.length}개: 최대 36개까지 지원합니다`);
+  if (c.holes.length > 72) E(`홀 수 ${c.holes.length}개: 최대 72개까지 지원합니다`); // 54홀 골프장(9홀 코스 6개)도 발행
   if (c.defaultStimp != null && !(c.defaultStimp >= 6 && c.defaultStimp <= 15)) E('기본 그린 스피드(스팀프)는 6~15 사이여야 합니다');
   const ns = c.holes.map(h => h.n);
   ns.forEach((n, i) => { if (n !== i + 1) E(`홀 번호가 1부터 순서대로가 아닙니다 (${i + 1}번째 홀 = ${n})`); });

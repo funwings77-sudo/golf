@@ -142,3 +142,23 @@ input.sm, select.sm { min-height: 36px; padding: 4px 8px; width: 84px; }
 .pinsheet .ps { border: 1px solid var(--line); border-radius: 10px; padding: 6px; text-align: center; font-size: 12px; }
 .pinsheet .ps b { font-size: 14px; }
 .pinsheet svg { width: 100%; height: auto; }
+
+/* 📱 앱 준비도 */
+.rd-tbl th.c, .rd-tbl td.c, .rd-holes th.c, .rd-holes td.c { text-align: center; padding-left: 4px; padding-right: 4px; }
+.rd-tbl th.c small, .rd-holes th.c small { font-size: 10.5px; font-weight: 600; color: var(--sub); white-space: nowrap; }
+.rd-tbl tbody tr, .rd-holes tbody tr { cursor: pointer; }
+.rd-tbl tr.sel td, .rd-holes tr.sel td { background: var(--green-soft); }
+.rd-cell { display: inline-block; min-width: 42px; padding: 3px 6px; border-radius: 8px; font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.rd-cell.ok { background: var(--green-soft); color: var(--green); } .rd-cell.part { background: var(--sand-soft); color: #8a6a2c; } .rd-cell.none { background: var(--danger-soft); color: var(--danger); }
+.rd-cell.opt.none { background: var(--bg); color: var(--sub); }
+.rd-bar { display: inline-block; width: 70px; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; vertical-align: middle; margin-right: 6px; }
+.rd-bar i { display: block; height: 100%; border-radius: 4px; } .rd-bar.ok i { background: var(--green); } .rd-bar.part i { background: #d9a441; } .rd-bar.none i { background: var(--danger); }
+.rd-v { font-variant-numeric: tabular-nums; }
+.warn-note { border-color: var(--danger); background: var(--danger-soft); }
+.rd-todo { margin: 10px 0 0; padding-left: 20px; } .rd-todo li { margin-bottom: 12px; } .rd-todo .row { gap: 8px; align-items: center; } .rd-uses { opacity: .8; font-size: 12px; }
+.rd-ok { color: var(--green); font-weight: 900; } .rd-no { color: var(--danger); font-weight: 900; opacity: .6; }
+.rd-phone { margin-top: 10px; background: #0f1a14; color: #eef5ef; border-radius: 22px; padding: 14px; border: 6px solid #1d2a22; box-shadow: 0 6px 20px rgba(0,0,0,.18); }
+.rd-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; } .rd-top b { font-size: 15px; } .rd-top span { font-size: 12.5px; color: #c8f169; white-space: nowrap; }
+.rd-len { font-size: 12px; opacity: .7; margin-top: 4px; }
+.rd-line { display: flex; gap: 8px; font-size: 13px; line-height: 1.45; padding: 8px 10px; margin-top: 8px; border-radius: 12px; background: rgba(255,255,255,.06); }
+.rd-line i { font-style: normal; } .rd-line.bad { background: rgba(255,90,79,.18); color: #ffc9c3; } .rd-line.mute { opacity: .55; }

@@ -151,3 +151,23 @@ test('GitHub 인코딩: UTF-8 base64 왕복, git blob sha', async () => {
   assert.equal(b64ToUtf8(utf8ToB64(s)), s);
   assert.equal(await gitBlobSha('hello\n'), 'ce013625030ba8dba906f756967f9e9ca394464a');
 });
+
+test('앱 준비도: 골퍼 앱이 쓰는 데이터 점검 · 먼저 할 일 · 화면 미리보기', async () => {
+  const { courseReadiness, holePreview } = await import('../js/admin/ready.js');
+  const c = sampleCourse(), today = M.todayKey();
+  const r = courseReadiness(c, null, today), F = k => r.features.find(f => f.key === k);
+  assert.equal(F('green').level, 'ok'); assert.equal(F('pin').level, 'none'); assert.equal(F('shelter').have, 1);
+  assert.equal(r.todo[0].key, 'pin', '오늘 핀이 없으면 영향 큰 순서 맨 앞');
+  const pins = { date: today, stimp: 11, holes: { 1: { lat: c.holes[0].green.lat, lon: c.holes[0].green.lon } } };
+  const r2 = courseReadiness(c, pins, today);
+  assert.equal(r2.features.find(f => f.key === 'pin').have, 1); assert.ok(r2.score > r.score);
+  // 스코어카드만 있는 DB 코스: 그린 위치 없음 → 낮은 점수 · 미리보기 경고
+  const db = { id: 'db', name: 'DB CC', holes: [{ n: 1, par: 4, hdcpCard: 3, nine: '동', nineHole: 1, hazards: [], note: '왼쪽 OB' }] };
+  const r3 = courseReadiness(db, null, today);
+  assert.equal(r3.features[0].level, 'none'); assert.equal(r3.todo[0].key, 'green'); assert.ok(r3.score < 50);
+  const p = holePreview(db, db.holes[0], null, today);
+  assert.match(p.title, /동 1번 홀/); assert.match(p.distance, /그린 위치가 없어요/); assert.equal(p.hdcp, 3); assert.equal(p.stimp, 10);
+  // 54홀 코스도 발행 가능
+  const big = M.newOfficialCourse({ id: 'big-cc', name: '54', holes: 54 });
+  assert.ok(!M.validateCourse(big).errors.some(e => /홀 수/.test(e.msg)));
+});

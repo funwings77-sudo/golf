@@ -19,7 +19,17 @@ export default {
     remember('pinsCourse', id);
     const [{ data: course }, pins] = await Promise.all([Store.loadCourse(id), Store.loadPins(id, true)]);
     if (!course) { el.innerHTML = '<div class="card">코스 파일을 불러오지 못했습니다.</div>'; return; }
-    st = { id, cat, course, remote: pins.data, date: M.todayKey(), stimp: course.defaultStimp ?? 10, note: '', holes: {}, sel: 1, dirty: false, map: null, layer: null };
+    // 그린 위치가 없는 홀(스코어카드만 있는 DB 코스)은 핀을 놓을 수 없음 → 목록에서 빼고 알려 줌 (예전엔 화면이 오류로 멈춤)
+    const hasG = h => Number.isFinite(h.green?.lat) && Number.isFinite(h.green?.lon);
+    const noGreen = course.holes.filter(h => !hasG(h)), usable = { ...course, holes: course.holes.filter(hasG) };
+    if (!usable.holes.length) {
+      el.innerHTML = `<div class="a-head"><div class="grow"><h1>📍 오늘의 핀</h1><div class="statusline">${courseSelect(cat.courses, id)}</div></div></div>
+        <div class="card empty-card"><b>${esc(course.name)}에는 그린 위치가 없어 핀을 넣을 수 없습니다.</b><br><span class="sub">핀은 '그린 앞에서 m · 좌우 m'로 그린 위치를 기준으로 계산합니다. 코스 편집에서 그린 중앙(가능하면 앞·뒤도)을 지정해 발행한 뒤 다시 오세요. 그 전까지 골퍼 앱은 사용자가 직접 그린을 눌러 거리를 잽니다.</span><br>
+        <a class="btn primary" href="#/course/${encodeURIComponent(id)}" style="margin-top:10px">🗺️ 코스 편집에서 그린 지정</a> <a class="btn" href="#/ready/${encodeURIComponent(id)}" style="margin-top:10px">📱 앱 준비도 보기</a></div>`;
+      $('#courseSel').onchange = e => go('pins/' + encodeURIComponent(e.target.value));
+      return;
+    }
+    st = { id, cat, course: usable, noGreen, remote: pins.data, date: M.todayKey(), stimp: course.defaultStimp ?? 10, note: '', holes: {}, sel: usable.holes[0].n, dirty: false, map: null, layer: null };
     loadFrom(pins.data, pins.data?.date === st.date);
     render();
   },
@@ -47,6 +57,7 @@ function render() {
         ${st.dirty ? '<span class="badge warn" data-dirty>● 발행 안 된 변경</span>' : ''}</div></div>
     <div class="a-actions"><button class="btn" id="center">모두 중앙</button><button class="btn" id="rotate">🎲 자동 로테이션</button>${r && r.date !== st.date ? '<button class="btn" id="prev">이전 핀 불러오기</button>' : ''}<button class="btn" id="print">🖨️ 핀 시트 인쇄</button><button class="btn primary" id="pub">🚀 발행</button></div></div>
     <div class="no-print">${readonlyNote()}</div>
+    ${st.noGreen.length ? `<div class="note no-print">그린 위치가 없는 ${st.noGreen.length}개 홀(${st.noGreen.slice(0, 8).map(h => h.n + '번').join(', ')}${st.noGreen.length > 8 ? ' …' : ''})은 핀을 넣을 수 없어 빼고 보여 줍니다. <a href="#/course/${encodeURIComponent(st.id)}">코스 편집에서 그린 지정 →</a></div>` : ''}
     <div class="card tight no-print"><div class="formgrid">
       <label class="f"><span>적용 날짜</span><input type="date" id="date" value="${st.date}"></label>
       <label class="f"><span>오늘 그린 스피드 (스팀프)</span><input type="number" id="stimp" min="6" max="15" step="0.5" value="${st.stimp}"></label>
@@ -75,8 +86,9 @@ function render() {
   $('#prev')?.addEventListener('click', () => { loadFrom(st.remote, false); renderTable(); drawMap(); renderHead(); toast(`${st.remote.date} 핀을 불러왔습니다`); });
   $('#print').onclick = printSheet;
   $('#pub').onclick = publish;
-  $('#mPrev').onclick = () => select(st.sel > 1 ? st.sel - 1 : st.course.holes.length);
-  $('#mNext').onclick = () => select(st.sel < st.course.holes.length ? st.sel + 1 : 1);
+  const stepH = d => { const hs = st.course.holes, i = hs.findIndex(h => h.n === st.sel); select(hs[(i + d + hs.length) % hs.length].n); }; // 홀 번호가 띄엄띄엄이어도 순서대로
+  $('#mPrev').onclick = () => stepH(-1);
+  $('#mNext').onclick = () => stepH(1);
 }
 function renderHead() {
   const b = $('.statusline'); if (!b) return;

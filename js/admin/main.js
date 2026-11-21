@@ -4,6 +4,7 @@ import { Store } from './store.js';
 
 const ROUTES = {
   dashboard: () => import('./views/dashboard.js'),
+  ready: () => import('./views/ready.js'),
   courses: () => import('./views/courses.js'),
   kgba: () => import('./views/kgba.js'),
   course: () => import('./views/editor.js'),
