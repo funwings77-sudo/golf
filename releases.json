@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.70",
+   "code": 71,
+   "date": "2026-11-21T17:18:46.437Z",
+   "bytes": 6182313,
+   "sha256": "d4093e7e546f5b5a3f753d381623b4118c43ced3c5f67477ebc7b819ebdb11ca",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.70/pinpoint-caddie-1.0.70.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.70",
+   "notes": [
+    "골프장 공략 메모가 비어 있는 홀(\"홀별 공략 텍스트 미수집\" 등)은 홀 정보·티샷 화면·AI 캐디에 빈 문장을 보여 주지 않음"
+   ]
+  },
+  {
    "version": "1.0.69",
    "code": 70,
    "date": "2026-11-21T16:26:03.197Z",
@@ -905,6 +917,6 @@
    ]
   }
  ],
- "latest": "1.0.69",
- "updatedAt": "2026-11-21T16:26:09.677Z"
+ "latest": "1.0.70",
+ "updatedAt": "2026-11-21T17:18:51.146Z"
 }
