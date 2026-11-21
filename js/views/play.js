@@ -10,7 +10,7 @@ import { Sensors, onPos, onOrientation, sampleFix, keepAwake, vibrate, speak, st
 import { distance, bearing, destination, normAngle, toLocal, geodesic } from '../core/geo.js';
 import { gridSurface } from '../physics/putt.js';
 import { fetchElevations, playsLike } from '../core/weather.js';
-import { adviseShot, predictBall, toBall, dirWords, compassName, greenR } from '../physics/advice.js';
+import { adviseShot, predictBall, toBall, dirWords, compassName, greenR, keepClub } from '../physics/advice.js';
 import { conditionsEffect } from '../physics/flight.js';
 import { learnClub } from '../core/score.js';
 import { createMap, destroyMap, drawHole, ll, flagIcon, labelIcon, satTileUrl } from '../map.js';
@@ -33,7 +33,7 @@ const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: 'ar', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: 'ar' }; } })();
 const persist = () => { try { sessionStorage.setItem(KEY, JSON.stringify({ viewSet: P.viewSet, view: P.view, step: P.step, q: P.q, ballPos: P.ballPos, ballHole: P.ballHole, ballSrc: P.ballSrc, ballAcc: P.ballAcc, target: P.target, plOff: P.plOff })); } catch {} };
 
-let el_, App_, map = null, lay = null, v3 = null, arStop = null, arCtl = null, headMk = null, unPos = null, unOri = null, adv = null, advKey = '', advT = 0, timer = null;
+let el_, App_, map = null, lay = null, v3 = null, arStop = null, arCtl = null, headMk = null, unPos = null, unOri = null, adv = null, advKey = '', advT = 0, timer = null, advAt = null, advChg = null; // advAt: 지금 추천을 정한 때의 위치·바람·핀 · advChg: 클럽이 바뀐 이유(잠깐 표시)
 
 export default {
   full: true,
@@ -519,8 +519,18 @@ function compute(force) {
   const key = `${h.n}|${me.lat.toFixed(5)},${me.lon.toFixed(5)}|${h.pin?.lat}|${h.green?.lat}|${currentMode()}`;
   if (!force && key === advKey && Date.now() - advT < 30000) return;
   advKey = key; advT = Date.now();
-  const w = wx();
-  adv = adviseShot({ me, hole: h, bag: S.bag, hcp: S.settings.hcp, weather: allowed('windAdjust') && w ? { windSpeed: w.windSpeed, windFrom: w.windFrom, rho: w.rho } : {} });
+  const w = wx(), pin = h.pin || h.green;
+  const next = adviseShot({ me, hole: h, bag: S.bag, hcp: S.settings.hcp, weather: allowed('windAdjust') && w ? { windSpeed: w.windSpeed, windFrom: w.windFrom, rho: w.rho } : {} });
+  const here = { me, wind: w?.windSpeed || 0, pin: pin && `${pin.lat},${pin.lon}`, hole: h.n };
+  // 🔁 같은 홀에서 조금 움직였을 뿐이면 추천을 흔들지 않음 · 바뀌면 이유 한 줄 (홀 바뀜·핀 다시 찍음 같은 force는 새로)
+  if (!force && adv && advAt && advAt.hole === h.n) {
+    const r = keepClub(adv, next, { moved: distance(advAt.me, me), windDelta: Math.abs(here.wind - advAt.wind), pinMoved: here.pin !== advAt.pin });
+    if (r.kept) return; // 이전 추천과 기준점 그대로
+    adv = r.adv; advAt = here;
+    if (r.reason) { advChg = { ...r.reason, t: Date.now() }; toast(`🔁 추천 클럽 ${r.reason.from} → ${r.reason.to} · ${r.reason.why}`, 3500); } // 카메라 화면처럼 안내 카드가 없는 보기에서도 보이게
+    return;
+  }
+  adv = next; advAt = here; advChg = null;
 }
 
 function update(force = false) {
@@ -536,8 +546,18 @@ function topBar() {
   const len = cardLen(h);
   const est = pin ? null : estLeft(h, me);
   const lab = el.previousElementSibling; if (lab) lab.textContent = pin ? '깃발까지' : est != null ? '깃발까지 (어림)' : '이 홀 길이';
-  el.innerHTML = me && pin ? `${Math.round(distance(me, pin))}<small>m</small>` : pin ? '—' : est != null ? `약 ${est}<small>m</small>` : len ? `${len}<small>m</small>` : '—';
+  if (me && pin) {
+    // 한눈에 읽히게(내비 '시선 2초' 원칙): 서 있을 때 GPS가 1~2m씩 흔들려도 숫자가 깜빡이지 않게 3m 이상 바뀌거나 4초가 지나야 새로 표시 (걸으면 2초 안에 바뀜)
+    const d = distance(me, pin), now = Date.now(), k = `${h.n}|${pin.lat},${pin.lon}`;
+    if (shownD.k !== k || Math.abs(d - shownD.v) >= 3 || now - shownD.t > 4000) shownD = { k, v: d, t: now };
+    // 위치 오차가 크면 숫자 하나 대신 범위를 솔직하게 (손으로 찍은 공 위치는 GPS 오차 없음)
+    const acc = me === Sensors.pos ? Sensors.pos?.acc : null;
+    el.innerHTML = `${Math.round(shownD.v)}<small>m</small>${acc > 12 ? `<small class="bd-pm">±${Math.round(acc)}</small>` : ''}`;
+    return;
+  }
+  el.innerHTML = pin ? '—' : est != null ? `약 ${est}<small>m</small>` : len ? `${len}<small>m</small>` : '—';
 }
+let shownD = { k: '', v: 0, t: 0 };
 function gpsChip() {
   const g = $('#gps'); if (!g) return;
   const p = Sensors.pos, acc = p?.acc;
@@ -635,6 +655,7 @@ function cards() {
     const why = adv?.club && adv.carry >= D * 0.8 ? playsWhy(D, plays(sceneData(), D, bearing(me, pin), pinDrop(me, pin, h)?.v || 0)) : null;
     box.innerHTML = adv?.club ? `<div class="e-rec"><i class="e-rec-a" style="transform:rotate(${Math.max(-60, Math.min(60, rel * 3))}deg)" aria-hidden="true">⬆</i>
         <span><b>${esc(adv.clubName)}</b>${ro(adv.clubName)} · ${esc(adv.swing.short)}<small>${side}</small></span><button class="e-say" id="sayB" aria-label="소리로 듣기">🔊</button></div>
+        ${advChg && Date.now() - advChg.t < 12000 ? `<div class="e-chg" role="status">🔁 ${esc(advChg.from)} → <b>${esc(advChg.to)}</b> · ${esc(advChg.why)}</div>` : ''}
         ${why ? `<button class="e-wind e-why" id="whyB">${w?.windSrc === 'course' ? '📡' : '🌡️'} ${esc(why.text)} <em>왜?</em></button>` : windy ? `<div class="e-wind">💨 바람이 세요${w.windSrc === 'course' ? ' (이 홀 풍속계)' : ''} · 바람까지 생각해서 클럽을 골랐어요</div>` : ''}
         ${easyTrust(h, D)}${histLine(h)}${h.memo ? `<div class="m-memo">📝 ${esc(h.memo)}</div>` : ''}`
       : `<div class="bd-rec"><span class="sub">클럽을 고르는 중…</span></div>`;

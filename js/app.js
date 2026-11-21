@@ -2,7 +2,7 @@
 import { S, save, MODES, activeCourse, currentMode, subscribe, onSaveFail, allowed } from './core/state.js';
 import { startGPS, restartGPS, onPos, setSim, setVoice, startOrientation, startSwingDetect, vibrate, speak, Sensors, sampleFix, keepAwake } from './core/sensors.js';
 import { fetchWeather } from './core/weather.js';
-import { detectHoleByTee } from './core/course.js';
+import { detectHoleByTee, dwell } from './core/course.js';
 import { syncPins, getNotices, getCatalog, pendingUpdates } from './core/remote.js';
 import { fetchLive } from './core/live.js';
 import { gripSupported, startGripScan, stopGripScan, clubForEvent } from './core/grip.js';
@@ -305,8 +305,12 @@ function autoHole(p) {
   if (!done && Date.now() - App.manualAt < 3 * 60 * 1000) return;
   const R = 6371000, rad = Math.PI / 180, dLat = (nh.tee.lat - p.lat) * rad, dLon = (nh.tee.lon - p.lon) * rad;
   const d = 2 * R * Math.asin(Math.sqrt(Math.sin(dLat / 2) ** 2 + Math.cos(p.lat * rad) * Math.cos(nh.tee.lat * rad) * Math.sin(dLon / 2) ** 2));
-  if (d < 22) { const nm = `${nh.nineHole ?? nh.n}번 홀`; App.setHole(next, { auto: true }); toast(`${nm} 티에 왔어요`); speak(nm); }
+  // 위치가 한 번 튄 것으로 홀이 넘어가지 않게: 다음 홀 티 22m 안에 3번 이상 · 5초 넘게 머물러야 넘김 (오차가 큰 신호는 세지 않음)
+  const r = dwell(holeCand, next, d < 22 && !(p.acc > 25), Date.now());
+  holeCand = r.cand;
+  if (r.fire) { const nm = `${nh.nineHole ?? nh.n}번 홀`; App.setHole(next, { auto: true }); toast(`${nm} 티에 왔어요`); speak(nm); }
 }
+let holeCand = null;
 
 // ---------- 스윙 감지 → 샷 시작점 기록 ----------
 let unSwing = null;

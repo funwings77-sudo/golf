@@ -67,7 +67,7 @@ export function setSim(on) {
   if (on) { stopGPS(); if (simPos) pushPos(simPos); }
   else { simPos = null; kf = null; startGPS(); }
 }
-export function setSimPos(lat, lon) { simPos = { lat, lon, acc: 1, ts: Date.now(), sim: true }; if (simOn) pushPos(simPos); }
+export function setSimPos(lat, lon) { if (!Number.isFinite(lat) || !Number.isFinite(lon)) return; simPos = { lat, lon, acc: 1, ts: Date.now(), sim: true }; if (simOn) pushPos(simPos); } // 잘못된 좌표는 무시 (지도가 NaN으로 멈추지 않게)
 
 // "공 옆에 서서 기록": 여러 측위값을 정확도 가중 평균
 export function sampleFix(ms = 4000) {

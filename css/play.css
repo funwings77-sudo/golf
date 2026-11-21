@@ -745,3 +745,10 @@ html.msheet-on .m-map .leaflet-top { top: max(env(safe-area-inset-top), var(--cu
 .m-sheet { position: fixed; left: 0; right: 0; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); z-index: 20; height: var(--m-sheet); overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 22px 22px 0 0; box-shadow: 0 -8px 24px rgba(0,0,0,.3); padding: 0 12px 16px; transition: height .25s; }
 .m-grip { position: sticky; top: 0; z-index: 2; display: grid; place-items: center; width: 100%; height: 26px; border: 0; background: var(--bg); cursor: pointer; }
 .m-grip i { width: 44px; height: 5px; border-radius: 3px; background: var(--line, #ccc); }
+/* 📱 그린 지도: 그린 그림(평면·입체)은 판 위 보이는 칸 전체 */
+.g-back { position: fixed; left: 0; right: 0; top: 0; bottom: calc(var(--m-sheet) + var(--nav-h) + env(safe-area-inset-bottom)); z-index: 0; background: #16301f; transition: bottom .25s; overflow: hidden; }
+.g-back .g-cv { display: block; width: 100%; height: 100%; }
+.g-back #g3wrap { height: 100%; display: grid; place-items: center; padding-top: max(env(safe-area-inset-top), var(--cut-top, 0px)); }
+.g-back #g3wrap .g3-box { width: min(100%, 100vh); }
+.e-chg { margin-top: 6px; padding: 6px 10px; border-radius: 10px; background: rgba(200,241,105,.14); color: #e9f1ec; font-size: 13px; font-weight: 700; } /* 추천 클럽이 바뀐 이유 */
+.bd-d b small.bd-pm { font-size: 12px; margin-left: 4px; color: #ffc35a; opacity: 1; } /* GPS 오차가 클 때 ±범위 */

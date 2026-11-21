@@ -15,6 +15,7 @@ import { openCamera, GroundProjector, coverTransform } from '../core/camera.js';
 import { drawGreen, makeView } from './greencanvas.js';
 import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed, DU } from '../ui.js';
 import { immersive } from '../core/screen.js';
+import { mapSheetPage, sheetHTML } from '../map.js';
 
 const STAND_BACK = 0.6; // 공 뒤에 서는 거리 (m)
 let depth = null; // 깊이 카메라 (LiDAR · ARCore) 쓸 수 있나
@@ -46,7 +47,7 @@ export default {
     render();
     if (!depth) depthInfo().then(d => { depth = d; if (d.ok && G.tab === 'measure' && el_?.isConnected) render(); });
   },
-  unmount() { stopAR(); metronome(false); metroOn = false; saveG(); },
+  unmount() { stopAR(); mapSheetPage(false); metronome(false); metroOn = false; saveG(); },
   onHole() { G.holeN = null; this.mount(el_, App_); },
 };
 
@@ -128,11 +129,15 @@ function render() {
   const canSlope = allowed('greenSlope'), canLine = allowed('puttLine');
   const gridName = hole?.greenGrid ? (hole.greenGrid.source || '사전 측량 그린') : null;
   const E = easy();
-  el_.innerHTML = `<h2>🟢 ${E ? '그린 읽기' : '그린 리딩 · 퍼팅'}</h2>
+  const mapMode = G.tab === 'map' && canSlope; // 📱 그린 지도: 그림은 판 위 보이는 칸 전체 · 제목·탭·버튼·결과는 지도 위 아래 판
+  mapSheetPage(mapMode);
+  const page = `<h2>🟢 ${E ? '그린 읽기' : '그린 리딩 · 퍼팅'}</h2>
     <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">${E ? '직접 재기' : '현장 측정'}</button>${G.scan ? `<button data-v="scan" class="${G.src === 'scan' ? 'on' : ''}">📏 ${E ? '카메라 스캔' : '깊이 스캔'}</button>` : ''}${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">${E ? '그린 지도' : '그린맵'}</button>` : ''}<button data-v="demo" class="${G.src === 'demo' ? 'on' : ''}">${E ? '연습 그린' : '데모 그린'}</button></div>
     ${G.src === 'demo' ? `<div class="seg" id="demoSeg" style="margin-top:6px">${[['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']].map(([k, n]) => `<button data-v="${k}" class="${G.demoKind === k ? 'on' : ''}">${n}</button>`).join('')}</div><p class="sub">${E ? '연습용 가짜 그린이에요. ② 그린 지도에서 공·홀 위치를 눌러 바꿔 보세요.' : '가상의 사전 측량 그린입니다 (실제 코스 아님). 그린맵 탭에서 공·홀 위치를 탭으로 바꿔 보세요.'}</p>` : ''}
     <div class="seg" id="tabSeg" style="margin-top:10px"><button data-v="measure" class="${G.tab === 'measure' ? 'on' : ''}">${E ? '① 재기' : '③ 측정'}</button><button data-v="map" class="${G.tab === 'map' ? 'on' : ''}">${E ? '② 그린 지도' : '④ 그린맵'}</button><button data-v="ar" class="${G.tab === 'ar' ? 'on' : ''}">${E ? '③ 카메라로 보기' : '⑤ AR 리딩'}</button></div>
     <div id="tabBody"></div><div id="result"></div>`;
+  el_.innerHTML = mapMode ? `<div class="g-back" id="gBack"></div>` + sheetHTML(page, '그린 판 크게·작게') : page;
+  if (mapMode) $('#mGrip').onclick = () => { $('#mSheet').classList.toggle('tall'); document.documentElement.classList.toggle('msheet-tall'); setTimeout(() => G.tab === 'map' && $('#tabBody') && mapTab($('#tabBody')), 280); }; // 판 크기가 바뀌면 그린을 다시 그림
   $$('#srcSeg button').forEach(b => b.onclick = () => { G.src = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
   $$('#demoSeg button').forEach(b => b.onclick = () => { G.demoKind = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
   $$('#tabSeg button').forEach(b => b.onclick = () => { if (b.dataset.v === 'ar' && G.tab !== 'ar') G.prevTab = G.tab; G.tab = b.dataset.v; saveG(); render(); });
@@ -437,16 +442,21 @@ function mapTab(body) {
     const gi = gridInfo(), b = gridBounds(gi.grid), surf = buildSurface(geo.spec);
     const ins = gi.grid.mask ? geo.inside : ovalInside(b);
     const th = Math.atan2(geo.hole.y - geo.ball.y, geo.hole.x - geo.ball.x) * 180 / Math.PI;
-    body.innerHTML = `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d">${easy() ? '위에서 보기' : '평면 지도'}</button><button data-v="3d" class="on">⛰️ ${easy() ? '입체로 보기' : '3D 그린'}</button></div><div id="g3wrap"></div>`;
+    body.innerHTML = `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d">${easy() ? '위에서 보기' : '평면 지도'}</button><button data-v="3d" class="on">⛰️ ${easy() ? '입체로 보기' : '3D 그린'}</button></div>`;
+    const back3 = $('#gBack'); if (back3) back3.innerHTML = '<div id="g3wrap"></div>'; // 입체 그린은 판 위 보이는 칸에
     mountGreen3D($('#g3wrap'), () => ({ surf, bounds: b, inside: ins, ball: geo.ball, hole: geo.hole, yaw0: 90 - th }));
     $$('#g3Seg button').forEach(x => x.onclick = () => { G.g3 = x.dataset.v === '3d'; saveG(); mapTab(body); });
     return;
   }
   const E = easy();
-  body.innerHTML = `${geo.kind === 'grid' ? `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d" class="on">${E ? '위에서 보기' : '평면 지도'}</button><button data-v="3d">⛰️ ${E ? '입체로 보기' : '3D 그린'}</button></div>` : ''}<div class="card tight" style="padding:6px"><canvas class="view" id="gcv" width="900" height="1100"></canvas></div>
+  body.innerHTML = `${geo.kind === 'grid' ? `<div class="seg" id="g3Seg" style="margin-bottom:8px"><button data-v="2d" class="on">${E ? '위에서 보기' : '평면 지도'}</button><button data-v="3d">⛰️ ${E ? '입체로 보기' : '3D 그린'}</button></div>` : ''}
     ${geo.kind === 'grid' ? `<div class="grid2"><button class="btn ${tapMode === 'ball' ? 'on' : ''}" id="tBall">⚪ ${E ? '공 위치 바꾸기' : '공 위치 탭'}</button><button class="btn ${tapMode === 'hole' ? 'on' : ''}" id="tHole">⛳ ${E ? '홀 위치 바꾸기' : '홀 위치 탭'}</button></div>` : ''}
     <p class="sub">${E ? `색이 진할수록 많이 기울었어요 · 흰 선은 높이가 같은 곳 · 화살표는 공이 굴러 내려가는 쪽이에요.${geo.kind === 'onsite' ? ' 직접 잰 곳(공~홀 사이)만 보여요.' : ''}` : `${esc(geo.name)} · 색 = 경사 크기, 흰 선 = 등고선(${'1~5'}cm), 화살표 = 물이 흐르는(공이 휘는) 방향. ${geo.kind === 'onsite' ? '현장 측정 범위(라인 주변)만 표시합니다.' : ''}`}</p>
     ${!G.result ? `<button class="btn primary block" id="calc2">${E ? '🎯 어떻게 칠지 보기' : '퍼팅 계산'}</button>` : ''}`;
+  // 평면 그린은 판 위 보이는 칸을 꽉 채운 그림 (칸 크기 × 화면 배율로 선명하게)
+  const back = $('#gBack');
+  if (back) { const k = devicePixelRatio || 1; back.innerHTML = `<canvas class="g-cv" id="gcv" width="${Math.round(back.clientWidth * k)}" height="${Math.round(back.clientHeight * k)}"></canvas>`; }
+  else body.insertAdjacentHTML('afterbegin', '<div class="card tight" style="padding:6px"><canvas class="view" id="gcv" width="900" height="1100"></canvas></div>');
   const cv = $('#gcv');
   const surf = buildSurface(geo.spec);
   const showLine = !(currentMode() === 'practice' && G.training && !G.revealed) && allowed('puttLine') && G.result && G.result.conf >= 0.4;

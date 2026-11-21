@@ -91,3 +91,18 @@ export function toBall(me, ball, heading = null) {
   const d = distance(me, ball), b = bearing(me, ball);
   return { d, bearing: b, compass: compassName(b), rel: heading == null ? null : normAngle(b - heading) };
 }
+
+// 🔁 추천 클럽 흔들림 막기 (내비의 '이탈 판정 지연·재탐색 이유 표시'와 같은 생각)
+//  GPS가 1~2m 튀거나 두 클럽이 거의 같을 때 7번 ↔ 6번이 오락가락하지 않게:
+//   · 조금만 움직였고(6m 미만) 바람·핀이 그대로이고, 이전 클럽의 기대 타수가 새 최선과 거의 같으면(0.06타 미만) 이전 추천 유지
+//   · 진짜로 바뀌면 이유를 한 줄로 (몇 m 옮겨서 · 바람이 바뀌어서 · 핀이 바뀌어서)
+export function keepClub(prev, next, { moved = 0, windDelta = 0, pinMoved = false } = {}) {
+  if (!prev || !next || !prev.club || !next.club || prev.club === next.club) return { adv: next, reason: null, kept: false };
+  const big = moved >= 6 || windDelta >= 1.5 || pinMoved || prev.kind !== next.kind;
+  if (!big && next.kind === 'full' && next.es != null) {
+    const alt = (next.alternatives || []).find(a => a.club === prev.club);
+    if (alt && alt.es - next.es < 0.06) return { adv: prev, reason: null, kept: true };
+  }
+  const why = pinMoved ? '핀 위치가 바뀌어서' : windDelta >= 1.5 ? '바람이 바뀌어서' : moved >= 6 ? `${Math.round(moved)}m 옮겨서` : '남은 거리가 바뀌어서';
+  return { adv: next, reason: { from: prev.clubName, to: next.clubName, why }, kept: false };
+}

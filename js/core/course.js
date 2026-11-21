@@ -71,3 +71,13 @@ export function detectHoleByTee(course, pos, current) {
   }
   return null;
 }
+
+// ⏱️ 머무름 판정 (내비의 '측위가 한 번 튀었다고 바로 재탐색하지 않음'): 같은 곳이 n번 이상 · ms 이상 이어져야 확정
+//  cand: 이전 상태(없으면 null) · key: 무엇에 대한 판정인지(예: 다음 홀 번호) · inside: 이번 위치가 조건 안인지
+//  → { cand: 다음 상태, fire: 확정됐는지 }
+export function dwell(cand, key, inside, now, { n = 3, ms = 5000 } = {}) {
+  if (!inside) return { cand: cand?.key === key ? null : cand, fire: false };
+  const c = cand?.key === key ? { ...cand, k: cand.k + 1 } : { key, t: now, k: 1 };
+  if (c.k >= n && now - c.t >= ms) return { cand: null, fire: true };
+  return { cand: c, fire: false };
+}
