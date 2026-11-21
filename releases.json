@@ -4,6 +4,19 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.56",
+   "code": 57,
+   "date": "2026-11-21T13:30:42.680Z",
+   "bytes": 6145868,
+   "sha256": "cf59d556dd8ff133f038b9ef38968c360b1388abe294e1bbf31b9e91f84cb8f1",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.56/pinpoint-caddie-1.0.56.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.56",
+   "notes": [
+    "모든 지도에 전체 화면 버튼 (상태바·메뉴까지 숨김)",
+    "설정에 구글 지도 키를 넣으면 지도가 구글 위성지도로 바뀜 (키가 없거나 안 되면 지금 지도)"
+   ]
+  },
+  {
    "version": "1.0.55",
    "code": 56,
    "date": "2026-11-21T13:11:13.206Z",
@@ -727,6 +740,6 @@
    ]
   }
  ],
- "latest": "1.0.55",
- "updatedAt": "2026-11-21T13:11:17.964Z"
+ "latest": "1.0.56",
+ "updatedAt": "2026-11-21T13:30:48.155Z"
 }
