@@ -63,7 +63,7 @@ function updates() {
 
 function quick() {
   return `${notices()}${updates()}<h3>바로 쓰기</h3>
-    <a class="list-btn" href="#/green"><span class="ico">🟢</span><span class="grow"><b>그린 리딩 · 퍼팅 계산</b><br><span class="sub">경사 측정 → 라인·조준점·세기·백스윙</span></span></a>
+    <a class="list-btn" href="#/green?measure"><span class="ico">🟢</span><span class="grow"><b>그린 리딩 · 퍼팅 계산</b><br><span class="sub">경사 측정 → 라인·조준점·세기·백스윙</span></span></a>
     <a class="list-btn" href="#/lost"><span class="ico">📡</span><span class="grow"><b>분실구 안내</b><br><span class="sub">낙하 예상 구역 → 레이더 길안내 → 카메라 탐지</span></span></a>
     <a class="list-btn" href="#/lie"><span class="ico">📐</span><span class="grow"><b>라이 경사 측정</b><br><span class="sub">휴대폰을 지면에 2초 → 셋업·조준 보정</span></span></a>
     <a class="list-btn" href="#/rules"><span class="ico">📖</span><span class="grow"><b>룰 · 구제 도우미</b><br><span class="sub">OB·페널티 구역·언플레이어블 벌타와 구제 구역</span></span></a>`;

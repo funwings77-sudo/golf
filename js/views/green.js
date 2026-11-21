@@ -32,8 +32,13 @@ function saveG() { try { const { result, ...rest } = G; sessionStorage.setItem('
 export default {
   mount(el, App) {
     el_ = el; App_ = App; G = loadG();
-    // #/green?ar : 플레이 화면의 'AR로 그린 보기'에서 바로 AR 탭으로 (주소는 #/green으로 정리)
-    if (/\?(.*&)?ar\b/.test(location.hash) || App_.greenAR) { if (G.tab !== 'ar') G.prevTab = G.tab; G.tab = 'ar'; G.arMode = null; App_.greenAR = false; if (/\?/.test(location.hash)) history.replaceState(null, '', '#/green'); }
+    // 📷 그린에 들어오면 늘 '직접 재기 + ③ 카메라로 보기'가 먼저 (대회 모드는 퍼팅 라인 금지라 ① 재기)
+    //   예외: 계산 화면을 열려고 누른 곳은 #/green?measure(① 재기) · #/green?map(② 그린 지도)
+    const want = (location.hash.match(/\?(?:.*&)?(ar|measure|map)\b/) || [])[1];
+    if (want === 'measure' || want === 'map') G.tab = want;
+    else { G.src = 'onsite'; G.prevTab = 'measure'; G.tab = allowed('puttLine') ? 'ar' : 'measure'; G.arMode = null; G.arPanel = false; }
+    App_.greenAR = false;
+    if (/\?/.test(location.hash)) history.replaceState(null, '', '#/green');
     const hole = activeHole();
     // 골프장이 발행한 오늘 그린 스피드가 있으면 그 값으로 시작 (사용자가 바꾸면 그 값 유지)
     const tp = activeCourse()?.todayPins;
@@ -50,7 +55,7 @@ export default {
   },
   unmount() { stopAR(); mapSheetPage(false); metronome(false); metroOn = false; saveG(); },
   // 아래 메뉴 '그린': 이미 그린 화면이면 다시 불러오지 않고 바로 AR 그린 리딩
-  openAR() { if (G.tab !== 'ar') G.prevTab = G.tab; G.tab = 'ar'; G.arMode = null; saveG(); render(); },
+  openAR() { if (G.tab !== 'ar') G.prevTab = G.tab; G.src = 'onsite'; G.tab = 'ar'; G.arMode = null; G.result = null; saveG(); render(); }, // 메뉴 '그린'도 직접 재기 + 카메라
   onHole() { G.holeN = null; this.mount(el_, App_); },
 };
 
