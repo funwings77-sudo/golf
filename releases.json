@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.51",
+   "code": 52,
+   "date": "2026-11-21T12:56:00.809Z",
+   "bytes": 6130168,
+   "sha256": "aebd7565ca990aa9883218883552f7b7f8f50c43d992ccdd53e65e9ca788d917",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.51/pinpoint-caddie-1.0.51.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.51",
+   "notes": [
+    "지도 위 표시(재는 곳·떨어질 곳·내 공·깃발)도 아이콘으로 바꿈"
+   ]
+  },
+  {
    "version": "1.0.50",
    "code": 51,
    "date": "2026-11-21T12:53:04.294Z",
@@ -667,6 +679,6 @@
    ]
   }
  ],
- "latest": "1.0.50",
- "updatedAt": "2026-11-21T12:53:09.548Z"
+ "latest": "1.0.51",
+ "updatedAt": "2026-11-21T12:56:05.267Z"
 }
