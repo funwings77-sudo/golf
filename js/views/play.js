@@ -280,6 +280,8 @@ function stepHole() {
   $('#bdP').onclick = () => App_.stepHole(-1); $('#bdN').onclick = () => App_.stepHole(1); $('#bdInfo').onclick = () => holeInfo(h);
   $('#fabAI').onclick = () => openAICaddie({ getFacts: aiFacts });
   $('#fabGreen').onclick = () => App_.go('green');
+  // 📷 카메라 화면: 안내 카드는 한 줄로 접혀 있고, 누르면 펼침 (안의 버튼은 그대로 눌림)
+  $('#cards').addEventListener('click', e => { if (P.view !== 'ar' || e.target.closest('button, a, input')) return; e.currentTarget.classList.toggle('open'); });
   $('#fabMe').onclick = () => { P.ballPos = null; P.target = null; persist(); update(true); if (map) fit2d(); toast('내 위치로 돌아왔어요'); };
   $$('[data-v]').forEach(b => b.onclick = () => { P.view = b.dataset.v; P.viewSet = true; persist(); render(); });
   mountView();

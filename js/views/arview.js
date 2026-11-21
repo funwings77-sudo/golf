@@ -31,6 +31,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   let a = null, b = null, g = null;
   let evN = 0, evRate = 0, evT = performance.now();
   const unOri = onOrientation(() => { evN++; const now = performance.now(); if (now - evT >= 1000) { evRate = evN * 1000 / (now - evT); evN = 0; evT = now; } });
+  const hintUntil = performance.now() + 10000; // 긴 안내 글은 처음 10초만 (화면을 가리지 않게)
   let diagOn = false, lockPt = null, ringsOn = true, terrOn = true, ht = null, readT = 0, aim = null, lastHit = null;
 
   // ---------- 🗺️ 지도 (작게 ↔ 전체) ----------
@@ -345,7 +346,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     else if (ht) htLine = '<div class="ar-ht">🌳 나무·벽의 <b>밑동</b>을 조준하고 [높이]를 누르세요</div>';
     read.innerHTML = `<div class="ar-big">${too ? `<span class="far">${!isFinite(gh.h) || gh.h >= 400 ? '하늘·먼 곳' : '너무 멀어요'}</span>` : `${snap ? `<em>${esc(snap.name)}</em>` : '<em>조준한 곳</em>'}<b>${dist < 10 ? dist.toFixed(1) : Math.round(dist)}</b><small>m</small>${snap ? '' : `<i>±${err < 10 ? err.toFixed(1) : Math.round(err)}</i>`}${club ? `<u>${esc(CLUBN(club))}</u>` : ''}`}</div>
       <div class="ar-sub"><span>🧭 ${compass(brg)} ${Math.round(brg)}°</span>${rel != null ? `<span>${Math.abs(rel) < 1 ? '깃발 방향 ✓' : `깃발보다 ${rel > 0 ? '오른쪽' : '왼쪽'} ${Math.abs(rel).toFixed(1)}°`}</span>` : ''}${!too && Math.abs(dzPt) >= 0.5 ? `<span>${dzPt > 0 ? '⬆ 오르막' : '⬇ 내리막'} ${Math.abs(dzPt).toFixed(1)}m</span>` : `<span>${gh.elev >= 0 ? '⬆' : '⬇'} ${Math.abs(gh.elev).toFixed(1)}°</span>`}${toPin != null ? `<span>⛳까지 ${Math.round(toPin)}m</span>` : ''}</div>
-      ${too ? '<div class="ar-hint">멀리는 깃발·벙커·물 표시에 조준선을 맞추면 GPS 거리가 나와요</div>' : ''}${htLine}`;
+      ${too && now < hintUntil ? '<div class="ar-hint">멀리는 깃발·벙커·물 표시에 조준선을 맞추면 GPS 거리가 나와요</div>' : ''}${htLine}`;
   }
   function reticle(x, y) { ctx.beginPath(); ctx.arc(x, y, 18, 0, 7); ctx.moveTo(x - 34, y); ctx.lineTo(x - 22, y); ctx.moveTo(x + 22, y); ctx.lineTo(x + 34, y); ctx.moveTo(x, y - 34); ctx.lineTo(x, y - 22); ctx.moveTo(x, y + 22); ctx.lineTo(x, y + 34); ctx.stroke(); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 7); ctx.fill(); }
   function tag(x, y, t) { ctx.font = '800 12px system-ui, sans-serif'; const w = ctx.measureText(t).width + 10; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x, y - 9, w, 18); ctx.fillStyle = '#fff'; ctx.fillText(t, x + 5, y + 4); }
