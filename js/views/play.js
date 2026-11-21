@@ -5,6 +5,7 @@
 import { S, save, activeCourse, activeHole, allowed, currentMode, MODES } from '../core/state.js';
 import { newRound, totals } from '../core/score.js';
 import { demoCourse } from '../core/course.js';
+import { holeNote } from '../core/holenote.js';
 import { getCatalog, installCourse, findInstalled, getClubs } from '../core/remote.js';
 import { Sensors, onPos, onOrientation, sampleFix, keepAwake, vibrate, speak, startOrientation, restartGPS } from '../core/sensors.js';
 import { distance, bearing, destination, normAngle, toLocal, geodesic } from '../core/geo.js';
@@ -889,7 +890,7 @@ function scoreCard(h) {
   const hd = h.hdcpNine ?? h.hdcp ?? h.hdcpCard;
   return `<div class="pcard scard"><div class="row" style="justify-content:space-between"><b>📋 스코어카드</b><span class="sub">파 ${+h.par || ''}${hd ? ` · 핸디캡 ${esc(String(hd))}` : ''}</span></div>
     <div class="tees">${tees.map(([n, v, c]) => `<span><i style="background:${c}"></i>${n} <b>${+v}</b>${esc(s.unit || '')}</span>`).join('')}</div>
-    ${h.note ? `<p class="sub" style="margin:6px 0 0">💡 ${esc(h.note)}</p>` : ''}</div>`;
+    ${holeNote(h) ? `<p class="sub" style="margin:6px 0 0">💡 ${esc(holeNote(h))}</p>` : ''}</div>`;
 }
 
 // 🧭 ⑦ 날아간 쪽 가리키기: 공이 사라진 쪽으로 휴대폰을 2초 가리키면 그 방위로 낙하 예상 위치를 다시 계산 (기획서 ⑦ 2-A)
@@ -962,7 +963,7 @@ function moreSheet() {
 function aiFacts() {
   const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start, pin = h?.pin || h?.green;
   const r1 = x => (x == null || !isFinite(x) ? null : Math.round(x)), w = wx();
-  const f = { mode: MODES[currentMode()]?.label, hole: { number: h.n, name: holeName(h), par: h.par, handicap: h.hdcpNine ?? h.hdcp ?? h.hdcpCard ?? null, course_note: h.note || null, my_memo: h.memo || null } };
+  const f = { mode: MODES[currentMode()]?.label, hole: { number: h.n, name: holeName(h), par: h.par, handicap: h.hdcpNine ?? h.hdcp ?? h.hdcpCard ?? null, course_note: holeNote(h) || null, my_memo: h.memo || null } };
   if (me && pin) {
     const D = distance(me, pin), drop = pinDrop(me, pin, h), pl = plays(sceneData(), D, bearing(me, pin), drop?.v || 0);
     f.distances = { to_pin_m: r1(D), to_green_front_m: h.front ? r1(distance(me, h.front)) : null, to_green_back_m: h.back ? r1(distance(me, h.back)) : null, plays_like_m: pl ? r1(pl.total) : null, pin_elevation_m: drop ? Math.round(drop.v * 10) / 10 : null };

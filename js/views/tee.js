@@ -6,6 +6,7 @@ import { optimizeTeeShot, describeAim } from '../physics/strategy.js';
 import { RHO_STD } from '../physics/flight.js';
 import { createMap, destroyMap, drawHole, fitHole, ll, localHole, toLL, labelIcon, mapSheetPage, sheetHTML, sheetCover, bindSheet } from '../map.js';
 import { $, $$, esc, toast, lockedCard, DU, signed } from '../ui.js';
+import { holeNote } from '../core/holenote.js';
 
 let map, holeLayer, ovl, fromMe = false, windMode = 'auto', windManual = { speed: 0, rel: 'head' }, App_;
 
@@ -48,7 +49,7 @@ function renderBody() {
   const dPin = distance(start, pin);
   const controls = `<div class="card tight"><div class="row"><div class="seg grow" id="fromSeg"><button data-v="tee" class="${!fromMe ? 'on' : ''}">티에서</button><button data-v="me" class="${fromMe ? 'on' : ''}">현재 위치에서</button></div></div>
     <div class="row" style="margin-top:8px"><span class="sub">핀까지 직선</span> <b class="mid">${DU(dPin)}</b><span class="grow"></span><span class="sub">핸디캡 ${S.settings.hcp}</span></div>
-    ${hole.note ? `<p class="sub" style="margin:6px 0 0">📝 골프장 공략 메모: ${esc(hole.note)}</p>` : ''}</div>`;
+    ${holeNote(hole) ? `<p class="sub" style="margin:6px 0 0">📝 골프장 공략 메모: ${esc(holeNote(hole))}</p>` : ''}</div>`;
   if (!allowed('clubRec')) {
     body.innerHTML = controls + lockedCard(FEATURE_NAMES.clubRec);
     bindFrom(); ovl?.clearLayers(); return;

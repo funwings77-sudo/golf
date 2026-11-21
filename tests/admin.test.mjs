@@ -171,3 +171,11 @@ test('앱 준비도: 골퍼 앱이 쓰는 데이터 점검 · 먼저 할 일 · 
   const big = M.newOfficialCourse({ id: 'big-cc', name: '54', holes: 54 });
   assert.ok(!M.validateCourse(big).errors.some(e => /홀 수/.test(e.msg)));
 });
+
+test('공략 메모: 코스 DB 자리 채움 문장은 골퍼 앱·AI 캐디·관리자에서 모두 없는 것으로', async () => {
+  const { holeNote } = await import('../js/core/holenote.js');
+  assert.equal(holeNote({ note: '홀별 공략 텍스트 미수집' }), '');
+  assert.equal(holeNote({ note: '  -  ' }), '');
+  assert.equal(holeNote({}), '');
+  assert.equal(holeNote({ note: ' 왼쪽 OB 조심 ' }), '왼쪽 OB 조심');
+});

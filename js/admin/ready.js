@@ -2,11 +2,12 @@
 //   발행된 코스가 골퍼에게 어떻게 보일지 점검 (DOM 없음 → node --test로 검증)
 //   · 홀 항목: 그린 위치 · 티 위치 · 그린 앞뒤 · 오늘 핀 · 스코어카드 · 그린 경사 지도 · 해저드 · 공략 메모
 //   · 코스 항목: 그린 빠르기 · 낙뢰 대피소 · 로컬 룰 · 연락처 · 실시간 장비(선택)
+import { holeNote } from '../core/holenote.js';
 const isLL = p => p && Number.isFinite(p.lat) && Number.isFinite(p.lon) && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180;
 export const holeLabel = h => (h.nine ? `${h.nine} ${h.nineHole ?? h.n}번` : `${h.n}번`);
 export const holeHdcp = h => h.hdcpNine ?? h.hdcp ?? h.hdcpCard ?? null;
-// KGBA DB의 '미수집' 같은 자리 채움 문장은 메모로 보지 않음
-export const realNote = h => { const t = String(h.note || '').trim(); return t && !/미수집|자료 없음|^(없음|-|—)$/.test(t) ? t : ''; };
+// KGBA DB의 '미수집' 같은 자리 채움 문장은 메모로 보지 않음 (골퍼 앱과 같은 기준)
+export const realNote = holeNote;
 const pinOn = (pins, today, n) => (pins?.date === today && isLL(pins.holes?.[n]) ? pins.holes[n] : null);
 
 // w: 골퍼에게 미치는 영향(가중치) · fix: 고치는 관리자 화면 · miss: 없으면 앱에서 어떻게 되는지
