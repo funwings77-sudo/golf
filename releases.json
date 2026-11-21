@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.62",
+   "code": 63,
+   "date": "2026-11-21T13:57:04.893Z",
+   "bytes": 6153000,
+   "sha256": "5574189331627c7ded0f3b531eaa6963d9bc394fabd5c3088c9c853620ebdb51",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.62/pinpoint-caddie-1.0.62.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.62",
+   "notes": [
+    "룰(구제 도우미) 지도를 전체 화면으로 · 구제 구역이 판 위 가운데 오게"
+   ]
+  },
+  {
    "version": "1.0.61",
    "code": 62,
    "date": "2026-11-21T13:53:53.996Z",
@@ -800,6 +812,6 @@
    ]
   }
  ],
- "latest": "1.0.61",
- "updatedAt": "2026-11-21T13:53:58.633Z"
+ "latest": "1.0.62",
+ "updatedAt": "2026-11-21T13:57:10.720Z"
 }
