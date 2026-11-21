@@ -14,6 +14,7 @@ import { muFromStimp, buildSurface, fitQuadFromGradients, optimizePutt, backswin
 import { openCamera, GroundProjector, coverTransform } from '../core/camera.js';
 import { drawGreen, makeView } from './greencanvas.js';
 import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed, DU } from '../ui.js';
+import { immersive } from '../core/screen.js';
 
 const STAND_BACK = 0.6; // 공 뒤에 서는 거리 (m)
 let depth = null; // 깊이 카메라 (LiDAR · ARCore) 쓸 수 있나
@@ -471,7 +472,7 @@ function arTab(body, canLine) {
   const distMode = G.arMode === 'distance' && geo.kind === 'onsite';
   const canSlope = allowed('greenSlope');
   // 📱 전체 화면: 앱 머리줄·아래 메뉴를 숨기고 카메라가 화면을 꽉 채움 (✕ 또는 뒤로 가기로 닫기)
-  document.documentElement.classList.add('gar-on');
+  document.documentElement.classList.add('gar-on'); immersive(true);
   body.innerHTML = `<div class="cam gar-full" id="cam"><video autoplay playsinline muted></video><canvas id="arcv"></canvas>
       <div class="hud top" id="arHud"><button class="gar-x" id="arClose" data-back aria-label="닫기">✕</button><b>${distMode ? '카메라로 거리 재기' : 'AR 그린 리딩'}</b><div class="sub" id="arMsg"></div></div>
       <div class="hud bottom"><div class="row"><button class="btn small" id="arCal">${distMode ? '취소' : '🎯 홀컵 탭으로 보정'}</button><span class="sub grow" id="arInfo"></span></div></div></div>
@@ -674,5 +675,5 @@ function arTab(body, canLine) {
 }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
-function stopAR() { document.documentElement.classList.remove('gar-on'); if (arT) cancelAnimationFrame(arT); arT = null; if (camStop) { camStop(); camStop = null; } }
+function stopAR() { if (document.documentElement.classList.contains('gar-on')) immersive(false); document.documentElement.classList.remove('gar-on'); if (arT) cancelAnimationFrame(arT); arT = null; if (camStop) { camStop(); camStop = null; } }
 void makeView; void onOrientation; void unOri;

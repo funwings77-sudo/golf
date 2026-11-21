@@ -669,11 +669,11 @@ html.easy.in-hole #toast { bottom: auto; top: calc(86px + env(safe-area-inset-to
 html.gar-on, html.gar-on body { overflow: hidden; }
 html.gar-on .topbar, html.gar-on nav.tabs, html.gar-on .bottom-bar, html.gar-on .pp-nav { display: none !important; }
 .cam.gar-full { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; z-index: 900; }
-.cam.gar-full .hud.top { top: calc(8px + env(safe-area-inset-top)); padding-right: 52px; }
+.cam.gar-full .hud.top { top: calc(8px + max(env(safe-area-inset-top), var(--cut-top, 0px))); padding-right: 52px; }
 .cam.gar-full .hud.bottom { bottom: calc(10px + env(safe-area-inset-bottom)); }
-.cam.gar-full .gar-prec { top: calc(86px + env(safe-area-inset-top)); }
+.cam.gar-full .gar-prec { top: calc(86px + max(env(safe-area-inset-top), var(--cut-top, 0px))); }
 .cam .gar-x { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255,255,255,.18); color: #fff; font-size: 20px; line-height: 40px; pointer-events: auto; cursor: pointer; }
-html.gar-on #toast { bottom: auto; top: calc(130px + env(safe-area-inset-top)); }
+html.gar-on #toast { bottom: auto; top: calc(130px + max(env(safe-area-inset-top), var(--cut-top, 0px))); }
 
 /* 📱 아래 메뉴 공통 (쉬운 화면 · 모든 화면): 골프 치기 화면의 7칸 메뉴를 화면 아래에 고정 · 옛 탭 막대는 숨김 */
 .bd-global { display: none; }
