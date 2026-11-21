@@ -252,7 +252,7 @@ function stepHole() {
   const order = App_.holeOrder(), idx = order.indexOf(h.n);
   if (!P.viewSet) P.view = 'ar'; // 기본: 카메라 화면 (입체 지도 · 공 비행 · 지도가 한 화면, 휴대폰을 내리면 지도)
   const hd = h.hdcpNine ?? h.hdcp ?? h.hdcpCard;
-  el_.innerHTML = `<div class="imm ${S.settings.detail ? '' : 'easy'}">
+  el_.innerHTML = `<div class="imm ${S.settings.detail ? '' : 'easy'} ${P.view === 'ar' ? 'arv' : ''}">
     <div class="stage imm-stage" id="stage"></div>
     <div class="imm-top">
       <button class="e-hole" id="eHp" aria-label="이전 홀">◀</button><button class="imm-pill" id="hInfo" aria-label="홀 정보"><i class="imm-tgt"></i><span><b class="e-hide">거리 측정</b><b class="e-only">${esc(holeName(h))} · 파 ${h.par}</b><small>${esc(holeName(h))} · 파 ${h.par}${(h.hdcpNine ?? h.hdcp ?? h.hdcpCard) ? ` · 핸디 ${h.hdcpNine ?? h.hdcp ?? h.hdcpCard}` : ''} · ${idx + 1}/${order.length}</small></span></button>
@@ -558,6 +558,7 @@ const sgn = (v, d = 2) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFix
 
 function cards() {
   const box = $('#cards'); if (!box) return;
+  box.hidden = false;
   const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start || null; // GPS가 없어도 친 곳에서 이어서 안내
   const pin = h.pin || h.green;
   if (!pin) {
@@ -567,6 +568,7 @@ function cards() {
       box.innerHTML = `<div class="m-label">내 공이 있는 곳으로 가요 <span>${esc(shot.clubName)}</span></div><p class="m-text">도착하면 <b>[✅ 공 찾았어요]</b>를 눌러요. 날아간 거리를 재 드려요.</p>`;
       return;
     }
+    if (P.view === 'ar') { box.innerHTML = ''; box.hidden = true; return; } // 카메라 화면: 안내창 없음 (거리는 위 막대에 '약'으로)
     box.innerHTML = `<div class="m-label">${est != null ? '위 거리는 어림이에요' : len ? `이 홀은 ${len}m예요` : '이 홀은 처음이에요'}</div>
       <p class="m-text">한 번 치고 나면 이 홀 그린 위치를 저절로 배워서, 다음부터는 정확한 거리가 나와요.</p>`;
     return;
