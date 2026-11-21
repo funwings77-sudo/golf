@@ -734,3 +734,13 @@ html.dist-on .mapwrap > .fab-col { margin-top: max(env(safe-area-inset-top), var
 html.dist-on .mapwrap .leaflet-bottom { bottom: calc(var(--nav-h) + 6px + env(safe-area-inset-bottom)); }
 html.dist-on .mapwrap > .hud.bottom { bottom: calc(var(--nav-h) + 12px + env(safe-area-inset-bottom)); }
 html.dist-on main#view.full > .mapwrap { isolation: isolate; z-index: 0; } /* 지도 속 층(z 400)이 떠 있는 아래 메뉴(z 30)를 덮지 않게 */
+/* 📱 티샷 화면: 지도 전체 화면 + 결과는 지도 위 아래 판 (반쯤 42% ↔ 크게 78%) · 저작권·확대 버튼은 판 위로 따라 올라감 */
+html.tee-on { --tee-sheet: 42dvh; }
+html.tee-on.tee-big { --tee-sheet: 78dvh; }
+html.tee-on .topbar { display: none !important; }
+html.tee-on main#view { padding: 0 !important; }
+html.tee-on .tee-map { position: fixed; inset: 0; height: auto; min-height: 0; isolation: isolate; z-index: 0; }
+html.tee-on .tee-map .leaflet-bottom { bottom: calc(var(--tee-sheet) + var(--nav-h) + env(safe-area-inset-bottom)); transition: bottom .25s; }
+.tee-sheet { position: fixed; left: 0; right: 0; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); z-index: 20; height: var(--tee-sheet); overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 22px 22px 0 0; box-shadow: 0 -8px 24px rgba(0,0,0,.3); padding: 0 12px 16px; transition: height .25s; }
+.tee-grip { position: sticky; top: 0; z-index: 2; display: grid; place-items: center; width: 100%; height: 26px; border: 0; background: var(--bg); cursor: pointer; }
+.tee-grip i { width: 44px; height: 5px; border-radius: 3px; background: var(--line, #ccc); }

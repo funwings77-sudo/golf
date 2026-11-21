@@ -6,6 +6,7 @@ import { optimizeTeeShot, describeAim } from '../physics/strategy.js';
 import { RHO_STD } from '../physics/flight.js';
 import { createMap, destroyMap, drawHole, fitHole, ll, localHole, toLL, labelIcon } from '../map.js';
 import { $, $$, esc, toast, lockedCard, DU, signed } from '../ui.js';
+import { immersive } from '../core/screen.js';
 
 let map, holeLayer, ovl, fromMe = false, windMode = 'auto', windManual = { speed: 0, rel: 'head' }, App_;
 
@@ -17,15 +18,21 @@ export default {
       el.innerHTML = `<div class="card"><b>티샷 공략에는 코스의 티·그린 위치가 필요합니다</b><p class="sub">코스 관리에서 홀의 티, 그린, 해저드(OB·물·벙커·숲)를 지도에 찍어 주세요.</p><a class="btn primary" href="#/courses">코스 관리</a></div>`;
       return;
     }
-    el.innerHTML = `<div class="mapwrap half" style="border-radius:14px;overflow:hidden"><div class="map" id="map"></div></div>
-      <div id="teeBody"></div>`;
-    map = createMap($('#map', el), { center: ll(hole.tee), zoom: 16 });
-    if (map) { holeLayer = drawHole(map, hole); ovl = L.layerGroup().addTo(map); fitHole(map, hole); }
+    // 📱 지도는 늘 전체 화면 · 계산 결과는 지도 위에 떠 있는 아래 판 (손잡이: 반쯤 ↔ 크게)
+    document.documentElement.classList.add('tee-on'); immersive(true);
+    el.innerHTML = `<div class="mapwrap tee-map"><div class="map" id="map"></div></div>
+      <section class="tee-sheet" id="teeSheet"><button class="tee-grip" id="teeGrip" aria-label="결과 판 크게·작게"><i></i></button><div id="teeBody"></div></section>`;
+    map = createMap($('#map', el), { center: ll(hole.tee), zoom: 16, full: false });
+    if (map) { holeLayer = drawHole(map, hole); ovl = L.layerGroup().addTo(map); fitHole(map, hole, null, sheetH()); setTimeout(() => { if (!map) return; map.invalidateSize(); fitHole(map, hole, null, sheetH()); }, 150); } // 지도 크기가 정해진 뒤 한 번 더 (판 위 보이는 칸에 홀 전체)
+    $('#teeGrip', el).onclick = () => { $('#teeSheet').classList.toggle('tall'); document.documentElement.classList.toggle('tee-big'); setTimeout(() => map?.invalidateSize(), 260); };
     renderBody();
   },
-  unmount() { destroyMap(map); map = null; },
-  onHole() { const h = activeHole(); if (map && h) { drawHole(map, h, holeLayer); fitHole(map, h); } renderBody(); },
+  unmount() { document.documentElement.classList.remove('tee-on', 'tee-big'); immersive(false); destroyMap(map); map = null; },
+  onHole() { const h = activeHole(); if (map && h) { drawHole(map, h, holeLayer); fitHole(map, h, null, sheetH()); } renderBody(); },
 };
+
+// 아래 판(+ 그 아래 메뉴)이 덮는 높이(px) = 판 위쪽 끝 ~ 화면 아래: 홀을 판 위 보이는 칸에 맞추려고
+const sheetH = () => { const t = $('#teeSheet'); return t ? Math.max(0, innerHeight - t.getBoundingClientRect().top) : 0; };
 
 function weatherFor(brg) {
   const w = App_.weather;
@@ -50,11 +57,10 @@ function renderBody() {
   }
   const brg0 = bearing(start, hole.ip && !fromMe ? hole.ip : hole.green);
   const wx = weatherFor(brg0);
-  body.innerHTML = controls + `<div class="card tight"><div class="row"><span class="sub">바람</span>
+  body.innerHTML = `<div id="rec"><div class="empty">몬테카를로 계산 중…</div></div>` + controls + `<div class="card tight"><div class="row"><span class="sub">바람</span>
       <div class="seg grow" id="windSeg"><button data-v="auto" class="${windMode === 'auto' ? 'on' : ''}">자동</button><button data-v="manual" class="${windMode === 'manual' ? 'on' : ''}">직접</button></div></div>
       ${windMode === 'manual' ? `<div class="row" style="margin-top:8px"><select id="wRel" class="grow">${[['head', '맞바람'], ['tail', '뒷바람'], ['l2r', '왼→오른'], ['r2l', '오른→왼']].map(([k, n]) => `<option value="${k}" ${windManual.rel === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input type="number" id="wSpd" style="width:110px" min="0" max="20" step="0.5" value="${windManual.speed}"><span class="sub">m/s</span></div>`
-      : `<p class="sub">${wx.src} · ${wx.windSpeed.toFixed(1)} m/s ${dirName(wx.windFrom)}에서</p>`}</div>
-    <div id="rec"><div class="empty">몬테카를로 계산 중…</div></div>`;
+      : `<p class="sub">${wx.src} · ${wx.windSpeed.toFixed(1)} m/s ${dirName(wx.windFrom)}에서</p>`}</div><div id="recMore"></div>`; // 판 순서: 추천 카드 → 출발·바람 → 클럽별 표
   bindFrom();
   $$('#windSeg button').forEach(b => b.onclick = () => { windMode = b.dataset.v; renderBody(); });
   $('#wRel')?.addEventListener('change', e => { windManual.rel = e.target.value; renderBody(); });
@@ -87,7 +93,9 @@ function compute(hole, start, wx) {
         <div class="stat"><div class="v" style="color:var(--danger)">${Math.round(b.pOB * 100)}%</div><div class="l">OB</div></div>
       </div>
       <p class="sub" style="margin-top:8px">분산: 좌우 ±${(ct?.sdLat ?? 4.5).toFixed(1)}° · 거리 ±${Math.round((ct?.sdDist ?? 0.07) * 100)}% ${ct?.learned ? `(내 샷 ${ct.n}개 학습)` : '(핸디캡 기본값 — 샷 기록 시 개인화)'}</p>
-    </div>
+    </div>`;
+  // 클럽별 표는 판 아래쪽(출발·바람 설정 다음)
+  const more = $('#recMore'); if (more) more.innerHTML = `
     <h3>클럽별 최선</h3>
     <div class="tblwrap"><table class="score"><tr><th>클럽</th><th>스윙</th><th>조준</th><th>기대타수</th><th>OB</th></tr>
     ${res.perClub.map(r => `<tr><td>${esc(r.clubName)}</td><td>${Math.round(r.swing * 100)}%</td><td>${r.aim === 0 ? '중앙' : (r.aim < 0 ? '좌 ' : '우 ') + Math.abs(r.aim) + '°'}</td><td><b>${r.es.toFixed(2)}</b> <span class="sub">${r === b ? '' : signed(r.es - b.es, 2)}</span></td><td>${Math.round(r.pOB * 100)}%</td></tr>`).join('')}

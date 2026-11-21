@@ -174,9 +174,10 @@ export function drawHole(map, hole, layer) {
   if (pts.length) layer._bounds = L.latLngBounds(pts);
   return layer;
 }
-export function fitHole(map, hole, me = null) {
+// bottom: 지도 아래를 덮는 판 높이(px) — 그만큼 위쪽 보이는 칸에 홀을 맞춤
+export function fitHole(map, hole, me = null, bottom = 0) {
   const pts = [hole.tee, hole.green, hole.pin, hole.ip, me].filter(Boolean).map(ll);
-  if (pts.length) map.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 19 });
+  if (pts.length) map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [40, 40], paddingBottomRight: [40, 40 + bottom], maxZoom: 19 });
 }
 export function greenRadius(hole) {
   if (hole.front && hole.back) return Math.max(8, distance(hole.front, hole.back) / 2 + 2);
