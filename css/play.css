@@ -752,3 +752,27 @@ html.msheet-on .m-map .leaflet-top { top: max(env(safe-area-inset-top), var(--cu
 .g-back #g3wrap .g3-box { width: min(100%, 100vh); }
 .e-chg { margin-top: 6px; padding: 6px 10px; border-radius: 10px; background: rgba(200,241,105,.14); color: #e9f1ec; font-size: 13px; font-weight: 700; } /* 추천 클럽이 바뀐 이유 */
 .bd-d b small.bd-pm { font-size: 12px; margin-left: 4px; color: #ffc35a; opacity: 1; } /* GPS 오차가 클 때 ±범위 */
+/* ⚙ AR 그린 리딩: 숫자 판은 기본 한 줄 · 설정 판은 누를 때만 아래 절반 (카메라 화면을 가리지 않게) */
+.gp-k { display: flex; gap: 4px; align-items: stretch; }
+.gp-k span { flex: 1; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,.55); border-radius: 10px; padding: 3px 4px 4px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.gp-k small { font-size: 10px; opacity: .75; font-weight: 700; } .gp-k b { font-size: 14px; font-weight: 900; white-space: nowrap; }
+.gp-more, .gp-less { pointer-events: auto; border: 0; border-radius: 10px; background: rgba(0,0,0,.55); color: #fff; font-weight: 900; cursor: pointer; }
+.gp-more { flex: none; width: 34px; font-size: 16px; }
+.gp-less { display: block; margin: 0 0 3px auto; padding: 3px 10px; font-size: 12px; }
+.gar-tool { flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 38px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.12); color: #fff; font-weight: 800; font-size: 13px; cursor: pointer; }
+.gar-tool .ic { width: 18px; height: 18px; } .gar-tool.on { background: #c8f169; color: #14241c; border-color: #c8f169; }
+.gar-pan { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; max-height: 52%; display: flex; flex-direction: column; background: rgba(14,20,16,.9); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-radius: 20px 20px 0 0; color: #fff; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -8px 24px rgba(0,0,0,.4); }
+.gar-pan-h { flex: none; display: flex; align-items: center; gap: 8px; padding: 6px 14px 4px; border: 0; background: none; color: #fff; font-weight: 900; font-size: 14px; cursor: pointer; position: relative; }
+.gar-pan-h i { position: absolute; left: 50%; top: 5px; width: 40px; height: 4px; margin-left: -20px; border-radius: 2px; background: rgba(255,255,255,.35); }
+.gar-pan-h span { margin-top: 10px; } .gar-pan-h em { margin: 10px 0 0 auto; display: grid; } .gar-pan-h .ic { width: 20px; height: 20px; }
+.gar-pan-b { overflow-y: auto; overscroll-behavior: contain; padding: 0 14px 14px; }
+.gp-sec { margin-top: 10px; } .gp-lab { font-size: 12px; font-weight: 800; opacity: .7; margin-bottom: 4px; }
+.gar-pan .seg { background: rgba(255,255,255,.08); } .gar-pan .seg button { color: #fff; } .gar-pan .seg button.on { background: #c8f169; color: #14241c; }
+.gp-dist { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.gp-dist b { font-size: 30px; font-weight: 900; font-variant-numeric: tabular-nums; min-width: 96px; text-align: center; } .gp-dist b small { font-size: 14px; opacity: .8; margin-left: 2px; }
+.gp-step { width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.1); color: #fff; font-size: 24px; font-weight: 900; cursor: pointer; }
+.gp-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.gp-btn { flex: 1 1 140px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #fff; font-weight: 800; font-size: 13px; cursor: pointer; }
+.gp-btn .ic { width: 18px; height: 18px; }
+.gp-note { margin: 4px 0 0; font-size: 12px; opacity: .7; text-align: center; }
+.cam.pan-on .hud.bottom { visibility: hidden; } /* 판이 열려 있으면 아래 버튼 줄은 판 뒤로 (겹치지 않게) */

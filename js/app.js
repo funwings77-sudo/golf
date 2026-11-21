@@ -12,6 +12,7 @@ import { holeHistory } from './core/insights.js';
 import { $, $$, sheet, toast, esc, bottomMenuHTML } from './ui.js';
 import { icon } from './icons.js';
 import { startIconize } from './iconize.js';
+import { hasMapsKey, cachedSession, getSession } from './core/gmaps.js';
 import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
 
@@ -386,7 +387,7 @@ function bottomMenu(name) {
   nav.innerHTML = bottomMenuHTML({ on: name });
   const playCmd = c => { if (currentName === 'play' && current?.cmd) current.cmd(c); else { App.pendingCmd = c; App.go('play'); } };
   $('#mMenu', nav).onclick = () => $('#drawer').classList.add('open');
-  $('#mGreen', nav).onclick = () => App.go(allowed('puttLine') ? 'green?ar' : 'green');
+  $('#mGreen', nav).onclick = () => { if (!allowed('puttLine')) return App.go('green'); if (currentName === 'green' && current?.openAR) return current.openAR(); App.greenAR = true; App.go('green?ar'); }; // 그린 = 바로 AR 그린 리딩
   $('#mLost', nav).onclick = () => playCmd('lost');
   $('#mPlay', nav).onclick = () => App.go('play');
   $('#mShots', nav).onclick = () => App.go('shots');
@@ -421,6 +422,8 @@ function applyIcons() {
 
 function init() {
   applyIcons();
+  // 🗺️ 구글 지도 연결(세션)을 미리: 첫 지도·골프장 사진부터 구글로 (잠깐 Esri가 보였다가 바뀌지 않게)
+  if (hasMapsKey() && !cachedSession() && navigator.onLine !== false) getSession().catch(() => {});
   startIconize(); // 본문 버튼 이모지도 아이콘으로 (화면이 다시 그려져도)
   applySettings();
   safetyNets();

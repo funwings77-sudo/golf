@@ -57,6 +57,15 @@ function esriLayer() {
   const o = { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' };
   return native ? new (cachedTileLayer())(SAT_URL, o) : L.tileLayer(SAT_URL, o);
 }
+// 한 칸을 Esri 사진으로 채움: 미리 받아 둔 지도(Cache Storage)가 있으면 그것부터 (신호 없는 코스) · 없으면 인터넷
+function fillFromEsri(img, c) {
+  const url = SAT_URL.replace('{z}', c.z).replace('{y}', c.y).replace('{x}', c.x), net = () => { img.src = url; };
+  if (!('caches' in window)) return net();
+  caches.open('pinpoint-tiles').then(k => k.match(url)).then(r => {
+    if (!r || r.type === 'opaque') return net();
+    return r.blob().then(b => { const u = URL.createObjectURL(b); img.addEventListener('load', () => URL.revokeObjectURL(u), { once: true }); img.src = u; });
+  }).catch(net);
+}
 export const GM_LOGO = '<img src="icons/google-maps-logo.svg" alt="Google Maps" width="86" height="18" draggable="false">';
 function googleLayer(map, s) {
   const lay = L.tileLayer(tileUrl(s), { maxZoom: 21, maxNativeZoom: 19, attribution: 'Google Maps' }); // 구글 위성은 확대 19까지
@@ -65,9 +74,9 @@ function googleLayer(map, s) {
   lay.on('tileerror', e => {
     // 구글이 안 주는 칸(보안 지역 등)은 그 칸만 Esri 사진으로 채움
     const t = e.tile, c = e.coords;
-    if (t && c && !t.dataset.fb) { t.dataset.fb = '1'; t.src = SAT_URL.replace('{z}', c.z).replace('{y}', c.y).replace('{x}', c.x); }
-    // 하나도 안 되면(키 막힘·한도 초과) 지도 전체를 Esri로
-    if (++fails >= 6 && oks === 0 && map._base === lay) { forgetSession(); swapBase(map, esriLayer()); }
+    if (t && c && !t.dataset.fb) { t.dataset.fb = '1'; fillFromEsri(t, c); }
+    // 하나도 안 되면(키 막힘·한도 초과·신호 없음) 지도 전체를 Esri로 (앱은 미리 받은 지도를 꺼내 씀) · 신호가 없을 때는 구글 연결을 버리지 않음
+    if (++fails >= 6 && oks === 0 && map._base === lay) { if (navigator.onLine !== false) forgetSession(); swapBase(map, esriLayer()); }
   });
   const copy = () => {
     if (map._base !== lay) return;
@@ -91,7 +100,7 @@ function swapBase(map, lay) {
   map._base = lay.addTo(map); lay.bringToBack?.();
 }
 function baseLayer(map) {
-  if (!hasMapsKey()) return swapBase(map, esriLayer());
+  if (!hasMapsKey() || navigator.onLine === false) return swapBase(map, esriLayer()); // 신호가 없으면 바로 미리 받은 지도
   const s = cachedSession();
   if (s) return swapBase(map, googleLayer(map, s));
   swapBase(map, esriLayer());

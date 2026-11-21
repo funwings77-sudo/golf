@@ -729,7 +729,7 @@ function actions() {
     $('#hit')?.addEventListener('click', hit); $('#hitOut')?.addEventListener('click', hit);
     $('#more')?.addEventListener('click', moreSheet);
     $('#mPlay').onclick = goPlay;
-    $('#mGreen').onclick = () => App_.go(allowed('puttLine') ? 'green?ar' : 'green');
+    $('#mGreen').onclick = () => { if (allowed('puttLine')) App_.greenAR = true; App_.go(allowed('puttLine') ? 'green?ar' : 'green'); };
     $('#mLost').onclick = toLost;
     $('#mShots').onclick = () => App_.go('shots');
     $('#mYard').onclick = yardBook;
