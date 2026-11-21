@@ -26,7 +26,7 @@ export async function satSource(center) {
       const s = await Promise.race([getSession(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))]);
       const d = 0.01, b = { getNorth: () => center.lat + d, getSouth: () => center.lat - d, getEast: () => center.lon + d, getWest: () => center.lon - d };
       const copy = await viewportCopyright(s, b, 17).catch(() => '');
-      return { tiles: [tileUrl(s)], maxzoom: 19, attribution: ['Google', copy].filter(Boolean).join(', ') };
+      return { tiles: [tileUrl(s)], maxzoom: 19, attribution: ['Google Maps', copy].filter(Boolean).join(', '), google: true };
     } catch {}
   }
   return { tiles: [SAT_URL], maxzoom: 19, attribution: 'Imagery © Esri' };
@@ -57,8 +57,9 @@ function esriLayer() {
   const o = { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' };
   return native ? new (cachedTileLayer())(SAT_URL, o) : L.tileLayer(SAT_URL, o);
 }
+export const GM_LOGO = '<img src="icons/google-maps-logo.svg" alt="Google Maps" width="86" height="18" draggable="false">';
 function googleLayer(map, s) {
-  const lay = L.tileLayer(tileUrl(s), { maxZoom: 21, maxNativeZoom: 19, attribution: 'Google' }); // 구글 위성은 확대 19까지
+  const lay = L.tileLayer(tileUrl(s), { maxZoom: 21, maxNativeZoom: 19, attribution: 'Google Maps' }); // 구글 위성은 확대 19까지
   let fails = 0, oks = 0, last = '';
   lay.on('tileload', () => { oks++; });
   lay.on('tileerror', e => {
@@ -78,7 +79,10 @@ function googleLayer(map, s) {
   };
   let tm = null; map.on('moveend', () => { clearTimeout(tm); tm = setTimeout(copy, 700); });
   lay.once('add', () => setTimeout(copy, 300));
-  lay.on('remove', () => { if (last) map.attributionControl?.removeAttribution(last); last = ''; });
+  // 구글 지도 로고 (공식 파일 · 테두리 있는 것 = 위성처럼 복잡한 배경용 · 높이 18px · 왼쪽 아래, 다른 표시와 안 겹치게)
+  const logo = new (L.Control.extend({ onAdd() { const d = L.DomUtil.create('div', 'gm-logo'); d.innerHTML = GM_LOGO; return d; } }))({ position: 'bottomleft' });
+  lay.on('add', () => { logo.addTo(map); map.getContainer().classList.add('gm-on'); });
+  lay.on('remove', () => { logo.remove(); map.getContainer().classList.remove('gm-on'); if (last) map.attributionControl?.removeAttribution(last); last = ''; });
   return lay;
 }
 function swapBase(map, lay) {

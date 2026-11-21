@@ -1,7 +1,7 @@
 // 3D · 4D 코스 보기 (MapLibre GL + 위성 사진 + AWS 지형 고도 타일)
 //  3D: 지형을 기울여 홀을 내려다봄 (확대·회전·기울기)
 //  4D: 3D + 시간 — 공이 날아가는 모습(탄도) 재생, 홀 플라이오버, 시간 막대로 되감기
-import { satSource } from '../map.js';
+import { satSource, GM_LOGO } from '../map.js';
 import { distance, bearing, destination } from '../core/geo.js';
 import { greenGeoJSON, gridCorners, slopeAt } from '../physics/greenmesh.js';
 import { slopeColor } from './greencanvas.js';
@@ -41,6 +41,7 @@ export async function create3D(container, { center, bearingDeg = 0, pitch = 62, 
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showZoom: false }), 'top-right');
   await new Promise(r => map.once('load', r));
+  if (sat.google) container.insertAdjacentHTML('beforeend', `<div class="gm-logo gm-logo-3d">${GM_LOGO}</div>`); // 구글 지도 로고
   map.addSource('lines', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({ id: 'pin-line', type: 'line', source: 'lines', filter: ['==', ['get', 'k'], 'pin'], paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.8 } });
   map.addLayer({ id: 'rest-line', type: 'line', source: 'lines', filter: ['==', ['get', 'k'], 'rest'], paint: { 'line-color': '#ffffff', 'line-width': 3, 'line-dasharray': [1, 1.5] } });
