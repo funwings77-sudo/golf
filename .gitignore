@@ -10,3 +10,5 @@ release/
 *.jks
 *.keystore
 *upload.properties
+# 앱에 넣는 API 키 (빌드 때만 씀 · 저장소에 올리지 않음)
+local.keys.json

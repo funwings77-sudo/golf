@@ -4,7 +4,7 @@ import { saveFile, pickTextFile } from '../core/files.js';
 import { requestMotionPermission, Sensors, startOrientation, restartGPS } from '../core/sensors.js';
 import { $, $$, toast, confirmSheet, esc } from '../ui.js';
 import { getKey, setKey, getModel, setModel, hasKey, testConnection, usageToday } from '../core/gemini.js';
-import { getMapsKey, setMapsKey, hasMapsKey, testMapsKey } from '../core/gmaps.js';
+import { userMapsKey, builtInMapsKey, setMapsKey, hasMapsKey, testMapsKey } from '../core/gmaps.js';
 import { say, audioRoute, openBluetooth, audioNative, ROUTE_WORD } from '../core/voice.js';
 
 // 켜고 끄는 것: [키, 이름, 설명]
@@ -64,11 +64,11 @@ export default {
         <div class="grid2"><button class="btn primary" id="gTest">🔌 저장 · 연결 시험</button><button class="btn" id="gDel">키 지우기</button></div>
         <p class="sub" id="gStat">${hasKey() ? `모델: ${esc(getModel() || '자동 선택')} · 오늘 ${usageToday().n}회` : '키 받기: 브라우저에서 aistudio.google.com/apikey → [API 키 만들기] → 복사해서 위에 붙여 넣기'}</p>
         <details><summary>개인정보 · 안전 안내</summary><p class="sub">· 키는 이 휴대폰에만 저장되고, 요청은 휴대폰에서 Google로 바로 가요 (PinPoint 서버 없음).<br>· AI에 보내는 것: 홀 번호·파·거리·클럽 비거리·바람·질문 글 (위치 좌표·이름·동반자 정보는 보내지 않아요). 사진은 직접 붙였을 때만.<br>· Google 무료 사용량에서는 보낸 내용이 Google 서비스 개선에 쓰일 수 있어요 (Google 약관). 원하지 않으면 키를 지우세요.<br>· 🏆 대회 모드에서는 AI 샷 조언이 꺼져요 (규칙 4.3a·10.2). 규칙 질문만 돼요.<br>· 키를 다른 사람에게 보여 주지 마세요. 사용량은 Google AI Studio에서 확인·제한할 수 있어요.</p></details></details>
-      <details class="card" id="gmSet"><summary><b>🗺️ 구글 지도 (선택)</b> <span class="sub">${hasMapsKey() ? '✓ 구글 위성지도' : '지금은 Esri 위성지도'}</span></summary>
-        <p class="sub">키를 넣으면 앱의 모든 지도가 <b>구글 위성지도</b>로 바뀌어요. 키가 없거나 안 되면 지금 지도(Esri)로 저절로 돌아가요.</p>
-        <label class="f"><span>Google Maps API 키 ${hasMapsKey() ? '<b style="color:var(--green)">✓ 저장됨</b>' : ''}</span><input type="password" id="mKey" autocomplete="off" spellcheck="false" placeholder="AIza… (Google Cloud에서 발급)" value="${esc(getMapsKey())}"></label>
+      <details class="card" id="gmSet"><summary><b>🗺️ 구글 지도 (선택)</b> <span class="sub">${hasMapsKey() ? `✓ 구글 위성지도${userMapsKey() ? '' : ' (앱 기본 키)'}` : '지금은 Esri 위성지도'}</span></summary>
+        <p class="sub">${builtInMapsKey() ? '이 앱에는 구글 지도 키가 들어 있어서 <b>따로 넣지 않아도 구글 위성지도</b>가 나와요. 내 키를 쓰고 싶을 때만 아래에 넣으세요.' : '키를 넣으면 앱의 모든 지도가 <b>구글 위성지도</b>로 바뀌어요.'} 키가 없거나 안 되면 지금 지도(Esri)로 저절로 돌아가요.</p>
+        <label class="f"><span>내 Google Maps API 키 ${userMapsKey() ? '<b style="color:var(--green)">✓ 저장됨</b>' : ''}</span><input type="password" id="mKey" autocomplete="off" spellcheck="false" placeholder="${builtInMapsKey() ? '비워 두면 앱 기본 키' : 'AIza… (Google Cloud에서 발급)'}" value="${esc(userMapsKey())}"></label>
         <div class="grid2"><button class="btn primary" id="mTest">🔌 저장 · 연결 시험</button><button class="btn" id="mDel">키 지우기</button></div>
-        <p class="sub" id="mStat">${hasMapsKey() ? '구글 위성지도를 쓰고 있어요' : '키 받기: console.cloud.google.com → 결제 계정 연결 → [API 및 서비스]에서 <b>Map Tiles API</b> 사용 설정 → [사용자 인증 정보]에서 API 키 만들기 → 복사해서 위에 붙여 넣기'}</p>
+        <p class="sub" id="mStat">${hasMapsKey() ? `구글 위성지도를 쓰고 있어요${userMapsKey() ? ' (내 키)' : ' (앱 기본 키)'}` : '키 받기: console.cloud.google.com → 결제 계정 연결 → [API 및 서비스]에서 <b>Map Tiles API</b> 사용 설정 → [사용자 인증 정보]에서 API 키 만들기 → 복사해서 위에 붙여 넣기'}</p>
         <details><summary>요금 · 안전 안내</summary><p class="sub">· 구글 지도는 사용량에 따라 Google Cloud 요금이 생길 수 있어요. 요금표와 무료 사용량은 Google Maps Platform 가격 안내에서 확인하고, 콘솔에서 하루 사용 한도를 걸어 두면 안전해요.<br>· 키는 이 휴대폰에만 저장되고, 지도 요청은 휴대폰에서 Google로 바로 가요.<br>· 키는 콘솔에서 'Map Tiles API'만 쓰도록 제한해 두세요.<br>· 신호 없는 코스용 '지도 미리 받기'는 구글 약관상 저장이 안 돼서 Esri 지도로 받아 둬요.</p></details></details>
       <details class="card"><summary><b>🔧 전문가 숫자</b> <span class="sub">(보통은 안 바꿔도 돼요)</span></summary>
         <div class="grid2">${num('hcp', '핸디캡', 0, 54, 1)}${num('stimp', '그린 스피드 (스팀프)', 6, 14, 0.5, 'ft')}${num('eyeHeight', '눈높이 (AR 퍼팅)', 1.0, 2.0, 0.01, 'm')}${num('phoneHeight', '가슴 높이 (공 탐지)', 0.8, 1.8, 0.01, 'm')}${num('stepLen', '한 걸음 길이', 0.4, 1.2, 0.01, 'm')}${num('cameraVFov', '카메라 세로 화각', 40, 90, 1, '°')}${num('aimSigma', '조준 오차 σ', 0.3, 4, 0.1, '°')}${num('speedSigma', '세기 오차 σ (0.06=6%)', 0.02, 0.2, 0.01)}${num('roundsPerMonth', '한 달 라운드 수 (공 소모 예측)', 0, 30, 1, '회')}</div>
@@ -117,7 +117,7 @@ export default {
       try { await testMapsKey(k); setMapsKey(k); await testMapsKey(k); st2.innerHTML = '<b style="color:var(--green)">✓ 연결됐어요</b> · 이제 지도가 구글 위성지도로 나와요'; }
       catch (e) { st2.textContent = '연결 안 됨: ' + e.message + ' · 키·결제 계정·Map Tiles API 사용 설정을 확인해 주세요'; }
     };
-    $('#mDel').onclick = () => { setMapsKey(''); $('#mKey').value = ''; $('#mStat').textContent = '키를 지웠어요. 지도가 Esri 위성지도로 돌아가요'; };
+    $('#mDel').onclick = () => { setMapsKey(''); $('#mKey').value = ''; $('#mStat').textContent = builtInMapsKey() ? '내 키를 지웠어요. 앱 기본 키로 구글 위성지도를 써요' : '키를 지웠어요. 지도가 Esri 위성지도로 돌아가요'; };
     $('#gDel').onclick = () => { setKey(''); setModel(''); $('#gKey').value = ''; $('#gStat').textContent = '키를 지웠어요. AI 기능이 꺼졌어요'; };
     $('#bkSave').onclick = async () => {
       try {

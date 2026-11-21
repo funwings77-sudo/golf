@@ -3,11 +3,15 @@
 //  · 세션(약 2주 유효)을 한 번 만들어 보관하고 타일 주소에 붙여 씀
 //  · 지도 아래 표시: 'Google' + 보이는 곳의 저작권 문구(viewport API) — 구글 약관대로
 //  · 신호 없는 코스용 '미리 받기'는 구글 약관상 타일 저장이 안 돼서 Esri 지도로 계속 함 (map.js · offline.js)
+import { BUILT_IN_MAPS_KEY } from './mapskey.js';
 const K_KEY = 'pinpoint.mapsKey', K_SES = 'pinpoint.mapsSession';
 const API = 'https://tile.googleapis.com';
 
 const ls = { get: k => { try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set: (k, v) => { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch {} } };
-export const getMapsKey = () => ls.get(K_KEY).trim();
+// 설정에서 직접 넣은 키가 먼저, 없으면 앱에 들어 있는 기본 키
+export const userMapsKey = () => ls.get(K_KEY).trim();
+export const builtInMapsKey = () => BUILT_IN_MAPS_KEY || '';
+export const getMapsKey = () => userMapsKey() || builtInMapsKey();
 export const hasMapsKey = () => !!getMapsKey();
 export function setMapsKey(k) { ls.set(K_KEY, (k || '').trim()); ls.set(K_SES, ''); }
 
