@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.45",
+   "code": 46,
+   "date": "2026-11-21T12:21:09.420Z",
+   "bytes": 6117251,
+   "sha256": "5315313036817a95b68296618b89a5ad20f75a38be279701079b8d6825b43f09",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.45/pinpoint-caddie-1.0.45.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.45",
+   "notes": [
+    "골프 치기 화면도 상단 상태바·하단 바를 숨겨 완전 전체 화면으로"
+   ]
+  },
+  {
    "version": "1.0.44",
    "code": 45,
    "date": "2026-11-21T12:17:17.585Z",
@@ -595,6 +607,6 @@
    ]
   }
  ],
- "latest": "1.0.44",
- "updatedAt": "2026-11-21T12:17:23.426Z"
+ "latest": "1.0.45",
+ "updatedAt": "2026-11-21T12:21:14.848Z"
 }
