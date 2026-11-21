@@ -51,6 +51,12 @@ export const DEFAULT_SETTINGS = {
   aimSigma: 1.0, speedSigma: 0.06, roundsPerMonth: 3,
   tempoBpm: 76,
   detail: false,           // false = 쉬운 화면(기본), true = 자세히 화면
+  voiceLevel: 'detail',    // 🎧 음성 안내: detail(자세히 · 숫자 정밀) | simple(간단히)
+  voiceRate: 1,            // 말 빠르기 0.85 · 1 · 1.2
+  voiceButtons: true,      // 이어폰 버튼: 1번 다시 듣기 · 2번 쳤어요/찾았어요 · 3번 취소
+  voiceAuto: true,         // 이어폰을 꽂거나 연결하면 음성 안내 저절로 켜기
+  watchAuto: true,         // ⌚ 워치가 스윙을 알아채면 저절로 [쳤어요]
+  grips: [],               // 🏷️ 그립 센서 연결 [{ deviceId, club, name, battery }]
 };
 
 // 핸디캡 18 남성 기준 캐리(m) → 핸디캡·성별로 스케일

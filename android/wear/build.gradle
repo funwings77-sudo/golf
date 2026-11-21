@@ -1,0 +1,27 @@
+// ⌚ PinPoint 워치 앱 (Wear OS · 갤럭시워치 등): 손목 센서로 스윙·임팩트를 알아채 휴대폰 앱에 알림
+//  휴대폰 앱과 같은 applicationId · 같은 서명이어야 서로 메시지를 주고받음 (Wearable Data Layer)
+apply plugin: 'com.android.application'
+
+android {
+    namespace "io.github.funwings77sudo.pinpoint.wear"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "io.github.funwings77sudo.pinpoint"
+        minSdkVersion 26
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0.0"
+    }
+    buildTypes {
+        release { minifyEnabled false }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-wearable:18.2.0'
+    testImplementation "junit:junit:$junitVersion"
+}

@@ -10,6 +10,7 @@ const ROUTES = {
   pins: () => import('./views/pins.js'),
   greens: () => import('./views/greens.js'),
   notices: () => import('./views/notices.js'),
+  devices: () => import('./views/devices.js'),
   analytics: () => import('./views/analytics.js'),
   deploy: () => import('./views/deploy.js'),
   connect: () => import('./views/connect.js'),

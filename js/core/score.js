@@ -74,11 +74,13 @@ export function minTransfers(names, net) {
 // ---------- 내 백(My Bag) ----------
 // 샷 기록으로 클럽별 캐리 평균/분산 학습 (사전값을 n0=5 샷 가중치로 둔 베이지안 갱신)
 export function learnClub(club, shots) {
+  // 날씨를 뺀 표준 캐리(stdCarry, insights.js)가 있으면 그것으로: 추천 엔진이 오늘 날씨를 다시 더하므로 두 번 빼지 않게
+  const cv = x => x.stdCarry ?? x.carry;
   const s = shots.filter(x => x.club === club.id && x.carry > 10 && !x.excluded && !x.partial); // 힘을 덜 준 샷은 비거리 학습에서 뺌
   if (s.length < 3) return { ...club, n: s.length, learned: false };
   const n0 = 5, prior = club.priorCarry ?? club.carry;
-  const mean = (prior * n0 + s.reduce((a, x) => a + x.carry, 0)) / (n0 + s.length);
-  const sd = Math.sqrt(s.reduce((a, x) => a + (x.carry - mean) ** 2, 0) / s.length) / mean;
+  const mean = (prior * n0 + s.reduce((a, x) => a + cv(x), 0)) / (n0 + s.length);
+  const sd = Math.sqrt(s.reduce((a, x) => a + (cv(x) - mean) ** 2, 0) / s.length) / mean;
   const lat = s.filter(x => x.latDeg != null);
   const sdLat = lat.length >= 3 ? Math.sqrt(lat.reduce((a, x) => a + x.latDeg ** 2, 0) / lat.length) : club.sdLat;
   return { ...club, priorCarry: prior, carry: Math.round(mean), sdDist: Math.max(0.03, Math.min(0.2, sd || club.sdDist)), sdLat: Math.max(1.5, Math.min(12, sdLat)), n: s.length, learned: true };

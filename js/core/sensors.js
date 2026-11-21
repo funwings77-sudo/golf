@@ -1,5 +1,6 @@
 // 센서 퓨전: GNSS(칼만 필터), 나침반, 기울기, 걸음, 스윙 감지, 진동, 음성
 import { toLocal, fromLocal } from './geo.js';
+import { say, configureVoice } from './voice.js';
 import { pointingHeading, AngleFilter, wrap180 } from './heading.js';
 
 const posSubs = new Set(), oriSubs = new Set();
@@ -188,14 +189,8 @@ export function startSwingDetect(cb) {
 export function vibrate(p) { try { navigator.vibrate && navigator.vibrate(p); } catch {} }
 let voiceOn = false;
 export function setVoice(on) { voiceOn = on; }
-export function speak(text, force = false) {
-  if ((!voiceOn && !force) || !('speechSynthesis' in window)) return;
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; u.rate = 1.02;
-    speechSynthesis.speak(u);
-  } catch {}
-}
+configureVoice({ on: () => voiceOn });
+export function speak(text, force = false) { return say(text, { force }); } // 🎧 core/voice.js: 앱은 휴대폰 TTS → 이어폰
 let wakeLock = null;
 export async function keepAwake(on = true) {
   try {

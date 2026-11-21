@@ -6,6 +6,7 @@ import { $, $$, esc, confirmSheet, DU, sheet, toast } from '../ui.js';
 import { reviewRounds } from '../core/aicaddie.js';
 import { hasKey } from '../core/gemini.js';
 import { saveFile } from '../core/files.js';
+import { areaStats, lessonVideos, lessonTrend, roundDiagnosis } from '../core/insights.js';
 
 // 홀별 색 막대 (이글 보라 · 버디 파랑 · 파 초록 · 보기 노랑 · 더블+ 주황)
 function holeBar(r) {
@@ -14,39 +15,12 @@ function holeBar(r) {
 }
 
 // 영역별 실력(핸디캡 환산) → 가장 먼저 연습할 것
-// 일반 아마추어 평균표(핸디캡 0·10·20·30): 페어웨이 안착 · 그린 적중(GIR) · 리커버리(GIR 실패 후 파 이하) · 홀당 퍼트
-const BENCH = { fw: [0.60, 0.50, 0.42, 0.35], gir: [0.65, 0.40, 0.20, 0.08], scr: [0.55, 0.35, 0.20, 0.10], putt: [1.75, 1.85, 1.95, 2.05] };
 const AREA = {
   fw: ['티샷', '페어웨이에 올리는 비율', '드라이버 대신 3번 우드·하이브리드로 페어웨이를 먼저 지켜 보세요. 연습장에서는 폭 30m 목표로 10개 중 몇 개 들어가는지 세어 보세요.'],
   gir: ['어프로치', '정규 타수로 그린에 올리는 비율', '깃발 대신 그린 가운데를 보고 치세요. 클럽별 실제 비거리(내 백)를 믿고 한 클럽 길게 잡는 게 도움이 돼요.'],
   scr: ['숏게임', '그린을 놓친 뒤 파를 지키는 비율', '그린 주변 칩샷은 굴리는 샷(7·8번 아이언)부터 연습해 보세요. 1~2m 안에 붙이는 연습이 효과가 커요.'],
   putt: ['퍼팅', '홀당 퍼트 수', '먼 거리는 홀 주변 1m 원 안에 붙이는 거리감, 짧은 거리는 1m 퍼트 20개 연속 넣기를 연습해 보세요.'],
 };
-function toHcp(key, v) { // 평균표 사이를 직선으로 이어 핸디캡으로 환산 (0~36)
-  const xs = [0, 10, 20, 30], dir = key === 'putt' ? 1 : -1, g = BENCH[key].map(x => x * dir), gv = v * dir;
-  if (gv <= g[0]) return 0;
-  for (let i = 1; i < 4; i++) if (gv <= g[i]) return xs[i - 1] + (gv - g[i - 1]) / (g[i] - g[i - 1]) * 10;
-  return Math.min(36, 30 + (gv - g[3]) / (g[3] - g[2]) * 10);
-}
-function areaStats(rounds) {
-  let fwN = 0, fwY = 0, girN = 0, girY = 0, scrN = 0, scrY = 0, pN = 0, pS = 0;
-  for (const r of rounds) for (const h of r.holes) {
-    const sc = h.scores?.[0]; if (!sc?.strokes) continue;
-    if (sc.fw && h.par >= 4) { fwN++; if (sc.fw === 'C') fwY++; }
-    if (sc.putts > 0) {
-      pN++; pS += sc.putts;
-      const gir = sc.strokes - sc.putts <= h.par - 2; girN++; if (gir) girY++;
-      else { scrN++; if (sc.strokes <= h.par) scrY++; }
-    }
-  }
-  const out = {};
-  if (fwN >= 5) out.fw = { v: fwY / fwN, n: fwN, txt: `${Math.round(fwY / fwN * 100)}%` };
-  if (girN >= 9) out.gir = { v: girY / girN, n: girN, txt: `${Math.round(girY / girN * 100)}%` };
-  if (scrN >= 6) out.scr = { v: scrY / scrN, n: scrN, txt: `${Math.round(scrY / scrN * 100)}%` };
-  if (pN >= 9) out.putt = { v: pS / pN, n: pN, txt: (pS / pN).toFixed(2) };
-  for (const k in out) out[k].hcp = toHcp(k, out[k].v);
-  return out;
-}
 function practiceCard(rounds) {
   const a = areaStats(rounds), keys = Object.keys(a);
   if (keys.length < 2) return `<div class="card"><b>🎯 연습 우선순위</b><p class="sub">9홀 이상 점수와 퍼트를 기록하면 티샷·어프로치·숏게임·퍼팅 중 무엇부터 연습하면 좋을지 알려 드려요. (다음 홀로 갈 때 나오는 점수 창에서 퍼트·티샷 방향을 눌러 주세요)</p></div>`;
@@ -55,10 +29,25 @@ function practiceCard(rounds) {
   return `<div class="card prio"><b>🎯 가장 먼저 연습할 것</b><div class="big">${AREA[worst][0]}</div>
     <p class="sub" style="margin:0">${AREA[worst][1]} ${a[worst].txt} → 핸디캡 약 ${Math.round(a[worst].hcp)} 수준이에요.</p>
     <p style="margin:6px 0 0;font-size:14px">💡 ${AREA[worst][2]}</p>
+    ${lessonBox(rounds, worst)}
     ${drills(keys.sort((x, y) => a[y].hcp - a[x].hcp).slice(0, 2))}
     <div class="lvl">${['fw', 'gir', 'scr', 'putt'].map(k => a[k] ? `<div><i class="${k === worst ? 'bad' : ''}" style="height:${Math.max(6, a[k].hcp / mx * 70)}px"></i>${AREA[k][0]}<br><b>${Math.round(a[k].hcp)}</b><br><span class="sub">${a[k].txt}</span></div>` : `<div><i style="height:4px;background:#ccc"></i>${AREA[k][0]}<br><span class="sub">기록 부족</span></div>`).join('')}</div>
     <p class="sub" style="margin:8px 0 0">막대 = 그 영역만 봤을 때의 핸디캡 (낮을수록 잘함) · 일반 아마추어 평균과 비교</p></div>`;
 }
+// 📺 약점 1순위 레슨 영상 2개 + 지난 라운드들과 비교 (처방 → 다음 라운드 효과)
+function lessonBox(rounds, k) {
+  const f = { L: 0, R: 0 }; for (const r of rounds.slice(0, 5)) for (const h of r.holes) { const x = h.scores?.[0]?.fw; if (x === 'L' || x === 'R') f[x]++; }
+  const tr = lessonTrend(rounds, k);
+  return `<div class="lesson"><b>📺 이 영상부터 보세요</b><div class="fin-v">${lessonVideos(k, f.L > f.R ? 'L' : 'R').map(v => `<a href="${esc(v.url)}" target="_blank" rel="noopener">▶ ${esc(v.title)}</a>`).join('')}</div>
+    ${tr ? `<p class="sub" style="margin:6px 0 0">📈 최근 3라운드: ${esc(tr.text)}</p>` : '<p class="sub" style="margin:6px 0 0">라운드를 4번 이상 기록하면, 연습한 뒤 좋아졌는지 숫자로 보여 드려요.</p>'}</div>`;
+}
+// 지난 라운드 한 줄 진단 (라운드 카드 아래)
+function diagLine(r) {
+  if (r.mode === 'practice') return '';
+  const d = roundDiagnosis(r, S.settings.hcp);
+  return d ? `<div class="sub r-dg">${d.ok ? '👍 ' + esc(d.text) : '🔎 ' + esc(d.text)}</div>` : '';
+}
+
 // 다음 라운드 전 연습 2개 (측정 가능한 목표와 함께)
 const DRILL = {
   fw: ['🎯 폭 30m 페어웨이 10개', '연습장에서 깃발 두 개 사이(폭 30m)를 페어웨이로 정하고 10개 중 6개 이상 넣기'],
@@ -163,7 +152,7 @@ export default {
         ${rs.length ? '<button class="btn block" id="csv" style="margin-top:10px">⬇ 내 기록 CSV로 내보내기 (엑셀)</button>' : ''}
         ${Object.keys(byClub).length ? `<h3>클럽별 실제 캐리</h3><div class="tblwrap"><table class="score"><tr><th>클럽</th><th>샷</th><th>평균</th><th>최소~최대</th></tr>${Object.entries(byClub).map(([k, v]) => `<tr><td>${esc(S.bag.find(c => c.id === k)?.name || k)}</td><td>${v.length}</td><td>${DU(v.reduce((a, b) => a + b, 0) / v.length)}</td><td>${DU(Math.min(...v))}~${DU(Math.max(...v))}</td></tr>`).join('')}</table></div>` : ''}
         <h3>라운드</h3>
-        ${rs.length ? rs.map((r, i) => { const t = (r.totals || totals(r))[0]; return `<div class="card tight"><div class="row"><div class="grow"><b>${esc(r.courseName)}</b> <span class="pill ${r.mode === 'tournament' ? 'danger' : r.mode === 'practice' ? 'warn' : ''}">${MODES[r.mode]?.label}</span><br><span class="sub">${new Date(r.date).toLocaleDateString()} · ${t.played}홀 · ${t.strokes}타 (${t.toPar >= 0 ? '+' : ''}${t.toPar}) · 퍼트 ${t.putts} · 분실 ${t.lost}</span>${holeBar(r)}</div><button class="btn small" data-rep="${i}" title="골프장 제출용 리포트">📤 리포트</button><button class="btn small" data-del="${i}">삭제</button></div></div>`; }).join('') : '<div class="empty">완료된 라운드가 없습니다</div>'}`;
+        ${rs.length ? rs.map((r, i) => { const t = (r.totals || totals(r))[0]; return `<div class="card tight"><div class="row"><div class="grow"><b>${esc(r.courseName)}</b> <span class="pill ${r.mode === 'tournament' ? 'danger' : r.mode === 'practice' ? 'warn' : ''}">${MODES[r.mode]?.label}</span><br><span class="sub">${new Date(r.date).toLocaleDateString()} · ${t.played}홀 · ${t.strokes}타 (${t.toPar >= 0 ? '+' : ''}${t.toPar}) · 퍼트 ${t.putts} · 분실 ${t.lost}</span>${holeBar(r)}${diagLine(r)}</div><button class="btn small" data-rep="${i}" title="골프장 제출용 리포트">📤 리포트</button><button class="btn small" data-del="${i}">삭제</button></div></div>`; }).join('') : '<div class="empty">완료된 라운드가 없습니다</div>'}`;
       $('#csv')?.addEventListener('click', () => exportCSV(rs));
       $('#aiRev')?.addEventListener('click', () => aiReview(counted, me));
       $$('[data-rep]').forEach(b => b.onclick = () => shareReport(rs[+b.dataset.rep]));

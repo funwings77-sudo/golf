@@ -1,6 +1,9 @@
 // ③ 그린 위 거리 · ④ 그린 경사 지도 · ⑤ 퍼팅 라인/조준점/세기/백스윙
 import { mountGreen3D, ovalInside } from './green3d.js';
 import { todayKey } from '../core/remote.js';
+import { greenToday, recordPuttFeel } from '../core/insights.js';
+import { depthInfo, measureWithDepth, surveyWithDepth, processSurvey, KIND_WORD } from '../core/depth.js';
+import { saveFile } from '../core/files.js';
 import { S, save, allowed, activeHole, activeCourse, currentMode, FEATURE_NAMES } from '../core/state.js';
 import { distance, toLocal, toRad } from '../core/geo.js';
 import { Sensors, sampleTilt, startSteps, onOrientation, startOrientation, vibrate, speak } from '../core/sensors.js';
@@ -12,6 +15,7 @@ import { drawGreen, makeView } from './greencanvas.js';
 import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed, DU } from '../ui.js';
 
 const STAND_BACK = 0.6; // 공 뒤에 서는 거리 (m)
+let depth = null; // 깊이 카메라 (LiDAR · ARCore) 쓸 수 있나
 let el_, App_, G, worker = null, reqId = 0, camStop = null, arT = null, unOri = null, metroOn = false;
 
 function loadG() {
@@ -29,10 +33,15 @@ export default {
     // 골프장이 발행한 오늘 그린 스피드가 있으면 그 값으로 시작 (사용자가 바꾸면 그 값 유지)
     const tp = activeCourse()?.todayPins;
     if (tp?.stimp && tp.date === todayKey() && G.stimpSrc !== tp.date) { G.stimp = tp.stimp; G.stimpSrc = tp.date; G.result = null; }
-    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.holeN = hole?.n ?? null; }
+    // 오늘 내 퍼트 결과로 맞춘 빠르기가 있으면 그것이 우선 (골프장 발표보다 오늘 내 느낌이 최신)
+    const gt = greenToday(activeCourse());
+    if (gt?.src === 'feel' && G.stimp !== gt.stimp) { G.stimp = gt.stimp; G.result = null; }
+    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.scan = null; if (G.src === 'scan') G.src = null; G.holeN = hole?.n ?? null; }
+    if (G.src === 'scan' && !G.scan) G.src = null;
     if (!G.src) G.src = hole?.greenGrid ? 'grid' : 'onsite';
     if (G.src === 'grid' && !hole?.greenGrid) G.src = 'demo';
     render();
+    if (!depth) depthInfo().then(d => { depth = d; if (d.ok && G.tab === 'measure' && el_?.isConnected) render(); });
   },
   unmount() { stopAR(); metronome(false); metroOn = false; saveG(); },
   onHole() { G.holeN = null; this.mount(el_, App_); },
@@ -40,6 +49,7 @@ export default {
 
 function gridInfo() {
   const hole = activeHole();
+  if (G.src === 'scan' && G.scan) return { grid: G.scan.grid, origin: null, name: `${KIND_WORD[G.scan.kind] || '카메라'} 스캔`, pin: null };
   if (G.src === 'grid' && hole?.greenGrid) return { grid: hole.greenGrid.grid, origin: hole.greenGrid.origin, name: hole.greenGrid.source || '사전 측량 그린', pin: hole.pin || hole.green };
   if (G.src === 'demo') { const g = demoGreen(G.demoKind); g.y0 -= 12.5; return { grid: g, origin: null, name: `데모(가상) · ${g.name}`, pin: null }; }
   return null;
@@ -86,6 +96,7 @@ function fusionCorrection(surf, ball, hole) {
   return { a: a / ms.length, b: b / ms.length };
 }
 function confidence(geo) {
+  if (G.src === 'scan' && G.scan) return G.scan.conf;
   if (geo.kind === 'grid') return Math.min(0.95, (G.src === 'demo' ? 0.8 : 0.85) + (Object.values(G.meas).filter(Boolean).length ? 0.05 : 0));
   const n = geo.nMeas || 0, precise = Object.values(G.meas).some(m => m?.precise);
   return n === 0 ? 0.2 : Math.min(0.8, 0.45 + n * 0.08 + (precise ? 0.08 : 0) - (G.D > 8 ? 0.1 : 0));
@@ -99,7 +110,7 @@ function render() {
   const gridName = hole?.greenGrid ? (hole.greenGrid.source || '사전 측량 그린') : null;
   const E = easy();
   el_.innerHTML = `<h2>🟢 ${E ? '그린 읽기' : '그린 리딩 · 퍼팅'}</h2>
-    <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">${E ? '직접 재기' : '현장 측정'}</button>${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">${E ? '그린 지도' : '그린맵'}</button>` : ''}<button data-v="demo" class="${G.src === 'demo' ? 'on' : ''}">${E ? '연습 그린' : '데모 그린'}</button></div>
+    <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">${E ? '직접 재기' : '현장 측정'}</button>${G.scan ? `<button data-v="scan" class="${G.src === 'scan' ? 'on' : ''}">📏 ${E ? '카메라 스캔' : '깊이 스캔'}</button>` : ''}${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">${E ? '그린 지도' : '그린맵'}</button>` : ''}<button data-v="demo" class="${G.src === 'demo' ? 'on' : ''}">${E ? '연습 그린' : '데모 그린'}</button></div>
     ${G.src === 'demo' ? `<div class="seg" id="demoSeg" style="margin-top:6px">${[['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']].map(([k, n]) => `<button data-v="${k}" class="${G.demoKind === k ? 'on' : ''}">${n}</button>`).join('')}</div><p class="sub">${E ? '연습용 가짜 그린이에요. ② 그린 지도에서 공·홀 위치를 눌러 바꿔 보세요.' : '가상의 사전 측량 그린입니다 (실제 코스 아님). 그린맵 탭에서 공·홀 위치를 탭으로 바꿔 보세요.'}</p>` : ''}
     <div class="seg" id="tabSeg" style="margin-top:10px"><button data-v="measure" class="${G.tab === 'measure' ? 'on' : ''}">${E ? '① 재기' : '③ 측정'}</button><button data-v="map" class="${G.tab === 'map' ? 'on' : ''}">${E ? '② 그린 지도' : '④ 그린맵'}</button><button data-v="ar" class="${G.tab === 'ar' ? 'on' : ''}">${E ? '③ 카메라로 보기' : '⑤ AR 리딩'}</button></div>
     <div id="tabBody"></div><div id="result"></div>`;
@@ -118,7 +129,7 @@ function measureTab(body, canSlope) {
   const geo = geometry();
   const isGrid = geo.kind === 'grid';
   const E = easy();
-  body.innerHTML = `<div class="card"><div class="row"><b class="grow">${E ? '공에서 홀까지 거리' : '③ 공 ↔ 홀컵 거리'}</b>${isGrid ? `<span class="pill">${E ? '그린 지도' : '그린맵 좌표'}</span>` : G.distSrc ? `<span class="pill">${esc(G.distSrc)}</span>` : ''}</div>
+  body.innerHTML = `${depthCard()}<div class="card"><div class="row"><b class="grow">${E ? '공에서 홀까지 거리' : '③ 공 ↔ 홀컵 거리'}</b>${isGrid ? `<span class="pill">${E ? '그린 지도' : '그린맵 좌표'}</span>` : G.distSrc ? `<span class="pill">${esc(G.distSrc)}</span>` : ''}</div>
       ${isGrid ? `<div class="big" style="margin-top:6px">${geo.D.toFixed(1)}<small>m</small></div><p class="sub">${E ? '② 그린 지도에서 공·홀 위치를 바꿀 수 있어요.' : '그린맵 탭에서 공·홀 위치를 바꿀 수 있습니다.'}</p>`
       : `<div class="row" style="margin-top:6px"><input type="number" id="dIn" inputmode="decimal" step="0.1" min="0.5" max="40" value="${G.D || ''}" placeholder="거리 (m)" style="max-width:140px;font-size:22px;font-weight:800"><span class="sub">m</span></div>
          <div class="grid3" style="margin-top:8px"><button class="btn small" id="dSteps">👣 걸어서</button><button class="btn small" id="dCam">📷 카메라로</button><button class="btn small" id="dGps">📍 위치로</button></div>
@@ -148,6 +159,49 @@ function measureTab(body, canSlope) {
     G.D = +distance(Sensors.pos, pin).toFixed(1); G.distSrc = `GPS ±${Math.round(Sensors.pos.acc || 4)}m`; saveG(); render();
   });
   $('#calc').onclick = compute;
+  $('#depthGo')?.addEventListener('click', () => runDepth(canSlope));
+  $('#surveyGo')?.addEventListener('click', runSurvey);
+}
+
+// 📏 깊이 카메라 카드: 한 번에 거리 + 그린 높낮이 (LiDAR · ARCore 깊이를 쓸 수 있는 앱에서만)
+function depthCard() {
+  if (!depth?.ok) return '';
+  const E = easy(), sc = G.scan;
+  return `<div class="card dp-card"><button class="dp-go" id="depthGo"><i>📏</i><span><b>${sc ? '다시 재기' : E ? '카메라로 한 번에 재기' : '깊이 카메라로 측정'}</b><small>${E ? '공 → 홀을 찍고 그린을 한 번 비추면 거리와 높낮이를 재요' : `${KIND_WORD[depth.kind] || '카메라'} · 거리(cm) + 그린 높이 지도`}</small></span><em>›</em></button>
+    ${sc ? `<div class="dp-res"><div><small>거리</small><b>${sc.D.toFixed(2)}m</b></div><div><small>${sc.dh >= 0 ? '오르막' : '내리막'}</small><b>${Math.abs(sc.dh * 100).toFixed(0)}cm</b></div><div><small>믿음</small><b>${confWord(sc.conf)}</b></div></div>
+      <p class="sub">${esc(KIND_WORD[sc.kind] || '카메라')}${sc.planeOnly ? ' · 그린을 덜 비춰서 평균 기울기만 썼어요' : ` · 길의 ${Math.round(sc.coverage * 100)}%를 봤어요`}</p>` : ''}
+    ${allowed('greenSlope') ? `<button class="dp-sv" id="surveyGo">🛰️ 이 그린 전체 측량하기 <small>(골프장 직원용 · 1분)</small></button>` : ''}</div>`;
+}
+// 🛰️ 그린 전체 측량 → 이 홀 그린맵(이 휴대폰) + 관리자에게 보낼 파일
+async function runSurvey() {
+  const h = activeHole();
+  if (!h?.front || !h?.back || !h?.green) return sheet({ title: '그린 위치가 먼저 필요해요', body: '<p>측량한 높이를 지도에 맞추려면 이 홀의 <b>그린 앞 · 뒤 · 가운데</b> 위치가 있어야 해요.</p><p class="sub">관리자 페이지 → 코스 편집 → ⚡ 빠른 지정에서 그린 앞·뒤를 찍고 발행한 뒤, 앱에서 코스를 업데이트하세요.</p>', actions: [{ label: '알겠어요', kind: 'primary' }] });
+  if (h.greenGrid && h.greenGrid.by !== 'user' && !(await new Promise(res => sheet({ title: '이미 그린맵이 있어요', body: `<p>이 홀에는 골프장이 발행한 그린맵(${esc(h.greenGrid.source || '')})이 있어요. 새로 측량해서 이 휴대폰에서만 바꿀까요?</p>`, actions: [{ label: '취소', onClick: () => res(false) }, { label: '측량하기', kind: 'primary', onClick: () => res(true) }] })))) return;
+  try {
+    const raw = await surveyWithDepth();
+    if (raw.cancelled) { if (raw.error) toast(raw.error, 4000); return; }
+    const r = processSurvey(raw, h);
+    h.greenGrid = r.greenGrid; save('courses');
+    G.src = 'grid'; G.gBall = G.gHole = null; G.result = null; G.tab = 'map'; saveG(); render();
+    const g = r.greenGrid.grid, file = { format: 'pinpoint-green-survey', version: 1, course: activeCourse()?.official?.id || activeCourse()?.name, hole: h.n, ...r.greenGrid };
+    sheet({ title: '🛰️ 그린 측량 완료', body: `<div class="dp-res light"><div><small>격자</small><b>${g.nx}×${g.ny}</b></div><div><small>본 곳</small><b>${Math.round(r.coverage * 100)}%</b></div><div><small>점</small><b>${Math.round(r.nPts / 1000)}천 개</b></div></div>
+      ${r.warn ? `<p style="color:var(--danger)">⚠ ${esc(r.warn)}</p>` : ''}
+      <p>이 휴대폰의 ${h.nineHole ?? h.n}번 홀 그린 지도에 바로 넣었어요. 모든 사람이 쓰게 하려면 파일을 골프장 관리자에게 보내 주세요 (관리자 페이지 → 그린맵 → JSON 올리기).</p>
+      ${r.coverage < 0.5 ? '<p class="sub">비춘 곳이 절반이 안 돼요. 빈 곳은 주변 높이로 채웠어요. 다시 하면 더 정확해져요.</p>' : ''}`,
+      actions: [{ label: '닫기' }, { label: '📤 관리자에게 보내기', kind: 'primary', onClick: async () => { try { await saveFile(`green-survey-h${h.n}-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(file), 'application/json', 'PinPoint 그린 측량'); } catch (e) { toast('보내지 못했어요: ' + e.message, 4000); } return false; } }] });
+  } catch (e) { toast('측량하지 못했어요: ' + (e?.message || e), 5000); }
+}
+async function runDepth(canSlope) {
+  try {
+    const r = await measureWithDepth({ scan: canSlope });
+    if (r.cancelled) return;
+    G.D = r.D; G.distSrc = KIND_WORD[r.kind] || '카메라'; G.result = null;
+    if (canSlope) { G.scan = r; G.src = 'scan'; G.gBall = { x: 0, y: 0 }; G.gHole = { x: 0, y: r.D }; }
+    saveG(); vibrate(60);
+    toast(`📏 ${r.D.toFixed(2)}m · ${Math.abs(r.dh * 100) < 1 ? '평평해요' : `${r.dh > 0 ? '오르막' : '내리막'} ${Math.abs(r.dh * 100).toFixed(0)}cm`}${canSlope ? ' · 그린 높이 지도를 만들었어요' : ''}`, 3500);
+    render();
+    if (G.D > 0) compute();
+  } catch (e) { toast('재지 못했어요: ' + (e?.message || e), 4000); }
 }
 function slopeText(m) {
   const along = m.gy * 100, cross = m.gx * 100;
@@ -284,12 +338,30 @@ function renderResult(canLine) {
         <div class="stat"><div class="v">${r.mc.meanLeave.toFixed(1)}m</div><div class="l">빗나갈 때 남는 거리</div></div></div>
       <div class="row" style="margin-top:10px"><button class="btn grow ${metroOn ? 'on' : ''}" id="metro">🎵 템포 메트로놈 ${metroOn ? '끄기' : '켜기'}</button><button class="btn" id="spk">🔊</button></div>
       ${currentMode() === 'practice' ? `<label class="switch"><span>그린 리딩 훈련 모드 (먼저 예측)</span><input type="checkbox" id="train" ${G.training ? 'checked' : ''}></label>` : ''}
+      ${feelRow()}
     </div>
     ${alt ? `<details class="card tight"><summary class="sub">지나치는 거리별 비교 (몬테카를로 ${160}회)</summary><div class="tblwrap" style="margin-top:8px"><table class="score"><tr><th>지나침</th><th>성공</th><th>2퍼트↓</th><th>조준(컵)</th></tr>${alt}</table></div></details>` : ''}
     <p class="sub">백스윙 크기는 ${S.calib.samples?.length ? '내 캘리브레이션' : '기본값'} 기준입니다. <a href="#/calib">연습 그린 캘리브레이션</a>(3m·6m·9m)을 하면 정확해집니다. 오차 가정: 조준 ±${S.settings.aimSigma}° · 세기 ±${Math.round(S.settings.speedSigma * 100)}%.</p>`;
   $('#metro').onclick = () => { metroOn = !metroOn; metronome(metroOn, S.settings.tempoBpm); renderResult(true); };
   $('#spk').onclick = () => { const was = S.settings.voice; speak(`${cupsText(r)}, 평지 ${r.flatEquiv.toFixed(1)}미터 세기, 백스윙 ${Math.round(bs)}센티`, true); void was; };
   $('#train')?.addEventListener('change', e => { G.training = e.target.checked; G.revealed = false; saveG(); renderResult(true); });
+  bindFeel();
+}
+
+// 친 뒤 한 번: 공이 짧았어요 / 딱 맞았어요 / 길었어요 → 오늘 이 골프장 그린 빠르기를 맞춤 (다음 퍼트부터)
+function feelRow() {
+  const gt = greenToday(activeCourse());
+  return `<div class="pt-feel"><div class="pt-feel-h">치고 나서 눌러 주세요 · 공이…${gt?.src === 'feel' ? ` <small>오늘 ${gt.n}번 맞춤</small>` : ''}</div>
+    <div class="pt-feel-b"><button data-feel="short">짧았어요</button><button data-feel="good">딱 맞았어요</button><button data-feel="long">길었어요</button></div></div>`;
+}
+function bindFeel() {
+  $$('[data-feel]').forEach(b => b.onclick = () => {
+    const k = b.dataset.feel, f = recordPuttFeel(activeCourse(), G.stimp, k);
+    const changed = f.stimp !== G.stimp;
+    G.stimp = f.stimp; G.result = null; saveG();
+    toast(k === 'good' ? '👍 좋아요! 오늘 그린 빠르기 그대로 갈게요' : changed ? `알겠어요 · 오늘 그린은 생각보다 ${k === 'short' ? '느려요 → 다음 퍼트는 조금 세게' : '빨라요 → 다음 퍼트는 조금 살살'} 계산할게요` : '더 바꿀 수 없을 만큼 맞췄어요', 4000);
+    render();
+  });
 }
 
 // 쉬운 화면 결과: 어디를 보고 · 얼마나 세게(퍼터를 뒤로 몇 cm) · 들어갈 확률
@@ -304,11 +376,13 @@ function renderEasyResult(box, r, head) {
         <div class="stat"><div class="v">${(r.mc.pTwoPuttOrBetter * 100).toFixed(0)}%</div><div class="l">두 번 안에 넣을 확률</div></div></div>
       <div class="row" style="margin-top:10px"><button class="btn grow ${metroOn ? 'on' : ''}" id="metro">🎵 ${metroOn ? '박자 소리 끄기' : '박자 소리 (똑-딱에 맞춰 치기)'}</button><button class="btn" id="spk" aria-label="소리로 듣기">🔊</button></div>
       ${currentMode() === 'practice' ? `<label class="switch"><span>먼저 맞혀 보기 (연습)</span><input type="checkbox" id="train" ${G.training ? 'checked' : ''}></label>` : ''}
+      ${feelRow()}
     </div>
     <p class="sub">퍼터를 뒤로 빼는 길이는 보통 사람 기준이에요. <a href="#/calib">연습 그린에서 내 힘 맞추기</a>를 하면 더 정확해져요.</p>`;
   $('#metro').onclick = () => { metroOn = !metroOn; metronome(metroOn, S.settings.tempoBpm); renderResult(true); };
   $('#spk').onclick = () => speak(sayPutt(r, bs), true);
   $('#train')?.addEventListener('change', e => { G.training = e.target.checked; G.revealed = false; saveG(); renderResult(true); });
+  bindFeel();
 }
 
 // ---------- ④ 그린맵 ----------

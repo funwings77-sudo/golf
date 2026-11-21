@@ -6,7 +6,7 @@
   "description": "PinPoint AI 캐디 — 올인원 골프 AI 캐디 PWA",
   "scripts": {
     "start": "node server.mjs 8080",
-    "test": "node --test tests/engine.test.mjs tests/admin.test.mjs tests/kgba.test.mjs tests/state.test.mjs",
+    "test": "node --test tests/engine.test.mjs tests/admin.test.mjs tests/kgba.test.mjs tests/state.test.mjs tests/insights.test.mjs tests/depth.test.mjs tests/devices.test.mjs tests/voice.test.mjs",
     "build:www": "node scripts/build-www.mjs",
     "android:sync": "npm run build:www && npx cap sync android",
     "android:apk": "npm run android:sync && cd android && .\\gradlew.bat assembleDebug",
@@ -20,8 +20,10 @@
     "leaflet": "^1.9.4"
   },
   "dependencies": {
+    "@capacitor-community/bluetooth-le": "^6.1.0",
     "@capacitor/app": "^6.0.3",
     "@capacitor/filesystem": "^6.0.4",
+    "@capacitor/ios": "^6.2.3",
     "@capacitor/share": "^6.0.4"
   }
 }

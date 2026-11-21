@@ -21,6 +21,10 @@ import { matches } from '../core/search.js';
 import { analyzeShot, shotSummary, windAlongCross, kmh } from '../physics/shotfit.js';
 import { shotSheet } from './lmform.js';
 import { spin } from '../core/heading.js';
+import { withHoleWind, matchBall } from '../core/live.js';
+import { swingAction, watchSend } from '../core/watch.js';
+import { say, shotCue, walkCue, resultCue, clock, ro, m as mWords } from '../core/voice.js';
+import { stdCarry, playsWhy, holeHistory, roundBriefing, conditionBrief, provisionalRisk, roundDiagnosis, lessonVideos, clubRange, dots, greenToday } from '../core/insights.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
@@ -46,8 +50,27 @@ export default {
     if (App_.pendingFinish) { App_.pendingFinish = false; if (S.round) setTimeout(finishSheet, 200); }
   },
   finishRound() { finishSheet(); }, // 마지막 홀에서 ▶ (app.js stepHole)
+  // ⌚ 워치가 스윙(임팩트)을 알아챔 → [쳤어요] · 공을 찾으러 가던 중이면 [공 찾았어요] 다음 [쳤어요]
+  async onWatchSwing(ev) {
+    if (P.step !== 'hole') return;
+    const shot = shotOf();
+    const act = swingAction({ impact: !!ev.impact, inRound: !!S.round, onGreen: onGreen(), liveShot: !!shot, sinceShotMs: shot ? Date.now() - shot.ts : 0 });
+    if (!act) return;
+    if (act === 'found-hit') { await found(); await new Promise(r => setTimeout(r, 400)); $('#sheet')?.classList.remove('open'); }
+    toast('⌚ 워치가 스윙을 알아챘어요', 1500);
+    await hit();
+  },
   unmount() { teardown(); unPos?.(); unOri?.(); clearInterval(timer); unPos = unOri = null; },
-  onHole() { if (P.step === 'hole') { adv = null; advKey = ''; P.ballPos = null; persist(); render(); } },
+  onHole() { if (P.step === 'hole') { adv = null; advKey = ''; P.ballPos = null; P.voiceDue = true; persist(); render(); } },
+  // 🎧 이어폰 버튼: 1번 = 지금 안내 다시 · 2번 = 쳤어요 / 공 찾았어요 · 3번 = 방금 것 취소
+  voiceRepeat() { voiceNow(true); },
+  async voiceMain() {
+    if (P.step !== 'hole') return say('골프 치기 화면에서 쓸 수 있어요.', { force: true });
+    if (shotOf()) { say('공 찾았어요. 거리를 재요.', { force: true }); return found(); }
+    if (onGreen()) return say('그린 위예요. 홀에 넣으면 화면에서 홀에 넣었어요를 눌러 주세요.', { force: true });
+    await hit(); say('쳤어요. 기록했어요. 잘못이면 버튼을 세 번 누르세요.', { force: true, flush: false });
+  },
+  voiceUndo() { if (shotOf()) { cancelShot(); say('방금 친 기록을 취소했어요.', { force: true }); } else say('취소할 샷이 없어요.', { force: true }); },
 };
 
 function teardown() { document.documentElement.classList.remove('in-hole'); $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; }
@@ -190,7 +213,9 @@ function stepCourse() {
         : `<div class="picks">${opts.map(o => `<button class="pick ${pick === o.k ? 'sel' : ''}" data-o="${o.k}"><span class="pi">${pick === o.k ? '✅' : '⚪'}</span><span class="pt"><b>${o.t}</b></span></button>`).join('')}</div>`}
       <h2 class="ph2">👫 누구랑 쳐요? <small>(혼자면 그대로 두세요)</small></h2>
       <div class="chips big" id="pl">${players.map((p, i) => `<button class="on" data-pl="${i}">${esc(p)}${i ? ' ✕' : ''}</button>`).join('')}<button id="addP">＋ 친구</button></div>
+      ${condCard(c)}
       <button class="pbtn primary" id="go">시작하기 🏌️</button>
+      <button class="plink p-brief" id="brief">📋 홀마다 어떻게 칠지 미리 보기</button>
       <details class="p-opt" ${mode === 'tournament' ? 'open' : ''}><summary>그 밖의 설정</summary>
         <label class="tgl"><input type="checkbox" id="tour" ${mode === 'tournament' ? 'checked' : ''}> 🏆 대회예요 <small>(대회 규칙상 거리만 보여요)</small></label></details>
     </div>`;
@@ -201,12 +226,20 @@ function stepCourse() {
     $$('[data-pl]').forEach(b => b.onclick = () => { const i = +b.dataset.pl; if (i) { players.splice(i, 1); draw(); } });
     $('#addP').onclick = () => sheet({ title: '친구 이름', body: '<input type="text" id="pn" maxlength="10" placeholder="예: 민수">', actions: [{ label: '취소' }, { label: '추가', kind: 'primary', onClick: card => { const v = $('#pn', card).value.trim(); if (v && players.length < 8) players.push(v); draw(); } }] });
     $('#tour').onchange = e => { mode = e.target.checked ? 'tournament' : 'casual'; };
+    $('#brief').onclick = () => briefingSheet(c, nines ? [...nines.find(n => n.name === first).holes, ...(second ? nines.find(n => n.name === second).holes : [])] : opts.find(o => o.k === pick).ns);
     $('#go').onclick = () => {
       const holeNs = nines ? [...nines.find(n => n.name === first).holes, ...(second ? nines.find(n => n.name === second).holes : [])] : opts.find(o => o.k === pick).ns;
       startRound(c, holeNs, players, mode);
     };
   };
   draw();
+}
+
+// 🌡️ 오늘 컨디션 카드: 추위·바람·그린 빠르기 → 클럽을 어떻게 (날씨를 아직 모르면 안 보임)
+function condCard(c) {
+  const cond = conditionBrief(allowed('windAdjust') ? App_.weather : null, S.bag, allowed('greenSlope') ? greenToday(c) : null);
+  if (!cond.length) return '';
+  return `<div class="cond"><div class="cond-h">오늘 컨디션</div>${cond.map(x => `<div><i>${x.i}</i><span><b>${esc(x.t)}</b>${x.s ? `<small>${esc(x.s)}</small>` : ''}</span></div>`).join('')}</div>`;
 }
 
 // ---------------- ③ 홀 화면 ----------------
@@ -395,13 +428,73 @@ function renderBig() {
   }
   const D = distance(me, pin), dF = h.front ? distance(me, h.front) : null, dB = h.back ? distance(me, h.back) : null;
   const pl = plays(sceneData(), D, bearing(me, pin), pinDrop(me, pin, h)?.v || 0);
-  const club = allowed('clubRec') && adv?.clubName ? adv : null, w = App_.weather;
+  const club = allowed('clubRec') && adv?.clubName ? adv : null, w = wx();
   box.innerHTML = `<div class="bg-hole">${esc(holeName(h))} · 파 ${h.par}</div>
     <div class="bg-fb">${dB ? `<span>뒤</span><b>${Math.round(dB)}</b>` : ''}</div>
     <div class="bg-main">${Math.round(D)}<small>m</small></div>
     <div class="bg-fb">${dF ? `<span>앞</span><b>${Math.round(dF)}</b>` : ''}</div>
     <div class="bg-info">${pl ? `<div><span>체감</span><b>${Math.round(pl.total)}m</b></div>` : ''}${club ? `<div><span>클럽</span><b>${esc(club.clubName)}</b>${club.power && club.power < 98 ? `<small>힘 ${club.power}%</small>` : ''}</div>` : ''}${allowed('windAdjust') && w?.windSpeed != null ? `<div><span>바람</span><b><i style="display:inline-block;transform:rotate(${(w.windFrom + 180) % 360}deg)">↑</i> ${(+w.windSpeed).toFixed(1)}</b><small>m/s</small></div>` : ''}</div>
     ${trustLine(h, me, D)}`;
+}
+
+// 이 홀 날씨: 예보(기온·공기 밀도) + 골프장 풍속계가 있으면 그 홀 바람 (📡 core/live.js)
+const wx = () => withHoleWind(App_.weather, App_.live, activeHole()?.n);
+
+// 🎧 지금 상황을 정밀하게 말하기 (자세히: 거리·앞뒤·고저차·바람·체감·클럽·힘·조준 각도·위험 / 간단히: 거리·클럽·방향)
+function cueNow() {
+  const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start, pin = h?.pin || h?.green, lvl = S.settings.voiceLevel || 'detail';
+  if (!h || !me) return null;
+  if (shot) { const t = toBall(Sensors.pos || me, shot.pred, Sensors.point ?? Sensors.heading); return `공까지 ${mWords(t.d)}${t.rel != null ? `, ${clock(t.rel)}` : ''}.`; }
+  if (!pin) return null;
+  const D = distance(me, pin);
+  if (!allowed('clubRec') || !adv?.club) return `깃발까지 ${mWords(D)}${h.front && h.back ? `, 그린 앞 ${mWords(distance(me, h.front))}, 뒤 ${mWords(distance(me, h.back))}` : ''}.`;
+  const brg = bearing(me, pin), elev = pinDrop(me, pin, h)?.v ?? null, w = wx(), pl = plays(sceneData(), D, brg, elev || 0);
+  const wnd = allowed('windAdjust') && w?.windSpeed ? windAlongCross(w.windSpeed, w.windFrom, adv.aimBearing ?? brg) : { along: 0, cross: 0 };
+  return shotCue({ kind: adv.kind, D, front: h.front ? distance(me, h.front) : null, back: h.back ? distance(me, h.back) : null, elev, along: wnd.along, cross: wnd.cross,
+    plays: pl?.total ?? null, temp: pl?.parts?.temp ?? null, club: adv.clubName, swing: adv.swing?.short || '', power: adv.power, rel: adv.rel, lateral: adv.lateral,
+    carry: adv.carry, rest: adv.landing ? distance(adv.landing, pin) : null, hazards: hazardsAhead(me, h, adv.aimBearing ?? brg, adv.carry || D), pBad: adv.pBad }, lvl);
+}
+// 조준 줄 위·옆의 해저드: 앞까지 · 넘기려면 / 옆 OB
+function hazardsAhead(me, h, brg, carry) {
+  const u = [Math.sin(brg * Math.PI / 180), Math.cos(brg * Math.PI / 180)], out = [];
+  for (const z of h.hazards || []) {
+    const q = toLocal(me, z), along = q.x * u[0] + q.y * u[1], off = q.x * u[1] - q.y * u[0], name = HZ_NAME[z.type] || '해저드';
+    if (along <= 0 || along > carry + 40) continue;
+    if (Math.abs(off) <= (z.r || 10) + 6) out.push({ name, front: Math.max(0, along - (z.r || 10)), carry: along + (z.r || 10), at: along });
+    else if (z.type === 'ob' && Math.abs(off) < 45 && Math.abs(along - carry) < 60) out.push({ name, side: off > 0 ? '오른쪽' : '왼쪽', at: along });
+  }
+  return out.sort((a, b) => a.at - b.at);
+}
+function voiceNow(force) { const t = cueNow(); if (t) say(t, { force }); else if (force) say('위치를 찾는 중이에요. 잠깐만 기다려 주세요.', { force: true }); }
+// 저절로 말할 때: 홀에 왔을 때·공을 찾은 뒤 한 번 + 공 찾으러 갈 때 남은 거리 (150·100·…·5m)
+let walkPrev = null;
+function voiceAuto() {
+  if (!S.settings.voice || !S.round) return;
+  const shot = shotOf();
+  if (shot) {
+    const t = toBall(Sensors.pos || shot.start, shot.pred, Sensors.point ?? Sensors.heading);
+    const cue = walkCue(walkPrev, t.d, t.rel); walkPrev = t.d;
+    if (cue) say(cue, { key: 'walk' + Math.round(t.d), gapMs: 20000 });
+    return;
+  }
+  walkPrev = null;
+  if (P.voiceDue && adv && (adv.club || adv.kind === 'putt')) { P.voiceDue = false; setTimeout(() => voiceNow(false), 2500); } // 홀 소개 말이 끝난 뒤
+}
+
+// ⌚ 워치 화면 한 줄: 깃발까지 · 추천 클럽 (바뀔 때만 보냄)
+function toWatch() {
+  const h = activeHole(), shot = shotOf(), me = ballPos(), pin = h?.pin || h?.green; if (!h || !S.round) return;
+  const head = `${holeName(h)} · 파 ${h.par}`;
+  const line = shot ? `공 찾으러 가요 · ${shot.clubName}` : !me || !pin ? '치고 나면 저절로 적어요' : `깃발까지 ${Math.round(distance(me, pin))}m${allowed('clubRec') && adv?.clubName && adv.kind !== 'putt' ? `\n${adv.clubName} · ${adv.swing?.short || ''}` : ''}`;
+  watchSend(`${head}\n${line}`);
+}
+
+// 📷 골프장 카메라가 친 공을 봤으면 예상 위치 대신 그 자리로 (한 번만)
+function cameraBall() {
+  const shot = shotOf(); if (!shot || shot.cam || !App_.live) return;
+  const m = matchBall(App_.live, shot); if (!m) return;
+  shot.cam = m; shot.pred = { lat: m.lat, lon: m.lon }; shot.r80 = 6; save('round');
+  vibrate([80, 40, 80]); speak('골프장 카메라가 공을 찾았어요'); toast('📷 골프장 카메라가 공 멈춘 곳을 찾았어요 · 화살표대로 가요', 4000);
 }
 
 // 상태: 친 공 (라운드 중 하나)
@@ -413,13 +506,13 @@ function compute(force) {
   const key = `${h.n}|${me.lat.toFixed(5)},${me.lon.toFixed(5)}|${h.pin?.lat}|${h.green?.lat}|${currentMode()}`;
   if (!force && key === advKey && Date.now() - advT < 30000) return;
   advKey = key; advT = Date.now();
-  const w = App_.weather;
+  const w = wx();
   adv = adviseShot({ me, hole: h, bag: S.bag, hcp: S.settings.hcp, weather: allowed('windAdjust') && w ? { windSpeed: w.windSpeed, windFrom: w.windFrom, rho: w.rho } : {} });
 }
 
 function update(force = false) {
   if (P.step !== 'hole') return;
-  compute(force);
+  compute(force); cameraBall(); toWatch(); voiceAuto();
   gpsChip(); nowLine(); cards(); actions(); scene(); mini(); batteryGuard(); topBar();
 }
 
@@ -490,9 +583,10 @@ function cards() {
   // ① 친 공을 찾으러 가는 중
   if (shot) {
     const t = toBall(Sensors.pos || me, shot.pred, Sensors.point ?? Sensors.heading), drop = pinDrop(shot.pred, pin, h);
-    box.innerHTML = `<div class="m-label">내 공까지 <span>${esc(shot.clubName)} · 찾을 범위 약 ${Math.round(shot.r80)}m</span></div>
+    box.innerHTML = `<div class="m-label">내 공까지 <span>${esc(shot.clubName)} · ${shot.cam ? '📷 골프장 카메라가 찾음' : `찾을 범위 약 ${Math.round(shot.r80)}m`}</span></div>
       <div class="m-big ${S.settings.detail ? '' : 'e-big'}"><b>${S.settings.detail ? f1(t.d) : Math.round(t.d)}</b><small>m</small><i class="m-arrow" id="ballArrow" style="transform:rotate(${t.rel ?? 0}deg)">⬆</i></div>
       ${shot.pf ? `<div class="m-pf">예상 · 공 속도 <b>${Math.round(kmh(shot.pf.est.ballSpeed))}km/h</b> · 각도 <b>${Math.round(shot.pf.est.launchDeg)}°</b> · 높이 <b>${Math.round(shot.pf.est.apex)}m</b> · <b>${shot.pf.est.time.toFixed(1)}초</b></div>` : ''}
+      ${shot.provisional ? `<div class="m-memo m-warn">⚠ ${shot.provisional.kind === 'ob' ? 'OB' : '숲'} 쪽일 수 있어요 · 잠정구를 쳐 뒀다면 원래 공을 3분만 찾아보고, 없으면 잠정구로 이어서 쳐요</div>` : ''}
       <p class="m-text">${t.rel == null ? `${t.compass}쪽${S.settings.detail ? ` (${Math.round(t.bearing)}°)` : ''}으로 걸어가요` : Math.abs(t.rel) < 12 ? '앞으로 쭉 걸어가요' : `${t.rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.round(Math.abs(t.rel))}° 돌아서 걸어가요`}</p>
       <div class="m-row"><div><span>예상 비거리</span><b>${f1(distance(shot.start, shot.pred))}<small>m</small></b></div><div><span>남은 거리</span><b>${f1(distance(shot.pred, pin))}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div></div>`;
     return;
@@ -520,20 +614,39 @@ function cards() {
   const cb = adv?.club ? S.bag.find(c => c.id === adv.club) : null, rel = adv?.rel || 0;
   if (!S.settings.detail) { // 쉬운 화면: 거리는 위쪽 홀 바에, 여기는 '이렇게 쳐요' 한 줄 (18Birdies 클럽 추천 칩 방식)
     const side = Math.abs(rel) < 0.75 ? '깃발 보고 똑바로' : `깃발보다 ${rel > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.abs(rel) < 3 ? '조금' : '많이'}`;
-    const w = App_.weather, windy = w && w.windSpeed >= 4 && allowed('windAdjust');
+    const w = wx(), windy = w && w.windSpeed >= 4 && allowed('windAdjust');
+    const why = adv?.club && adv.carry >= D * 0.8 ? playsWhy(D, plays(sceneData(), D, bearing(me, pin), pinDrop(me, pin, h)?.v || 0)) : null;
     box.innerHTML = adv?.club ? `<div class="e-rec"><i class="e-rec-a" style="transform:rotate(${Math.max(-60, Math.min(60, rel * 3))}deg)" aria-hidden="true">⬆</i>
-        <span><b>${esc(adv.clubName)}</b>로 · ${esc(adv.swing.short)}<small>${side}</small></span></div>
-        ${windy ? `<div class="e-wind">💨 바람이 세요 · 바람까지 생각해서 클럽을 골랐어요</div>` : ''}
-        ${easyTrust(h, D)}${h.memo ? `<div class="m-memo">📝 ${esc(h.memo)}</div>` : ''}`
+        <span><b>${esc(adv.clubName)}</b>${ro(adv.clubName)} · ${esc(adv.swing.short)}<small>${side}</small></span><button class="e-say" id="sayB" aria-label="소리로 듣기">🔊</button></div>
+        ${why ? `<button class="e-wind e-why" id="whyB">${w?.windSrc === 'course' ? '📡' : '🌡️'} ${esc(why.text)} <em>왜?</em></button>` : windy ? `<div class="e-wind">💨 바람이 세요${w.windSrc === 'course' ? ' (이 홀 풍속계)' : ''} · 바람까지 생각해서 클럽을 골랐어요</div>` : ''}
+        ${easyTrust(h, D)}${histLine(h)}${h.memo ? `<div class="m-memo">📝 ${esc(h.memo)}</div>` : ''}`
       : `<div class="bd-rec"><span class="sub">클럽을 고르는 중…</span></div>`;
+    $('#whyB')?.addEventListener('click', () => whySheet(D, why, cb));
+    $('#sayB')?.addEventListener('click', () => voiceNow(true));
     return;
   }
   box.innerHTML = `<div class="m-label">비거리 <span>${adv?.club ? `${esc(adv.clubName)} · 힘 ${adv.power}% (${esc(adv.swing.short)})` : '추천 계산 중…'}</span></div>
     <div class="m-big"><b>${f1(carry)}</b><small>m</small><i class="m-ico"></i></div>
     <div class="m-row"><div><span>남은 거리</span><b>${f1(rest)}<small>m</small></b></div><div><span>핀 고저차</span><b>${drop ? sgn(drop.v, drop.src === 'grid' ? 2 : 1) + '<small>m</small>' : '—'}</b></div><div><span>${isBall ? '공→깃발' : '깃발까지'}</span><b>${f1(D)}<small>m</small></b>${h.front && h.back ? `<em class="m-fb">앞 ${Math.round(distance(me, h.front))} · 뒤 ${Math.round(distance(me, h.back))}</em>` : ''}</div></div>
     ${adv?.club ? `<div class="m-dir"><i style="transform:rotate(${Math.max(-60, Math.min(60, rel * 3))}deg)">⬆</i><span><b>${dirWords(rel)}</b> · 방위 ${Math.round(adv.aimBearing)}° ${compassName(adv.aimBearing)}${Math.abs(adv.lateral || 0) >= 2 ? ` · 깃발 줄에서 ${rel > 0 ? '오른쪽' : '왼쪽'} ${Math.round(Math.abs(adv.lateral))}m` : ''}</span></div>` : ''}
-    ${trustLine(h, me, D)}${h.memo ? `<div class="m-memo">📝 ${esc(h.memo)}</div>` : ''}
+    ${trustLine(h, me, D)}${(() => { const why = adv?.carry >= D * 0.8 && playsWhy(D, plays(sceneData(), D, bearing(me, pin), pinDrop(me, pin, h)?.v || 0)); return why ? `<div class="e-wind">🌡️ ${esc(why.text)}</div>` : ''; })()}${histLine(h)}${h.memo ? `<div class="m-memo">📝 ${esc(h.memo)}</div>` : ''}
     ${last ? `<div class="m-foot">방금 샷 <b>${f1(last.dist)}m</b>${last.club ? ` · ${esc(last.club)}` : ''}</div>` : cb ? `<div class="m-foot">내 ${esc(cb.name)} 비거리 ${Math.round(cb.carry)}m · ${cb.learned ? `실제 ${cb.n}샷 학습 ✓` : `기본값 (${cb.n || 0}/3샷)`}${adv.pBad > 0.12 ? ` · ⚠ 위험 ${Math.round(adv.pBad * 100)}%` : ''}</div>` : ''}`;
+}
+
+// 📒 이 홀 지난 기록 한 줄 (같은 골프장에서 친 라운드)
+function histLine(h) {
+  const hh = holeHistory(S.rounds, activeCourse()?.id, h.n);
+  if (!hh) return '';
+  return `<div class="m-memo m-hist">📒 ${esc(hh.text)}${hh.tip ? `<br><b>${esc(hh.tip)}</b>` : ''}</div>`;
+}
+// 왜 이 클럽?: 체감 거리 이유 + 내 클럽 거리 범위 (믿음 정도)
+function whySheet(D, why, cb) {
+  if (!why) return;
+  const rg = cb ? clubRange(cb, S.shots) : null, reasons = why.text.split(' · ').slice(1);
+  sheet({ title: '왜 이 클럽이에요?', body: `<div class="why-n"><span>깃발까지<b>${Math.round(D)}m</b></span><i>→</i><span>오늘 느낌<b>${why.total}m</b></span></div>
+    ${reasons.length ? `<div class="why-r">${reasons.map(x => `<span>${esc(x)}m</span>`).join('')}</div>` : ''}
+    ${rg ? `<div class="why-c"><b>내 ${esc(cb.name)}</b><span>10번 중 8번은 <b>${rg.lo}~${rg.hi}m</b> 날아가요</span><small>${dots(rg.trust.dots)} ${esc(rg.trust.word)}${rg.src === 'guess' ? ' · 실제로 칠수록 정확해져요' : ` · 샷 ${rg.n}개`}</small></div>` : ''}
+    <p class="sub">추운 날·맞바람에는 공이 덜 날아가고, 오르막이면 더 쳐야 해요. 이걸 다 넣어서 클럽을 골랐어요.</p>`, actions: [{ label: '알겠어요', kind: 'primary' }] });
 }
 
 // 코스 지도 (작은 창): 북쪽 위 · 공 → 떨어질 곳 → 깃발
@@ -683,6 +796,7 @@ function finishSheet() {
   const t = totals(r)[0], played = r.holes.filter(x => x.scores[0]?.strokes).length;
   sheet({ title: '🏁 라운드 끝!', body: `<div class="fin"><div class="fin-n">${t.strokes || 0}<small>타</small></div>
       <div class="fin-s">${played ? `${played}홀 · 파보다 <b>${t.toPar > 0 ? t.toPar + '타 많이' : t.toPar < 0 ? -t.toPar + '타 적게' : '똑같이'}</b>` : '아직 적은 점수가 없어요'}</div>
+      ${finDiag(r)}
       <p class="sub">수고했어요! [저장하고 끝내기]를 누르면 기록에 남아요.</p></div>`,
     actions: [{ label: '점수표 보기', onClick: () => App_.go('score') }, { label: '저장하고 끝내기', kind: 'primary', onClick: () => {
       r.endedAt = new Date().toISOString(); r.totals = totals(r);
@@ -691,6 +805,27 @@ function finishSheet() {
       S.round = null; S.lost = null; save('round', 'lost'); App_.pendingShot = null; keepAwake(false);
       P.step = 'club'; persist(); toast('🎉 라운드를 저장했어요'); App_.go('history');
     } }] });
+}
+
+// 🔎 이번 라운드 가장 아쉬운 곳 → 레슨 영상 2개
+function finDiag(r) {
+  const d = roundDiagnosis(r, S.settings.hcp);
+  if (!d) return '';
+  if (d.ok) return `<div class="fin-dg ok">${esc(d.text)}</div>`;
+  const f = { L: 0, R: 0 }; for (const h of r.holes) { const x = h.scores[0]?.fw; if (x === 'L' || x === 'R') f[x]++; }
+  return `<div class="fin-dg"><b>🔎 ${esc(d.text)}</b>${d.fact ? `<small>${esc(d.fact)}</small>` : ''}
+    <div class="fin-v">${lessonVideos(d.k, f.L > f.R ? 'L' : 'R').map(v => `<a href="${esc(v.url)}" target="_blank" rel="noopener">▶ ${esc(v.title)}</a>`).join('')}</div></div>`;
+}
+
+// 📋 오늘 공략 미리 보기: 홀마다 한 줄 (지키는 홀 · 노려 볼 홀) + 오늘 컨디션
+function briefingSheet(c, holeNs) {
+  if (!c) return;
+  const rows = roundBriefing(c, holeNs, S.rounds);
+  const TAG = { safe: ['🛡️', '지키는 홀'], attack: ['🎯', '노려 볼 홀'], normal: ['', ''] };
+  sheet({ title: '📋 오늘 공략 미리 보기', body: `${condCard(c)}
+    <p class="sub">🛡️ 지키는 홀은 보기도 괜찮아요 · 🎯 노려 볼 홀에서 파를 노려요${S.rounds.some(r => r.courseId === c.id) ? ' · 📒는 내가 여기서 친 기록이에요' : ''}</p>
+    <div class="brief">${rows.map(x => `<div class="br ${x.tag}"><span class="br-n">${esc(x.label)}<small>파 ${x.par}</small></span><span class="br-t">${TAG[x.tag][1] ? `<em>${TAG[x.tag][0]} ${TAG[x.tag][1]}</em>` : ''}${esc(x.line)}${x.hist ? `<small>📒 ${esc(x.hist.text)}</small>` : ''}</span></div>`).join('')}</div>`,
+    actions: [{ label: '닫기', kind: 'primary' }] });
 }
 
 // 스코어카드(코스 DB): 파 · 핸디캡 · 티별 거리 · 공략 메모
@@ -737,6 +872,7 @@ function moreSheet() {
     ['dist', '🌬️', '거리 · 바람 자세히', '체감 거리 · 고저차 · 바람 · 기온', () => App_.go('distance')],
     ['lost', '🔍', '공 찾기', '떨어진 구역 · 남은 거리 · 3분 타이머', () => App_.go('lost')],
     ...(shotOf() ? [['point', '🧭', '날아간 쪽 가리키기', '공이 사라진 쪽으로 휴대폰을 2초 가리키면 찾을 곳을 좁혀요', pointShot]] : []),
+    ['brief', '📋', '오늘 공략 미리 보기', '홀마다 한 줄 · 지키는 홀/노려 볼 홀 · 오늘 날씨', () => briefingSheet(activeCourse(), App_.holeOrder())],
     ['info', 'ℹ️', '홀 정보 · 메모', '스코어카드 · 메모 · 지도 미리 받기 · 배터리', () => holeInfo(h)],
     ['rule', '⚖️', '규칙 도움', 'OB · 물 · 언플레이어블 구제 방법', () => App_.go('rules')],
     ['shots', '📈', '내 샷 기록', '클럽별 공 속도 · 각도 · 높이 · 거리 · 방향', () => App_.go('shots')],
@@ -770,7 +906,7 @@ function moreSheet() {
 // 🤖 AI에 보낼 사실(FACTS): 엔진이 계산한 숫자만 · 위치 좌표·이름 없음
 function aiFacts() {
   const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start, pin = h?.pin || h?.green;
-  const r1 = x => (x == null || !isFinite(x) ? null : Math.round(x)), w = App_.weather;
+  const r1 = x => (x == null || !isFinite(x) ? null : Math.round(x)), w = wx();
   const f = { mode: MODES[currentMode()]?.label, hole: { number: h.n, name: holeName(h), par: h.par, handicap: h.hdcpNine ?? h.hdcp ?? h.hdcpCard ?? null, course_note: h.note || null, my_memo: h.memo || null } };
   if (me && pin) {
     const D = distance(me, pin), drop = pinDrop(me, pin, h), pl = plays(sceneData(), D, bearing(me, pin), drop?.v || 0);
@@ -843,18 +979,31 @@ async function hit() {
   let learnedTee = false;
   if (!h.tee && !sc0?.strokes) { h.tee = { lat: +start.lat.toFixed(7), lon: +start.lon.toFixed(7) }; h.teeBy = 'auto'; save('courses'); learnedTee = true; } // 첫 샷 자리 = 티 (잘못 눌렀어요면 되돌림)
   if (!(h.pin || h.green)) { hitNoGreen(h, start, sc0); if (learnedTee && S.round.liveShot) { S.round.liveShot.learnedTee = true; save('round'); } return; }
-  const club = adv?.club && adv.club !== 'PT' ? S.bag.find(c => c.id === adv.club) : null;
+  // 🏷️ 그립 센서가 30초 안에 알려 준 클럽이 있으면 그 클럽 (추천 클럽보다 우선)
+  const grip = App_.gripClub && Date.now() - App_.gripClub.ts < 30000 ? S.bag.find(c => c.id === App_.gripClub.club) : null;
+  App_.gripClub = null;
+  const club = grip || (adv?.club && adv.club !== 'PT' ? S.bag.find(c => c.id === adv.club) : null);
   const pick = club || S.bag.filter(c => c.enabled).sort((a, b) => Math.abs(a.carry - distance(start, h.pin || h.green)) - Math.abs(b.carry - distance(start, h.pin || h.green)))[0];
-  const aim = adv?.aimBearing ?? bearing(start, h.pin || h.green), power = adv?.power ?? 100;
+  const aim = adv?.aimBearing ?? bearing(start, h.pin || h.green), power = grip && grip.id !== adv?.club ? 100 : adv?.power ?? 100;
   const pred = predictBall({ start, aimBearing: aim, club: pick, hole: h, power });
-  const w = App_.weather, wind = w ? windAlongCross(w.windSpeed, w.windFrom, aim) : null, predTotal = distance(start, pred.center);
+  const w = wx(), wind = w ? windAlongCross(w.windSpeed, w.windFrom, aim) : null, predTotal = distance(start, pred.center);
   let pf = null; try { pf = shotSummary(analyzeShot({ clubId: pick.id, total: predTotal, err: 0, wind, rho: w?.rho })); } catch {}
   S.round.liveShot = { hole: h.n, start: { lat: start.lat, lon: start.lon }, startAcc: P.ballPos && P.ballHole === h.n ? (P.ballAcc || 4) : (Sensors.pos?.acc || 5), aimBearing: aim, club: pick.id, clubName: pick.name, power, carry: pick.carry * power / 100, pred: pred.center, predTotal, pf, wind, rho: w?.rho, r80: pred.r80, ts: Date.now() };
   const sc = S.round.holes.find(x => x.n === h.n)?.scores[0];
   if (sc) { sc.strokes = (sc.strokes || 0) + 1; }
   if (learnedTee) S.round.liveShot.learnedTee = true;
-  save('round'); vibrate(80); speak(`공은 약 ${Math.round(distance(start, pred.center))}미터 앞에 있어요`);
-  toast(`${h.nineHole ?? h.n}번 홀 ${sc?.strokes || 1}타째 기록 · 이제 공을 찾으러 가요`, 3000);
+  // OB·숲으로 갔을 수 있으면 잠정구 안내 (공 찾느라 다시 돌아오지 않게) — 물(페널티 구역)은 잠정구 대상이 아님
+  const risk = provisionalRisk(pred.est, (h.hazards || []).map(z => ({ ...toLocal(start, z), r: z.r, type: z.type })));
+  if (risk.kind) S.round.liveShot.provisional = { kind: risk.kind, p: Math.round(risk.p * 100) };
+  save('round');
+  if (risk.kind) {
+    const where = risk.kind === 'ob' ? 'OB' : '숲';
+    vibrate([120, 60, 120]); speak(`${where} 쪽으로 갔을 수 있어요. 잠정구를 한 번 더 쳐 두세요`);
+    toast(`⚠ ${where} 쪽으로 갔을 수 있어요 (약 ${Math.round(risk.p * 100)}%) · "잠정구"라고 말하고 같은 자리에서 한 번 더 쳐 두면 돌아오지 않아도 돼요`, 6500);
+  } else {
+    vibrate(80); speak(`공은 약 ${Math.round(distance(start, pred.center))}미터 앞에 있어요`);
+    toast(`${h.nineHole ?? h.n}번 홀 ${sc?.strokes || 1}타째 기록 · 이제 공을 찾으러 가요`, 3000);
+  }
   P.ballPos = null; persist(); update(true);
 }
 
@@ -895,12 +1044,13 @@ async function foundRun(shot) {
   const f = Sensors.pos ? await sampleFix(1500) : null;
   let rec = null;
   if (f) {
-    const total = distance(shot.start, f), w = App_.weather;
+    const total = distance(shot.start, f), w = wx();
     const latDeg = shot.aimBearing == null ? null : normAngle(bearing(shot.start, f) - shot.aimBearing), err = Math.round(Math.hypot(shot.startAcc || 5, f.acc || 5));
     const wind = w ? windAlongCross(w.windSpeed, w.windFrom, bearing(shot.start, f)) : shot.wind || null, rho = w?.rho ?? shot.rho;
     if (total > 5) {
       let fit = null; try { fit = shotSummary(analyzeShot({ clubId: shot.club, total, err, latDeg, wind, rho })); } catch {}
       rec = { id: Date.now(), club: shot.club, total: Math.round(total * 10) / 10, carry: fit?.est.carry ?? total / 1.05, latDeg: latDeg == null ? null : Math.round(latDeg * 10) / 10, err, wind, rho, power: shot.power, partial: shot.power < 95 || total <= 20, start: shot.start, end: { lat: f.lat, lon: f.lon }, hole: shot.hole, course: S.round.courseName, ts: Date.now(), fromPlay: true, fit };
+      { const sc = stdCarry(rec); if (sc && Math.abs(sc - rec.carry) >= 0.5) rec.stdCarry = sc; } // 날씨를 뺀 표준 캐리
       S.shots.push(rec);
       const i = S.bag.findIndex(c => c.id === shot.club); if (i >= 0 && !rec.partial) S.bag[i] = learnClub(S.bag[i], S.shots);
       save('shots', 'bag');
@@ -920,7 +1070,8 @@ async function foundRun(shot) {
   // 결과 화면: 측정(거리·방향) + 계산(공 속도·높이·시간…)
   if (!rec && !shot.pred) return;
   const card = rec || { club: shot.club, total: shot.predTotal || distance(shot.start, shot.pred), wind: shot.wind, rho: shot.rho, estPos: true };
-  speak(`${Math.round(card.total)}미터 ${rec ? '날아갔어요' : '쯤 갔을 거예요'}`);
+  { const cb = S.bag.find(c => c.id === shot.club); say(resultCue({ club: shot.clubName, total: card.total, lateral: rec?.fit?.measured?.lateralM ?? null, usual: cb ? cb.carry * 1.04 : null, estimated: !rec }), { force: false }); }
+  P.voiceDue = true;
   shotSheet(card, { title: `🏌️ ${shot.clubName} · ${rec ? '내 공 결과' : '예상 결과 (위치를 못 재서)'}`, kind: rec ? 'result' : 'predict', extra: [{ label: '📈 클럽별', onClick: () => App_.go('shots') }] });
 }
 
@@ -1051,7 +1202,7 @@ function clubFor(d) {
 }
 function plays(sd, d, brg, dh = 0) {
   if (!allowed('playsLike') || P.plOff) return null;
-  const w = App_.weather, wind = allowed('windAdjust') && w;
+  const w = wx(), wind = allowed('windAdjust') && w;
   return playsLike({ dist: d, dh, windSpeed: wind ? w.windSpeed || 0 : 0, windFrom: wind ? w.windFrom || 0 : 0, shotBearing: brg, tempC: w?.temp ?? 20 });
 }
 let ringLay = null;
@@ -1110,7 +1261,7 @@ function drawRings(sd) {
     if (Math.abs(pt.wind) >= 0.5) bits.push(`바람 ${pt.wind > 0 ? '+' : '−'}${Math.abs(pt.wind).toFixed(0)}`);
     if (Math.abs(pt.elev) >= 0.5) bits.push(`${pt.elev > 0 ? '오르막' : '내리막'} ${pt.elev > 0 ? '+' : '−'}${Math.abs(pt.elev).toFixed(0)}`);
     if (Math.abs(pt.temp) >= 0.5) bits.push(`기온 ${pt.temp > 0 ? '+' : '−'}${Math.abs(pt.temp).toFixed(0)}`);
-    const diff = pl.total - rT, w = App_.weather;
+    const diff = pl.total - rT, w = wx();
     const msg = bits.length ? `${Math.abs(diff) < 0.5 ? '거의 그대로' : `${Math.abs(diff).toFixed(0)}m 더 ${diff > 0 ? '길게' : '짧게'}`} 쳐요 · ${bits.join(' · ')}m` : '바람·경사 영향 거의 없음';
     const windOk = allowed('windAdjust') && w && w.windSpeed != null;
     const hud = document.createElement('div'); hud.className = 'rg-hud';

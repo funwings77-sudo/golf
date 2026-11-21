@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ARCore는 Android 7(API 24)+ · 앱은 그 아래에서도 설치되고 깊이 재기만 숨김 (DepthPlugin이 버전 확인) -->
+    <uses-sdk tools:overrideLibrary="com.google.ar.core" />
 
     <application
         android:allowBackup="true"
@@ -12,6 +16,7 @@
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
@@ -23,6 +28,16 @@
             </intent-filter>
 
         </activity>
+
+        <!-- 📏 깊이 카메라 화면 (ARCore) -->
+        <activity
+            android:name=".depth.DepthActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+            android:exported="false" />
+        <!-- AR은 선택 기능: ARCore가 없는 폰도 설치 가능 -->
+        <meta-data android:name="com.google.ar.core" android:value="optional" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -44,5 +59,6 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.ar" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 </manifest>

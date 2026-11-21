@@ -4,14 +4,15 @@ import { saveFile, pickTextFile } from '../core/files.js';
 import { requestMotionPermission, Sensors, startOrientation, restartGPS } from '../core/sensors.js';
 import { $, $$, toast, confirmSheet, esc } from '../ui.js';
 import { getKey, setKey, getModel, setModel, hasKey, testConnection, usageToday } from '../core/gemini.js';
+import { say, audioRoute, openBluetooth, audioNative, ROUTE_WORD } from '../core/voice.js';
 
 // 켜고 끄는 것: [키, 이름, 설명]
 const SW = [
-  ['voice', '🔊 소리로 알려 주기', '이어폰으로 "깃발까지 142미터"처럼 읽어 줘요'],
   ['bigText', '🔠 큰 글씨', '글씨를 크게 보여 줘요'],
   ['outdoor', '☀️ 햇빛 아래 잘 보이게', '대비를 높여서 밝은 데서도 잘 보여요'],
   ['weather', '⚡ 날씨·번개·더위 알림', '위치를 날씨 서비스(Open-Meteo)에 보내서 날씨를 받아요'],
   ['beginner', '🌱 처음 치는 사람 안내', '홀마다 할 일과 예절을 알려 줘요'],
+  ['watchAuto', '⌚ 워치가 스윙을 알아채면 저절로 [쳤어요]', '갤럭시워치·애플워치에서 PinPoint 워치 앱을 켜고 [라운드 시작]을 눌러 두세요'],
   ['swingDetect', '🏌️ 스윙하면 저절로 기록 (실험)', '휴대폰을 주머니에 넣고 치면 친 자리를 기억해요'],
 ];
 // 보통 몇 타 치나요? → 핸디캡 (기본 클럽 거리 계산용)
@@ -46,6 +47,14 @@ export default {
         <label class="f"><span>퍼팅 실력 <small class="sub">(들어갈 확률 계산에 써요)</small></span>${seg('puttSeg', PUTT.map(([v, n]) => [v.join(','), n]), puttCur)}</label>
         <label class="f"><span>우리 골프장 그린 빠르기</span>${seg('spdSeg', SPEED, near(st.stimp, SPEED))}</label></div>
       <div class="card"><b>경기 방식</b>${seg('mode', Object.entries(MODES).map(([k, m]) => [k, m.label]), st.mode)}<p class="sub">${MODES[st.mode].desc}</p></div>
+      <div class="card" id="earCard"><b>🎧 이어폰 · 음성 안내</b>
+        <p class="sub" id="routeLine">${window.App?.audioRoute ? `지금 소리: <b>${esc(window.App.audioRoute.name || ROUTE_WORD[window.App.audioRoute.kind])}</b> (${ROUTE_WORD[window.App.audioRoute.kind]})` : '블루투스 이어폰(버즈·에어팟 등)이나 유선 이어폰을 연결하면 안내가 이어폰으로 나와요.'}</p>
+        <label class="switch"><span><b>🔊 음성으로 안내하기</b><br><span class="sub">깃발까지 거리·앞뒤·고저차·바람·클럽·조준 방향을 읽어 줘요</span></span><input type="checkbox" data-sw="voice" ${st.voice ? 'checked' : ''}></label>
+        <label class="f"><span>얼마나 자세히</span>${seg('vLvl', [['detail', '자세히 (숫자 정밀)'], ['simple', '간단히']], st.voiceLevel || 'detail')}</label>
+        <label class="f"><span>말 빠르기</span>${seg('vRate', [['0.85', '🐢 천천히'], ['1', '보통'], ['1.2', '🐇 빠르게']], String(st.voiceRate || 1))}</label>
+        <label class="switch"><span><b>이어폰 연결하면 저절로 켜기</b></span><input type="checkbox" data-sw="voiceAuto" ${st.voiceAuto !== false ? 'checked' : ''}></label>
+        <label class="switch"><span><b>이어폰 버튼으로 조작</b><br><span class="sub">1번: 다시 듣기 · 2번: 쳤어요 / 공 찾았어요 · 3번: 방금 것 취소</span></span><input type="checkbox" data-sw="voiceButtons" ${st.voiceButtons !== false ? 'checked' : ''}></label>
+        <div class="grid2"><button class="btn" id="vTest">🔊 시험 듣기</button><button class="btn" id="btOpen">🎧 블루투스 이어폰 연결</button></div></div>
       <div class="card">${SW.map(([k, n, d]) => `<label class="switch"><span><b>${n}</b>${d ? `<br><span class="sub">${d}</span>` : ''}</span><input type="checkbox" data-sw="${k}" ${st[k] ? 'checked' : ''}></label>`).join('')}</div>
       <div class="card"><b>📍 위치 · 🧭 나침반</b><p class="sub">위치 ${Sensors.pos ? '✅ 쓰고 있어요' : Sensors.gpsState === 'denied' ? '❌ 꺼져 있어요 · 휴대폰 설정 → 애플리케이션 → PinPoint 캐디 → 권한 → 위치를 허용해 주세요' : '아직 못 찾았어요'} · 나침반·기울기 ${sensorOk ? '✅' : '아직'}</p>${sensorOk && Sensors.pos ? '' : '<button class="btn block" id="perm">↻ 다시 허락받기 · 찾기</button>'}</div>
       <details class="card ai-set" id="aiSet" ${hasKey() ? '' : ''}><summary><b>🤖 AI 캐디 (선택)</b> <span class="sub">${hasKey() ? '✓ 켜짐' : '꺼짐 · 구글 키가 있으면 켤 수 있어요'}</span></summary>
@@ -80,6 +89,11 @@ export default {
     onSeg('mode', v => { st.mode = v; });
     $('#myH').onchange = e => { const cm = Math.round(+e.target.value); if (!(cm >= 100 && cm <= 210)) return toast('키를 cm로 넣어 주세요 (예: 170)'); st.myHeight = cm; Object.assign(st, fromHeight(cm)); save('settings'); toast(`눈높이 ${st.eyeHeight}m로 맞췄어요`); };
     $$('[data-num]').forEach(i => i.onchange = () => { const v = +i.value; if (isFinite(v)) { st[i.dataset.num] = v; save('settings'); toast('저장했어요'); } });
+    $$('#vLvl button').forEach(b => b.onclick = () => { st.voiceLevel = b.dataset.v; save('settings'); $$('#vLvl button').forEach(x => x.classList.toggle('on', x === b)); });
+    $$('#vRate button').forEach(b => b.onclick = () => { st.voiceRate = +b.dataset.v; save('settings'); $$('#vRate button').forEach(x => x.classList.toggle('on', x === b)); say('깃발까지 142미터. 7번 아이언, 끝까지 크게.', { force: true }); });
+    $('#vTest').onclick = () => say(st.voiceLevel === 'simple' ? '깃발까지 142미터. 7번 아이언으로 끝까지 크게. 깃발을 바로 보고 치세요.' : '깃발까지 142미터, 그린 앞 133미터, 뒤 151미터. 오르막 3미터, 맞바람 초속 4미터. 그래서 151미터처럼 쳐야 해요. 7번 아이언, 끝까지 크게. 깃발보다 왼쪽으로 2도, 깃발 왼쪽 5미터 지점을 보고 치세요.', { force: true });
+    $('#btOpen').onclick = async () => { const r = await openBluetooth(); if (!audioNative()) toast('휴대폰 설정 → 블루투스에서 이어폰을 연결해 주세요', 3500); else if (r?.reason === 'ios') toast('제어 센터나 설정 → Bluetooth에서 이어폰을 연결해 주세요', 4000); };
+    audioRoute().then(r => { const el = $('#routeLine'); if (r && el) el.innerHTML = `지금 소리: <b>${esc(r.name || ROUTE_WORD[r.kind])}</b> (${ROUTE_WORD[r.kind]})`; });
     $$('[data-sw]').forEach(i => i.onchange = () => { st[i.dataset.sw] = i.checked; save('settings'); });
     $('#perm')?.addEventListener('click', async () => { const ok = await requestMotionPermission(); startOrientation(); restartGPS(); toast(ok ? '허락했어요 · 위치를 다시 찾고 있어요' : '위치를 다시 찾고 있어요'); setTimeout(re, 1200); });
     $('#gTest').onclick = async () => {

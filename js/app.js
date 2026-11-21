@@ -4,6 +4,11 @@ import { startGPS, restartGPS, onPos, setSim, setVoice, startOrientation, startS
 import { fetchWeather } from './core/weather.js';
 import { detectHoleByTee } from './core/course.js';
 import { syncPins, getNotices, getCatalog, pendingUpdates } from './core/remote.js';
+import { fetchLive } from './core/live.js';
+import { gripSupported, startGripScan, stopGripScan, clubForEvent } from './core/grip.js';
+import { onWatchSwing } from './core/watch.js';
+import { configureVoice, onAudio, audioRoute, earButtons, say, holeIntro, ROUTE_WORD } from './core/voice.js';
+import { holeHistory } from './core/insights.js';
 import { $, $$, sheet, toast, esc } from './ui.js';
 import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
@@ -106,6 +111,8 @@ function applySettings() {
   root.classList.toggle('bigtext', !!st.bigText);
   root.classList.toggle('easy', !st.detail);
   setVoice(!!st.voice);
+  configureVoice({ rate: () => S.settings.voiceRate || 1 });
+  earButtons(!!st.voice && st.voiceButtons !== false);
   if (st.simGPS !== Sensors.sim) setSim(!!st.simGPS);
 }
 
@@ -179,6 +186,71 @@ async function remoteTick() {
 }
 App.remoteTick = remoteTick;
 
+// ---------- 🏷️ 그립 센서: 라운드 중에만 블루투스 신호를 들음 → 친 클럽을 App.gripClub에 ----------
+let gripOn = false;
+async function setupGrip() {
+  const grips = S.settings.grips || [], want = !!S.round && grips.length > 0 && gripSupported();
+  try {
+    if (!want) { if (gripOn) { gripOn = false; await stopGripScan(); } return; }
+    await startGripScan(ev => {
+      const g = clubForEvent(S.settings.grips || [], ev); if (!g) return;
+      const club = S.bag.find(c => c.id === g.club);
+      App.gripClub = { club: g.club, name: club?.name || g.club, ts: ev.at };
+      if (ev.battery != null && g.battery !== ev.battery) { g.battery = ev.battery; save('settings'); }
+      vibrate(40); toast(`🏷️ ${App.gripClub.name} 센서 · [쳤어요] 때 이 클럽으로 적어요`, 2500);
+      current?.onGrip?.(App.gripClub);
+    });
+    gripOn = true;
+  } catch (e) { console.warn('grip', e.message); }
+}
+App.setupGrip = setupGrip;
+
+// ---------- 🎧 이어폰: 연결되면 알려 주고(설정에 따라 음성 안내 켜기), 이어폰 버튼 1·2·3번 ----------
+App.audioRoute = null;
+function setupAudio() {
+  audioRoute().then(r => { App.audioRoute = r; });
+  onAudio({
+    route: r => {
+      const was = App.audioRoute?.kind; App.audioRoute = r;
+      const ear = r.kind !== 'speaker', wasEar = was && was !== 'speaker';
+      if (ear && !wasEar) {
+        if (!S.settings.voice && S.settings.voiceAuto !== false) { S.settings.voice = true; S.settings.voiceByEar = true; save('settings'); }
+        toast(`🎧 ${r.name || ROUTE_WORD[r.kind]} 연결됨${S.settings.voice ? ' · 이어폰으로 안내해요' : ''}`, 3000);
+        if (S.settings.voice) say('이어폰이 연결됐어요. 음성 안내를 시작해요. 이어폰 버튼을 한 번 누르면 다시 들을 수 있어요.', { force: true });
+      } else if (!ear && wasEar) {
+        if (S.settings.voiceByEar) { S.settings.voice = false; delete S.settings.voiceByEar; save('settings'); }
+        toast('🎧 이어폰 연결이 끊겼어요' + (S.settings.voice ? ' · 휴대폰 스피커로 말해요' : ' · 음성 안내를 껐어요'), 3000);
+      }
+    },
+    button: ({ count }) => {
+      if (S.settings.voiceButtons === false) return;
+      if (count === 1) return current?.voiceRepeat ? current.voiceRepeat() : say('지금은 다시 들을 안내가 없어요.', { force: true });
+      if (count === 2) return current?.voiceMain ? current.voiceMain() : say('골프 치기 화면에서 두 번 누르면 쳤어요로 적어요.', { force: true });
+      if (count >= 3) return current?.voiceUndo ? current.voiceUndo() : null;
+    },
+  }).catch(e => console.warn('audio', e.message));
+}
+
+// ---------- ⌚ 워치 스윙: 골프 치기 화면이면 그 화면이 처리 (쳤어요 · 공 찾았어요), 아니면 친 자리만 기억 ----------
+function setupWatch() {
+  onWatchSwing(ev => {
+    if (!S.round || S.settings.watchAuto === false) return;
+    if (current?.onWatchSwing) return current.onWatchSwing(ev);
+    if (!ev.impact || !Sensors.pos) return;
+    App.pendingShot = { lat: Sensors.pos.lat, lon: Sensors.pos.lon, ts: ev.ts || Date.now(), auto: true, hole: S.ui.hole };
+    vibrate(60); toast('⌚ 워치가 스윙을 알아챘어요 · 골프 치기 화면으로 가면 이어서 적어요', 3500);
+  }).catch(e => console.warn('watch', e.message));
+}
+
+// ---------- 📡 골프장 장비 (홀 풍속계 · 낙구 카메라): 라운드 중 30초마다 ----------
+App.live = null;
+async function liveTick() {
+  const c = activeCourse(), url = c?.live?.url;
+  if (!S.round || !url || !navigator.onLine) { if (!url) App.live = null; return; }
+  try { App.live = await fetchLive(url); App.liveErr = null; }
+  catch (e) { App.liveErr = e.message; console.warn('live', e.message); }
+}
+
 // ---------- 설치형 앱 새 버전 알림 (시작할 때 · 6시간마다) ----------
 async function appUpdateTick(manual = false) {
   const u = await checkAppUpdate();
@@ -207,7 +279,8 @@ function markHoleArrival(n) {
       const par = rh?.par || h?.par, hd = h?.hdcpNine ?? h?.hdcp ?? h?.hdcpCard, pin = h?.pin || h?.green;
       const R = 6371000, rad = Math.PI / 180, me = Sensors.pos;
       const d = me && pin ? 2 * R * Math.asin(Math.sqrt(Math.sin((pin.lat - me.lat) * rad / 2) ** 2 + Math.cos(me.lat * rad) * Math.cos(pin.lat * rad) * Math.sin((pin.lon - me.lon) * rad / 2) ** 2)) : null;
-      speak(`${h?.nineHole ?? n}번 홀, 파 ${par}${hd ? `, 핸디캡 ${hd}` : ''}${d && d < 700 ? `. 깃발까지 ${Math.round(d)}미터` : ''}`);
+      const c = activeCourse(), hh = c ? holeHistory(S.rounds, c.id, n) : null, sc = h?.scorecard, len = sc ? (sc.white ?? sc.blue ?? sc.red ?? sc.back) * (sc.unit === 'yd' ? 0.9144 : 1) : null;
+      speak(holeIntro({ name: `${h?.nineHole ?? n}번 홀`, par, len: Number.isFinite(len) ? len : null, hd, toPin: d, hist: hh ? `${hh.text}${hh.tip ? '. ' + hh.tip : ''}` : null, memo: h?.memo, level: S.settings.voiceLevel }));
     }
   }
 }
@@ -304,7 +377,8 @@ function init() {
   startOrientation();
   setupSwing();
   onPos(autoHole);
-  subscribe(keys => { if (keys.includes('settings')) { applySettings(); setupSwing(); refreshHeader(); } });
+  subscribe(keys => { if (keys.includes('settings')) { applySettings(); setupSwing(); refreshHeader(); } if (keys.includes('round') || keys.includes('settings')) setupGrip(); });
+  setTimeout(setupGrip, 2000); setupWatch(); setupAudio();
   $('#menuBtn').onclick = () => $('#drawer').classList.add('open');
   $('#tabMore')?.addEventListener('click', e => { e.preventDefault(); $('#drawer').classList.add('open'); });
   $('#drawer .bg').onclick = () => $('#drawer').classList.remove('open');
@@ -315,6 +389,7 @@ function init() {
   setInterval(() => { safetyTick(); hydrateTick(); }, 30000);
   setTimeout(safetyTick, 4000);
   setInterval(remoteTick, 5 * 60 * 1000);
+  setInterval(liveTick, 30000); setTimeout(liveTick, 2500);
   setTimeout(() => appUpdateTick(), 4000); setInterval(() => appUpdateTick(), 6 * 3600 * 1000);
   const vb = $('#verBtn'); if (vb) { vb.textContent = `🔄 업데이트 확인 · ${isNative() ? '앱 ' + APP_VERSION.name : '웹 (항상 최신)'}`; vb.onclick = () => { $('#drawer').classList.remove('open'); appUpdateTick(true); }; }
   setTimeout(remoteTick, 1500);

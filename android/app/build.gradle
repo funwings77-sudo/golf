@@ -51,6 +51,8 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
+    implementation 'com.google.android.gms:play-services-wearable:18.2.0' // watch messages (android/wear)
+    implementation 'com.google.ar:core:1.45.0' // 📏 깊이 카메라 (AR 선택 기능: 지원 안 되는 폰에서도 앱은 그대로)
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
