@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.50",
+   "code": 51,
+   "date": "2026-11-21T12:53:04.294Z",
+   "bytes": 6129932,
+   "sha256": "a1cdda16ee964e733ce8efa97b248a6f35cc88af87161705f82c3554c8060296",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.50/pinpoint-caddie-1.0.50.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.50",
+   "notes": [
+    "카메라 화면 위 거리 표시(깃발·떨어질 곳·내 공·능선 등)도 아이콘으로 바꿈"
+   ]
+  },
+  {
    "version": "1.0.49",
    "code": 50,
    "date": "2026-11-21T12:48:59.395Z",
@@ -655,6 +667,6 @@
    ]
   }
  ],
- "latest": "1.0.49",
- "updatedAt": "2026-11-21T12:49:04.200Z"
+ "latest": "1.0.50",
+ "updatedAt": "2026-11-21T12:53:09.548Z"
 }
