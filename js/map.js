@@ -14,6 +14,24 @@ export const HZ_STYLE = {
 };
 export const SAT_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 
+// 위성 사진 한 장 주소 (썸네일·카드 배경): 구글 세션이 있으면 구글, 없으면 Esri
+export function satTileUrl(z, x, y) {
+  const s = hasMapsKey() && cachedSession();
+  return (s ? tileUrl(s) : SAT_URL).replace('{z}', z).replace('{x}', x).replace('{y}', y);
+}
+// 3D 지도(MapLibre)용 바탕: { tiles, maxzoom, attribution } — 구글이면 보이는 곳 저작권 문구까지
+export async function satSource(center) {
+  if (hasMapsKey()) {
+    try {
+      const s = await Promise.race([getSession(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))]);
+      const d = 0.01, b = { getNorth: () => center.lat + d, getSouth: () => center.lat - d, getEast: () => center.lon + d, getWest: () => center.lon - d };
+      const copy = await viewportCopyright(s, b, 17).catch(() => '');
+      return { tiles: [tileUrl(s)], maxzoom: 19, attribution: ['Google', copy].filter(Boolean).join(', ') };
+    } catch {}
+  }
+  return { tiles: [SAT_URL], maxzoom: 19, attribution: 'Imagery © Esri' };
+}
+
 let CachedTiles = null;
 function cachedTileLayer() {
   return CachedTiles ||= L.TileLayer.extend({

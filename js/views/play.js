@@ -13,7 +13,7 @@ import { fetchElevations, playsLike } from '../core/weather.js';
 import { adviseShot, predictBall, toBall, dirWords, compassName, greenR } from '../physics/advice.js';
 import { conditionsEffect } from '../physics/flight.js';
 import { learnClub } from '../core/score.js';
-import { createMap, destroyMap, drawHole, ll, flagIcon, labelIcon, SAT_URL } from '../map.js';
+import { createMap, destroyMap, drawHole, ll, flagIcon, labelIcon, satTileUrl } from '../map.js';
 import { $, $$, esc, toast, sheet, confirmSheet, bottomMenuHTML } from '../ui.js';
 import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
 import { openAICaddie } from './aisheet.js';
@@ -97,7 +97,7 @@ function tileOf(p, z = 15) {
   if (!p || !Number.isFinite(p.lat) || !Number.isFinite(p.lon)) return null;
   const n = 2 ** z, r = p.lat * Math.PI / 180;
   const x = Math.floor((p.lon + 180) / 360 * n), y = Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n);
-  return SAT_URL.replace('{z}', z).replace('{y}', y).replace('{x}', x);
+  return satTileUrl(z, x, y); // 구글 지도 키가 있으면 구글 위성 사진
 }
 const courseCenter = c => c.center || c.holes?.find(h => h.green)?.green || c.holes?.find(h => h.tee)?.tee || null;
 const thumb = (p, name, z) => { const u = tileOf(p, z); return u ? `<span class="pi th" style="background-image:url('${u}')" aria-hidden="true"></span>` : `<span class="pi mono" aria-hidden="true">${esc([...String(name || '⛳')][0])}</span>`; };

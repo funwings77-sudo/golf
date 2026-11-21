@@ -1,7 +1,7 @@
 // 3D · 4D 코스 보기 (MapLibre GL + 위성 사진 + AWS 지형 고도 타일)
 //  3D: 지형을 기울여 홀을 내려다봄 (확대·회전·기울기)
 //  4D: 3D + 시간 — 공이 날아가는 모습(탄도) 재생, 홀 플라이오버, 시간 막대로 되감기
-import { SAT_URL } from '../map.js';
+import { satSource } from '../map.js';
 import { distance, bearing, destination } from '../core/geo.js';
 import { greenGeoJSON, gridCorners, slopeAt } from '../physics/greenmesh.js';
 import { slopeColor } from './greencanvas.js';
@@ -22,13 +22,13 @@ const ll = p => [p.lon, p.lat];
 function el(cls, html) { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; return d; }
 
 export async function create3D(container, { center, bearingDeg = 0, pitch = 62, zoom = 17 }) {
-  const maplibregl = await loadMapLibre();
+  const [maplibregl, sat] = await Promise.all([loadMapLibre(), satSource(center)]); // 바탕: 구글 지도 키가 있으면 구글 위성
   const map = new maplibregl.Map({
     container, center: ll(center), zoom, pitch, bearing: bearingDeg, maxPitch: 80, attributionControl: { compact: true },
     style: {
       version: 8,
       sources: {
-        sat: { type: 'raster', tiles: [SAT_URL], tileSize: 256, maxzoom: 19, attribution: 'Imagery © Esri' },
+        sat: { type: 'raster', tiles: sat.tiles, tileSize: 256, maxzoom: sat.maxzoom, attribution: sat.attribution },
         dem2: { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 15 },
         dem: { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 15, attribution: 'Terrain © Mapzen, AWS' },
       },
