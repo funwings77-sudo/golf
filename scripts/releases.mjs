@@ -1,6 +1,7 @@
 // 버전별 APK: GitHub Releases에 올리고 releases.json(다운로드 페이지가 읽는 목록)을 갱신
 //   import { publishRelease } from './releases.mjs'  ← release-apk.mjs에서 사용
 //   node scripts/releases.mjs backfill <dir>         ← 과거 버전 일괄 등록 (pinpoint-caddie-<버전>.apk)
+//   node scripts/releases.mjs notes <버전> "줄1" "줄2" ← 이미 올린 버전의 노트 고치기 (GitHub 릴리스 + releases.json)
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -24,7 +25,32 @@ export function saveReleases(r) {
   writeFileSync(FILE, JSON.stringify(r, null, 1) + '\n');
 }
 
-// 릴리스 하나 등록 (이미 있으면 파일만 교체)
+// GitHub 릴리스 본문
+const relBody = (version, code, notes, sha256) => [`PinPoint AI 캐디 Android ${version} (versionCode ${code})`, '', ...notes.map(n => `- ${n}`), '', `SHA-256: \`${sha256}\``].join('\n');
+export const hasKorean = notes => notes.length > 0 && notes.every(n => /[가-힣]/.test(n));
+
+// 📝 사용자에게 보여 줄 한국어 노트 (release-apk.mjs): ① --notes "줄" (여러 번) ② release-notes.md의 '- ' 줄
+export const NOTES_FILE = join(root, 'release-notes.md');
+export const NOTES_TEMPLATE = "# 다음 APK 릴리스 노트 (한국어)\n# 사용자에게 보이는 변경 내용을 한 줄에 하나씩 '- '로 적으면 npm run release:apk가 씁니다. 릴리스 뒤 비워집니다.\n";
+export function pendingNotes(argv = process.argv) {
+  const cli = []; for (let i = 0; i < argv.length; i++) if (argv[i] === '--notes' && argv[i + 1]) cli.push(...argv[++i].split('|').map(s => s.trim()).filter(Boolean));
+  if (cli.length) return { notes: cli, from: '--notes' };
+  if (existsSync(NOTES_FILE)) {
+    const f = readFileSync(NOTES_FILE, 'utf8').split(/\r?\n/).filter(l => /^\s*-\s+\S/.test(l)).map(l => l.replace(/^\s*-\s+/, '').trim());
+    if (f.length) return { notes: f, from: 'release-notes.md' };
+  }
+  return { notes: [], from: null };
+}
+
+// 이미 올린 버전의 노트 바꾸기
+export function setNotes(version, notes) {
+  const r = loadReleases(), rel = r.releases.find(x => x.version === version);
+  if (!rel) throw new Error(`releases.json에 ${version}이 없습니다`);
+  rel.notes = notes; saveReleases(r);
+  gh(['release', 'edit', `v${version}`, '-R', REPO, '--notes', relBody(version, rel.code, notes, rel.sha256)]);
+  return rel;
+}
+
 export function publishRelease({ version, code, apkPath, notes = [], date = new Date().toISOString(), commit = 'main' }) {
   const tag = `v${version}`, name = `pinpoint-caddie-${version}.apk`;
   commit = execFileSync('git', ['rev-parse', commit], { cwd: root, encoding: 'utf8' }).trim(); // GitHub API는 전체 SHA 필요
@@ -47,6 +73,12 @@ export function notesSince(prevTag) {
   let range = 'HEAD';
   try { if (prevTag) { execFileSync('git', ['rev-parse', prevTag], { cwd: root, stdio: 'ignore' }); range = `${prevTag}..HEAD`; } } catch {}
   return execFileSync('git', ['log', '--format=%s', range], { cwd: root, encoding: 'utf8' }).split('\n').map(s => s.trim()).filter(s => s && !/^Android APK \d/.test(s)).slice(0, 8);
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1] && process.argv[2] === 'notes') {
+  const [, , , version, ...notes] = process.argv;
+  if (!version || !notes.length) { console.error('사용법: node scripts/releases.mjs notes <버전> "줄1" "줄2"'); process.exit(1); }
+  setNotes(version, notes); console.log(`v${version} 노트 ${notes.length}줄로 바꿈`);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1] && process.argv[2] === 'backfill') {

@@ -1,4 +1,5 @@
-// APK 재빌드 + GitHub Pages 업로드를 한 번에: npm run release:apk [-- --no-push]
+// APK 재빌드 + GitHub Pages 업로드를 한 번에: npm run release:apk [-- --no-push] [-- --notes "한국어 노트|두 번째 줄"]
+//   📝 노트(한국어): --notes 또는 release-notes.md의 '- ' 줄 → 없으면 한국어 커밋 제목 → 그것도 없으면 빌드 전에 멈춤
 // 1) 엔진 테스트 → 2) 버전 자동 증가 → 3) www 생성·cap sync → 4) Gradle 빌드
 // 5) pinpoint-caddie.apk 교체 → 6) 커밋·푸시 → 7) Pages에서 같은 파일이 받아지는지 확인
 import { execSync } from 'node:child_process';
@@ -26,6 +27,20 @@ const dirty = out('git status --porcelain').split('\n').filter(Boolean)
 if (dirty.length && push) {
   console.warn('⚠ 커밋되지 않은 변경이 있습니다 (APK에는 포함되지만 커밋되지 않음):\n  ' + dirty.join('\n  '));
 }
+
+// 📝 한국어 릴리스 노트를 빌드 전에 확정 (영어 커밋 제목이 그대로 노트가 되지 않게)
+const R = await import('./releases.mjs');
+let relNotes = R.pendingNotes();
+if (push && !relNotes.notes.length) {
+  const prev = R.loadReleases().releases.sort((a, b) => b.code - a.code)[0];
+  const fromGit = R.notesSince(prev ? `v${prev.version}` : null).filter(n => /[가-힣]/.test(n) && !/^Release notes/.test(n));
+  relNotes = { notes: fromGit, from: '커밋 제목' };
+}
+if (push && !R.hasKorean(relNotes.notes)) {
+  console.error("✖ 한국어 릴리스 노트가 없습니다. 아래 중 하나로 적어 주세요:\n  npm run release:apk -- --notes \"바뀐 점 1|바뀐 점 2\"\n  또는 release-notes.md에 '- 바뀐 점' 줄을 적기");
+  process.exit(1);
+}
+if (push) console.log(`📝 릴리스 노트 (${relNotes.from}):\n  - ${relNotes.notes.join('\n  - ')}`);
 
 step(1, '엔진 테스트');
 run('npm test');
@@ -79,15 +94,15 @@ if (!push) { console.log('\n--no-push: 커밋·업로드 생략. 완료.'); proc
 
 step(6, 'GitHub 릴리스(버전별 다운로드) · 커밋 · 푸시');
 run('git push'); // 릴리스 태그가 가리킬 커밋을 먼저 GitHub에 올림 (안 하면 릴리스 등록 실패)
-// 버전별 다운로드: 이전 릴리스 이후 변경 내용을 노트로 GitHub Releases에 올리고 releases.json 갱신
+// 버전별 다운로드: 한국어 노트로 GitHub Releases에 올리고 releases.json 갱신
 try {
-  const R = await import('./releases.mjs');
-  const prev = R.loadReleases().releases.sort((a, b) => b.code - a.code)[0];
-  const notes = R.notesSince(prev ? `v${prev.version}` : null);
-  R.publishRelease({ version: name, code, apkPath: target, notes: notes.length ? notes : ['안정성 개선'] });
-  console.log(`릴리스 v${name} 등록 · 노트 ${notes.length}줄`);
+  R.publishRelease({ version: name, code, apkPath: target, notes: relNotes.notes });
+  console.log(`릴리스 v${name} 등록 · 노트 ${relNotes.notes.length}줄`);
 } catch (e) { console.warn('⚠ GitHub 릴리스 등록 실패(최신 다운로드는 계속 제공): ' + e.message); }
-run('git add pinpoint-caddie.apk apk.json releases.json android/app/build.gradle js/core/appver.js' + (existsSync(join(root, 'pinpoint-watch.apk')) ? ' pinpoint-watch.apk watch.json android/wear/build.gradle' : ''));
+// 쓴 노트 파일은 비워서 다음 릴리스에 섞이지 않게
+const notesFileUsed = relNotes.from === 'release-notes.md';
+if (notesFileUsed) await writeFile(R.NOTES_FILE, R.NOTES_TEMPLATE);
+run('git add pinpoint-caddie.apk apk.json releases.json android/app/build.gradle js/core/appver.js' + (notesFileUsed ? ' release-notes.md' : '') + (existsSync(join(root, 'pinpoint-watch.apk')) ? ' pinpoint-watch.apk watch.json android/wear/build.gradle' : ''));
 const who = out('git config user.name') ? '' : '-c user.name="PinPoint" -c user.email="noreply@users.noreply.github.com" ';
 run(`git ${who}commit -q -m "Android APK ${name} (versionCode ${code})"`);
 run('git push');

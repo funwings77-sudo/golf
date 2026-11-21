@@ -28,7 +28,10 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.41/pinpoint-caddie-1.0.41.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.41",
    "notes": [
-    "Long range to 10 km, ridgelines, depth-camera AR lines, sensor fusion, ball-flight tracking"
+    "멀리 재기 10km까지 · 산 능선 표시",
+    "깊이 카메라로 실제 땅에 붙는 AR 선 (앞 물체에 가려지면 숨김)",
+    "여러 센서를 합쳐 위치·방향 정확도 개선",
+    "친 공 따라가기: 카메라로 날아가는 공을 찾아 공 속도·발사각·착지 거리 계산"
    ]
   },
   {
@@ -40,7 +43,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.40/pinpoint-caddie-1.0.40.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.40",
    "notes": [
-    "Camera screen without info cards; center menu button is \"골프 치기\"; shot action moves above the menu"
+    "카메라 화면에서 정보 카드 없앰",
+    "가운데 메뉴 버튼 이름을 \"골프 치기\"로 · 샷 버튼은 메뉴 위로"
    ]
   },
   {
@@ -52,7 +56,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.39/pinpoint-caddie-1.0.39.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.39",
    "notes": [
-    "Camera screen UX: bottom menu with center action, movable aim with precise readout, one tool button, visible messages"
+    "카메라 화면 새 구성: 아래 메뉴와 가운데 버튼",
+    "조준점을 옮겨 정밀하게 거리 읽기 · 도구 버튼 하나로 정리 · 안내 문구가 잘 보이게"
    ]
   },
   {
@@ -64,7 +69,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.38/pinpoint-caddie-1.0.38.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.38",
    "notes": [
-    "Camera screen: remove the \"distance is an estimate\" info card; fold rules no longer depend on :has()"
+    "카메라 화면의 \"거리는 추정값\" 안내 카드 없앰",
+    "접히는 화면이 오래된 휴대폰에서도 잘 동작"
    ]
   },
   {
@@ -76,7 +82,7 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.37/pinpoint-caddie-1.0.37.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.37",
    "notes": [
-    "Camera screen no longer covered: now-line hidden, info card folds to one line, long hint only first 10 s"
+    "카메라 화면이 가려지지 않게: 현재 선 숨김 · 정보 카드는 한 줄로 접힘 · 긴 안내는 처음 10초만"
    ]
   },
   {
@@ -88,9 +94,9 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.36/pinpoint-caddie-1.0.36.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.36",
    "notes": [
-    "Camera screen is the default and combines the map, 3D terrain and ball flight",
-    "Google Play prep for phone + watch: watch AAB signed with the upload key, release:aab builds both",
-    "Galaxy Watch APK on the download page (Wear OS 1.0.35)"
+    "카메라 화면이 기본 화면 · 지도·3D 지형·공 비행을 한 화면에",
+    "갤럭시 워치 앱을 다운로드 페이지에서 받기 (Wear OS)",
+    "구글 플레이 출시 준비 (휴대폰 + 워치)"
    ]
   },
   {
@@ -102,7 +108,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.35/pinpoint-caddie-1.0.35.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.35",
    "notes": [
-    "AI caddie planning doc pass, LiDAR/ARCore depth, course devices, watch, grip sensors, earphone voice guidance, portrait lock"
+    "AI 캐디 개선 · 깊이 카메라(LiDAR·ARCore) 사용",
+    "골프장 장비·워치·그립 센서 연결 · 이어폰 음성 안내 · 세로 화면 고정"
    ]
   },
   {
@@ -114,7 +121,11 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.34/pinpoint-caddie-1.0.34.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.34",
    "notes": [
-    "Customer-convenience and reliability pass from a three-part audit (UX flows, system robustness, scoring correctness) Scoring: last-hole save now shows the round-end sheet (it was closed by the score sheet), ▶ on the last hole ends the round instead of wrapping to hole 1, '공 찾았어요' and lost-ball '찾았어요' can't record twice, cancel in both screens removes the stroke and an auto-learned tee, friends' scores are entered in the same score sheet, putts added on an unsaved hole count toward the total, '모두 기준타' no longer finalises partial holes, a chip within 25 m of the flag can still be recorded, an old lost-ball search can't add a penalty to a new round Auto hole/green: no hole switch while a shot is live or the score sheet is open, only the next hole's tee counts, 3-minute pause after a manual hole change unless the hole is saved; greens are not learned when scoring a hole after reaching the next one; voice and toasts use scorecard hole numbers Data safety: save failures return false and raise a backup/cleanup sheet, round end saves rounds before clearing the live round, corrupt stored values kept aside, full backup/restore (merge rounds and shots) with native file sharing (@capacitor/filesystem, @capacitor/share), storage meter and cache cleanup, green height grids stored as 16-bit 0.1 mm base64 (one 9-hole course 2.6 MB → 0.4 MB) Comfort: Android back closes sheets/drawer, goes back to play, double press to exit (@capacitor/app); location denied/weak signal explained with fix steps, map-tap fallback and retry; GPS and screen-on resume when returning to the app; error log and retry card; plain words in remaining lost-ball and green messages System: APK reads pre-downloaded map tiles from Cache Storage (tiles now stored CORS-readable), bundled course lists for first run on weak signal, pins saved only when changed, service worker falls back to the cached copy after 3 s and only serves index.html for navigations, small escaping fixes"
+    "스코어: 마지막 홀 저장 뒤 라운드 끝 화면이 제대로 나옴 · 같은 기록이 두 번 들어가지 않음 · 동반자 점수도 같은 화면에서",
+    "홀 자동 넘김: 샷 중이거나 스코어 화면이 열려 있으면 넘기지 않음 · 손으로 바꾼 뒤 3분은 그대로",
+    "데이터 보호: 저장 실패를 알려 주고 백업 안내 · 전체 백업·복원과 파일 공유 · 저장 공간 보기와 정리 · 그린 데이터 용량 6분의 1로",
+    "편의: 뒤로 가기로 창 닫기·두 번 눌러 종료 · 위치를 못 잡을 때 해결 방법과 지도에서 찍기 · 앱으로 돌아오면 GPS와 화면 켜짐 다시 시작",
+    "인터넷이 약할 때도 미리 받은 지도와 골프장 목록 사용"
    ]
   },
   {
@@ -126,7 +137,9 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.33/pinpoint-caddie-1.0.33.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.33",
    "notes": [
-    "Settings and score sheet in plain words: settings ask easy questions (쉬운/자세히 화면, 보통 몇 타 치나요?, 치는 손, 내 키 → eye and chest height computed, 퍼팅 실력 잘해요/보통/연습 중 → aim and speed spread, 그린 빠르기 느려요/보통/빨라요, 경기 방식 대회/친구랑/연습); expert numbers (camera field of view, σ, raw handicap, Stimp, step length) and fake-GPS testing folded into '전문가 숫자'; AI caddie folded Score sheet: 기준 4타 (파 4), labelled 친 횟수 / 그린에서 steppers, 모두 기준타(파)로, plain legend and totals (기준보다 ±0, 그린에서 친 횟수, 잃어버린 공), 내기 계산 / 누가 누구에게, 오늘 라운드 끝내기; mode names 대회 · 친구랑 · 연습 everywhere; top bar '1번 홀 · 파 4 · 치는 중'"
+    "설정을 쉬운 질문으로: 보통 몇 타 치나요? · 치는 손 · 내 키 · 퍼팅 실력 · 그린 빠르기 · 경기 방식",
+    "전문가 숫자는 \"전문가 숫자\" 안으로 접음",
+    "스코어 화면도 쉬운 말로: 기준 4타(파 4) · 친 횟수 · 그린에서 · 내기 계산 · 오늘 라운드 끝내기"
    ]
   },
   {
@@ -138,7 +151,9 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.32/pinpoint-caddie-1.0.32.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.32",
    "notes": [
-    "Green reading in plain words (easy screen): tabs ① 재기 · ② 그린 지도 · ③ 카메라로 보기; green speed as 느려요/보통/빨라요 (Stimp number folded away, μ hidden); slope readings as '오르막이에요 · 오른쪽이 높아요 → 공이 왼쪽으로 휘어요'; result as '어디를 보고: 홀 왼쪽으로 27cm (컵 2.5개)' and '얼마나 세게: 퍼터를 뒤로 30cm 빼서 쳐요' with a bar, plus '한 번에 들어갈 / 두 번 안에 넣을 확률'; speech, map legend, AR hints and buttons rewritten; Monte Carlo table, initial speed and error assumptions stay in the detail screen"
+    "그린 읽기를 쉬운 말로: ① 재기 · ② 그린 지도 · ③ 카메라로 보기",
+    "그린 빠르기는 느려요/보통/빨라요 · 경사는 \"오르막이에요 · 공이 왼쪽으로 휘어요\"처럼",
+    "결과: 어디를 보고(홀 왼쪽 27cm) · 얼마나 세게(퍼터를 뒤로 30cm) · 한 번에 넣을 확률"
    ]
   },
   {
@@ -150,7 +165,9 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.31/pinpoint-caddie-1.0.31.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.31",
    "notes": [
-    "Lost-ball flow joined to play and in plain words: '공이 안 보여요' hands over the shot position, club and direction (pointed or aimed) so '바로 찾으러 가기' works in one tap; '찾았어요' returns to play which measures the distance and shows the result card (one record, search learning kept); '못 찾았어요' explains the two options in plain words, adds the penalty, ends the live shot and returns to play; a newer hand-off replaces an old unfinished search All lost-ball labels rewritten without jargon (공을 친 곳, 얼마나 잘 맞았나요?, 친구가 본 곳, 여기는 없어요, 찾을 범위 반지름…); expert numbers only in the detail screen"
+    "\"공이 안 보여요\"를 누르면 친 곳·클럽·방향을 넘겨받아 한 번에 공 찾기 시작",
+    "\"찾았어요\" → 거리 재고 결과 카드 · \"못 찾았어요\" → 두 가지 방법을 쉬운 말로 안내하고 벌타 기록",
+    "공 찾기 화면의 말을 모두 쉬운 말로"
    ]
   },
   {
@@ -162,7 +179,9 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.30/pinpoint-caddie-1.0.30.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.30",
    "notes": [
-    "Precise live direction arrows: the pointing heading comes from the full rotation matrix (top edge of the phone, switching to the camera axis when held upright, so sideways roll or tilt no longer skews it), smoothed with a One-Euro filter and drawn with shortest-path animation stepped on every sensor reading Lost-ball direction step: north-up compass dial whose needle follows the phone, flag marker, '137.4° 남동 · 깃발에서 오른쪽 23°' text, live lime line on the map, hand-shake warning (residual from the smoothed direction, silent while turning) and 1 s capture that rejects shaky readings and reports ± spread Search guide arrow and the walk-to-ball arrow now turn smoothly as the phone turns"
+    "방향 화살표가 정확하고 부드럽게: 휴대폰을 기울이거나 세워도 방향이 틀어지지 않음",
+    "공 찾기 방향 단계: 휴대폰을 따라 도는 나침반 · 깃발 기준 각도 · 손 떨림 경고 · 1초 동안 재서 흔들린 값은 버림",
+    "공까지 가는 화살표도 부드럽게 돌아감"
    ]
   },
   {
@@ -174,7 +193,10 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.29/pinpoint-caddie-1.0.29.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.29",
    "notes": [
-    "Even easier: tapping a course starts hole 1 right away (course order and players default, change them under 더보기 → 코스·친구 바꾸기); one-line location prompt; easy-mode map shows only me, landing dot and flag line (no rings, hazard numbers, angle labels or glass chips); club advice as one sentence with a direction arrow, wind mentioned only when strong Real courses without green data: the first shot position is learned as the tee, the spot where the hole score is saved (far enough from the tee) is learned as the green, an estimated distance (hole length minus distance from tee) is shown meanwhile, and shots can be recorded and measured without a green Plain words on the shot result card (잰 값 / 추정 / 기계, 공중으로 간 거리, 굴러간 거리, 뜬 각도, 공 회전…), 4 numbers shown and the rest folded"
+    "골프장을 누르면 바로 1번 홀 시작 (코스·동반자는 더보기에서 바꾸기)",
+    "쉬운 화면 지도는 나·떨어질 곳·깃발 선만 · 클럽 추천은 한 문장",
+    "그린 정보가 없는 골프장: 첫 샷 자리를 티로, 점수 저장한 자리를 그린으로 배워 거리 표시",
+    "샷 결과 카드를 쉬운 말로 (공중으로 간 거리 · 굴러간 거리 · 뜬 각도 …)"
    ]
   },
   {
@@ -186,7 +208,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.28/pinpoint-caddie-1.0.28.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.28",
    "notes": [
-    "Design v2 (premium golf app language): sage background, lime accent, black pill buttons with a lime arrow circle, big bold question titles over a contour-line pattern, satellite-photo course thumbnails and a full-photo 'play here' card, glass hole bar and glass map chips (wind relative to the shot, flag elevation, distance left after the shot), lime main button, floating pill tab bar, dark stats card with left/centre/right result bar, restyled score sheet, result card and map labels; night-green header and status bar; dark mode checked Nearby-course card now also appears when the GPS fix arrives after the list loads"
+    "새 디자인: 세이지 배경 · 라임 포인트 · 큰 제목 · 골프장 위성 사진 · 유리 느낌 홀 막대와 지도 칩",
+    "다크 모드 점검 · 위치를 늦게 잡아도 가까운 골프장 카드 표시"
    ]
   },
   {
@@ -198,7 +221,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.27/pinpoint-caddie-1.0.27.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.27",
    "notes": [
-    "Launch monitor CSV import: finds the header row (skipping info lines), unit row ([mph], [yds]) and units in column names, auto-maps common column names from Garmin R10, Rapsodo MLM2PRO, FlightScope, TrackMan and Korean devices, reads quoted CSV with comma/semicolon/tab, decimal commas, '5.2 L' style sides and EUC-KR files; preview lets the user fix column mapping, default units, club-name mapping and left/right sign before importing; putters dropped, re-imported shots skipped by key Direction for monitor shots now prefers offline distance (where the ball went) over launch direction"
+    "런치 모니터 CSV 가져오기: 가민 R10 · 랩소도 · 플라이트스코프 · 트랙맨 · 국산 장비 파일 자동 인식",
+    "가져오기 전에 열·단위·클럽 이름·좌우 방향을 미리 보고 고치기 · 이미 가져온 샷은 건너뜀"
    ]
   },
   {
@@ -210,7 +234,9 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.26/pinpoint-caddie-1.0.26.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.26",
    "notes": [
-    "Launch monitor input: enter ball speed (required), launch angle, spin, club speed, carry, total, side angle/offline and apex from a launch monitor on the shot result card or any saved shot, or add a monitor-only shot (range / simulator, no GPS); km/h·mph·m/s and m·yd units remembered, range checks catch unit mix-ups, values tagged 모니터/GPS/계산 per field, empty fields computed by the flight model, GPS distance kept when present, model-vs-monitor carry difference and smash factor shown; per-club stats prefer monitor ball speed, launch and spin"
+    "런치 모니터 값 입력: 공 속도·발사각·스핀·클럽 속도·거리·좌우·최고 높이",
+    "km/h·mph·m/s, m·yd 단위 기억 · 단위 실수 잡아 줌 · 비어 있는 값은 비행 계산으로 채움",
+    "스매시 팩터와 계산값 비교 표시 · 클럽별 통계에 모니터 값 우선 사용"
    ]
   },
   {
@@ -222,7 +248,9 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.25/pinpoint-caddie-1.0.25.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.25",
    "notes": [
-    "Shot analysis: right after '쳤어요' the predicted ball speed, launch angle, apex and flight time; on '찾았어요' a result card with measured distance (GPS, ± error) and direction, and ball speed, head speed, carry, roll, apex, flight time, landing angle/speed computed by solving the 3-DOF flight model backwards from the measured distance with wind and air density (launch ±3°, spin ±15% ranges), plus a side-view flight curve; every shot saved with its analysis '📈 내 샷 기록': per-club average/longest distance, ball speed, apex, direction mean and spread, top-view landing scatter, per-shot cards and delete; partial-power shots stay out of averages and club distance learning"
+    "샷 분석: \"쳤어요\" 직후 공 속도·발사각·최고 높이·비행 시간 예측",
+    "\"찾았어요\" 뒤 결과 카드: 잰 거리(GPS ±)와 방향, 바람·공기까지 넣어 거꾸로 계산한 공 속도·헤드 속도·굴러간 거리",
+    "📈 내 샷 기록: 클럽별 평균·최장 거리, 방향 퍼짐, 떨어진 곳 분포"
    ]
   },
   {
@@ -234,7 +262,10 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.24/pinpoint-caddie-1.0.24.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.24",
    "notes": [
-    "Very easy play flow (one screen = one thing to do): 👉 'what to do now' line, one big button that changes with the situation (쳤어요 → 공 찾았어요 → on the green 홀에 넣었어요 → score → 🏁 round end on the last hole), two helper buttons, app header and tabs hidden on the hole screen with menu/score/round-end inside 더보기 (4 big favourite tiles, other tools folded), 3 bottom tabs, mode chip and handicap hidden in easy mode Courses: one merged list where courses with data start in one tap ('바로 치기'), nearby course card starts directly, tournament option folded away Holes without green coordinates: stand on the green and press '여기가 그린이에요' (3 s GPS average) instead of finding the green on a regional satellite map; bar shows scorecard hole length Score sheet: plain words, default = 쳤어요 presses + 2 putts, '잘못 눌렀어요' also undoes the stroke; accuracy line only when the distance may be badly off"
+    "아주 쉬운 플레이: 한 화면에 할 일 하나 · 상황에 따라 바뀌는 큰 버튼 하나 (쳤어요 → 공 찾았어요 → 홀에 넣었어요)",
+    "골프장 목록 하나로 합침 · 데이터 있는 골프장은 \"바로 치기\"",
+    "그린 좌표가 없는 홀: 그린에 서서 \"여기가 그린이에요\" (3초 GPS 평균)",
+    "스코어 화면 쉬운 말로 · \"잘못 눌렀어요\"로 타수도 되돌림"
    ]
   },
   {
@@ -246,7 +277,7 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.23/pinpoint-caddie-1.0.23.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.23",
    "notes": [
-    "One-tap AR green view: '📷 AR로 그린 보기' on the putt distance card and in the hole tools list open the green screen straight on the AR tab (#/green?ar)"
+    "퍼팅 거리 카드와 홀 도구에서 \"📷 AR로 그린 보기\"를 누르면 바로 AR 그린 화면"
    ]
   },
   {
@@ -258,9 +289,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.22/pinpoint-caddie-1.0.22.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.22",
    "notes": [
-    "Download page: what to do with Samsung's harmful-app warning and Auto Blocker, privacy policy link",
-    "Google Play internal testing: signed AAB build (npm run release:aab) with upload key kept outside the repo, targetSdk/compileSdk 36 for Play's 2026 requirement, edge-to-edge insets so the web view is not hidden under system bars, Play build skips the in-app APK update prompt (Play self-update policy), privacy policy page, shared JDK/SDK detection (finds ~/android-sdk) for both release scripts",
-    "Play AAB 1.0.21 (versionCode 22)"
+    "다운로드 페이지: 삼성 유해 앱 경고·자동 차단 해결 방법 · 개인정보 처리방침",
+    "구글 플레이 테스트 준비 · 화면이 시스템 막대에 가려지지 않게"
    ]
   },
   {
@@ -272,7 +302,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.20/pinpoint-caddie-1.0.20.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.20",
    "notes": [
-    "AR green reading in smart-glasses style: distance ring grid bent by green height (1m solid, 0.5m dashed, vertex dots), slope flow particles running downhill, green dotted putt line with solid start and rolling-ball preview, hole distance tag, UPHILL/DOWNHILL badge, fall-line compass, shows at once from phone tilt with auto putt compute, one-tap hole calibration then compass yaw tracking"
+    "AR 그린 읽기(스마트 안경 스타일): 그린 높이에 따라 휘는 거리 격자 · 내리막으로 흐르는 경사 입자 · 퍼팅 선과 굴러가는 공 미리 보기",
+    "오르막/내리막 표시 · 휴대폰을 기울이면 바로 계산 · 한 번 맞추면 나침반으로 따라감"
    ]
   },
   {
@@ -284,7 +315,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.19/pinpoint-caddie-1.0.19.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.19",
    "notes": [
-    "Camera flagstick ranging: distance from standard pole height (d = f*H/h), flagstick found by Gemini vision or two taps, error range, compare with GPS, set today's pin from the measurement"
+    "카메라로 깃대 거리 재기: 깃대 높이로 거리 계산 · AI가 깃대 찾기 또는 두 번 누르기",
+    "오차 범위와 GPS 비교 · 잰 값으로 오늘 핀 정하기"
    ]
   },
   {
@@ -296,14 +328,11 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.18/pinpoint-caddie-1.0.18.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.18",
    "notes": [
-    "Easy hole screen in 18Birdies/Garmin style: hole bar (hole·distance·par·handicap), floating AI/green/locate buttons, one-line club card, shot button + bottom bar (scorecard · hole score · tools), tools list, 1-9 score grid with symbols + putts + fairway, point-the-direction step for lost ball",
-    "Nearby course suggestion by GPS, search ignoring spaces/CC with Korean romanization, birdie/bogey symbols on score buttons, GPS accuracy in words, explain location/camera use before asking",
-    "Easy screen by default: big distance, one-line how-to (club, power bar, direction), 4 big buttons, More sheet with every tool, 4-tab nav; detailed screen toggle keeps all expert views",
-    "Gemini: probe models with real JSON request, auto-fallback across working models, drop retired models, thinking off for speed, wind/aim as words",
-    "Gemini AI caddie: grounded facts (no coordinates), JSON schema output, anchored number verification with retry and engine fallback, rules Q&A grounded in rule summary, AI round review, photo/voice input, key stored on device, tournament lock",
-    "Register releases 1.0.8-1.0.13; push before creating GitHub release",
-    "In-app update check for the Android app: compare with published apk.json, prompt to download, menu shows version",
-    "AR rangefinder: crosshair distance (ground ray + GPS snap to flag/green/hazards), error range, bearing, angle vs flag line, elevation angle, distance rings on ground, compass tape, aim lock to target, height measurement"
+    "쉬운 홀 화면: 홀 막대(홀·거리·파·핸디캡) · 한 줄 클럽 카드 · 샷 버튼과 아래 막대 · 점수 격자",
+    "GPS로 가까운 골프장 추천 · 띄어쓰기·영문 이름으로도 검색",
+    "AI 캐디(제미나이): 숫자 검증 · 룰 질문 · 라운드 돌아보기 · 사진·음성 입력",
+    "앱 안에서 새 버전 확인·받기",
+    "AR 거리 측정기: 조준점 거리·오차·방위·깃발 선과의 각도 · 땅 위 거리 원 · 목표 고정 · 높이 재기"
    ]
   },
   {
@@ -315,7 +344,7 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.17/pinpoint-caddie-1.0.17.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.17",
    "notes": [
-    "Nearby course suggestion by GPS, search ignoring spaces/CC with Korean romanization, birdie/bogey symbols on score buttons, GPS accuracy in words, explain location/camera use before asking"
+    "GPS로 가까운 골프장 추천 · 띄어쓰기·영문 이름으로도 검색 · 점수 버튼에 버디·보기 표시 · GPS 정확도를 말로"
    ]
   },
   {
@@ -327,7 +356,7 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.16/pinpoint-caddie-1.0.16.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.16",
    "notes": [
-    "Easy screen by default: big distance, one-line how-to (club, power bar, direction), 4 big buttons, More sheet with every tool, 4-tab nav; detailed screen toggle keeps all expert views"
+    "쉬운 화면이 기본: 큰 거리 · 한 줄 안내(클럽·힘·방향) · 큰 버튼 4개 · 모든 도구는 더보기에 · 자세한 화면도 그대로"
    ]
   },
   {
@@ -339,7 +368,7 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.15/pinpoint-caddie-1.0.15.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.15",
    "notes": [
-    "Gemini: probe models with real JSON request, auto-fallback across working models, drop retired models, thinking off for speed, wind/aim as words"
+    "AI 캐디(제미나이): 되는 모델을 자동으로 골라 쓰기 · 더 빠르게 · 바람·조준을 말로"
    ]
   },
   {
@@ -351,8 +380,8 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.14/pinpoint-caddie-1.0.14.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.14",
    "notes": [
-    "Gemini AI caddie: grounded facts (no coordinates), JSON schema output, anchored number verification with retry and engine fallback, rules Q&A grounded in rule summary, AI round review, photo/voice input, key stored on device, tournament lock",
-    "Register releases 1.0.8-1.0.13; push before creating GitHub release"
+    "AI 캐디(제미나이): 실제 코스 정보로만 답하고 숫자를 다시 확인 · 룰 질문 · 라운드 돌아보기",
+    "사진·음성 입력 · 키는 휴대폰에만 저장 · 대회 모드에서는 잠금"
    ]
   },
   {
@@ -441,7 +470,7 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.7/pinpoint-caddie-1.0.7.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.7",
    "notes": [
-    "Fix hamburger menu hidden behind immersive play overlays"
+    "플레이 화면에서 메뉴 버튼이 가려지던 문제 수정"
    ]
   },
   {
@@ -541,5 +570,5 @@
   }
  ],
  "latest": "1.0.42",
- "updatedAt": "2026-11-21T11:48:14.545Z"
+ "updatedAt": "2026-11-21T11:52:26.286Z"
 }
