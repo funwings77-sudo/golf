@@ -558,6 +558,7 @@ const sgn = (v, d = 2) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFix
 
 function cards() {
   const box = $('#cards'); if (!box) return;
+  if (P.view === 'ar') { box.innerHTML = ''; box.hidden = true; return; } // 카메라 화면: 안내 카드 없음 (거리·클럽은 화면 위 숫자 판과 음성으로)
   box.hidden = false;
   const h = activeHole(), shot = shotOf(), me = ballPos() || shot?.start || null; // GPS가 없어도 친 곳에서 이어서 안내
   const pin = h.pin || h.green;
@@ -679,18 +680,18 @@ function arrowOnly() {
 function actions() {
   const box = $('#act'); if (!box) return;
   const shot = shotOf(), h = activeHole(), isBall = P.ballPos && P.ballHole === h.n;
-  if (!S.settings.detail) { // 쉬운 화면: 아래 메뉴 5칸 (가운데 = 지금 할 일 큰 동그라미) + 상황에 맞는 작은 버튼 2개
+  if (!S.settings.detail) { // 쉬운 화면: 위 = 지금 할 일 큰 버튼 + 보조 버튼 · 아래 메뉴 7칸 (가운데 = ⛳ 골프 치기)
     const pin = h.pin || h.green, putt = pin && onGreen();
     const hint = (() => { try { return !localStorage.getItem('pinpoint.hint.main'); } catch { return false; } })();
-    // 가운데: 쳤어요 → 공 찾았어요 → (그린 위) 홀에 넣었어요
-    const mid = shot ? ['found', '✅', '찾았어요'] : putt ? ['holed', '⛳', '넣었어요'] : ['hit', '🏌️', '쳤어요'];
+    // 지금 할 일: 쳤어요 → 공 찾았어요 → (그린 위) 홀에 넣었어요
+    const act = shot ? ['found', '✅ 공 찾았어요'] : putt ? ['holed', '⛳ 홀에 넣었어요'] : ['hit', '🏌️ 쳤어요'];
+    // 보조: 친 뒤 = 잘못 눌렀어요 · 그린 위 = 그린 밖에서 쳤어요 · 그 밖 = 홀 끝·점수
+    const sub = shot ? `<button id="cancel">↩ 잘못 눌렀어요</button>` : putt ? `<button id="hitOut">🏌️ 그린 밖에서 쳤어요</button>` : `<button id="scoreB">📝 홀 끝 · 점수</button>`;
     const item = (id, i, t) => `<button id="${id}"><i>${i}</i><span>${t}</span></button>`;
-    // 위 작은 버튼: 친 뒤 = 잘못 눌렀어요 · 그린 위 = 그린 밖에서 쳤어요 · 그 밖 = 홀 끝·점수 (+ 늘 더보기)
-    const ctx = shot ? `<button id="cancel">↩ 잘못 눌렀어요</button>` : putt ? `<button id="hit">🏌️ 그린 밖에서 쳤어요</button>` : `<button id="scoreB">📝 홀 끝 · 점수</button>`;
-    box.innerHTML = `<div class="bd-ctx">${ctx}</div>
+    box.innerHTML = `<div class="bd-ctx"><button class="a-main act${hint ? ' pulse' : ''}" id="${act[0]}">${act[1]}</button>${sub}</div>
       <nav class="bd-menu" aria-label="아래 메뉴">
         ${item('mMenu', '☰', '더보기')}${item('mGreen', '📷', '그린 읽기')}${item('mLost', '🔍', shot ? '안 보여요' : '공 찾기')}
-        <button class="a-main mid${hint ? ' pulse' : ''}" id="${mid[0]}"><i>${mid[1]}</i><span>${mid[2]}</span></button>
+        <button class="mid" id="mPlay" aria-label="골프 치기 화면으로"><i>⛳</i><span>골프 치기</span></button>
         ${item('mShots', '📈', '내 샷 기록')}${item('mYard', '📋', '거리표')}${item('more', '🧰', '도구')}
       </nav>`;
     const seen = () => { try { localStorage.setItem('pinpoint.hint.main', '1'); } catch {} };
@@ -698,8 +699,9 @@ function actions() {
     $('#found')?.addEventListener('click', found);
     $('#cancel')?.addEventListener('click', cancelShot);
     $('#holed')?.addEventListener('click', quickScore); $('#scoreB')?.addEventListener('click', quickScore);
-    $$('#hit', box).forEach(b => b.addEventListener('click', hit));
+    $('#hit')?.addEventListener('click', hit); $('#hitOut')?.addEventListener('click', hit);
     $('#more')?.addEventListener('click', moreSheet);
+    $('#mPlay').onclick = goPlay;
     $('#mGreen').onclick = () => App_.go(allowed('puttLine') ? 'green?ar' : 'green');
     $('#mLost').onclick = toLost;
     $('#mShots').onclick = () => App_.go('shots');
@@ -723,6 +725,17 @@ function actions() {
   $('#nextH').onclick = quickScore;
   $('#aiB').onclick = () => openAICaddie({ getFacts: aiFacts });
   $('#yd').onclick = yardBook;
+}
+
+// ⛳ 골프 치기 (아래 메뉴 가운데): 언제나 카메라 홀 화면으로 — 지도·큰 숫자 화면이면 카메라로, 큰 지도·도구 판은 닫고, 라운드 전이면 골프장 고르기
+function goPlay() {
+  if (!S.round) { P.step = activeCourse() ? 'course' : 'club'; persist(); return render(); }
+  P.step = 'hole';
+  if (P.view !== 'ar') { P.view = 'ar'; P.viewSet = false; persist(); return render(); }
+  arCtl?.setMap(false, true);
+  const tray = $('#arTray'); if (tray && !tray.hidden) $('#arTools')?.click();
+  $('#sheet')?.classList.remove('open');
+  vibrate(20); update(true);
 }
 
 // 📋 거리표: 그린 앞·중앙·뒤 + 해저드 앞/넘기기 (먼 순서)
