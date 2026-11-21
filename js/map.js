@@ -134,6 +134,19 @@ function fullControl(map, el) {
   new C({ position: 'topright' }).addTo(map);
   map._fullBox = box;
 }
+// 📱 '지도 전체 화면 + 지도 위 아래 판' 화면 (티샷·코스 편집 공통)
+//   mapSheetPage(true): 상태바·머리줄 숨김 · sheetHTML(id, body): 손잡이 달린 판 · sheetCover(): 판이 덮는 높이(px)
+export function mapSheetPage(on) {
+  const r = document.documentElement;
+  r.classList.toggle('msheet-on', on); if (!on) r.classList.remove('msheet-tall');
+  immersive(on);
+}
+export const sheetHTML = (inner, label = '판 크게·작게') => `<section class="m-sheet${document.documentElement.classList.contains('msheet-tall') ? ' tall' : ''}" id="mSheet"><button class="m-grip" id="mGrip" aria-label="${label}"><i></i></button>${inner}</section>`;
+export const sheetCover = () => { const t = document.getElementById('mSheet'); return t ? Math.max(0, innerHeight - t.getBoundingClientRect().top) : 0; };
+export function bindSheet(map) {
+  const g = document.getElementById('mGrip'); if (!g) return;
+  g.onclick = () => { document.getElementById('mSheet').classList.toggle('tall'); document.documentElement.classList.toggle('msheet-tall'); setTimeout(() => map?.invalidateSize(), 260); };
+}
 export function setMapFull(map, box, on) {
   box.classList.toggle('map-full', on);
   document.documentElement.classList.toggle('map-on', on);

@@ -3,7 +3,7 @@ import { S, save, uid } from '../core/state.js';
 import { blankCourse, demoCourse, exportCourse, importCourse, holeLength } from '../core/course.js';
 import { getCatalog, installCourse, findInstalled } from '../core/remote.js';
 import { Sensors, sampleFix } from '../core/sensors.js';
-import { createMap, destroyMap, drawHole, fitHole, ll, HZ_STYLE, SAT_URL } from '../map.js';
+import { createMap, destroyMap, drawHole, fitHole, ll, HZ_STYLE, SAT_URL, mapSheetPage, sheetHTML, sheetCover, bindSheet } from '../map.js';
 import { $, $$, esc, toast, sheet, confirmSheet, DU } from '../ui.js';
 import { saveFile } from '../core/files.js';
 
@@ -12,7 +12,7 @@ const TOOLS = [['tee', '티'], ['green', '그린 중앙'], ['front', '그린 앞
 
 export default {
   mount(el, App) { el_ = el; App_ = App; editId ? editor() : list(); },
-  unmount() { destroyMap(map); map = null; },
+  unmount() { mapSheetPage(false); destroyMap(map); map = null; },
 };
 
 // 골프장이 발행한 공식 코스 (관리자 페이지 → data/catalog.json)
@@ -41,7 +41,7 @@ async function official() {
 }
 
 function list() {
-  destroyMap(map); map = null;
+  mapSheetPage(false); destroyMap(map); map = null;
   el_.innerHTML = `<h2>🗺️ 코스 관리</h2>
     <div class="card"><div class="row"><b class="grow">📡 공식 코스 (골프장 제공)</b><button class="btn small" id="refOff">새로고침</button></div><div id="official" style="margin-top:6px"><p class="sub" style="margin:0">불러오는 중…</p></div></div>
     <h3>내 기기의 코스</h3>
@@ -97,22 +97,24 @@ async function prefetchTiles(c) {
 function editor() {
   const c = S.courses.find(x => x.id === editId); if (!c) { editId = null; return list(); }
   const h = c.holes.find(x => x.n === holeN) || c.holes[0];
-  el_.innerHTML = `<div class="row" style="margin-bottom:6px"><button class="btn small" id="back">‹ 목록</button><b class="grow" style="text-align:center">${esc(c.name)}</b><button class="btn small" id="rename">이름</button></div>
+  // 📱 지도는 늘 전체 화면 · 홀 고르기·도구·해저드 목록은 지도 위 아래 판 (티샷 화면과 같은 부품)
+  mapSheetPage(true);
+  el_.innerHTML = `<div class="mapwrap m-map"><div class="map" id="map"></div></div>` + sheetHTML(`<div class="row" style="margin-bottom:6px"><button class="btn small" id="back">‹ 목록</button><b class="grow" style="text-align:center">${esc(c.name)}</b><button class="btn small" id="rename">이름</button></div>
     <div class="row"><button class="btn small" id="hp">‹</button><b class="grow" style="text-align:center">${h.n}번 홀 · Par <select id="par" style="width:70px;min-height:36px;display:inline-block">${[3, 4, 5, 6].map(p => `<option ${p === h.par ? 'selected' : ''}>${p}</option>`).join('')}</select> ${holeLength(h) ? '· ' + DU(holeLength(h)) : ''}</b><button class="btn small" id="hn">›</button></div>
-    <div class="mapwrap half" style="margin-top:8px;border-radius:14px;overflow:hidden;height:50vh"><div class="map" id="map"></div></div>
     <div class="row" style="margin-top:8px;gap:6px">${TOOLS.map(([k, n]) => `<button class="btn small ${tool === k ? 'on' : ''}" data-tool="${k}">${n}</button>`).join('')}</div>
     ${tool === 'hazard' ? `<div class="card tight"><div class="seg" id="hzSeg">${Object.entries(HZ_STYLE).map(([k, v]) => `<button data-v="${k}" class="${hzType === k ? 'on' : ''}">${v.label.replace('(페널티 구역)', '')}</button>`).join('')}</div>
       <label class="f"><span>반경 ${hzR}m</span><input type="range" id="hzR" min="4" max="60" value="${hzR}"></label></div>` : ''}
     <p class="sub">${tool ? (tool === 'erase' ? '지울 해저드·대피소를 탭하세요.' : '지도를 탭해 위치를 지정하거나 [내 위치로]를 누르세요.') : '도구를 고른 뒤 지도를 탭하세요.'}</p>
     ${tool && tool !== 'erase' ? '<button class="btn block" id="here">📍 내 위치로 지정 (3초 평균)</button>' : ''}
     <div class="card tight"><b>해저드 ${h.hazards.length}개</b>${h.hazards.map(z => `<div class="kv"><span>${HZ_STYLE[z.type]?.label} · 반경 ${z.r}m</span><button class="btn small" data-delhz="${z.id}">삭제</button></div>`).join('')}
-      <label class="f"><span>페어웨이 반폭 ${h.halfWidth || 16}m (전략 계산용)</span><input type="range" id="hw" min="8" max="35" value="${h.halfWidth || 16}"></label></div>`;
+      <label class="f"><span>페어웨이 반폭 ${h.halfWidth || 16}m (전략 계산용)</span><input type="range" id="hw" min="8" max="35" value="${h.halfWidth || 16}"></label></div>`, '편집 판 크게·작게');
   destroyMap(map);
-  map = createMap($('#map'), { center: ll(h.green || h.tee || Sensors.pos || { lat: 37.5, lon: 127 }), zoom: h.tee ? 17 : 16 });
+  map = createMap($('#map'), { center: ll(h.green || h.tee || Sensors.pos || { lat: 37.5, lon: 127 }), zoom: h.tee ? 17 : 16, full: false });
+  bindSheet(map);
   if (map) {
     layer = drawHole(map, h);
     for (const s of c.shelters) L.marker(ll(s), { title: s.name }).bindTooltip('대피소: ' + esc(s.name)).addTo(layer); // 툴팁은 HTML로 들어감
-    if (h.tee && h.green) fitHole(map, h);
+    if (h.tee && h.green) { fitHole(map, h, null, sheetCover()); setTimeout(() => { if (!map) return; map.invalidateSize(); fitHole(map, h, null, sheetCover()); }, 150); } // 판 위 보이는 칸에 홀 전체
     map.on('click', e => apply({ lat: e.latlng.lat, lon: e.latlng.lng }));
   }
   const persist = () => { save('courses'); editor(); };

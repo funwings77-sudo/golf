@@ -4,9 +4,8 @@ import { distance, bearing, bearingVec } from '../core/geo.js';
 import { Sensors } from '../core/sensors.js';
 import { optimizeTeeShot, describeAim } from '../physics/strategy.js';
 import { RHO_STD } from '../physics/flight.js';
-import { createMap, destroyMap, drawHole, fitHole, ll, localHole, toLL, labelIcon } from '../map.js';
+import { createMap, destroyMap, drawHole, fitHole, ll, localHole, toLL, labelIcon, mapSheetPage, sheetHTML, sheetCover, bindSheet } from '../map.js';
 import { $, $$, esc, toast, lockedCard, DU, signed } from '../ui.js';
-import { immersive } from '../core/screen.js';
 
 let map, holeLayer, ovl, fromMe = false, windMode = 'auto', windManual = { speed: 0, rel: 'head' }, App_;
 
@@ -19,20 +18,19 @@ export default {
       return;
     }
     // 📱 지도는 늘 전체 화면 · 계산 결과는 지도 위에 떠 있는 아래 판 (손잡이: 반쯤 ↔ 크게)
-    document.documentElement.classList.add('tee-on'); immersive(true);
-    el.innerHTML = `<div class="mapwrap tee-map"><div class="map" id="map"></div></div>
-      <section class="tee-sheet" id="teeSheet"><button class="tee-grip" id="teeGrip" aria-label="결과 판 크게·작게"><i></i></button><div id="teeBody"></div></section>`;
+    mapSheetPage(true);
+    el.innerHTML = `<div class="mapwrap m-map"><div class="map" id="map"></div></div>${sheetHTML('<div id="teeBody"></div>', '결과 판 크게·작게')}`;
     map = createMap($('#map', el), { center: ll(hole.tee), zoom: 16, full: false });
     if (map) { holeLayer = drawHole(map, hole); ovl = L.layerGroup().addTo(map); fitHole(map, hole, null, sheetH()); setTimeout(() => { if (!map) return; map.invalidateSize(); fitHole(map, hole, null, sheetH()); }, 150); } // 지도 크기가 정해진 뒤 한 번 더 (판 위 보이는 칸에 홀 전체)
-    $('#teeGrip', el).onclick = () => { $('#teeSheet').classList.toggle('tall'); document.documentElement.classList.toggle('tee-big'); setTimeout(() => map?.invalidateSize(), 260); };
+    bindSheet(map);
     renderBody();
   },
-  unmount() { document.documentElement.classList.remove('tee-on', 'tee-big'); immersive(false); destroyMap(map); map = null; },
+  unmount() { mapSheetPage(false); destroyMap(map); map = null; },
   onHole() { const h = activeHole(); if (map && h) { drawHole(map, h, holeLayer); fitHole(map, h, null, sheetH()); } renderBody(); },
 };
 
-// 아래 판(+ 그 아래 메뉴)이 덮는 높이(px) = 판 위쪽 끝 ~ 화면 아래: 홀을 판 위 보이는 칸에 맞추려고
-const sheetH = () => { const t = $('#teeSheet'); return t ? Math.max(0, innerHeight - t.getBoundingClientRect().top) : 0; };
+// 아래 판(+ 그 아래 메뉴)이 덮는 높이(px): 홀을 판 위 보이는 칸에 맞추려고
+const sheetH = sheetCover;
 
 function weatherFor(brg) {
   const w = App_.weather;
