@@ -4,6 +4,20 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.43",
+   "code": 44,
+   "date": "2026-11-21T12:13:43.024Z",
+   "bytes": 6113272,
+   "sha256": "c6789d0f867196d113052a8b10eb2e92053ec72ac203df6f96f7a15b04a24a70",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.43/pinpoint-caddie-1.0.43.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.43",
+   "notes": [
+    "모든 화면에 같은 아래 메뉴 (더보기 · 그린 · 공 찾기 · 골프 치기 · 내 샷 기록 · 거리표 · 도구)",
+    "그린 카메라 화면(AR 그린 리딩)을 전체 화면으로 · ✕나 뒤로 가기로 닫기",
+    "아래 메뉴 \"그린 읽기\" → \"그린\""
+   ]
+  },
+  {
    "version": "1.0.42",
    "code": 43,
    "date": "2026-11-21T11:46:36.837Z",
@@ -569,6 +583,6 @@
    ]
   }
  ],
- "latest": "1.0.42",
- "updatedAt": "2026-11-21T11:52:26.286Z"
+ "latest": "1.0.43",
+ "updatedAt": "2026-11-21T12:13:49.154Z"
 }
