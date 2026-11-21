@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.63",
+   "code": 64,
+   "date": "2026-11-21T14:00:59.562Z",
+   "bytes": 6153262,
+   "sha256": "0bba4dcef89d8d527b20118188b6cddfacccc9ae6982d947acfd56b9d251bb96",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.63/pinpoint-caddie-1.0.63.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.63",
+   "notes": [
+    "공 찾기 화면 지도를 전체 화면으로 · 입력·안내·레이더는 지도 위 아래 판에"
+   ]
+  },
+  {
    "version": "1.0.62",
    "code": 63,
    "date": "2026-11-21T13:57:04.893Z",
@@ -812,6 +824,6 @@
    ]
   }
  ],
- "latest": "1.0.62",
- "updatedAt": "2026-11-21T13:57:10.720Z"
+ "latest": "1.0.63",
+ "updatedAt": "2026-11-21T14:01:04.015Z"
 }
