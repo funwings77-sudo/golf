@@ -27,10 +27,10 @@ import { say, shotCue, walkCue, resultCue, clock, ro, m as mWords } from '../cor
 import { stdCarry, playsWhy, holeHistory, roundBriefing, conditionBrief, provisionalRisk, roundDiagnosis, lessonVideos, clubRange, dots, greenToday } from '../core/insights.js';
 
 const KEY = 'pinpoint.play';
-const P = (() => { try { return { view: '3d', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: '3d' }; } })();
+const P = (() => { try { return { view: 'ar', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: 'ar' }; } })();
 const persist = () => { try { sessionStorage.setItem(KEY, JSON.stringify({ viewSet: P.viewSet, view: P.view, step: P.step, q: P.q, ballPos: P.ballPos, ballHole: P.ballHole, ballSrc: P.ballSrc, ballAcc: P.ballAcc, target: P.target, plOff: P.plOff })); } catch {} };
 
-let el_, App_, map = null, lay = null, v3 = null, arStop = null, unPos = null, unOri = null, adv = null, advKey = '', advT = 0, timer = null;
+let el_, App_, map = null, lay = null, v3 = null, arStop = null, arCtl = null, headMk = null, unPos = null, unOri = null, adv = null, advKey = '', advT = 0, timer = null;
 
 export default {
   full: true,
@@ -73,7 +73,7 @@ export default {
   voiceUndo() { if (shotOf()) { cancelShot(); say('방금 친 기록을 취소했어요.', { force: true }); } else say('취소할 샷이 없어요.', { force: true }); },
 };
 
-function teardown() { document.documentElement.classList.remove('in-hole'); $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; }
+function teardown() { document.documentElement.classList.remove('in-hole'); $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; arCtl = null; headMk = null; P.mapFull = false; }
 function render() {
   teardown(); unPos?.(); unOri?.(); clearInterval(timer); unPos = unOri = null;
   el_.className = 'play';
@@ -250,7 +250,7 @@ function stepHole() {
   const c = activeCourse(), h = activeHole();
   if (!c || !h) { P.step = 'club'; return render(); }
   const order = App_.holeOrder(), idx = order.indexOf(h.n);
-  if (!S.settings.detail && !P.viewSet) P.view = '2d'; // 쉬운 화면 기본: 위성 지도 (18Birdies · Hole19 방식)
+  if (!P.viewSet) P.view = 'ar'; // 기본: 카메라 화면 (입체 지도 · 공 비행 · 지도가 한 화면, 휴대폰을 내리면 지도)
   const hd = h.hdcpNine ?? h.hdcp ?? h.hdcpCard;
   el_.innerHTML = `<div class="imm ${S.settings.detail ? '' : 'easy'}">
     <div class="stage imm-stage" id="stage"></div>
@@ -376,7 +376,7 @@ function trustSheet() {
     ${D != null ? `<div class="kv"><span>실제 거리 범위</span><b>${Math.max(0, Math.round(D - e))} ~ ${Math.round(D + e)}m</b></div>` : ''}
     <p class="sub">휴대폰 GPS는 보통 3~10m 틀릴 수 있어요. 오늘 핀 위치를 모르면 그린 가운데로 재기 때문에 그린 크기만큼 차이가 나요. 그래서 PinPoint는 거리와 함께 <b>어디를 기준으로 쟀는지</b>와 <b>틀릴 수 있는 범위</b>를 항상 보여 드려요.</p>
     <p class="sub">더 정확하게: ① 공 옆에서 <b>정밀 측정</b>(5초 동안 여러 번 재서 평균) ② 깃발이 보이면 지도에서 <b>오늘 핀</b>을 찍으세요.</p>`,
-    actions: [{ label: '⛳ 핀 찍기', onClick: () => { if (P.view !== '2d') { P.view = '2d'; persist(); render(); } P.marking = 'pin'; toast('🗺️ 지도에서 오늘 깃발이 꽂힌 곳을 눌러 주세요', 4000); } }, { label: '📡 정밀 측정', kind: 'primary', onClick: () => { precise(); } }] });
+    actions: [{ label: '⛳ 핀 찍기', onClick: () => { toMap(); P.marking = 'pin'; toast('🗺️ 지도에서 오늘 깃발이 꽂힌 곳을 눌러 주세요', 4000); } }, { label: '📡 정밀 측정', kind: 'primary', onClick: () => { precise(); } }] });
 }
 async function precise() {
   if (!Sensors.pos) return toast('GPS 신호를 찾는 중이에요');
@@ -513,6 +513,7 @@ function compute(force) {
 function update(force = false) {
   if (P.step !== 'hole') return;
   compute(force); cameraBall(); toWatch(); voiceAuto();
+  if (force && P.view === 'ar' && !P.mapFull) miniFit();
   gpsChip(); nowLine(); cards(); actions(); scene(); mini(); batteryGuard(); topBar();
 }
 
@@ -858,7 +859,7 @@ async function pointShot() {
 
 // 🧰 도구: 18Birdies 'Tools' 목록처럼 아이콘 · 이름 · 한 줄 설명
 function moreSheet() {
-  const h = activeHole(), V = [['2d', '🗺️', '지도'], ['3d', '🏔️', '입체 지도'], ['4d', '🎬', '공 비행'], ['ar', '📷', '카메라'], ['big', '🔠', '큰 숫자']];
+  const h = activeHole(), V = [['ar', '📷', '카메라 · 지도'], ['big', '🔠', '큰 숫자'], ...(S.settings.detail ? [['2d', '🗺️', '지도만'], ['3d', '🏔️', '입체 지도만'], ['4d', '🎬', '공 비행만']] : [])];
   const T = [
     ['ai', '🤖', 'AI 캐디에게 묻기', '이 샷 어떻게 칠지 물어보기 (숫자는 엔진이 계산)', () => openAICaddie({ getFacts: aiFacts })],
     ['yd', '📋', '거리표', '그린 앞·뒤 · 벙커·물 넘기기 거리와 클럽', yardBook],
@@ -960,13 +961,13 @@ async function greenHere() {
   adv = null; advKey = ''; if (map) drawHole(map, h); update(true);
 }
 function markGreenOnMap() {
-  if (P.view !== '2d') { P.view = '2d'; persist(); render(); }
+  toMap();
   P.marking = 'green'; toast('🗺️ 지도에서 그린 가운데를 눌러 주세요 (두 손가락으로 크게 볼 수 있어요)', 4500);
 }
 
 // 지도에서 공 위치 찍기 (공이 내 위치와 다를 때 · 실내 연습)
 function markBall(then) {
-  if (P.view !== '2d') { P.view = '2d'; persist(); render(); }
+  toMap();
   toast(then === 'hit' ? '📍 위치를 못 찾았어요 · 지도에서 공을 친 곳을 눌러 주세요' : '🗺️ 지도에서 내 공이 있는 곳을 눌러요', 4000);
   P.marking = true; P.afterMark = then === 'hit' ? 'hit' : null;
 }
@@ -1083,6 +1084,8 @@ function sceneData() {
     landing: !shot && adv?.landing && allowed('clubRec') ? adv.landing : null, ellipse: !shot && allowed('clubRec') ? adv?.ellipse : null,
     hazards: h?.hazards || [], hole: h, clubOk: allowed('clubRec'),
     dzPin: (() => { const pn = h ? (h.pin || h.green) : null; const f = me; return pn && f ? pinDrop(f, pn, h)?.v ?? null : null; })(),
+    plan: (() => { if (shot || !allowed('clubRec') || !me || !adv?.club || adv.club === 'PT' || !(adv.kind === 'full' || adv.kind === 'partial')) return null; const cb = S.bag.find(c => c.id === adv.club), w = allowed('windAdjust') ? wx() : null; return cb ? { from: me, aim: adv.aimBearing, club: adv.club, stdCarry: cb.carry * (adv.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: w?.rho } : null; })(),
+    live: (() => { if (!shot || shot.aimBearing == null || !shot.club) return null; const cb = S.bag.find(c => c.id === shot.club), w = allowed('windAdjust') ? wx() : null; return cb ? { ts: shot.ts, from: shot.start, aim: shot.aimBearing, club: shot.club, stdCarry: cb.carry * (shot.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: shot.rho ?? w?.rho } : null; })(),
     apex: !shot && adv?.landing && allowed('clubRec') ? (conditionsEffect(adv.club && adv.club !== 'PT' ? adv.club : '7i', Math.max(10, adv.carry || 0)).apex || 20) : null,
   };
 }
@@ -1099,23 +1102,7 @@ async function mountView() {
     if (!map) return;
     drawHole(map, h); lay = L.layerGroup().addTo(map); map.on('zoomend', () => drawRings(sceneData()));
     $('#zi').onclick = () => map.zoomIn(); $('#zo').onclick = () => map.zoomOut();
-    map.on('click', e => {
-      if (!P.marking) { // 아무 곳이나 누르면 그곳까지 거리 (목표점 이동)
-        if (!shotOf() && sceneData().from) { P.target = { hole: h.n, lat: e.latlng.lat, lon: e.latlng.lng }; persist(); drawRings(sceneData()); vibrate(20); }
-        return;
-      }
-      if (P.marking === 'pin') {
-        P.marking = false; h.pin = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7), ts: Date.now(), src: 'user' }; save('courses');
-        vibrate(40); toast('⛳ 오늘 핀 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); return;
-      }
-      if (P.marking === 'green') {
-        P.marking = false; h.green = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) }; h.greenBy = 'user'; save('courses');
-        vibrate(40); toast('🟢 그린 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); fit2d(); return;
-      }
-      P.marking = false; P.ballPos = { lat: e.latlng.lat, lon: e.latlng.lng }; P.ballHole = h.n; P.ballSrc = 'map'; persist(); vibrate(40);
-      if (P.afterMark === 'hit') { P.afterMark = null; hit(); fit2d(); return; }
-      update(true); fit2d();
-    });
+    map.on('click', mapClick);
     fit2d(); setTimeout(() => { map?.invalidateSize(); fit2d(); }, 150);
   } else if (P.view === '3d' || P.view === '4d') {
     stage.innerHTML = `<div class="map3" id="p3"></div><div class="zoomb"><button id="zi">＋</button><button id="zo">－</button><button id="tilt" title="기울기">⛰️</button></div>
@@ -1144,12 +1131,57 @@ async function mountView() {
     stage.innerHTML = '<div class="arbox" id="arb"></div>';
     const { startAR } = await import('./arview.js');
     if (!$('#arb')) return;
-    arStop = await startAR($('#arb'), () => { const sd = sceneData(); return { ...sd, me: Sensors.pos || sd.from }; }, { onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); }, onPin: p => { const h = activeHole(); h.pin = { lat: +p.lat.toFixed(7), lon: +p.lon.toFixed(7), ts: Date.now(), src: 'flag', err: p.err }; save('courses'); adv = null; advKey = ''; update(true); toast(`⛳ 카메라로 잰 핀을 저장했어요 (${p.d}m ±${p.err}m)`, 3500); } });
+    arCtl = await startAR($('#arb'), () => { const sd = sceneData(); return { ...sd, me: Sensors.pos || sd.from }; }, {
+      onMapEl: el => {
+        const c = activeCourse(), c0 = ballPos() || h.green || h.tee || c?.center || Sensors.pos || { lat: 36.5, lon: 127.8 };
+        map = createMap(el, { center: ll(c0), zoom: 17 }); if (!map) return;
+        drawHole(map, h); lay = L.layerGroup().addTo(map); map.on('click', mapClick); map.on('zoomend', () => P.mapFull && drawRings(sceneData()));
+        headMk = L.marker(ll(c0), { icon: L.divIcon({ className: 'hd-cone', html: '<i></i>', iconSize: [0, 0] }), interactive: false, zIndexOffset: -10 }).addTo(map);
+        setTimeout(() => { map?.invalidateSize(); miniFit(); scene(); }, 120);
+      },
+      onMapMode: full => { P.mapFull = full; setTimeout(() => { if (!map) return; map.invalidateSize(); full ? fit2d() : miniFit(); scene(); }, 80); if (full) toast(P.marking ? '🗺️ 지도에서 눌러 주세요' : '🗺️ 지도예요 · 휴대폰을 세우면 다시 카메라', 2200); },
+      onHeading: b => { const me = Sensors.pos || ballPos(); if (!headMk || !me) return; headMk.setLatLng(ll(me)); const i = headMk.getElement()?.firstChild; if (i) i.style.transform = `rotate(${b}deg)`; },
+      onFail: () => { if (P.view !== 'ar') return; P.view = '2d'; P.viewSet = true; persist(); render(); toast('📷 카메라를 쓸 수 없어서 지도로 보여 드려요', 3500); },
+      onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); }, onPin: p => { const h = activeHole(); h.pin = { lat: +p.lat.toFixed(7), lon: +p.lon.toFixed(7), ts: Date.now(), src: 'flag', err: p.err }; save('courses'); adv = null; advKey = ''; update(true); toast(`⛳ 카메라로 잰 핀을 저장했어요 (${p.d}m ±${p.err}m)`, 3500); } });
+    arStop = arCtl?.stop || null;
   }
 }
 
+// 지도 누르기: 목표점 · 핀 · 그린 · 내 공 찍기 (지도 화면과 카메라 화면 속 지도가 같이 씀)
+function mapClick(e) {
+  const h = activeHole();
+      if (!P.marking) { // 아무 곳이나 누르면 그곳까지 거리 (목표점 이동)
+        if (!shotOf() && sceneData().from) { P.target = { hole: h.n, lat: e.latlng.lat, lon: e.latlng.lng }; persist(); drawRings(sceneData()); vibrate(20); }
+        return;
+      }
+      if (P.marking === 'pin') {
+        P.marking = false; h.pin = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7), ts: Date.now(), src: 'user' }; save('courses');
+        vibrate(40); toast('⛳ 오늘 핀 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); return;
+      }
+      if (P.marking === 'green') {
+        P.marking = false; h.green = { lat: +e.latlng.lat.toFixed(7), lon: +e.latlng.lng.toFixed(7) }; h.greenBy = 'user'; save('courses');
+        vibrate(40); toast('🟢 그린 위치를 저장했어요'); adv = null; advKey = ''; drawHole(map, h); update(true); fit2d(); return;
+      }
+      P.marking = false; P.ballPos = { lat: e.latlng.lat, lon: e.latlng.lng }; P.ballHole = h.n; P.ballSrc = 'map'; persist(); vibrate(40);
+      if (P.afterMark === 'hit') { P.afterMark = null; hit(); fit2d(); return; }
+      update(true); fit2d();
+    }
+
+// 지도로 찍어야 할 때: 카메라 화면이면 그 안의 지도를 크게, 아니면 지도 화면으로
+function toMap() {
+  if (P.view === 'ar' && arCtl) { arCtl.setMap(true, true); return; }
+  if (P.view !== '2d') { P.view = '2d'; persist(); render(); }
+}
+
+function miniFit() {
+  if (!map) return;
+  const sd = sceneData(), pts = [sd.me, sd.from, sd.pin, sd.landing, sd.ball].filter(Boolean).map(ll);
+  if (pts.length >= 2) map.fitBounds(L.latLngBounds(pts), { padding: [10, 10], maxZoom: 18, animate: false });
+  else if (pts.length) map.setView(pts[0], 17, { animate: false });
+}
 function fit2d() {
   if (!map) return;
+  if (P.view === 'ar' && !P.mapFull) return miniFit();
   const sd = sceneData();
   // 거리 링이 보일 때: 목표 주변(앞뒤 ±35m)을 크게 — 내 위치는 작은 코스 지도에서 확인
   if (sd.from && sd.pin && !shotOf() && distance(sd.from, sd.pin) >= 60) {
@@ -1184,7 +1216,8 @@ function scene() {
   if (from) L.circleMarker(ll(from), { radius: 9, color: '#fff', weight: 3, fillColor: P.ballPos ? '#ffffff' : '#2b7bff', fillOpacity: 1 }).bindTooltip(P.ballPos ? '내 공' : '나').addTo(lay);
   if (ball) { L.circle(ll(ball), { radius: shotOf()?.r80 || 10, color: '#ff6b5a', weight: 2, fillOpacity: 0.15, interactive: false }).addTo(lay); L.marker(ll(ball), { icon: labelIcon(`⚪ 내 공 ${Math.round(distance(Sensors.pos || from, ball))}m`, 'ball'), interactive: false }).addTo(lay); }
   if (!easy && pin && from && (shotOf() || distance(from, pin) < 25)) L.marker(ll(pin), { icon: labelIcon(`⛳ ${Math.round(distance(from, pin))}m`, 'pin'), interactive: false }).addTo(lay);
-  drawRings(sd);
+  if (P.view !== 'ar' || P.mapFull) drawRings(sd); else if (ringLay) { ringLay.remove(); ringLay = null; }
+  if (P.view === 'ar' && !P.mapFull && !scene._fitAt) { scene._fitAt = 1; miniFit(); }
 }
 
 // ---------- 거리 링 · 목표점(레이업) · 해저드 캐리 · 체감 거리(경사·바람·기온) ----------

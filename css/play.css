@@ -302,9 +302,9 @@ table.score td.sc-d span { border: 1.6px solid #d0452f; box-shadow: 0 0 0 2px #f
 .sheet-body .pick { margin-bottom: 8px; }
 
 /* ===== AR 레인지파인더 ===== */
-.imm:has(.imm-stage.ar) .imm-card, .imm:has(.imm-stage.ar) .imm-mini { display: none; }
+.imm:has(.imm-stage.ar) .imm-mini { display: none; }
 .imm .ar-bar { top: auto; left: 8px; bottom: 132px; }
-.ar-read { position: absolute; left: 50%; top: calc(44% + 46px); transform: translateX(-50%); z-index: 3; min-width: 230px; max-width: calc(100% - 100px); text-align: center; color: #fff; pointer-events: none; }
+.ar-read { position: absolute; left: 50%; top: calc(40% + 46px); transform: translateX(-50%); z-index: 3; min-width: 230px; max-width: calc(100% - 100px); text-align: center; color: #fff; pointer-events: none; }
 .ar-big { display: inline-flex; align-items: baseline; gap: 4px; background: rgba(0,0,0,.6); border-radius: 16px; padding: 4px 14px 6px; backdrop-filter: blur(6px); }
 .ar-big em { font-style: normal; font-size: 12px; font-weight: 800; opacity: .85; align-self: center; margin-right: 4px; }
 .ar-big b { font-size: 46px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; color: #ffc83d; }
@@ -592,3 +592,22 @@ html.easy.in-hole #toast { bottom: auto; top: calc(86px + env(safe-area-inset-to
 .lmi-t td, .lmi-t th { font-size: 12.5px; white-space: nowrap; }
 .lmi-sum { font-size: 15px; margin: 10px 0 0; }
 @media (max-width: 380px) { .lmi-map, .lmi-clubs { grid-template-columns: 1fr; } }
+
+/* ---------- 📷 카메라 화면 = 기본: 지도 · 입체 지도 · 공 비행 한 화면 ---------- */
+.ar-map { position: absolute; z-index: 4; overflow: hidden; background: #1b2a20; transition: all .28s ease; }
+.ar-map.mini { top: 120px; right: 10px; width: 118px; height: 118px; border-radius: 18px; border: 2px solid rgba(255,255,255,.7); box-shadow: 0 6px 20px rgba(0,0,0,.45); }
+.ar-map.full { inset: 0; border-radius: 0; border: 0; z-index: 6; }
+.ar-map-in { position: absolute; inset: 0; }
+.ar-map.mini .leaflet-control-container { display: none; }
+.ar-map-catch { position: absolute; inset: 0; z-index: 500; background: none; border: 0; cursor: pointer; }
+.ar-map.full .ar-map-catch { display: none; }
+.ar-map-close { display: none; position: absolute; z-index: 600; left: 50%; transform: translateX(-50%); top: 128px; border: 0; border-radius: 999px; padding: 10px 18px; font-weight: 900; font-size: 15px; background: #0e1410; color: #c8f169; box-shadow: 0 4px 16px rgba(0,0,0,.4); cursor: pointer; }
+.ar-map.full .ar-map-close { display: block; }
+.ar.mapfull .ar-tools, .ar.mapfull .ar-read, .ar.mapfull .ar-fly, .ar.mapfull .ar-bar { visibility: hidden; }
+.hd-cone i { position: absolute; left: -22px; top: -44px; width: 44px; height: 44px; transform-origin: 22px 44px; background: conic-gradient(from -30deg at 50% 100%, rgba(43,123,255,.55) 0deg 60deg, transparent 60deg); clip-path: polygon(50% 100%, 0 0, 100% 0); pointer-events: none; }
+.ar-tools button.fly { background: #c8f169; color: #0e1410; border-color: #c8f169; }
+.ar-fly { position: absolute; left: 50%; top: calc(40% + 50px); transform: translateX(-50%); z-index: 3; padding: 8px 14px; border-radius: 14px; background: rgba(0,0,0,.6); color: #fff; font-size: 14px; white-space: nowrap; display: none; pointer-events: none; }
+.ar-fly.show { display: block; } .ar-fly b { color: #ffe27a; }
+#arT { flex: 1; min-width: 90px; accent-color: #c8f169; }
+.imm:has(.imm-stage.ar) .imm-card { max-height: 30vh; overflow: auto; }
+.ar.flying .ar-read { display: none; }
