@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.69",
+   "code": 70,
+   "date": "2026-11-21T16:26:03.197Z",
+   "bytes": 6171750,
+   "sha256": "7a8c9cdb5be32a2b7291ea2986a5bff3ed4cb9e16fd7098726dd61ae5aecd4d7",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.69/pinpoint-caddie-1.0.69.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.69",
+   "notes": [
+    "'그린'에 들어가면 직접 재기 + 카메라로 보기가 먼저 열림 (퍼팅 계산 메뉴는 ① 재기)"
+   ]
+  },
+  {
    "version": "1.0.68",
    "code": 69,
    "date": "2026-11-21T16:05:15.316Z",
@@ -893,6 +905,6 @@
    ]
   }
  ],
- "latest": "1.0.68",
- "updatedAt": "2026-11-21T16:05:19.761Z"
+ "latest": "1.0.69",
+ "updatedAt": "2026-11-21T16:26:09.677Z"
 }
