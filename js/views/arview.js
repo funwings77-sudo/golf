@@ -18,6 +18,7 @@ import { BallDetector } from '../core/camera.js';
 import { curvDrop } from '../core/arproj.js';
 import { flightPath, flightAt } from '../physics/flight3d.js';
 import { openFlagCam } from './flagcam.js';
+import { drawRich, richWidth } from '../canvasicon.js';
 
 const YAW_KEY = 'pinpoint.arYaw';
 const HZ = { ob: ['OB', 'rgba(255,255,255,.12)', '#ffffff'], water: ['💧물', 'rgba(64,160,255,.30)', '#58b4ff'], bunker: ['🏖벙커', 'rgba(240,214,150,.32)', '#f3dc9a'], trees: ['🌳숲', 'rgba(30,110,60,.30)', '#4fbf7a'] };
@@ -548,7 +549,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       ${htLine}`;
   }
   function reticle(x, y) { ctx.beginPath(); ctx.arc(x, y, 18, 0, 7); ctx.moveTo(x - 34, y); ctx.lineTo(x - 22, y); ctx.moveTo(x + 22, y); ctx.lineTo(x + 34, y); ctx.moveTo(x, y - 34); ctx.lineTo(x, y - 22); ctx.moveTo(x, y + 22); ctx.lineTo(x, y + 34); ctx.stroke(); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 7); ctx.fill(); }
-  function tag(x, y, t) { ctx.font = '800 12px system-ui, sans-serif'; const w = ctx.measureText(t).width + 10; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x, y - 9, w, 18); ctx.fillStyle = '#fff'; ctx.fillText(t, x + 5, y + 4); }
+  function tag(x, y, t) { ctx.font = '800 12px system-ui, sans-serif'; const w = richWidth(ctx, t) + 10; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x, y - 9, w, 18); ctx.fillStyle = '#fff'; drawRich(ctx, t, x + 5, y + 4); }
   function line(pts, color, w, dash) {
     if (pts.length < 2) return;
     ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.setLineDash(dash); ctx.beginPath();
@@ -591,7 +592,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y + 16); ctx.lineTo(x, y + (major ? 6 : 10)); ctx.stroke();
       if (dd % 45 === 0) { ctx.fillStyle = '#ffc83d'; ctx.fillText(DIRS[dd / 45], x, y + 2); } else if (dd % 30 === 0) { ctx.fillStyle = '#fff'; ctx.fillText(String(dd), x, y + 2); }
     }
-    const mk = (p, icon, color) => { const r = normAngle(bearing(sc.me, p) - ax.bearing); const x = W / 2 + Math.max(-span / 2, Math.min(span / 2, r)) * px; ctx.fillStyle = color; ctx.fillText(icon + (Math.abs(r) > span / 2 ? (r > 0 ? '▶' : '◀') : ''), x, y - 18); };
+    const mk = (p, icon, color) => { const r = normAngle(bearing(sc.me, p) - ax.bearing); const x = W / 2 + Math.max(-span / 2, Math.min(span / 2, r)) * px; ctx.fillStyle = color; const arr = Math.abs(r) > span / 2 ? (r > 0 ? '▶' : '◀') : ''; const w = drawRich(ctx, icon, x - (arr ? 8 : 0), y - 18, { align: 'center', color }); if (arr) { const ta = ctx.textAlign; ctx.textAlign = 'left'; ctx.fillText(arr, x - 8 + w / 2 + 2, y - 18); ctx.textAlign = ta; } }; // 방향 화살표는 글자(◀▶ 짝)
     if (sc.pin) mk(sc.pin, '⛳', '#fff');
     ctx.fillStyle = '#5ee6a8'; ctx.beginPath(); ctx.moveTo(W / 2, y + 16); ctx.lineTo(W / 2 - 6, y + 24); ctx.lineTo(W / 2 + 6, y + 24); ctx.fill();
     ctx.textAlign = 'left';
@@ -619,9 +620,9 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   box.querySelector('#arRings').onclick = e => { ringsOn = !ringsOn; e.target.classList.toggle('on', ringsOn); };
 
   function label(x, y, text, bg, size) {
-    ctx.font = `800 ${size}px system-ui, sans-serif`; const w = ctx.measureText(text).width + 16;
+    ctx.font = `800 ${size}px system-ui, sans-serif`; const w = richWidth(ctx, text, size) + 16;
     ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - w / 2, y - size - 6, w, size + 12, 9) : ctx.rect(x - w / 2, y - size - 6, w, size + 12); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(text, x, y); ctx.textAlign = 'left';
+    ctx.fillStyle = '#fff'; drawRich(ctx, text, x, y, { size, align: 'center' }); ctx.textAlign = 'left';
   }
   function ring(x, y, r) { ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(x, y, r * 1.6, r * 0.6, 0, 0, 7); ctx.stroke(); }
   function edge(p, name, ax) {

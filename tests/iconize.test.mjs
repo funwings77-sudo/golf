@@ -26,3 +26,11 @@ test('변형 선택자(️)·성별 조합까지 한 덩어리로 바꾸고, 표
   assert.equal(swap('‹ 목록'), '‹ 목록');
   assert.equal(swap('3번 홀 7타'), '3번 홀 7타');
 });
+
+import { splitRich } from '../js/canvasicon.js';
+test('카메라 화면(캔버스) 표시: 이모지는 아이콘 조각, 나머지는 글자 조각으로 나눔', () => {
+  assert.deepEqual(splitRich('⛳ 깃발 142m'), [{ ic: 'green' }, { t: ' 깃발 142m' }]);
+  assert.deepEqual(splitRich('⛳까지 12.3m'), [{ ic: 'green' }, { t: '까지 12.3m' }]);
+  assert.deepEqual(splitRich('⛰️ 능선 1.2km'), [{ ic: 'mountain' }, { t: ' 능선 1.2km' }]);
+  assert.deepEqual(splitRich('깃발은 왼쪽 30°'), [{ t: '깃발은 왼쪽 30°' }]);
+});
