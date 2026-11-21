@@ -13,7 +13,7 @@ import { S } from '../core/state.js';
 import { loadTerrain } from '../core/terrain.js';
 import { playsLike } from '../core/weather.js';
 import { buildHorizon, visibleIn } from '../core/horizon.js';
-import { FlightSpotter, AngleTrack, fitTrajectory, ImpactListener } from '../core/balltrack.js';
+import { FlightSpotter, AngleTrack, fitTrajectory, ImpactListener, fuseHitTime } from '../core/balltrack.js';
 import { BallDetector } from '../core/camera.js';
 import { curvDrop } from '../core/arproj.js';
 import { flightPath, flightAt } from '../physics/flight3d.js';
@@ -67,10 +67,21 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   }
 
   // ---------- 🎥 친 공 따라가기 · 🎤 임팩트 소리 · 📷 가까이 공 찾기 ----------
-  let trk = null, trkFit = null, trkFitAt = 0, trkLiveTs = null, nearDet = null, nearN = 0, nearSeen = null;
+  let trk = null, trkFit = null, trkFitAt = 0, trkBad = null, trkLiveTs = null, nearDet = null, nearN = 0, nearSeen = null;
   const impact = new ImpactListener();
+  // ⏱️ 프레임 촬영 시각 (단속기의 GPS 시각 동기처럼): 화면 그리는 시각이 아니라 카메라가 찍은 시각을 씀
+  //   · 같은 프레임을 두 번 보지 않음(화면 60Hz · 카메라 30fps) · 소리 시각과 같은 시계(performance.now)
+  let vf = { t: 0, n: -1 };
+  if (video.requestVideoFrameCallback) {
+    const onVF = (now, md) => {
+      const ct = md.captureTime, t = Number.isFinite(ct) && Math.abs(now - ct) < 1000 ? ct : (md.expectedDisplayTime || now);
+      vf = { t, n: md.presentedFrames ?? vf.n + 1 };
+      if (alive) video.requestVideoFrameCallback(onVF);
+    };
+    video.requestVideoFrameCallback(onVF);
+  }
   function armTrack(sec = 60, why = 'button') {
-    trk = { until: performance.now() + sec * 1000, spot: new FlightSpotter({ width: 240 }), at: new AngleTrack(), last: 0, why };
+    trk = { until: performance.now() + sec * 1000, spot: new FlightSpotter({ width: 240 }), at: new AngleTrack(), last: 0, why, frameN: -1 };
     impact.start().then(ok => { if (trk) trk.mic = ok; });
     box.querySelector('#arTrack').classList.add('on'); box.querySelector('#arTrack').textContent = '⏹ 따라가기 멈춤';
   }
@@ -289,25 +300,45 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     const el = box.querySelector('#arTrk'), now = performance.now();
     if (trk) {
       const aim = sc.live?.aim ?? sc.plan?.aim ?? cameraAxis(R).bearing;
-      const cands = trk.spot.detect(video).map(c => {
-        const v = unproject(R, t.ox + c.x * t.s, t.oy + c.y * t.s, opt);
-        return { ...c, az: normAngle(Math.atan2(v.x, v.y) * 180 / Math.PI - aim), el: Math.asin(Math.max(-1, Math.min(1, v.z))) * 180 / Math.PI, sx: t.ox + c.x * t.s, sy: t.oy + c.y * t.s };
-      });
-      const o = trk.at.add(cands, now, c => c.el > -1.5 && Math.abs(c.az) < 28);
-      if (o) trk.last = now;
+      // 새 프레임일 때만 (같은 프레임 두 번 = 차이 0 · 시각 어긋남) · 시각은 카메라가 찍은 시각
+      const hasVF = vf.n >= 0, fresh = !hasVF || vf.n !== trk.frameN;
+      if (fresh && video.videoWidth) {
+        trk.frameN = vf.n;
+        const ft = hasVF && now - vf.t < 500 ? vf.t : now;
+        const cands = trk.spot.detect(video).map(c => {
+          const v = unproject(R, t.ox + c.x * t.s, t.oy + c.y * t.s, opt);
+          return { ...c, az: normAngle(Math.atan2(v.x, v.y) * 180 / Math.PI - aim), el: Math.asin(Math.max(-1, Math.min(1, v.z))) * 180 / Math.PI, sx: t.ox + c.x * t.s, sy: t.oy + c.y * t.s };
+        });
+        const o = trk.at.add(cands, ft, c => c.el > -1.5 && Math.abs(c.az) < 28);
+        if (o) trk.last = now;
+      }
       const obs = trk.at.obs;
       for (const q of obs) { const p = project(R, angDir(q.az + aim, q.el), opt); if (p.visible) { ctx.fillStyle = '#ffe27a'; ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, 7); ctx.fill(); } }
       el.hidden = false;
-      el.innerHTML = `🎥 <b>공을 따라가는 중</b>${trk.mic ? ' · 🎤 소리 듣는 중' : ''}<br><small>${obs.length ? `본 점 ${obs.length}개 · ${(obs.at(-1).t).toFixed(1)}초` : '공이 날아가는 쪽 하늘을 비춰 주세요'}</small>`;
+      el.innerHTML = `🎥 <b>공을 따라가는 중</b>${trk.mic ? ' · 🎤 소리 듣는 중' : ''}<br><small>${obs.length ? `✅ 공 궤적 확정 · 본 점 ${obs.length}개 · ${(obs.at(-1).t).toFixed(1)}초` : trk.at.candidates ? `🔎 후보 ${trk.at.candidates}개 확인 중 (3번 이어져야 확정)` : '공이 날아가는 쪽 하늘을 비춰 주세요'}</small>`;
       const ended = obs.length >= 6 && now - trk.last > 700, timeout = now > trk.until;
       if (ended || (timeout && obs.length >= 6)) {
-        const hitT = impact.last(trk.at.t0) || (sc.swingTs ? { t: performance.now() - (Date.now() - sc.swingTs), src: 'swing' } : null);
-        const base = { club: sc.live?.club || sc.plan?.club || '7i', wind: sc.live?.wind || sc.plan?.wind, rho: sc.live?.rho || sc.plan?.rho, aim, from: sc.live?.from || sc.from || sc.me, guessCarry: sc.live?.stdCarry || sc.plan?.stdCarry };
-        if (hitT && trk.at.t0 - hitT.t >= 0 && trk.at.t0 - hitT.t < 8000) { base.tau0 = (trk.at.t0 - hitT.t) / 1000; base.tauSd = hitT.src === 'swing' ? 0.12 : 0.03; }
+        // ⏱️ 친 시각: 🎤 소리 ↔ ⌚ 스윙 이중 판정 (둘이 어긋나면 어느 쪽도 안 믿음)
+        const mic = impact.last(trk.at.t0)?.t ?? null, swing = sc.swingTs ? performance.now() - (Date.now() - sc.swingTs) : null;
+        const ok = x => x != null && trk.at.t0 - x >= 0 && trk.at.t0 - x < 8000;
+        const hit = fuseHitTime(ok(mic) ? mic : null, ok(swing) ? swing : null);
+        const from = sc.live?.from || sc.from || sc.me;
+        const base = { club: sc.live?.club || sc.plan?.club || '7i', wind: sc.live?.wind || sc.plan?.wind, rho: sc.live?.rho || sc.plan?.rho, aim, from, guessCarry: sc.live?.stdCarry || sc.plan?.stdCarry, timingConflict: hit.conflict };
+        if (hit.t != null) { base.tau0 = (trk.at.t0 - hit.t) / 1000; base.tauSd = hit.sd; }
+        // 📐 설치 기하: 찍는 사람(내 휴대폰) 위치 = 친 곳 기준 오른쪽·앞·눈높이 (단속기의 설치 각도·높이 측량)
+        const dd = geodesic(from, sc.me), bb = (bearing(from, sc.me) - aim) * Math.PI / 180;
+        base.obsAt = { x: dd > 0.3 ? dd * Math.sin(bb) : 0, y: dd > 0.3 ? dd * Math.cos(bb) : 0, z: eye - hgt(from, sc) };
         const fit = fitTrajectory(obs, base);
-        if (fit) { fit.timedBy = hitT ? (hitT.src === 'swing' ? '⌚ 스윙' : '🎤 소리') : null; trkFit = fit; trkFitAt = now; onTrack && onTrack(fit); }
+        if (fit && fit.valid) { fit.timedBy = { both: '🎤 소리+⌚ 스윙', mic: '🎤 소리', swing: '⌚ 스윙' }[hit.src] || null; trkFit = fit; trkFitAt = now; trkBad = null; onTrack && onTrack(fit); }
+        else if (fit) { trkBad = { reason: fit.reason, n: fit.n0, at: now }; try { navigator.vibrate?.(120); } catch {} }
         disarm();
       } else if (timeout) disarm();
+    }
+    // 🚫 측정 무효 (단속기처럼 결과를 버림 · 기록하지 않음) — 6초 알림
+    if (!trk && trkBad && now - trkBad.at < 6000) {
+      el.hidden = false;
+      el.innerHTML = `🚫 <b>이번 추적은 쓰지 않아요</b><br><small>${esc(trkBad.reason)} · 본 점 ${trkBad.n}개 · 다음엔 공이 날아갈 하늘을 휴대폰을 고정하고 비춰 주세요</small>`;
+      return;
     }
     // 맞춘 비행: 밝은 선 + 착지 · 숫자 판 (30초)
     if (trkFit && now - trkFitAt < 30000) {
@@ -321,7 +352,8 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       el.innerHTML = `<div class="trk-g"><span><small>공 속도</small><b>${f1(F.kmh)}km/h</b></span><span><small>발사 각</small><b>${f1(F.launch)}°</b></span><span><small>좌우</small><b>${Math.abs(F.sideDeg) < 0.05 ? '정면' : `${F.sideDeg > 0 ? '오른쪽' : '왼쪽'} ${f1(Math.abs(F.sideDeg))}°`}</b></span>
         <span><small>최고 높이</small><b>${f1(F.apex)}m</b></span><span><small>비행 시간</small><b>${F.time.toFixed(2)}초</b></span><span><small>착지 각</small><b>${f1(F.landAngle)}°</b></span>
         <span><small>공중 거리</small><b>${f1(F.carry)}m</b></span><span><small>멈출 거리</small><b>${f1(F.total)}m</b></span><span><small>오차</small><b>±${f1(F.sd)}m</b></span></div>
-        <small>🔀 ${F.timedBy ? `${F.timedBy}(친 시각) + ` : ''}📷 카메라 각도 ${F.n}점 + 🧮 탄도 모델${F.timedBy ? '' : ` · 친 시각을 몰라서 ${f1(F.lo)}~${f1(F.hi)}m 범위`}</small>`;
+        <small>🔀 ${F.timedBy ? `${F.timedBy}(친 시각) + ` : ''}📷 카메라 각도 ${F.n}점 + 🧮 탄도 모델${F.timedBy ? '' : ` · ${F.timingConflict ? '🎤 소리와 ⌚ 스윙 시각이 안 맞아 친 시각을 빼고' : '친 시각을 몰라서'} ${f1(F.lo)}~${f1(F.hi)}m 범위`}</small>
+        <small>✅ 검증 통과 · 각도 잔차 ${F.rms.toFixed(2)}°${F.rejected ? ` · 엉뚱한 점 ${F.rejected}개 버림` : ''}</small>`;
     } else if (!trk) el.hidden = true;
   }
   // 방위·올려다보는 각 → 먼 방향 점 (화면에 찍기용)

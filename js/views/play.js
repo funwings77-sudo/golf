@@ -1179,7 +1179,7 @@ async function mountView() {
         if (!shotOf()) await hit();
         const shot = shotOf(); if (!shot || !fit.rest) return;
         shot.pred = { lat: fit.rest.lat, lon: fit.rest.lon }; shot.r80 = Math.max(3, fit.sd * 1.5);
-        shot.track = { kmh: +fit.kmh.toFixed(1), launch: +fit.launch.toFixed(1), side: +fit.sideDeg.toFixed(1), apex: +fit.apex.toFixed(1), time: +fit.time.toFixed(2), carry: +fit.carry.toFixed(1), total: +fit.total.toFixed(1), sd: +fit.sd.toFixed(1), timedBy: fit.timedBy, n: fit.n };
+        shot.track = { kmh: +fit.kmh.toFixed(1), launch: +fit.launch.toFixed(1), side: +fit.sideDeg.toFixed(1), apex: +fit.apex.toFixed(1), time: +fit.time.toFixed(2), carry: +fit.carry.toFixed(1), total: +fit.total.toFixed(1), sd: +fit.sd.toFixed(1), timedBy: fit.timedBy, n: fit.n, rms: +fit.rms.toFixed(2), rejected: fit.rejected };
         save('round'); vibrate([60, 40, 60]); update(true);
         say(`착지 거리 ${fit.carry.toFixed(1)}미터, 공 속도 시속 ${Math.round(fit.kmh)}킬로미터`, { force: true });
         toast(`🎥 착지 ${fit.carry.toFixed(1)}m ±${fit.sd.toFixed(1)} · 공 속도 ${fit.kmh.toFixed(1)}km/h · 발사 ${fit.launch.toFixed(1)}°`, 4500);
