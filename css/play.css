@@ -611,3 +611,39 @@ html.easy.in-hole #toast { bottom: auto; top: calc(86px + env(safe-area-inset-to
 #arT { flex: 1; min-width: 90px; accent-color: #c8f169; }
 .imm:has(.imm-stage.ar) .imm-card { max-height: 30vh; overflow: auto; }
 .ar.flying .ar-read { display: none; }
+/* 🩺 점검 창: 위 홀 막대와 아래 버튼 사이에, 다른 표시보다 위 · 길면 스크롤 */
+.ar-diag { top: 140px; bottom: 210px; left: 10px; right: 10px; max-height: none; z-index: 20; padding: 0; background: rgba(8,12,10,.94); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 10px 30px rgba(0,0,0,.5); -webkit-overflow-scrolling: touch; }
+.ar-diag.show { display: flex; flex-direction: column; }
+.ar-diag-h { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 8px 10px 8px 14px; border-bottom: 1px solid rgba(255,255,255,.12); font-size: 15px; }
+.ar-diag-h button { border: 0; border-radius: 999px; padding: 6px 12px; font-weight: 800; background: #c8f169; color: #0e1410; cursor: pointer; }
+.ar-diag-b { flex: 1; overflow-y: auto; padding: 10px 14px 14px; }
+.ar-diag-b > div { margin: 3px 0; }
+/* 카메라 화면 안내 글: 위 홀 막대·내 위치 버튼 아래 (가려지지 않게) */
+.ar-msg { top: 140px; z-index: 21; left: 50%; right: auto; transform: translateX(-50%); width: min(340px, calc(100% - 24px)); }
+.ar-msg small { display: block; margin-top: 4px; font-weight: 600; font-size: 13px; opacity: .9; }
+.ar-bar .btn.on { background: #c8f169; color: #0e1410; }
+.ar canvas { touch-action: none; } /* 조준점 끌기: 화면이 따라 움직이지 않게 */
+/* 조준점 정밀 숫자 판 (0.1m · 0.1°) */
+.ar-read { min-width: 280px; max-width: calc(100% - 24px); }
+.ar-big b { font-size: 42px; }
+.ar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 6px; }
+.ar-grid span { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,.6); border-radius: 10px; padding: 3px 4px 4px; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.25; white-space: nowrap; }
+.ar-grid small { font-size: 10.5px; font-weight: 700; opacity: .75; }
+
+/* ---------- 🛠 카메라 도구: 버튼 하나 + 판 (능선·풍경을 가리지 않게) ---------- */
+.ar-tools { display: none !important; }
+.ar-tbtn { position: absolute; left: 10px; top: 120px; z-index: 7; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255,255,255,.28); background: rgba(10,16,12,.6); color: #fff; font-size: 21px; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+.ar-tbtn.on { background: #c8f169; color: #0e1410; border-color: #c8f169; }
+.ar-chip { position: absolute; left: 10px; top: 174px; z-index: 7; min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: rgba(10,16,12,.62); color: #fff; font-weight: 800; font-size: 12.5px; cursor: pointer; }
+.ar-chip.cal { left: 50%; transform: translateX(-50%); top: 200px; background: #c8f169; color: #0e1410; border-color: #c8f169; z-index: 22; }
+.ar-tray { position: absolute; left: 10px; top: 172px; z-index: 25; width: min(300px, calc(100% - 20px)); max-height: calc(100% - 420px); min-height: 120px; overflow-y: auto; padding: 10px; border-radius: 18px; background: rgba(8,12,10,.92); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 12px 32px rgba(0,0,0,.5); color: #fff; }
+.ar-tray[hidden] { display: none; }
+.ar-tray-h { font-weight: 900; font-size: 13.5px; margin: 2px 2px 8px; } .ar-tray-h small { display: block; font-weight: 600; font-size: 11px; opacity: .7; }
+.ar-tray-g { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ar-tray-g button { min-height: 42px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.07); color: #fff; font-weight: 800; font-size: 13px; text-align: left; padding: 0 10px; cursor: pointer; }
+.ar-tray-g button.on { background: #5ee6a8; color: #072015; border-color: #5ee6a8; }
+.ar-tray-g button.fly { background: #c8f169; color: #0e1410; border-color: #c8f169; }
+.ar-tray-g button.flag { background: #ff5a3c; border-color: #ff5a3c; }
+.ar-tray-v { margin-top: 10px; }
+/* 카메라 화면에서는 오른쪽 보기 바꾸기 줄(큰·2D·3D·4D·AR·◀▶)을 숨김 → 도구 판의 '화면 바꾸기'로 */
+.imm.arv .imm-side { display: none !important; }

@@ -11,19 +11,32 @@ import { rotationMatrix, project, enuOf, focalPx, cameraAxis, yawCorrection, smo
 import { distance, bearing, destination, normAngle } from '../core/geo.js';
 import { S } from '../core/state.js';
 import { loadTerrain } from '../core/terrain.js';
+import { playsLike } from '../core/weather.js';
 import { flightPath, flightAt } from '../physics/flight3d.js';
 import { openFlagCam } from './flagcam.js';
 
 const YAW_KEY = 'pinpoint.arYaw';
 const HZ = { ob: ['OB', 'rgba(255,255,255,.12)', '#ffffff'], water: ['💧물', 'rgba(64,160,255,.30)', '#58b4ff'], bunker: ['🏖벙커', 'rgba(240,214,150,.32)', '#f3dc9a'], trees: ['🌳숲', 'rgba(30,110,60,.30)', '#4fbf7a'] };
 
-export async function startAR(box, getScene, { onLock = null, onPin = null, onMapEl = null, onMapMode = null, onHeading = null, onFail = null } = {}) {
+export async function startAR(box, getScene, { onLock = null, onPin = null, onMapEl = null, onMapMode = null, onHeading = null, onFail = null, views = [], onView = null } = {}) {
   box.innerHTML = `<div class="ar"><video playsinline muted></video><canvas></canvas>
     <div class="ar-map mini" id="arMap"><div class="ar-map-in"></div><button class="ar-map-catch" id="arMapCatch" aria-label="지도 크게 보기"></button><button class="ar-map-close" id="arMapClose">📷 카메라로</button></div>
-    <div class="ar-msg" id="arMsg"></div><div class="ar-diag" id="arDiag"></div>
-    <div class="ar-read" id="arRead"></div><div class="ar-fly" id="arFlyInfo"></div>
-    <div class="ar-tools"><button id="arFly" class="fly">▶ 공 날려 보기</button><button id="arTer" class="on">⛰️ 지형</button><button id="arFlag" class="flag">🚩 깃대로 재기</button><button id="arLock">📌 고정</button><button id="arHt">🌳 높이</button><button id="arRings" class="on">◎ 거리선</button></div>
-    <div class="ar-bar"><button class="btn small" id="arCal">🎯 깃발 맞추기</button><button class="btn small" id="arReset" title="방위 보정 지우기">↺</button><button class="btn small" id="arChk">🩺 점검</button><input type="range" id="arT" min="0" max="1000" value="0" aria-label="공 비행 시간" hidden><span id="arAcc"></span></div></div>`;
+    <div class="ar-msg" id="arMsg"></div><div class="ar-diag" id="arDiag"><div class="ar-diag-h"><b>🩺 AR 점검</b><button id="arDiagX" aria-label="점검 닫기">✕ 닫기</button></div><div class="ar-diag-b" id="arDiagB"></div></div>
+    <div class="ar-read" id="arRead"></div><div class="ar-fly" id="arFlyInfo"></div><input type="range" class="ar-slide" id="arT" min="0" max="1000" value="0" aria-label="공 비행 시간" hidden>
+    <button class="ar-tbtn" id="arTools" aria-label="카메라 도구" aria-expanded="false">🛠</button>
+    <button class="ar-chip" id="arAim0" hidden>⊙ 가운데로</button>
+    <div class="ar-tray" id="arTray" hidden>
+      <div class="ar-tray-h">카메라 도구 <small>켜기/끄기는 그대로 두고, 나머지는 누르면 닫혀요</small></div>
+      <div class="ar-tray-g">
+        <button id="arFly" class="fly">▶ 공 날려 보기</button><button id="arFlag" class="flag">🚩 깃대로 재기</button>
+        <button id="arTer" class="on" data-keep>⛰️ 지형</button><button id="arRings" class="on" data-keep>◎ 거리선</button>
+        <button id="arLock">📌 고정</button><button id="arHt">🌳 높이</button>
+        <button id="arCal">🎯 깃발 맞추기</button><button id="arReset">↺ 보정 지우기</button>
+        <button id="arChk">🩺 점검</button>
+      </div>
+      <div class="ar-tray-v" id="arViews"></div>
+    </div>
+    <div class="ar-bar"><span id="arAcc"></span></div></div>`;
   const root = box.querySelector('.ar'), video = box.querySelector('video'), cv = box.querySelector('canvas'), msg = box.querySelector('#arMsg'), acc = box.querySelector('#arAcc');
   const mapBox = box.querySelector('#arMap'), flyInfo = box.querySelector('#arFlyInfo'), slider = box.querySelector('#arT');
   let stopCam = null, raf = 0, alive = true, calib = false;
@@ -31,8 +44,24 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   let a = null, b = null, g = null;
   let evN = 0, evRate = 0, evT = performance.now();
   const unOri = onOrientation(() => { evN++; const now = performance.now(); if (now - evT >= 1000) { evRate = evN * 1000 / (now - evT); evN = 0; evT = now; } });
+  const AIM0 = { x: 0.5, y: 0.40 };
+  let aimAt = { ...AIM0 }; // 🎯 조준점 (화면 비율): 손가락으로 끌거나 누른 곳으로 옮김
+  const aimXY = () => { const W = box.clientWidth, H = box.clientHeight; return { rx: Math.round(Math.max(40, Math.min(W - 40, aimAt.x * W))), ry: Math.round(Math.max(130, Math.min(H - 240, aimAt.y * H))) }; };
   const hintUntil = performance.now() + 10000; // 긴 안내 글은 처음 10초만 (화면을 가리지 않게)
   let diagOn = false, lockPt = null, ringsOn = true, terrOn = true, ht = null, readT = 0, aim = null, lastHit = null;
+
+  // ---------- 🛠 카메라 도구: 버튼 하나 → 판 (화면을 가리지 않게) ----------
+  const tray = box.querySelector('#arTray'), tBtn = box.querySelector('#arTools');
+  const setTray = on => { tray.hidden = !on; tBtn.classList.toggle('on', on); tBtn.setAttribute('aria-expanded', String(on)); };
+  tBtn.onclick = e => { e.stopPropagation(); setTray(tray.hidden); };
+  // 한 번 쓰는 도구는 누르면 판을 닫음 (켜기/끄기 도구는 data-keep으로 열어 둠)
+  tray.addEventListener('click', e => { const b = e.target.closest('button'); if (b && !b.hasAttribute('data-keep')) setTimeout(() => setTray(false), 0); });
+  box.addEventListener('pointerdown', e => { if (!tray.hidden && !tray.contains(e.target) && e.target !== tBtn) setTray(false); });
+  const vBox = box.querySelector('#arViews');
+  if (views.length && onView) {
+    vBox.innerHTML = `<div class="ar-tray-h">화면 바꾸기</div><div class="ar-tray-g">${views.map(([k, t]) => `<button data-view="${k}">${t}</button>`).join('')}</div>`;
+    vBox.querySelectorAll('[data-view]').forEach(b => b.onclick = () => onView(b.dataset.view));
+  }
 
   // ---------- 🗺️ 지도 (작게 ↔ 전체) ----------
   let mapFull = false, mapManual = false, lowSince = 0, highSince = 0;
@@ -286,7 +315,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     void d0; return null;
   }
   function rangefinder(sc, R, ax, opt, eye, f) {
-    const W = box.clientWidth, H = box.clientHeight, rx = W / 2, ry = Math.round(H * 0.40);
+    const W = box.clientWidth, H = box.clientHeight, { rx, ry } = aimXY();
     const D = sc.pin ? distance(sc.me, sc.pin) : null;
     // 지면 거리 링: 내 앞 ±35° 호, 점마다 실제 땅 높이
     if (ringsOn) {
@@ -302,8 +331,8 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
         const major = r % 50 === 0;
         ctx.strokeStyle = major ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.45)'; ctx.lineWidth = major ? 2 : 1.2; ctx.setLineDash(major ? [] : [5, 6]);
         ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.stroke(); ctx.setLineDash([]);
-        const lp = pts.reduce((m, q) => (Math.abs(q.x - W * 0.7) < Math.abs(m.x - W * 0.7) ? q : m)), c = clubFor(r);
-        if (lp.y > 110 && (lp.y < ry - 14 || lp.y > ry + 150)) tag(Math.min(W - 128, lp.x), lp.y - 10, `${r}m${c ? ' · ' + CLUBN(c) : ''}`);
+        const lp = pts.reduce((m, q) => (Math.abs(q.x - W * 0.6) < Math.abs(m.x - W * 0.6) ? q : m)), c = clubFor(r);
+        if (lp.y > 110 && (lp.y < ry - 14 || lp.y > ry + 150)) tag(Math.min(W - 190, lp.x), lp.y - 10, `${r}m${c ? ' · ' + CLUBN(c) : ''}`);
       }
     }
     compassTape(sc, ax, W);
@@ -328,24 +357,57 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     if (snap) { dist = distance(sc.me, snap.p); err = sc.me.acc || 5; pt = snap.p; }
     else if (isFinite(gh.h) && gh.h < 400) { dist = gh.h; err = gh.err; pt = destination(sc.me, brg, gh.h); }
     aim = pt ? { p: pt, dist, name: snap?.name || null } : null;
+    if (pt && dist >= 2) {
+      const br = bearing(sc.me, pt), gp = [];
+      for (let s = 1.5; s <= dist; s += Math.max(0.5, dist / 90)) { const p = destination(sc.me, br, s), q = project(R, enuOf(sc.me, p, { eye, dz: hgt(p, sc) }), opt); if (q.visible && q.depth > 0.8) gp.push(q); }
+      line(gp, 'rgba(0,0,0,.45)', 6, []); line(gp, 'rgba(255,200,61,.95)', 3, []);
+      const step = dist > 150 ? 25 : dist > 60 ? 10 : dist > 20 ? 5 : dist > 8 ? 2 : 1;
+      let lastLy = Infinity; // 눈금 글씨는 화면에서 18px 넘게 떨어질 때만 (멀리서 겹치지 않게)
+      for (let s = step; s < dist - step * 0.4; s += step) {
+        const p = destination(sc.me, br, s), q = project(R, enuOf(sc.me, p, { eye, dz: hgt(p, sc) }), opt);
+        if (!q.visible || q.depth < 0.8) continue;
+        ctx.fillStyle = '#ffc83d'; ctx.beginPath(); ctx.arc(q.x, q.y, 3.5, 0, 7); ctx.fill();
+        if ((dist <= 60 || !ringsOn) && Math.abs(q.y - ry) > 26 && Math.abs(lastLy - q.y) > 18) { tag(q.x + 6, q.y, `${s}m`); lastLy = q.y; } // 멀리는 거리선 글씨가 있으니 점만
+      }
+      if (sc.pin && !(snap && snap.p === sc.pin) && distance(pt, sc.pin) > 1) {
+        const bp = bearing(pt, sc.pin), dp = distance(pt, sc.pin), pp = [];
+        for (let s = 0; s <= dp; s += Math.max(0.5, dp / 60)) { const p = destination(pt, bp, s), q = project(R, enuOf(sc.me, p, { eye, dz: hgt(p, sc) }), opt); if (q.visible && q.depth > 1) pp.push(q); }
+        line(pp, 'rgba(255,255,255,.85)', 2, [6, 6]);
+        const mp = destination(pt, bp, dp / 2), mq = project(R, enuOf(sc.me, mp, { eye, dz: hgt(mp, sc) }), opt);
+        if (mq.visible) tag(mq.x + 6, mq.y - 6, `⛳까지 ${dp.toFixed(1)}m`);
+      }
+    }
     const col = snap ? '#5ee6a8' : '#ffffff';
     ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 4; reticle(rx, ry); ctx.strokeStyle = col; ctx.lineWidth = 2; reticle(rx, ry);
     if (snap) { ctx.strokeStyle = '#5ee6a8'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(snap.q.x, snap.q.y, 14, 0, 7); ctx.stroke(); }
     if (lockPt) { const q = project(R, enuOf(sc.me, lockPt, { eye, dz: hgt(lockPt, sc) }), opt); if (q.visible) { ctx.fillStyle = '#ffc83d'; ctx.beginPath(); ctx.arc(q.x, q.y, 7, 0, 7); ctx.fill(); tag(q.x + 10, q.y - 8, `📌 ${Math.round(distance(sc.me, lockPt))}m`); } }
     if (now - readT < 120) return; readT = now;
     const read = box.querySelector('#arRead');
+    read.style.top = `${ry + 44}px`; read.style.left = `${Math.max(150, Math.min(W - 150, rx))}px`;
     const too = !snap && (!isFinite(gh.h) || gh.h >= 400 || err > Math.max(8, dist * 0.35));
-    const club = !too && dist ? clubFor(dist) : null;
+    const f1 = x => (Math.round(x * 10) / 10).toFixed(1);
     const toPin = pt && sc.pin && !(snap && snap.p === sc.pin) ? distance(pt, sc.pin) : null;
     const dzPt = pt ? hgt(pt, sc) : 0;
+    // 체감 거리: 오늘 바람·기온 + 고저차 (대회 모드면 sc.wx 없음 → 안 보임)
+    const pl = !too && dist && sc.wx ? playsLike({ dist, dh: dzPt, windSpeed: sc.wx.windSpeed || 0, windFrom: sc.wx.windFrom || 0, shotBearing: brg, tempC: sc.wx.temp ?? 20 }) : null;
+    const club = !too && dist ? clubFor(pl ? pl.total : dist) : null;
+    const latM = rel != null && dist ? dist * Math.sin(rel * Math.PI / 180) : null;
     let htLine = '';
     if (ht?.base) {
       const th = Math.atan2(v.z, Math.hypot(v.x, v.y)), hg = ht.base.d * (Math.tan(th) - Math.tan(ht.base.th));
       htLine = `<div class="ar-ht">🌳 높이 <b>${Math.max(0, hg).toFixed(1)}m</b> <small>(${Math.round(ht.base.d)}m 앞 · 꼭대기를 조준하고 [높이]를 다시 누르면 확정)</small></div>`;
     } else if (ht?.done) htLine = `<div class="ar-ht">🌳 높이 <b>${ht.done.h.toFixed(1)}m</b> <small>${Math.round(ht.done.d)}m 앞 · ${esc(ht.done.note)}</small></div>`;
     else if (ht) htLine = '<div class="ar-ht">🌳 나무·벽의 <b>밑동</b>을 조준하고 [높이]를 누르세요</div>';
-    read.innerHTML = `<div class="ar-big">${too ? `<span class="far">${!isFinite(gh.h) || gh.h >= 400 ? '하늘·먼 곳' : '너무 멀어요'}</span>` : `${snap ? `<em>${esc(snap.name)}</em>` : '<em>조준한 곳</em>'}<b>${dist < 10 ? dist.toFixed(1) : Math.round(dist)}</b><small>m</small>${snap ? '' : `<i>±${err < 10 ? err.toFixed(1) : Math.round(err)}</i>`}${club ? `<u>${esc(CLUBN(club))}</u>` : ''}`}</div>
-      <div class="ar-sub"><span>🧭 ${compass(brg)} ${Math.round(brg)}°</span>${rel != null ? `<span>${Math.abs(rel) < 1 ? '깃발 방향 ✓' : `깃발보다 ${rel > 0 ? '오른쪽' : '왼쪽'} ${Math.abs(rel).toFixed(1)}°`}</span>` : ''}${!too && Math.abs(dzPt) >= 0.5 ? `<span>${dzPt > 0 ? '⬆ 오르막' : '⬇ 내리막'} ${Math.abs(dzPt).toFixed(1)}m</span>` : `<span>${gh.elev >= 0 ? '⬆' : '⬇'} ${Math.abs(gh.elev).toFixed(1)}°</span>`}${toPin != null ? `<span>⛳까지 ${Math.round(toPin)}m</span>` : ''}</div>
+    const cell = (k, v2) => `<span><small>${k}</small>${v2}</span>`;
+    read.innerHTML = `<div class="ar-big">${too ? `<span class="far">${!isFinite(gh.h) || gh.h >= 400 ? '하늘·먼 곳' : '너무 멀어요'}</span>` : `<em>${snap ? esc(snap.name) : '조준한 곳까지'}</em><b>${f1(dist)}</b><small>m</small><i>±${f1(err)}</i>${club ? `<u>${esc(CLUBN(club))}</u>` : ''}`}</div>
+      ${too ? `<div class="ar-sub"><span>🧭 ${compass(brg)} ${f1(brg)}°</span><span>${gh.elev >= 0 ? '⬆' : '⬇'} ${f1(Math.abs(gh.elev))}°</span></div>` : `<div class="ar-grid">
+        ${cell('직선 거리', `${f1(Math.hypot(dist, dzPt))}m`)}
+        ${cell('높이 차이', Math.abs(dzPt) < 0.05 ? '평평 0.0m' : `${dzPt > 0 ? '⬆' : '⬇'} ${f1(Math.abs(dzPt))}m · ${f1(Math.abs(dzPt / dist * 100))}%`)}
+        ${cell('방향', `${compass(brg)} ${f1(brg)}°`)}
+        ${rel != null ? cell('깃발 기준', Math.abs(rel) < 0.05 ? '정면 ✓' : `${rel > 0 ? '오른쪽' : '왼쪽'} ${f1(Math.abs(rel))}° · ${f1(Math.abs(latM))}m`) : cell('내려다봄', `${f1(Math.abs(gh.elev))}°`)}
+        ${toPin != null ? cell('⛳까지', `${f1(toPin)}m`) : sc.pin ? cell('⛳까지', '여기예요') : ''}
+        ${pl ? cell('체감 거리', `${f1(pl.total)}m`) : cell('내 위치 오차', `±${f1(sc.me.acc || 0)}m`)}
+      </div>`}
       ${too && now < hintUntil ? '<div class="ar-hint">멀리는 깃발·벙커·물 표시에 조준선을 맞추면 GPS 거리가 나와요</div>' : ''}${htLine}`;
   }
   function reticle(x, y) { ctx.beginPath(); ctx.arc(x, y, 18, 0, 7); ctx.moveTo(x - 34, y); ctx.lineTo(x - 22, y); ctx.moveTo(x + 22, y); ctx.lineTo(x + 34, y); ctx.moveTo(x, y - 34); ctx.lineTo(x, y - 22); ctx.moveTo(x, y + 22); ctx.lineTo(x, y + 34); ctx.stroke(); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 7); ctx.fill(); }
@@ -388,7 +450,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     if (!ht) { ht = {}; e.target.classList.add('on'); return; }
     if (ht.done) { ht = null; e.target.classList.remove('on'); return; }
     if (!last.R) return;
-    const W = box.clientWidth, H = box.clientHeight, v = unproject(last.R, W / 2, Math.round(H * 0.40), last.opt), th = Math.atan2(v.z, Math.hypot(v.x, v.y));
+    const { rx, ry } = aimXY(), v = unproject(last.R, rx, ry, last.opt), th = Math.atan2(v.z, Math.hypot(v.x, v.y));
     if (!ht.base) { if (!aim) return; ht.base = { d: aim.dist, th }; return; }
     const h = Math.max(0, ht.base.d * (Math.tan(th) - Math.tan(ht.base.th)));
     ht.done = { h, d: ht.base.d, note: h > ht.base.d * 0.35 ? '넘기기 어려워요 · 옆으로 돌아가세요' : h > ht.base.d * 0.18 ? '높은 탄도(웨지·9번)면 넘어가요' : '대부분 클럽으로 넘어가요' };
@@ -408,11 +470,13 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     ctx.fillStyle = '#ffe27a'; ctx.font = '900 26px system-ui'; ctx.textAlign = 'center'; ctx.fillText(left ? '◀' : '▶', x, y + 9);
     label(x + (left ? 60 : -60), y + 52, `${name}은 ${left ? '왼쪽' : '오른쪽'} ${Math.abs(rel).toFixed(0)}°`, 'rgba(0,0,0,.65)', 13); ctx.textAlign = 'left';
   }
+  let diagT = 0;
   function diag(sc, ax) {
+    const tn = performance.now(); if (tn - diagT < 500) return; diagT = tn; // 1초에 2번만 (스크롤이 튀지 않게)
     const D = sc.pin ? distance(sc.me, sc.pin) : 150, cAcc = Sensors.compassAcc, gAcc = sc.me.acc || 0, age = (Date.now() - (sc.me.ts || Date.now())) / 1000;
     const row = (ok, name, val, fix) => `<div>${ok === 2 ? '<b class="ok">✓</b>' : ok === 1 ? '<b class="mid">△</b>' : '<b class="bad">✕</b>'} ${name}: <b>${val}</b>${ok < 2 && fix ? ` <br><small>→ ${fix}</small>` : ''}</div>`;
     const compErr = cAcc != null && cAcc >= 0 ? cAcc : 10, lat = D * Math.tan(compErr * Math.PI / 180);
-    box.querySelector('#arDiag').innerHTML = `<b>AR 점검</b> <small>(이 화면을 캡처해서 보내 주시면 원인을 찾을 수 있어요)</small>
+    box.querySelector('#arDiagB').innerHTML = `<small>이 화면을 캡처해서 보내 주시면 원인을 찾을 수 있어요 · 길면 위아래로 밀어 보세요</small>
       ${row(isSecureContext ? 2 : 0, 'HTTPS', isSecureContext ? '예' : '아니요', 'https 주소로 열어야 센서·카메라가 켜져요')}
       ${row(video.videoWidth ? 2 : 0, '카메라', video.videoWidth ? `${video.videoWidth}×${video.videoHeight}` : '꺼짐', '카메라 권한을 허용해 주세요')}
       ${row(evRate >= 20 ? 2 : evRate >= 5 ? 1 : 0, '방향 센서', `${evRate.toFixed(0)}회/초`, '배터리 절약 모드를 끄고, iPhone은 동작·방향 권한을 허용해 주세요')}
@@ -424,18 +488,51 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       ${row(2, '방위 보정', `${yaw ? (yaw > 0 ? '+' : '') + yaw.toFixed(1) + '°' : '없음'} · 화각 ${S.settings.cameraVFov || 63}°`, '')}
       <div style="margin-top:6px">예상 오차: 깃발(${Math.round(D)}m)이 화면에서 좌우 약 <b>${lat.toFixed(1)}m</b> 어긋날 수 있어요${compErr > 8 ? ' → [🎯 깃발 맞추기]를 쓰면 줄어들어요' : ''}. 거리 숫자는 GPS로 계산해서 ±${Math.round(gAcc)}m 정도예요.</div>`;
   }
-  function say(h) { msg.innerHTML = h; msg.classList.add('show'); }
-  function hide() { msg.classList.remove('show'); }
-  box.querySelector('#arCal').onclick = () => { calib = !calib; };
-  box.querySelector('#arChk').onclick = () => { diagOn = !diagOn; box.querySelector('#arDiag').classList.toggle('show', diagOn); };
-  box.querySelector('#arReset').onclick = () => { yaw = 0; a = null; try { localStorage.removeItem(YAW_KEY); } catch {} };
+  // 안내 글: say = 지금 상태(매 화면) · flash = 잠깐 보여 주는 결과 (그동안 say에 덮이지 않음)
+  let flashUntil = 0;
+  function say(h) { if (performance.now() < flashUntil) return; msg.innerHTML = h; msg.classList.add('show'); }
+  function hide() { if (performance.now() < flashUntil) return; msg.classList.remove('show'); }
+  function flash(h, ms = 2600) { flashUntil = performance.now() + ms; msg.innerHTML = h; msg.classList.add('show'); }
+  const calBtn = box.querySelector('#arCal');
+  const setCalib = on => { calib = on; calBtn.classList.toggle('on', on); calBtn.textContent = on ? '✕ 깃발 맞추기 취소' : '🎯 깃발 맞추기'; calChip(on); };
+  // 깃발 맞추는 동안은 판이 닫혀 있으니, 화면에 작은 취소 칩
+  const calChip = on => { let c = box.querySelector('#arCalChip'); if (on && !c) { c = document.createElement('button'); c.id = 'arCalChip'; c.className = 'ar-chip cal'; c.textContent = '✕ 깃발 맞추기 취소'; c.onclick = () => setCalib(false); root.appendChild(c); } else if (!on && c) c.remove(); };
+  calBtn.onclick = () => {
+    if (calib) return setCalib(false);
+    const sc = getScene();
+    if (!sc?.pin) return flash('⛳ 이 홀은 아직 깃발 위치를 몰라요<br><small>그린에 가서 [여기가 그린이에요]를 누르거나, 지도에서 그린을 찍으면 그다음부터 맞출 수 있어요</small>', 4500);
+    if (!last.R) return flash('🧭 방향 센서를 기다리는 중이에요 · 잠시 뒤 다시 눌러 주세요');
+    setCalib(true);
+  };
+  const setDiag = on => { diagOn = on; diagT = 0; box.querySelector('#arDiag').classList.toggle('show', on); };
+  box.querySelector('#arChk').onclick = () => setDiag(!diagOn);
+  box.querySelector('#arDiagX').onclick = () => setDiag(false);
+  box.querySelector('#arReset').onclick = () => { yaw = 0; a = null; try { localStorage.removeItem(YAW_KEY); } catch {} flash('↺ 방향 보정을 지웠어요'); };
+  // 🎯 조준점 옮기기: 끌기(어디서 시작해도) · 짧게 누르면 그곳으로 · 조준점을 두 번 누르면 가운데로
+  const aim0Btn = box.querySelector('#arAim0');
+  const moveAim = (cx, cy) => { const r = cv.getBoundingClientRect(); aimAt = { x: (cx - r.left) / r.width, y: (cy - r.top) / r.height }; aim0Btn.hidden = Math.hypot(aimAt.x - AIM0.x, aimAt.y - AIM0.y) < 0.02; readT = 0; lastHit = null; };
+  let drag = null, lastTap = 0;
+  cv.addEventListener('pointerdown', e => { if (calib) return; drag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false }; try { cv.setPointerCapture(e.pointerId); } catch {} });
+  cv.addEventListener('pointermove', e => { if (!drag || e.pointerId !== drag.id) return; if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return; drag.moved = true; moveAim(e.clientX, e.clientY); });
+  cv.addEventListener('pointerup', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (d.moved) return;
+    const r = cv.getBoundingClientRect(), { rx, ry } = aimXY(), now = performance.now();
+    if (Math.hypot(e.clientX - r.left - rx, e.clientY - r.top - ry) < 40 && now - lastTap < 350) { aimAt = { ...AIM0 }; aim0Btn.hidden = true; readT = 0; lastHit = null; lastTap = 0; return; }
+    lastTap = now; moveAim(e.clientX, e.clientY);
+    try { if (!localStorage.getItem('pinpoint.arAimTip')) { localStorage.setItem('pinpoint.arAimTip', '1'); flash('🎯 조준점을 옮겼어요<br><small>끌어서 옮기고, 두 번 누르거나 [⊙ 가운데로]를 누르면 가운데로 돌아와요</small>', 3500); } } catch {}
+  });
+  cv.addEventListener('pointercancel', () => { drag = null; });
+  aim0Btn.onclick = () => { aimAt = { ...AIM0 }; aim0Btn.hidden = true; readT = 0; lastHit = null; };
   cv.addEventListener('click', e => {
     if (!calib || !last.R) return;
-    const sc = getScene(); if (!sc?.pin) { calib = false; return; }
+    const sc = getScene(); if (!sc?.pin) { setCalib(false); return; }
     const r = cv.getBoundingClientRect();
     const corr = yawCorrection(last.R, enuOf(sc.me, sc.pin, { eye: 0 }), e.clientX - r.left, last.opt);
-    if (corr != null && Math.abs(corr) < 45) { yaw = ((yaw - corr + 540) % 360) - 180; try { localStorage.setItem(YAW_KEY, String(yaw)); } catch {} a = null; }
-    calib = false;
+    if (corr != null && Math.abs(corr) < 45) { yaw = ((yaw - corr + 540) % 360) - 180; try { localStorage.setItem(YAW_KEY, String(yaw)); } catch {} a = null; flash(`✅ 방향을 맞췄어요 <small>(보정 ${yaw > 0 ? '+' : ''}${yaw.toFixed(1)}°)</small>`); }
+    else flash('깃발이 화면에서 너무 멀리 있어요 · 진짜 깃발이 화면 가운데 근처에 오게 하고 다시 눌러 주세요', 3500);
+    setCalib(false);
   });
   raf = requestAnimationFrame(frame);
   return { stop: () => { alive = false; cancelAnimationFrame(raf); unOri(); stopCam && stopCam(); }, play: playFlight, setMap };

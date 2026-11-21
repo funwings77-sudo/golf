@@ -679,23 +679,32 @@ function arrowOnly() {
 function actions() {
   const box = $('#act'); if (!box) return;
   const shot = shotOf(), h = activeHole(), isBall = P.ballPos && P.ballHole === h.n;
-  if (!S.settings.detail) { // 쉬운 화면: 지금 할 일 큰 버튼 1개 + 보조 버튼 2개 (상황에 따라 바뀜)
+  if (!S.settings.detail) { // 쉬운 화면: 아래 메뉴 5칸 (가운데 = 지금 할 일 큰 동그라미) + 상황에 맞는 작은 버튼 2개
     const pin = h.pin || h.green, putt = pin && onGreen();
     const hint = (() => { try { return !localStorage.getItem('pinpoint.hint.main'); } catch { return false; } })();
-    const main = (id, label) => `<button class="a-main${hint ? ' pulse' : ''}" id="${id}">${label}</button>`;
-    const two = (a, b) => `<div class="bd-bot two">${a}${b}</div>`, btn = (id, i, t) => `<button id="${id}"><i>${i}</i>${t}</button>`;
-    box.innerHTML = shot ? main('found', '✅ 공 찾았어요!') + two(btn('lostb', '🔍', '공이 안 보여요'), btn('cancel', '↩', '잘못 눌렀어요'))
-      : !pin ? main('hit', '🏌️ 쳤어요!') + two(btn('scoreB', '📝', '홀 끝 · 점수'), btn('more', '🧰', '더보기'))
-      : putt ? main('holed', '⛳ 홀에 넣었어요!') + `<div class="bd-bot three">${btn('hit', '🏌️', '그린 밖에서 쳤어요')}${allowed('puttLine') ? btn('arB', '📷', '그린 읽기') : btn('cardB', '📋', '점수표')}${btn('more', '🧰', '더보기')}</div>`
-      : main('hit', '🏌️ 쳤어요!') + two(btn('scoreB', '📝', '홀 끝 · 점수'), btn('more', '🧰', '더보기'));
+    // 가운데: 쳤어요 → 공 찾았어요 → (그린 위) 홀에 넣었어요
+    const mid = shot ? ['found', '✅', '찾았어요'] : putt ? ['holed', '⛳', '넣었어요'] : ['hit', '🏌️', '쳤어요'];
+    const item = (id, i, t) => `<button id="${id}"><i>${i}</i><span>${t}</span></button>`;
+    // 위 작은 버튼: 친 뒤 = 잘못 눌렀어요 · 그린 위 = 그린 밖에서 쳤어요 · 그 밖 = 홀 끝·점수 (+ 늘 더보기)
+    const ctx = shot ? `<button id="cancel">↩ 잘못 눌렀어요</button>` : putt ? `<button id="hit">🏌️ 그린 밖에서 쳤어요</button>` : `<button id="scoreB">📝 홀 끝 · 점수</button>`;
+    box.innerHTML = `<div class="bd-ctx">${ctx}</div>
+      <nav class="bd-menu" aria-label="아래 메뉴">
+        ${item('mMenu', '☰', '더보기')}${item('mGreen', '📷', '그린 읽기')}${item('mLost', '🔍', shot ? '안 보여요' : '공 찾기')}
+        <button class="a-main mid${hint ? ' pulse' : ''}" id="${mid[0]}"><i>${mid[1]}</i><span>${mid[2]}</span></button>
+        ${item('mShots', '📈', '내 샷 기록')}${item('mYard', '📋', '거리표')}${item('more', '🧰', '도구')}
+      </nav>`;
     const seen = () => { try { localStorage.setItem('pinpoint.hint.main', '1'); } catch {} };
     $('.a-main', box).addEventListener('click', seen);
-    $('#found')?.addEventListener('click', found); $('#lostb')?.addEventListener('click', toLost);
+    $('#found')?.addEventListener('click', found);
     $('#cancel')?.addEventListener('click', cancelShot);
-    $('#greenHere')?.addEventListener('click', greenHere);
     $('#holed')?.addEventListener('click', quickScore); $('#scoreB')?.addEventListener('click', quickScore);
-    $('#hit')?.addEventListener('click', hit); $('#arB')?.addEventListener('click', () => App_.go('green?ar'));
-    $('#more')?.addEventListener('click', moreSheet); $('#cardB')?.addEventListener('click', () => App_.go('score'));
+    $$('#hit', box).forEach(b => b.addEventListener('click', hit));
+    $('#more')?.addEventListener('click', moreSheet);
+    $('#mGreen').onclick = () => App_.go(allowed('puttLine') ? 'green?ar' : 'green');
+    $('#mLost').onclick = toLost;
+    $('#mShots').onclick = () => App_.go('shots');
+    $('#mYard').onclick = yardBook;
+    $('#mMenu').onclick = () => $('#drawer').classList.add('open'); // ☰ 전체 메뉴
     return;
   }
   if (shot) {
@@ -1086,7 +1095,7 @@ function sceneData() {
   return {
     me: Sensors.pos || me, ball: shot ? shot.pred : (P.ballPos && P.ballHole === h?.n ? P.ballPos : null), from: me, pin: h ? (h.pin || h.green) : null,
     landing: !shot && adv?.landing && allowed('clubRec') ? adv.landing : null, ellipse: !shot && allowed('clubRec') ? adv?.ellipse : null,
-    hazards: h?.hazards || [], hole: h, clubOk: allowed('clubRec'),
+    hazards: h?.hazards || [], hole: h, clubOk: allowed('clubRec'), wx: allowed('playsLike') ? wx() : null,
     dzPin: (() => { const pn = h ? (h.pin || h.green) : null; const f = me; return pn && f ? pinDrop(f, pn, h)?.v ?? null : null; })(),
     plan: (() => { if (shot || !allowed('clubRec') || !me || !adv?.club || adv.club === 'PT' || !(adv.kind === 'full' || adv.kind === 'partial')) return null; const cb = S.bag.find(c => c.id === adv.club), w = allowed('windAdjust') ? wx() : null; return cb ? { from: me, aim: adv.aimBearing, club: adv.club, stdCarry: cb.carry * (adv.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: w?.rho } : null; })(),
     live: (() => { if (!shot || shot.aimBearing == null || !shot.club) return null; const cb = S.bag.find(c => c.id === shot.club), w = allowed('windAdjust') ? wx() : null; return cb ? { ts: shot.ts, from: shot.start, aim: shot.aimBearing, club: shot.club, stdCarry: cb.carry * (shot.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: shot.rho ?? w?.rho } : null; })(),
@@ -1146,6 +1155,8 @@ async function mountView() {
       onMapMode: full => { P.mapFull = full; setTimeout(() => { if (!map) return; map.invalidateSize(); full ? fit2d() : miniFit(); scene(); }, 80); if (full) toast(P.marking ? '🗺️ 지도에서 눌러 주세요' : '🗺️ 지도예요 · 휴대폰을 세우면 다시 카메라', 2200); },
       onHeading: b => { const me = Sensors.pos || ballPos(); if (!headMk || !me) return; headMk.setLatLng(ll(me)); const i = headMk.getElement()?.firstChild; if (i) i.style.transform = `rotate(${b}deg)`; },
       onFail: () => { if (P.view !== 'ar') return; P.view = '2d'; P.viewSet = true; persist(); render(); toast('📷 카메라를 쓸 수 없어서 지도로 보여 드려요', 3500); },
+      views: [['big', '🔠 큰 숫자'], ['2d', '🗺️ 지도만'], ...(S.settings.detail ? [['3d', '🏔️ 입체 지도만'], ['4d', '🎬 공 비행만']] : [])],
+      onView: k => { P.view = k; P.viewSet = true; persist(); render(); },
       onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); }, onPin: p => { const h = activeHole(); h.pin = { lat: +p.lat.toFixed(7), lon: +p.lon.toFixed(7), ts: Date.now(), src: 'flag', err: p.err }; save('courses'); adv = null; advKey = ''; update(true); toast(`⛳ 카메라로 잰 핀을 저장했어요 (${p.d}m ±${p.err}m)`, 3500); } });
     arStop = arCtl?.stop || null;
   }
