@@ -1,5 +1,6 @@
 // ⌚ PinPoint 워치 앱 (Wear OS · 갤럭시워치 등): 손목 센서로 스윙·임팩트를 알아채 휴대폰 앱에 알림
 //  휴대폰 앱과 같은 applicationId · 같은 서명이어야 서로 메시지를 주고받음 (Wearable Data Layer)
+//  Google Play: 같은 앱(패키지)에 워치용 AAB를 따로 올림 → versionCode = 휴대폰 versionCode + 100000 (scripts/release-*.mjs가 맞춤)
 apply plugin: 'com.android.application'
 
 android {
@@ -8,12 +9,29 @@ android {
     defaultConfig {
         applicationId "io.github.funwings77sudo.pinpoint"
         minSdkVersion 26
-        targetSdkVersion 34
-        versionCode 36
+        targetSdkVersion 35
+        versionCode 100036
         versionName "1.0.35"
     }
+    // Google Play 업로드 키: 휴대폰 앱(android/app/build.gradle)과 같은 파일 ~/.android/pinpoint-upload.properties
+    def uploadProps = new Properties()
+    def uploadFile = file(System.getenv('PINPOINT_UPLOAD_PROPS') ?: "${System.getProperty('user.home')}/.android/pinpoint-upload.properties")
+    if (uploadFile.exists()) uploadFile.withInputStream { uploadProps.load(it) }
+    signingConfigs {
+        if (uploadProps['storeFile']) {
+            upload {
+                storeFile file(uploadProps['storeFile'])
+                storePassword uploadProps['storePassword']
+                keyAlias uploadProps['keyAlias']
+                keyPassword uploadProps['keyPassword']
+            }
+        }
+    }
     buildTypes {
-        release { minifyEnabled false }
+        release {
+            if (uploadProps['storeFile']) signingConfig signingConfigs.upload
+            minifyEnabled false
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17

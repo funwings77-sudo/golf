@@ -83,6 +83,17 @@ node scripts/import-kgba.mjs <golf_courses.sql> [--geocode]
 | 토너먼트/캐주얼/연습 모드 (규칙 4.3a) | `core/state.js` `allowed()` |
 | 룰·구제, 스코어·내기 정산, 낙뢰·폭염, 내 백 갭 분석, 공 소모, 입문자 가이드, 음성 | `views/rules.js`, `score.js`, `safety.js`, `bag.js` |
 
+## Google Play 출시 (휴대폰 앱 + 워치 앱)
+1. **업로드 키**: Play에 처음 올릴 때 쓴 키 파일을 `~/.android/pinpoint-upload.properties`에 둡니다. 내용은 `storeFile`·`storePassword`·`keyAlias`·`keyPassword` 4줄이고, 키 파일 자체는 저장소에 올리지 않습니다. 키를 잃어버렸으면 Play Console → 앱 무결성 → **업로드 키 재설정 요청**을 합니다.
+2. `npm run release:aab` → `release/pinpoint-caddie-<버전>.aab`(휴대폰)와 `release/pinpoint-watch-<버전>.aab`(워치)가 나옵니다. 둘 다 같은 업로드 키로 서명됐는지 스크립트가 확인합니다. 워치 versionCode는 휴대폰 + 100000입니다.
+3. **처음 한 번 (Play Console)**
+   - 테스트 및 출시 → 고급 설정 → **폼 팩터 → Wear OS 추가**
+   - 스토어 등록정보 → Wear OS 스크린샷(정사각형, 384×384 이상) 1장 이상
+   - 앱 콘텐츠 → **포그라운드 서비스 권한**: 워치의 '특수 용도'(라운드 중 손목 센서로 스윙 감지) 설명과 영상
+   - 앱 콘텐츠 → **데이터 보안**: 위치·카메라(깊이 측정)·블루투스(그립 센서)는 휴대폰 안에서만 쓰고 수집하지 않음
+4. **올리기**: 테스트 및 출시 → 내부 테스트 → 새 버전 만들기에 휴대폰 AAB를 올립니다. 같은 화면 위쪽 트랙 선택에서 **Wear OS 전용**으로 바꾸고 → 새 버전 만들기에 워치 AAB를 올립니다.
+5. 워치 앱은 Wear OS 품질 검토가 따로 있어 며칠 걸릴 수 있습니다. 통과하면 휴대폰에 앱을 설치할 때 연결된 워치에도 같이 설치할 수 있습니다.
+
 ## 관리자 페이지 (골프장 운영자용)
 **https://funwings77-sudo.github.io/golf/admin.html**
 

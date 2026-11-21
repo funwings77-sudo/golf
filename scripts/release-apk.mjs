@@ -39,7 +39,7 @@ gradle = gradle.replace(/versionCode \d+/, `versionCode ${code}`).replace(/versi
 await writeFile(gradlePath, gradle);
 // ⌚ 워치 앱(android/wear)도 같은 버전 번호
 const wearPath = join(root, 'android', 'wear', 'build.gradle');
-await writeFile(wearPath, (await readFile(wearPath, 'utf8')).replace(/versionCode \d+/, `versionCode ${code}`).replace(/versionName "[^"]*"/, `versionName "${name}"`));
+await writeFile(wearPath, (await readFile(wearPath, 'utf8')).replace(/versionCode \d+/, `versionCode ${100000 + code}`).replace(/versionName "[^"]*"/, `versionName "${name}"`));
 console.log(`versionCode ${code}, versionName ${name}`);
 // 앱 안에서 새 버전을 알 수 있게 내 버전을 기록
 await writeFile(join(root, 'js', 'core', 'appver.js'), `// 앱(APK) 버전 — scripts/release-apk.mjs가 빌드할 때마다 자동으로 바꿉니다\nexport const APP_VERSION = { name: '${name}', code: ${code} };\n`);
@@ -70,7 +70,7 @@ if (existsSync(wearBuilt)) {
   await copyFile(wearBuilt, wearTarget);
   const wbuf = await readFile(wearTarget);
   await writeFile(join(root, 'watch.json'), JSON.stringify({
-    packageId: appId, versionName: name, versionCode: code, bytes: wbuf.length, sha256: sha(wbuf), builtAt: new Date().toISOString(), platform: 'Wear OS 3+',
+    packageId: appId, versionName: name, versionCode: 100000 + code, bytes: wbuf.length, sha256: sha(wbuf), builtAt: new Date().toISOString(), platform: 'Wear OS 3+',
   }, null, 2) + '\n');
   console.log(`⌚ 워치 ${(wbuf.length / 1048576).toFixed(1)}MB`);
 }
