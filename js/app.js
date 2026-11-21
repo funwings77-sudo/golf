@@ -394,7 +394,7 @@ function bottomMenu(name) {
 const DRAWER_IC = { '#/play': 'play', '#/home': 'home', '#/lie': 'lie', '#/courses': 'map', '#/shots': 'shots', '#/bag': 'bag', '#/rules': 'book', '#/safety': 'bolt', '#/history': 'bars', '#/calib': 'sliders', '#/settings': 'gear', '#/about': 'info', verBtn: 'refresh' };
 const TAB_IC = { play: 'play', distance: 'green', tee: 'tee', lost: 'lost', green: 'green', score: 'card' };
 // 화면 제목(h2) 앞 이모지 → 아이콘 (화면이 다시 그려져도 바로 바꿈)
-const TITLE_IC = { shots: 'shots', score: 'card', green: 'green', lost: 'lost', tee: 'tee', distance: 'wind', lie: 'lie', bag: 'bag', rules: 'book', safety: 'bolt', history: 'bars', calib: 'sliders', settings: 'gear', about: 'info', courses: 'map' };
+const TITLE_IC = { shots: 'shots', score: 'card', green: 'green', lost: 'lost', tee: 'tee', distance: 'wind', lie: 'lie', bag: 'bag', rules: 'book', safety: 'bolt', history: 'bars', calib: 'sliders', settings: 'gear', about: 'brand', courses: 'map' };
 function titleIcon() {
   const n = TITLE_IC[currentName], h = n && $('#view h2'); if (!h || h.dataset.ic) return;
   const t = h.firstChild; if (!t || t.nodeType !== 3) return;
@@ -402,6 +402,10 @@ function titleIcon() {
   t.textContent = t.textContent.slice(m[0].length); h.dataset.ic = '1'; h.insertAdjacentHTML('afterbegin', icon(n, 'ic-h'));
 }
 function applyIcons() {
+  // 🏷️ 브랜드 마크 (위치 핀 + 골프 깃발): 앱 머리줄 제목 옆 · 전체 메뉴 맨 위
+  const ttl = $('.topbar .ttl'); if (ttl && !$('.topbar .brand-mk')) ttl.insertAdjacentHTML('beforebegin', `<span class="brand-mk" aria-hidden="true">${icon('brand')}</span>`);
+  const br = $('#drawer .brand'), t0 = br?.firstChild;
+  if (t0?.nodeType === 3) { t0.textContent = t0.textContent.replace(/^[^0-9A-Za-z가-힣]+/u, ''); br.insertAdjacentHTML('afterbegin', icon('brand', 'brand-ic')); }
   new MutationObserver(titleIcon).observe($('#view'), { childList: true, subtree: true });
   $$('#drawer .panel a').forEach(a => {
     const n = DRAWER_IC[a.id] || DRAWER_IC[a.getAttribute('href')]; if (!n) return;

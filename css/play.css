@@ -706,3 +706,8 @@ nav.tabs a .i .ic { width: 22px; height: 22px; }
 .pin-search-w { position: relative; display: block; }
 .pin-search-w > .ic { position: absolute; left: 20px; top: 50%; width: 22px; height: 22px; transform: translateY(-50%); color: var(--sub, #6b7a72); pointer-events: none; }
 .pin-search-w > .pin-search { padding-left: 52px; }
+/* 🏷️ 브랜드 마크 */
+.topbar .brand-mk { flex: none; display: grid; place-items: center; width: 30px; height: 30px; }
+.topbar .brand-mk .ic { width: 28px; height: 28px; }
+.drawer .brand .brand-ic { width: 30px; height: 30px; margin-right: 6px; vertical-align: -.35em; }
+.topbar button.ic > svg.ic { width: 24px; height: 24px; border-radius: 0; display: inline-block; } /* 메뉴 버튼(class ic)과 아이콘 SVG(class ic) 이름이 같아 커지던 것 */
