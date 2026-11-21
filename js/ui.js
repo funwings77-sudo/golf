@@ -11,6 +11,15 @@ export function U() { return S.settings.unit === 'yd' ? 'yd' : 'm'; }
 export function DU(m, digits = 0) { return D(m, digits) + U(); }
 
 let toastT = null;
+// 📱 아래 메뉴 7칸 (모든 화면 공통): ☰ 더보기 · 📷 그린 · 🔍 공 찾기 · (가운데) ⛳ 골프 치기 · 📈 내 샷 기록 · 📋 거리표 · 🧰 도구
+//  골프 치기 화면은 이 HTML을 자기 화면 아래에 넣고, 다른 화면은 앱 공통 메뉴(#bdNav)로 씀 — 버튼 id가 같아야 함
+export function bottomMenuHTML({ lost = '공 찾기', on = '' } = {}) {
+  const item = (id, i, t, r) => `<button id="${id}"${r && r === on ? ' class="on"' : ''}><i>${i}</i><span>${t}</span></button>`;
+  return `${item('mMenu', '☰', '더보기')}${item('mGreen', '📷', '그린', 'green')}${item('mLost', '🔍', lost, 'lost')}
+    <button class="mid" id="mPlay" aria-label="골프 치기 화면으로"><i>⛳</i><span>골프 치기</span></button>
+    ${item('mShots', '📈', '내 샷 기록', 'shots')}${item('mYard', '📋', '거리표')}${item('more', '🧰', '도구')}`;
+}
+
 export function toast(msg, ms = 2600) {
   const el = $('#toast'); if (!el) return;
   el.textContent = msg; el.classList.add('show');

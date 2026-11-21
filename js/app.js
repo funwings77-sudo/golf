@@ -1,5 +1,5 @@
 // PinPoint AI 캐디 — 앱 셸 (라우터 · 상단바 · 모드 · 안전 감시 · 스윙 감지)
-import { S, save, MODES, activeCourse, currentMode, subscribe, onSaveFail } from './core/state.js';
+import { S, save, MODES, activeCourse, currentMode, subscribe, onSaveFail, allowed } from './core/state.js';
 import { startGPS, restartGPS, onPos, setSim, setVoice, startOrientation, startSwingDetect, vibrate, speak, Sensors, sampleFix, keepAwake } from './core/sensors.js';
 import { fetchWeather } from './core/weather.js';
 import { detectHoleByTee } from './core/course.js';
@@ -9,7 +9,7 @@ import { gripSupported, startGripScan, stopGripScan, clubForEvent } from './core
 import { onWatchSwing } from './core/watch.js';
 import { configureVoice, onAudio, audioRoute, earButtons, say, holeIntro, ROUTE_WORD } from './core/voice.js';
 import { holeHistory } from './core/insights.js';
-import { $, $$, sheet, toast, esc } from './ui.js';
+import { $, $$, sheet, toast, esc, bottomMenuHTML } from './ui.js';
 import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
 
@@ -73,6 +73,7 @@ async function route() {
   view.className = ''; view.innerHTML = '<div class="empty">불러오는 중…</div>';
   $('#drawer').classList.remove('open');
   $$('#tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === name));
+  bottomMenu(name);
   $$('#drawer a').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#/' + name));
   try {
     const mod = (await loader()).default;
@@ -357,6 +358,7 @@ function safetyNets() {
       const sh = $('#sheet');
       if (sh?.classList.contains('open')) { sh.classList.remove('open'); sh.innerHTML = ''; return; }
       if ($('#drawer')?.classList.contains('open')) { $('#drawer').classList.remove('open'); return; }
+      const full = document.querySelector('[data-back]'); if (full) { full.click(); return; } // 전체 화면(카메라 등) 닫기
       if (currentName && currentName !== 'play') { App.go('play'); return; }
       if (Date.now() - lastBack < 2000) { back.exitApp?.(); return; }
       lastBack = Date.now(); toast('한 번 더 누르면 앱을 닫아요', 2000);
@@ -369,6 +371,21 @@ function safetyNets() {
     if (!S.settings.simGPS && Sensors.gpsState !== 'ok') restartGPS();
   });
   if (S.round) keepAwake(true);
+}
+
+// 📱 아래 메뉴 (모든 화면 공통 · 쉬운 화면): 골프 치기 화면과 같은 7칸
+//  공 찾기·거리표·도구는 지금 홀·친 샷이 필요해서 골프 치기 화면에서 열어 줌 (App.pendingCmd)
+function bottomMenu(name) {
+  const nav = $('#bdNav'); if (!nav) return;
+  nav.innerHTML = bottomMenuHTML({ on: name });
+  const playCmd = c => { if (currentName === 'play' && current?.cmd) current.cmd(c); else { App.pendingCmd = c; App.go('play'); } };
+  $('#mMenu', nav).onclick = () => $('#drawer').classList.add('open');
+  $('#mGreen', nav).onclick = () => App.go(allowed('puttLine') ? 'green?ar' : 'green');
+  $('#mLost', nav).onclick = () => playCmd('lost');
+  $('#mPlay', nav).onclick = () => App.go('play');
+  $('#mShots', nav).onclick = () => App.go('shots');
+  $('#mYard', nav).onclick = () => playCmd('yard');
+  $('#more', nav).onclick = () => playCmd('tools');
 }
 
 function init() {

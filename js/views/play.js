@@ -14,7 +14,7 @@ import { adviseShot, predictBall, toBall, dirWords, compassName, greenR } from '
 import { conditionsEffect } from '../physics/flight.js';
 import { learnClub } from '../core/score.js';
 import { createMap, destroyMap, drawHole, ll, flagIcon, labelIcon, SAT_URL } from '../map.js';
-import { $, $$, esc, toast, sheet, confirmSheet } from '../ui.js';
+import { $, $$, esc, toast, sheet, confirmSheet, bottomMenuHTML } from '../ui.js';
 import { prefetchCourse, offlineInfo, courseTiles } from '../core/offline.js';
 import { openAICaddie } from './aisheet.js';
 import { matches } from '../core/search.js';
@@ -49,6 +49,13 @@ export default {
       if (ls) setTimeout(found, 300);
     }
     if (App_.pendingFinish) { App_.pendingFinish = false; if (S.round) setTimeout(finishSheet, 200); }
+    // 다른 화면의 아래 메뉴에서 누른 것 (공 찾기 · 거리표 · 도구)
+    if (App_.pendingCmd) { const c = App_.pendingCmd; App_.pendingCmd = null; setTimeout(() => this.cmd(c), 250); }
+  },
+  cmd(c) {
+    if (c === 'lost') return toLost();
+    if (!S.round || P.step !== 'hole') return toast('골프장을 고르고 홀을 시작하면 쓸 수 있어요');
+    if (c === 'yard') yardBook(); else if (c === 'tools') moreSheet();
   },
   finishRound() { finishSheet(); }, // 마지막 홀에서 ▶ (app.js stepHole)
   // ⌚ 워치가 스윙(임팩트)을 알아챔 → [쳤어요] · 공을 찾으러 가던 중이면 [공 찾았어요] 다음 [쳤어요]
@@ -688,13 +695,8 @@ function actions() {
     const act = shot ? ['found', '✅ 공 찾았어요'] : putt ? ['holed', '⛳ 홀에 넣었어요'] : ['hit', '🏌️ 쳤어요'];
     // 보조: 친 뒤 = 잘못 눌렀어요 · 그린 위 = 그린 밖에서 쳤어요 · 그 밖 = 홀 끝·점수
     const sub = shot ? `<button id="cancel">↩ 잘못 눌렀어요</button>` : putt ? `<button id="hitOut">🏌️ 그린 밖에서 쳤어요</button>` : `<button id="scoreB">📝 홀 끝 · 점수</button>`;
-    const item = (id, i, t) => `<button id="${id}"><i>${i}</i><span>${t}</span></button>`;
     box.innerHTML = `<div class="bd-ctx"><button class="a-main act${hint ? ' pulse' : ''}" id="${act[0]}">${act[1]}</button>${sub}</div>
-      <nav class="bd-menu" aria-label="아래 메뉴">
-        ${item('mMenu', '☰', '더보기')}${item('mGreen', '📷', '그린 읽기')}${item('mLost', '🔍', shot ? '안 보여요' : '공 찾기')}
-        <button class="mid" id="mPlay" aria-label="골프 치기 화면으로"><i>⛳</i><span>골프 치기</span></button>
-        ${item('mShots', '📈', '내 샷 기록')}${item('mYard', '📋', '거리표')}${item('more', '🧰', '도구')}
-      </nav>`;
+      <nav class="bd-menu" aria-label="아래 메뉴">${bottomMenuHTML({ lost: shot ? '안 보여요' : '공 찾기' })}</nav>`;
     const seen = () => { try { localStorage.setItem('pinpoint.hint.main', '1'); } catch {} };
     $('.a-main', box).addEventListener('click', seen);
     $('#found')?.addEventListener('click', found);

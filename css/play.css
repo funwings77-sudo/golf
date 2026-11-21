@@ -664,3 +664,21 @@ html.easy.in-hole #toast { bottom: auto; top: calc(86px + env(safe-area-inset-to
 .trk-g small { font-size: 10px; opacity: .75; } .trk-g b { font-size: 13px; color: #ffb4a3; }
 .ar-tray-g button.track { background: #ff5a3c; border-color: #ff5a3c; }
 .ar-tray-g button.track.on { background: #c8f169; color: #0e1410; }
+
+/* 📱 AR 그린 리딩 전체 화면: 카메라가 화면을 꽉 채우고 앱 머리줄·아래 메뉴는 숨김 */
+html.gar-on, html.gar-on body { overflow: hidden; }
+html.gar-on .topbar, html.gar-on nav.tabs, html.gar-on .bottom-bar, html.gar-on .pp-nav { display: none !important; }
+.cam.gar-full { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; z-index: 900; }
+.cam.gar-full .hud.top { top: calc(8px + env(safe-area-inset-top)); padding-right: 52px; }
+.cam.gar-full .hud.bottom { bottom: calc(10px + env(safe-area-inset-bottom)); }
+.cam.gar-full .gar-prec { top: calc(86px + env(safe-area-inset-top)); }
+.cam .gar-x { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255,255,255,.18); color: #fff; font-size: 20px; line-height: 40px; pointer-events: auto; cursor: pointer; }
+html.gar-on #toast { bottom: auto; top: calc(130px + env(safe-area-inset-top)); }
+
+/* 📱 아래 메뉴 공통 (쉬운 화면 · 모든 화면): 골프 치기 화면의 7칸 메뉴를 화면 아래에 고정 · 옛 탭 막대는 숨김 */
+.bd-global { display: none; }
+html.easy .bd-global { display: grid; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(8px + env(safe-area-inset-bottom)); width: calc(100% - 16px); max-width: 584px; margin: 0; z-index: 30; }
+html.easy nav.tabs { display: none; }
+html.easy { --nav-h: 92px; }
+html.in-hole .bd-global, html.gar-on .bd-global { display: none !important; }
+.bd-menu > button.on:not(.mid) { color: #c8f169; }

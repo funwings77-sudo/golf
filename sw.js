@@ -1,5 +1,5 @@
 // 오프라인 우선 서비스 워커: 앱 셸·물리 엔진은 캐시 우선, 지도 타일은 런타임 캐시
-const VER = 'pinpoint-v40';
+const VER = 'pinpoint-v41';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'css/theme.css', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'js/core/files.js',
   'js/app.js', 'js/ui.js', 'js/map.js',

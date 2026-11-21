@@ -134,7 +134,7 @@ function render() {
     <div id="tabBody"></div><div id="result"></div>`;
   $$('#srcSeg button').forEach(b => b.onclick = () => { G.src = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
   $$('#demoSeg button').forEach(b => b.onclick = () => { G.demoKind = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
-  $$('#tabSeg button').forEach(b => b.onclick = () => { G.tab = b.dataset.v; saveG(); render(); });
+  $$('#tabSeg button').forEach(b => b.onclick = () => { if (b.dataset.v === 'ar' && G.tab !== 'ar') G.prevTab = G.tab; G.tab = b.dataset.v; saveG(); render(); });
   const body = $('#tabBody');
   if (G.tab === 'measure') measureTab(body, canSlope);
   else if (G.tab === 'map') { if (!canSlope) body.innerHTML = lockedCard(FEATURE_NAMES.greenSlope); else mapTab(body); }
@@ -470,8 +470,10 @@ function arTab(body, canLine) {
   const geo = geometry();
   const distMode = G.arMode === 'distance' && geo.kind === 'onsite';
   const canSlope = allowed('greenSlope');
-  body.innerHTML = `<div class="cam" id="cam"><video autoplay playsinline muted></video><canvas id="arcv"></canvas>
-      <div class="hud top" id="arHud"><b>${distMode ? '카메라로 거리 재기' : 'AR 그린 리딩'}</b><div class="sub" id="arMsg"></div></div>
+  // 📱 전체 화면: 앱 머리줄·아래 메뉴를 숨기고 카메라가 화면을 꽉 채움 (✕ 또는 뒤로 가기로 닫기)
+  document.documentElement.classList.add('gar-on');
+  body.innerHTML = `<div class="cam gar-full" id="cam"><video autoplay playsinline muted></video><canvas id="arcv"></canvas>
+      <div class="hud top" id="arHud"><button class="gar-x" id="arClose" data-back aria-label="닫기">✕</button><b>${distMode ? '카메라로 거리 재기' : 'AR 그린 리딩'}</b><div class="sub" id="arMsg"></div></div>
       <div class="hud bottom"><div class="row"><button class="btn small" id="arCal">${distMode ? '취소' : '🎯 홀컵 탭으로 보정'}</button><span class="sub grow" id="arInfo"></span></div></div></div>
     <p class="sub">${easy() ? `공 뒤에 서서 휴대폰을 눈높이로 들고 홀 쪽을 비춰요. 화면의 홀을 한 번 누르면 더 정확해져요.<br>흰 줄 = 1m마다 거리 · 흘러가는 줄 = 공이 굴러 내려가는 쪽 · 초록 점 = 공이 갈 길` : `공 뒤 ${STAND_BACK}m에 서서 휴대폰을 눈높이(${S.settings.eyeHeight}m, 설정에서 변경)로 들고 홀 쪽을 비추세요. 흰 링 = 내 위치에서 1m 간격 거리(지형 높이 따라 휨), 흐르는 흰 줄 = 물이 흘러가는(공이 휘는) 방향, 초록 점선 = 퍼팅 라인. LiDAR 없이 카메라 높이·기울기로 지면을 투영하는 근사 AR이며, 화면의 홀컵을 한 번 탭하면 각도가 보정됩니다.`}</p>`;
   const video = $('#cam video'), cv = $('#arcv'), msg = $('#arMsg'), info = $('#arInfo');
@@ -502,6 +504,7 @@ function arTab(body, canLine) {
   // 결과가 없으면 바로 계산 (영상처럼 비추자마자 라인이 보이도록)
   if (!distMode && canLine && geo.D >= 0.3 && !G.result) compute();
 
+  $('#arClose').onclick = () => { G.tab = G.arMode === 'distance' ? 'measure' : (G.prevTab || 'measure'); G.arMode = null; saveG(); render(); };
   $('#arCal').onclick = () => { if (distMode) { G.arMode = null; G.tab = 'measure'; render(); } else { calibrating = true; msg.textContent = '👆 화면에서 진짜 홀컵을 누르세요'; } };
   openCamera(video).then(stop => { camStop = stop; loop(); }).catch(e => { msg.textContent = '카메라를 열 수 없습니다: ' + e.message + ' (HTTPS·권한 확인)'; });
   cv.onclick = e => {
@@ -671,5 +674,5 @@ function arTab(body, canLine) {
 }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
-function stopAR() { if (arT) cancelAnimationFrame(arT); arT = null; if (camStop) { camStop(); camStop = null; } }
+function stopAR() { document.documentElement.classList.remove('gar-on'); if (arT) cancelAnimationFrame(arT); arT = null; if (camStop) { camStop(); camStop = null; } }
 void makeView; void onOrientation; void unOri;
