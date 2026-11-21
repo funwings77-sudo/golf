@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.57",
+   "code": 58,
+   "date": "2026-11-21T13:33:32.652Z",
+   "bytes": 6146308,
+   "sha256": "188ab17431397b22054e2be9dc4b751b17a706a941f5c31e3e1bb2acb4223e49",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.57/pinpoint-caddie-1.0.57.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.57",
+   "notes": [
+    "골프 치기 화면의 3D 지도·골프장 사진도 구글 위성지도로 (구글 지도 키가 있을 때)"
+   ]
+  },
+  {
    "version": "1.0.56",
    "code": 57,
    "date": "2026-11-21T13:30:42.680Z",
@@ -740,6 +752,6 @@
    ]
   }
  ],
- "latest": "1.0.56",
- "updatedAt": "2026-11-21T13:30:48.155Z"
+ "latest": "1.0.57",
+ "updatedAt": "2026-11-21T13:33:37.602Z"
 }
