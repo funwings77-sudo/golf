@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.40",
+   "code": 41,
+   "date": "2026-11-21T01:31:09.515Z",
+   "bytes": 6074452,
+   "sha256": "2fb588cae63f3460c091bafae01f81220691c284d79cffe46a072d80730b7907",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.40/pinpoint-caddie-1.0.40.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.40",
+   "notes": [
+    "Camera screen without info cards; center menu button is \"골프 치기\"; shot action moves above the menu"
+   ]
+  },
+  {
    "version": "1.0.39",
    "code": 40,
    "date": "2026-11-21T01:19:08.331Z",
@@ -500,6 +512,6 @@
    ]
   }
  ],
- "latest": "1.0.39",
- "updatedAt": "2026-11-21T01:19:14.215Z"
+ "latest": "1.0.40",
+ "updatedAt": "2026-11-21T01:31:15.340Z"
 }
