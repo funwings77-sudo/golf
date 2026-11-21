@@ -15,6 +15,7 @@ export const EMOJI_ICON = {
   '🌳': 'tree', '🩺': 'pulse', '⏹': 'stop', '▶': 'playtri', '👣': 'walk', '⏱': 'timer', '👥': 'users', '🌐': 'globe',
   '🌡': 'thermo', '🌬': 'wind', '🧍': 'user', '🔌': 'plug', '🏠': 'home', '⚡': 'bolt', '🎚': 'sliders', '⚙': 'gear',
   'ℹ': 'info', '🔄': 'refresh', '🔁': 'swap', '☰': 'menu', '⚪': 'ball', '🎒': 'bag', '🔠': 'big',
+  '😊': 'smile', '🙂': 'smile', '🐢': 'slow', '🐇': 'fast', '🏆': 'trophy', '📚': 'book', '☀': 'sun',
 };
 // 이모지 한 글자 (+ 피부색·변형 선택자·ZWJ 조합까지 한 덩어리로)
 export const RE = new RegExp(`(${Object.keys(EMOJI_ICON).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?:\\uFE0F|\\u200D[\\u2640\\u2642]\\uFE0F?|[\\u{1F3FB}-\\u{1F3FF}])*`, 'gu');

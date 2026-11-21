@@ -18,6 +18,8 @@ test('변형 선택자(️)·성별 조합까지 한 덩어리로 바꾸고, 표
   assert.equal(swap('ℹ️ 정보'), '[info] 정보');
   assert.equal(swap('📍 여기서 쳤어요'), '[pin] 여기서 쳤어요');
   assert.equal(swap('▶ 공 날려 보기'), '[playtri] 공 날려 보기');
+  assert.equal(swap('🐢 느려요 · 🙂 보통 · 🐇 빨라요'), '[slow] 느려요 · [smile] 보통 · [fast] 빨라요');
+  assert.equal(swap('😊 친선'), '[smile] 친선'); assert.equal(swap('🏆 대회'), '[trophy] 대회'); assert.equal(swap('☀️'), '[sun]');
   assert.equal(swap('✕ 닫기'), '✕ 닫기');
   assert.equal(swap('‹ 목록'), '‹ 목록');
   assert.equal(swap('3번 홀 7타'), '3번 홀 7타');
