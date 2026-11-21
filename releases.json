@@ -4,6 +4,20 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.36",
+   "code": 37,
+   "date": "2026-11-21T00:43:41.447Z",
+   "bytes": 6067513,
+   "sha256": "0ccb90c586ee194dd8cfe08415d730b81a6860a37929dc4a69c56fb6f367fef1",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.36/pinpoint-caddie-1.0.36.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.36",
+   "notes": [
+    "Camera screen is the default and combines the map, 3D terrain and ball flight",
+    "Google Play prep for phone + watch: watch AAB signed with the upload key, release:aab builds both",
+    "Galaxy Watch APK on the download page (Wear OS 1.0.35)"
+   ]
+  },
+  {
    "version": "1.0.35",
    "code": 36,
    "date": "2026-11-21T00:18:20.004Z",
@@ -450,6 +464,6 @@
    ]
   }
  ],
- "latest": "1.0.35",
- "updatedAt": "2026-11-21T00:18:26.647Z"
+ "latest": "1.0.36",
+ "updatedAt": "2026-11-21T00:43:47.065Z"
 }
