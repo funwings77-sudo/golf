@@ -3,6 +3,7 @@ node_modules/
 www/
 *.apk
 !/pinpoint-caddie.apk
+!/pinpoint-watch.apk
 # Google Play: 빌드 결과(AAB)와 서명키는 저장소에 올리지 않음
 release/
 *.aab

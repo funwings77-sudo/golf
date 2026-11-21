@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f5f3f">
-<meta name="description" content="PinPoint AI 캐디 Android 앱(APK) 다운로드와 설치 안내">
+<meta name="description" content="PinPoint AI 캐디 Android 앱 · 갤럭시워치 앱(APK) 다운로드와 설치 안내">
 <title>PinPoint 앱 다운로드</title>
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -119,6 +119,24 @@
     </ol>
   </section>
 
+  <section class="card" id="watch">
+    <h2>⌚ 갤럭시워치 앱 (선택)</h2>
+    <p class="vnote">손목 센서로 스윙을 알아채서 휴대폰 앱에 <b>[쳤어요]</b>를 저절로 적어 줘요. 워치 화면에는 깃발까지 거리와 추천 클럽이 보여요. <b>Wear OS 워치</b>(갤럭시워치 4 이상 등)에서 쓰고, 휴대폰에는 위의 PinPoint 앱 <b>1.0.35 이상</b>이 있어야 해요.</p>
+    <a class="dl" id="wdlBtn" href="pinpoint-watch.apk" download="pinpoint-watch.apk" style="background:var(--green2)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 20h16"/></svg>
+      워치 앱 다운로드
+    </a>
+    <div class="meta" id="wmeta"><span>APK</span><span>Wear OS 3 이상</span></div>
+    <p class="note" style="margin-top:12px">워치에는 웹 브라우저가 없어서 <b>휴대폰에서 받은 뒤 워치로 보내 설치</b>해야 해요. 처음 한 번만 아래처럼 하면 돼요. 애플워치 앱은 아직 준비 중이에요.</p>
+    <ol class="steps">
+      <li><b>휴대폰에서 받기</b><span>위 <b style="display:inline">워치 앱 다운로드</b>를 눌러 <b style="display:inline">pinpoint-watch.apk</b>를 휴대폰에 받아요.</span></li>
+      <li><b>워치 개발자 모드 켜기</b><span>워치 설정 → 워치 정보 → 소프트웨어 정보 → <b style="display:inline">소프트웨어 버전</b>을 7번 빠르게 눌러요.</span></li>
+      <li><b>무선 디버깅 켜기</b><span>워치 설정 → 개발자 옵션 → <b style="display:inline">ADB 디버깅</b>과 <b style="display:inline">무선 디버깅</b>을 켜요. 휴대폰과 워치는 같은 와이파이에 연결해 주세요.</span></li>
+      <li><b>휴대폰에서 워치로 설치</b><span>Play 스토어의 워치 APK 설치 앱(예: "Bugjaeger" 같은 무선 ADB 앱)을 열고, 워치의 무선 디버깅 화면 → <b style="display:inline">새 기기 페어링</b>에 나온 코드로 연결한 뒤 받은 파일을 설치해요.<br>컴퓨터가 있으면: <code>adb pair 워치IP:포트</code> → <code>adb connect 워치IP:포트</code> → <code>adb install pinpoint-watch.apk</code></span></li>
+      <li><b>쓰기</b><span>워치에서 <b style="display:inline">PinPoint 워치</b>를 열고 <b style="display:inline">🏌️ 라운드 시작</b>을 눌러요. 휴대폰에서 골프 치기를 열어 두면 칠 때마다 저절로 적혀요. 다 쓰면 워치 개발자 옵션은 꺼도 돼요.</span></li>
+    </ol>
+  </section>
+
   <section class="card" id="versions">
     <h2>📦 버전별 다운로드</h2>
     <p class="vnote">새 버전은 기존 앱 위에 덮어 설치되고 기록이 그대로 남습니다. <b>예전 버전으로 되돌릴 때</b>는 Android가 낮은 버전 덮어쓰기를 막으므로 앱을 삭제한 뒤 설치해야 하고, 이때 휴대폰에 저장된 라운드·코스 기록이 지워집니다.</p>
@@ -142,6 +160,7 @@
     <details>
       <summary>파일 정보 · 무결성 확인</summary>
       <p id="fileInfo" style="margin:10px 0 0">불러오는 중…</p>
+      <p id="wfileInfo" style="margin:10px 0 0"></p>
     </details>
   </section>
 
@@ -186,6 +205,14 @@
   }).catch(() => {
     document.getElementById('fileInfo').textContent = '파일 정보를 불러오지 못했습니다. 다운로드는 그대로 가능합니다.';
   });
+
+  // ⌚ 워치 APK 정보 (release:apk가 watch.json을 갱신)
+  fetch('watch.json?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(w => {
+    const date = new Date(w.builtAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('wmeta').innerHTML = `<span>버전 ${esc(w.versionName)}</span><span>${(w.bytes / 1048576).toFixed(1)}MB</span><span>${esc(date)}</span><span>Wear OS 3 이상</span>`;
+    document.getElementById('wdlBtn').href = 'pinpoint-watch.apk?v=' + encodeURIComponent(w.versionCode);
+    document.getElementById('wfileInfo').innerHTML = (`워치 <code>pinpoint-watch.apk</code> · 버전 ${esc(w.versionName)} (code ${esc(w.versionCode)}) · ${w.bytes.toLocaleString()} bytes<br>SHA-256 <code>${esc(w.sha256)}</code>`);
+  }).catch(() => { document.getElementById('watch').hidden = true; });
 
   // 버전별 목록 (GitHub Releases · releases.json)
   fetch('releases.json?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(rel => {

@@ -22,7 +22,7 @@ const sha = buf => createHash('sha256').update(buf).digest('hex');
 // 다른 작업 중인 변경이 섞여 커밋되지 않도록, APK·버전 파일만 커밋한다.
 // 단, 웹 코드에 커밋 안 된 변경이 있으면 APK와 저장소 내용이 어긋나므로 먼저 알린다.
 const dirty = out('git status --porcelain').split('\n').filter(Boolean)
-  .filter(l => !/pinpoint-caddie\.apk$|apk\.json$|releases\.json$|android\/app\/build\.gradle$/.test(l));
+  .filter(l => !/pinpoint-caddie\.apk$|pinpoint-watch\.apk$|apk\.json$|watch\.json$|releases\.json$|android\/(app|wear)\/build\.gradle$/.test(l));
 if (dirty.length && push) {
   console.warn('⚠ 커밋되지 않은 변경이 있습니다 (APK에는 포함되지만 커밋되지 않음):\n  ' + dirty.join('\n  '));
 }
@@ -37,6 +37,9 @@ const code = +gradle.match(/versionCode (\d+)/)[1] + 1;
 const name = `1.0.${code - 1}`;
 gradle = gradle.replace(/versionCode \d+/, `versionCode ${code}`).replace(/versionName "[^"]*"/, `versionName "${name}"`);
 await writeFile(gradlePath, gradle);
+// ⌚ 워치 앱(android/wear)도 같은 버전 번호
+const wearPath = join(root, 'android', 'wear', 'build.gradle');
+await writeFile(wearPath, (await readFile(wearPath, 'utf8')).replace(/versionCode \d+/, `versionCode ${code}`).replace(/versionName "[^"]*"/, `versionName "${name}"`));
 console.log(`versionCode ${code}, versionName ${name}`);
 // 앱 안에서 새 버전을 알 수 있게 내 버전을 기록
 await writeFile(join(root, 'js', 'core', 'appver.js'), `// 앱(APK) 버전 — scripts/release-apk.mjs가 빌드할 때마다 자동으로 바꿉니다\nexport const APP_VERSION = { name: '${name}', code: ${code} };\n`);
@@ -60,6 +63,18 @@ await writeFile(join(root, 'apk.json'), JSON.stringify({
   packageId: appId, versionName: name, versionCode: code, bytes, sha256: hash, builtAt: new Date().toISOString(),
 }, null, 2) + '\n');
 
+// ⌚ 워치 APK (assembleDebug가 :wear도 함께 빌드 · 휴대폰 앱과 같은 디버그 서명이라 서로 연결됨)
+const wearBuilt = join(root, 'android', 'wear', 'build', 'outputs', 'apk', 'debug', 'wear-debug.apk');
+if (existsSync(wearBuilt)) {
+  const wearTarget = join(root, 'pinpoint-watch.apk');
+  await copyFile(wearBuilt, wearTarget);
+  const wbuf = await readFile(wearTarget);
+  await writeFile(join(root, 'watch.json'), JSON.stringify({
+    packageId: appId, versionName: name, versionCode: code, bytes: wbuf.length, sha256: sha(wbuf), builtAt: new Date().toISOString(), platform: 'Wear OS 3+',
+  }, null, 2) + '\n');
+  console.log(`⌚ 워치 ${(wbuf.length / 1048576).toFixed(1)}MB`);
+}
+
 if (!push) { console.log('\n--no-push: 커밋·업로드 생략. 완료.'); process.exit(0); }
 
 step(6, 'GitHub 릴리스(버전별 다운로드) · 커밋 · 푸시');
@@ -72,7 +87,7 @@ try {
   R.publishRelease({ version: name, code, apkPath: target, notes: notes.length ? notes : ['안정성 개선'] });
   console.log(`릴리스 v${name} 등록 · 노트 ${notes.length}줄`);
 } catch (e) { console.warn('⚠ GitHub 릴리스 등록 실패(최신 다운로드는 계속 제공): ' + e.message); }
-run('git add pinpoint-caddie.apk apk.json releases.json android/app/build.gradle js/core/appver.js');
+run('git add pinpoint-caddie.apk apk.json releases.json android/app/build.gradle js/core/appver.js' + (existsSync(join(root, 'pinpoint-watch.apk')) ? ' pinpoint-watch.apk watch.json android/wear/build.gradle' : ''));
 const who = out('git config user.name') ? '' : '-c user.name="PinPoint" -c user.email="noreply@users.noreply.github.com" ';
 run(`git ${who}commit -q -m "Android APK ${name} (versionCode ${code})"`);
 run('git push');
