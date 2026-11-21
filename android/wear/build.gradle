@@ -10,8 +10,8 @@ android {
         applicationId "io.github.funwings77sudo.pinpoint"
         minSdkVersion 26
         targetSdkVersion 35
-        versionCode 100058
-        versionName "1.0.57"
+        versionCode 100059
+        versionName "1.0.58"
     }
     // Google Play 업로드 키: 휴대폰 앱(android/app/build.gradle)과 같은 파일 ~/.android/pinpoint-upload.properties
     def uploadProps = new Properties()
