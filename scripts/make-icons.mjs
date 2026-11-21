@@ -1,15 +1,15 @@
 // 🏷️ 앱 아이콘 만들기: 브랜드 마크(위치 핀 + 골프 깃발, js/icons.js의 'brand'와 같은 모양)로
-//   웹(파비콘·PWA) · 안드로이드 런처(보통·둥근·적응형 앞그림) · 시작 화면(splash)을 한 번에 다시 그림
+//   웹(파비콘·PWA) · 안드로이드 런처(보통·둥근·적응형 앞그림) · 시작 화면(splash) · ⌚ 워치 앱 아이콘·알림 아이콘을 한 번에 다시 그림
 //   node scripts/make-icons.mjs        (크롬으로 SVG를 PNG로 그림 · 크롬 경로는 CHROME 환경변수로 바꿀 수 있음)
 import { spawn } from 'node:child_process';
-import { writeFile, mkdtemp, rm } from 'node:fs/promises';
+import { writeFile, mkdtemp, rm, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const RES = join(root, 'android', 'app', 'src', 'main', 'res');
+const RES = join(root, 'android', 'app', 'src', 'main', 'res'), WEAR = join(root, 'android', 'wear', 'src', 'main', 'res');
 const BG = '#1F5F3F', LIME = '#C8F169', INK = '#14241C', SHADE = 'rgba(0,0,0,.22)';
 
 // 브랜드 마크 (24 격자 기준 모양을 cx,cy 가운데에 크기 s배로)
@@ -29,6 +29,9 @@ const ICON = {
   round: n => svg(n, n, `<circle cx="${n / 2}" cy="${n / 2}" r="${n / 2}" fill="${BG}"/>${mark(n / 2, n * 0.48, n * 0.029)}`),
   fore: n => svg(n, n, mark(n / 2, n * 0.48, n * 0.0225)),                                                                       // 적응형 앞그림 (안전 영역 66/108 안)
 };
+// 알림 아이콘(상태 표시줄): 안드로이드 규칙대로 흰 실루엣 + 투명 · 깃발은 구멍으로 뚫음
+const stat = n => svg(n, n, `<defs><mask id="m"><rect width="24" height="24" fill="#fff"/><path d="M10.3 5.2l4.6 1.8-4.6 1.8z" fill="#000"/><path d="M10.3 14.5V5.2M8.6 14.5h3.4" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></mask></defs>
+  <g transform="scale(${n / 24})"><path d="M12 22s-7.5-6.6-7.5-12.3a7.5 7.5 0 0115 0C19.5 15.4 12 22 12 22z" fill="#fff" mask="url(#m)"/></g>`);
 const splash = (w, h) => svg(w, h, `<rect width="${w}" height="${h}" fill="${BG}"/>${mark(w / 2, h / 2, Math.min(w, h) * 0.0105)}`);
 
 const jobs = [];
@@ -45,6 +48,15 @@ for (const [d, n] of [['mdpi', 48], ['hdpi', 72], ['xhdpi', 96], ['xxhdpi', 144]
 const SPL = { 'drawable': [480, 320], 'drawable-land-mdpi': [480, 320], 'drawable-land-hdpi': [800, 480], 'drawable-land-xhdpi': [1280, 720], 'drawable-land-xxhdpi': [1600, 960], 'drawable-land-xxxhdpi': [1920, 1280],
   'drawable-port-mdpi': [320, 480], 'drawable-port-hdpi': [480, 800], 'drawable-port-xhdpi': [720, 1280], 'drawable-port-xxhdpi': [960, 1600], 'drawable-port-xxxhdpi': [1280, 1920] };
 for (const [d, [w, h]] of Object.entries(SPL)) out(join(RES, d, 'splash.png'), w, h, splash(w, h));
+
+// ⌚ 워치 앱: 둥근 아이콘(워치는 화면이 둥글어서) + 적응형 앞그림 + 알림 아이콘
+for (const [d, n] of [['mdpi', 48], ['hdpi', 72], ['xhdpi', 96], ['xxhdpi', 144], ['xxxhdpi', 192]]) {
+  out(join(WEAR, `mipmap-${d}`, 'ic_launcher.png'), n, n, ICON.round(n));
+  const f = Math.round(n * 108 / 48);
+  out(join(WEAR, `mipmap-${d}`, 'ic_launcher_foreground.png'), f, f, ICON.fore(f));
+  const st = n / 2;
+  out(join(WEAR, `drawable-${d}`, 'ic_stat_brand.png'), st, st, stat(st));
+}
 
 // 크롬(헤드리스)으로 그리기: 배경 투명 · 정확한 픽셀 크기
 const CHROME = process.env.CHROME || ['C:/Program Files/Google/Chrome/Application/chrome.exe', '/usr/bin/google-chrome', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(existsSync);
@@ -64,8 +76,9 @@ try {
     await send('Page.navigate', { url: 'data:text/html;charset=utf-8,' + encodeURIComponent(`<style>html,body{margin:0;background:transparent}svg{display:block}</style>${j.markup}`) });
     await wait(120);
     const r = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: j.w, height: j.h, scale: 1 } });
+    await mkdir(dirname(j.path), { recursive: true });
     await writeFile(j.path, Buffer.from(r.result.data, 'base64'));
   }
   ws.close();
-  console.log(`아이콘 ${jobs.length + 1}개를 새로 그렸어요 (icons/ · android res/mipmap-* · drawable*/splash.png)`);
+  console.log(`아이콘 ${jobs.length + 1}개를 새로 그렸어요 (icons/ · 휴대폰·워치 mipmap-* · splash · 알림 아이콘)`);
 } finally { ch.kill(); await wait(300); await rm(prof, { recursive: true, force: true }).catch(() => {}); }

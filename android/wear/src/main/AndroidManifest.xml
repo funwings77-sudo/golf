@@ -10,7 +10,8 @@
 
     <application
         android:label="@string/app_name"
-        android:icon="@android:drawable/ic_menu_compass"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.DeviceDefault">
 
         <!-- 휴대폰 앱이 있어야 쓰는 워치 앱 -->

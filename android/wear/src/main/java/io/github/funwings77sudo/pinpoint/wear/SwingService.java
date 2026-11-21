@@ -44,7 +44,7 @@ public class SwingService extends Service implements SensorEventListener {
         nm.createNotificationChannel(new NotificationChannel("swing", "스윙 감지", NotificationManager.IMPORTANCE_LOW));
         PendingIntent open = PendingIntent.getActivity(this, 0, new Intent(this, WearActivity.class), PendingIntent.FLAG_IMMUTABLE);
         Notification n = new Notification.Builder(this, "swing").setContentTitle("PinPoint 스윙 감지 중")
-            .setContentText("치면 휴대폰에 저절로 적어요").setSmallIcon(android.R.drawable.ic_menu_compass).setContentIntent(open).setOngoing(true).build();
+            .setContentText("치면 휴대폰에 저절로 적어요").setSmallIcon(R.drawable.ic_stat_brand).setContentIntent(open).setOngoing(true).build();
         if (Build.VERSION.SDK_INT >= 34) startForeground(7, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         else startForeground(7, n);
         if (!running) {
