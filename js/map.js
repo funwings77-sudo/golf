@@ -1,6 +1,7 @@
 // 지도 (Leaflet + 위성 타일, 오프라인 캐시는 서비스 워커가 담당)
 import { toLocal, fromLocal, distance } from './core/geo.js';
 import { Sensors, onPos } from './core/sensors.js';
+import { iconHTML } from './iconize.js';
 
 export const HZ_STYLE = {
   ob: { color: '#ffffff', fill: '#ffffff', label: 'OB' },
@@ -54,7 +55,8 @@ export const ll = p => [p.lat, p.lon];
 export function flagIcon(text = '') {
   return L.divIcon({ className: 'flag-ic', html: `<div class="flag"><span></span></div>${text ? `<em>${text}</em>` : ''}`, iconSize: [24, 34], iconAnchor: [3, 32] });
 }
-export function labelIcon(text, cls = '') { return L.divIcon({ className: 'lbl-ic ' + cls, html: `<span>${text}</span>`, iconSize: null }); }
+// 지도 위 글자 표시: 이모지는 앱 아이콘으로 (📍 → 핀, 🎯 → 조준, ⚪ → 공, ⛳ → 깃발)
+export function labelIcon(text, cls = '') { return L.divIcon({ className: 'lbl-ic ' + cls, html: `<span>${iconHTML(text)}</span>`, iconSize: null }); }
 
 // 홀 요소 그리기
 export function drawHole(map, hole, layer) {

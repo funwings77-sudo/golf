@@ -701,3 +701,4 @@ nav.tabs a .i .ic { width: 22px; height: 22px; }
 .bd-fab #fabAI .ic { --ic-acc: rgba(255,255,255,.35); }
 .ic.ic-h { width: 1em; height: 1em; margin-right: 8px; vertical-align: -.12em; }
 #verBtn .ic { width: 22px; height: 22px; }
+.lbl-ic span .ic { width: 1.2em; height: 1.2em; margin-right: 3px; vertical-align: -.25em; }

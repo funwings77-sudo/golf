@@ -34,3 +34,10 @@ test('카메라 화면(캔버스) 표시: 이모지는 아이콘 조각, 나머�
   assert.deepEqual(splitRich('⛰️ 능선 1.2km'), [{ ic: 'mountain' }, { t: ' 능선 1.2km' }]);
   assert.deepEqual(splitRich('깃발은 왼쪽 30°'), [{ t: '깃발은 왼쪽 30°' }]);
 });
+
+import { iconHTML } from '../js/iconize.js';
+test('지도 마커 글자: 이모지는 아이콘 SVG로, 나머지 HTML은 그대로', () => {
+  const h = iconHTML('⚪ 내 공 96m');
+  assert.ok(h.startsWith('<svg class="ic"') && h.endsWith(' 내 공 96m'));
+  assert.equal(iconHTML('조준 120m'), '조준 120m');
+});

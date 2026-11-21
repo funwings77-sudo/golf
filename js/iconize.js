@@ -1,6 +1,6 @@
 // 🎨 화면 글자 속 이모지 → 앱 아이콘 세트 (js/icons.js) 자동 바꾸기
 //  · 버튼·제목·설명 문장·알림까지 화면에 보이는 글자 전부 (화면이 다시 그려져도 MutationObserver가 바로 바꿈)
-//  · 안 바꾸는 곳: 입력칸·선택 목록(option은 그림을 못 넣음)·지도 위 표시(지도 글꼴에 맞춰 그린 것)·data-noic
+//  · 안 바꾸는 곳: 입력칸·선택 목록(option은 그림을 못 넣음)·data-noic · 지도 위 표시도 바꿈(마커는 iconHTML로 미리)
 //  · 표에 없는 기호는 그대로: ✕ ‹ › ◎ · 방향 화살표 ⬆⬇↖↗↔ (높낮이·방향을 뜻하므로)
 import { icon } from './icons.js';
 
@@ -25,7 +25,9 @@ export const EMOJI_ICON = {
 };
 // 이모지 한 글자 (+ 피부색·변형 선택자·ZWJ 조합까지 한 덩어리로)
 export const RE = new RegExp(`(${Object.keys(EMOJI_ICON).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?:\\uFE0F|\\u200D[\\u2640\\u2642]\\uFE0F?|[\\u{1F3FB}-\\u{1F3FF}])*`, 'gu');
-const SKIP = 'script, style, textarea, select, option, svg, canvas, [contenteditable], [data-noic], .leaflet-container';
+const SKIP = 'script, style, textarea, select, option, svg, canvas, [contenteditable], [data-noic]';
+// HTML 문자열 속 이모지 → 아이콘 SVG (지도 마커처럼 처음부터 아이콘으로 만들 때)
+export function iconHTML(html) { RE.lastIndex = 0; return String(html ?? '').replace(RE, (_, e) => icon(EMOJI_ICON[e])); }
 const BTN = 'button, a.btn, [role="button"]';
 const PAIR = /^[▶◀]$/; // ◀ ▶ 짝 버튼(홀 넘기기)은 글자 그대로
 
