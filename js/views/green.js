@@ -2,12 +2,13 @@
 import { mountGreen3D, ovalInside } from './green3d.js';
 import { todayKey } from '../core/remote.js';
 import { greenToday, recordPuttFeel } from '../core/insights.js';
-import { depthInfo, measureWithDepth, surveyWithDepth, processSurvey, KIND_WORD } from '../core/depth.js';
+import { depthInfo, measureWithDepth, surveyWithDepth, processSurvey, KIND_WORD, liveDepth, sendOverlay, greenOverlay } from '../core/depth.js';
 import { saveFile } from '../core/files.js';
+import { fuse, SIGMA, srcLine, blendWeight } from '../core/fusion.js';
 import { S, save, allowed, activeHole, activeCourse, currentMode, FEATURE_NAMES } from '../core/state.js';
 import { distance, toLocal, toRad } from '../core/geo.js';
 import { Sensors, sampleTilt, startSteps, onOrientation, startOrientation, vibrate, speak } from '../core/sensors.js';
-import { smoothAngle } from '../core/arproj.js';
+import { smoothAngle, rotationMatrix, project, focalPx, cameraAxis, unproject, groundHit } from '../core/arproj.js';
 import { lineFrame, distanceRings, SlopeFlow, resamplePath, slopeVerdict, fallLine } from '../core/greenar.js';
 import { muFromStimp, buildSurface, fitQuadFromGradients, optimizePutt, backswingCm, demoGreen, CUP_W } from '../physics/putt.js';
 import { openCamera, GroundProjector, coverTransform } from '../core/camera.js';
@@ -16,6 +17,7 @@ import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed, DU 
 
 const STAND_BACK = 0.6; // 공 뒤에 서는 거리 (m)
 let depth = null; // 깊이 카메라 (LiDAR · ARCore) 쓸 수 있나
+let liveSend = null; // 🔴 실시간 AR 선이 열려 있으면: 퍼팅 계산이 끝날 때마다 선을 다시 보냄
 let el_, App_, G, worker = null, reqId = 0, camStop = null, arT = null, unOri = null, metroOn = false;
 
 function loadG() {
@@ -36,7 +38,7 @@ export default {
     // 오늘 내 퍼트 결과로 맞춘 빠르기가 있으면 그것이 우선 (골프장 발표보다 오늘 내 느낌이 최신)
     const gt = greenToday(activeCourse());
     if (gt?.src === 'feel' && G.stimp !== gt.stimp) { G.stimp = gt.stimp; G.result = null; }
-    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.scan = null; if (G.src === 'scan') G.src = null; G.holeN = hole?.n ?? null; }
+    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.dm = []; G.scan = null; if (G.src === 'scan') G.src = null; G.holeN = hole?.n ?? null; }
     if (G.src === 'scan' && !G.scan) G.src = null;
     if (!G.src) G.src = hole?.greenGrid ? 'grid' : 'onsite';
     if (G.src === 'grid' && !hole?.greenGrid) G.src = 'demo';
@@ -46,6 +48,19 @@ export default {
   unmount() { stopAR(); metronome(false); metroOn = false; saveG(); },
   onHole() { G.holeN = null; this.mount(el_, App_); },
 };
+
+// 🔀 퍼팅 거리: 잰 기술마다 하나씩 기억(같은 기술은 새 값으로) → 정확도만큼 합침 · 직접 입력은 내 뜻이니 그 값으로
+function addDist(v, src, { acc, sd } = {}) {
+  if (!(v > 0)) return;
+  if (src === 'typed') G.dm = [];
+  G.dm = (G.dm || []).filter(m => m.src !== src && m.src !== 'typed');
+  const sdv = sd ?? (src === 'gps' ? SIGMA.dist.gps(v, acc) : (SIGMA.dist[src] || SIGMA.dist.camera)(v));
+  G.dm.push({ v, sd: sdv, src, ts: Date.now() });
+  const f = fuse(G.dm);
+  G.D = Math.round(f.v * 100) / 100; G.dFuse = { sd: f.sd, srcs: f.srcs, dropped: f.dropped.map(d => d.src) };
+  G.distSrc = `${srcLine(f.srcs)} ±${f.sd < 0.1 ? Math.round(f.sd * 100) + 'cm' : f.sd.toFixed(1) + 'm'}`;
+  G.result = null;
+}
 
 function gridInfo() {
   const hole = activeHole();
@@ -93,7 +108,10 @@ function fusionCorrection(surf, ball, hole) {
     const gw = [m.gx * rx + m.gy * ux, m.gx * ry + m.gy * uy], gs = surf.grad(p.x, p.y);
     a += gw[0] - gs[0]; b += gw[1] - gs[1];
   }
-  return { a: a / ms.length, b: b / ms.length };
+  // 격자와 기울기 센서를 정확도만큼 섞음: 측량 그린은 조금만, 거친 스캔·가짜 그린은 많이 고침
+  const sdGrid = G.src === 'scan' && G.scan ? SIGMA.slope[G.scan.kind] ?? 1 : G.src === 'grid' ? SIGMA.slope.survey : 2;
+  const sdTilt = ms.some(([, m]) => m.precise) ? SIGMA.slope.tiltPrecise : SIGMA.slope.tilt, w = blendWeight(sdGrid, sdTilt / Math.sqrt(ms.length));
+  return { a: a / ms.length * w, b: b / ms.length * w, w };
 }
 function confidence(geo) {
   if (G.src === 'scan' && G.scan) return G.scan.conf;
@@ -145,7 +163,7 @@ function measureTab(body, canSlope) {
       ${Object.values(G.meas).some(Boolean) ? `<button class="btn small ghost" id="clrMeas">${E ? '잰 기울기 지우기' : '측정값 지우기'}</button>` : ''}
     </div>` : lockedCard(FEATURE_NAMES.greenSlope)}
     <button class="btn primary block" id="calc" ${!isGrid && !(G.D > 0) ? 'disabled' : ''}>${E ? '🎯 어떻게 칠지 보기' : '퍼팅 계산'}</button>`;
-  $('#dIn')?.addEventListener('change', e => { G.D = Math.max(0, +e.target.value || 0); G.distSrc = '직접 입력'; G.result = null; saveG(); render(); });
+  $('#dIn')?.addEventListener('change', e => { addDist(Math.max(0, +e.target.value || 0), 'typed'); saveG(); render(); });
   $('#stimp').oninput = e => { G.stimp = +e.target.value; const lab = e.target.previousElementSibling; if (lab?.tagName === 'SPAN') lab.textContent = `${G.stimp} ft · μ=${muFromStimp(G.stimp).toFixed(3)}`; };
   $('#stimp').onchange = () => { S.settings.stimp = G.stimp; save('settings'); G.result = null; saveG(); if (easy()) render(); };
   $$('[data-st]').forEach(b => b.onclick = () => { G.stimp = +b.dataset.st; S.settings.stimp = G.stimp; save('settings'); G.result = null; saveG(); render(); });
@@ -156,7 +174,7 @@ function measureTab(body, canSlope) {
   $('#dCam')?.addEventListener('click', () => { G.tab = 'ar'; G.arMode = 'distance'; render(); });
   $('#dGps')?.addEventListener('click', () => {
     const h = activeHole(), pin = h?.pin; if (!pin || !Sensors.pos) return toast('깃발 위치와 내 위치를 알아야 잴 수 있어요 · 걸어서 재기를 써 보세요', 3500);
-    G.D = +distance(Sensors.pos, pin).toFixed(1); G.distSrc = `GPS ±${Math.round(Sensors.pos.acc || 4)}m`; saveG(); render();
+    addDist(distance(Sensors.pos, pin), 'gps', { acc: Sensors.pos.acc }); saveG(); render();
   });
   $('#calc').onclick = compute;
   $('#depthGo')?.addEventListener('click', () => runDepth(canSlope));
@@ -192,16 +210,29 @@ async function runSurvey() {
   } catch (e) { toast('측량하지 못했어요: ' + (e?.message || e), 5000); }
 }
 async function runDepth(canSlope) {
-  try {
-    const r = await measureWithDepth({ scan: canSlope });
-    if (r.cancelled) return;
-    G.D = r.D; G.distSrc = KIND_WORD[r.kind] || '카메라'; G.result = null;
+  const take = r => {
+    addDist(r.D, r.kind === 'lidar' ? 'lidar' : r.kind === 'depth' ? 'depth' : 'plane');
     if (canSlope) { G.scan = r; G.src = 'scan'; G.gBall = { x: 0, y: 0 }; G.gHole = { x: 0, y: r.D }; }
     saveG(); vibrate(60);
-    toast(`📏 ${r.D.toFixed(2)}m · ${Math.abs(r.dh * 100) < 1 ? '평평해요' : `${r.dh > 0 ? '오르막' : '내리막'} ${Math.abs(r.dh * 100).toFixed(0)}cm`}${canSlope ? ' · 그린 높이 지도를 만들었어요' : ''}`, 3500);
-    render();
-    if (G.D > 0) compute();
-  } catch (e) { toast('재지 못했어요: ' + (e?.message || e), 4000); }
+  };
+  try {
+    if (!canSlope) { // 대회 모드: 거리만 (선은 규칙상 안 그림)
+      const r = await measureWithDepth({ scan: false }); if (r.cancelled) return;
+      take(r); toast(`📏 ${r.D.toFixed(2)}m`, 3000); render(); return;
+    }
+    // 🔴 실시간: 잰 뒤에도 AR 화면이 열린 채로 → 측정한 그린 표면 위에 격자·경사 화살표·퍼팅 길을 고정해서 보여 줌
+    let lastScan = null;
+    const info = () => {
+      const r = G.result, sc = lastScan; if (!sc) return '';
+      const along = sc.slope.along * 100, cross = sc.slope.cross * 100;
+      const parts = [`홀까지 ${sc.D.toFixed(2)}m`, `${sc.dh >= 0 ? '⬆' : '⬇'} ${Math.abs(sc.dh * 100).toFixed(1)}cm`, `${along >= 0 ? '오르막' : '내리막'} ${Math.abs(along).toFixed(1)}% · ${Math.abs(cross) < 0.1 ? '좌우 평평' : `${cross > 0 ? '오른쪽' : '왼쪽'}이 ${Math.abs(cross).toFixed(1)}% 높음`}`];
+      if (r && allowed('puttLine')) parts.push(`${aimText(r)} · 퍼터를 뒤로 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm`); else parts.push('퍼팅 길 계산 중…');
+      return parts.join(String.fromCharCode(10));
+    };
+    liveSend = () => { if (lastScan) sendOverlay(greenOverlay(lastScan, allowed('puttLine') ? G.result : null, { info: info() })); };
+    await liveDepth({ mode: 'green', onScan: r => { lastScan = r; take(r); G.result = null; render(); compute(); return greenOverlay(r, null, { info: info() }); } });
+    liveSend = null; render();
+  } catch (e) { liveSend = null; toast('재지 못했어요: ' + (e?.message || e), 4000); }
 }
 function slopeText(m) {
   const along = m.gy * 100, cross = m.gx * 100;
@@ -245,7 +276,7 @@ function stepsSheet() {
       $('#stMinus', card).onclick = () => { n = Math.max(0, n - 1); upd(); };
       $('#stPlus', card).onclick = () => { n++; upd(); };
     },
-    actions: [{ label: '취소', onClick: () => stop && stop() }, { label: '도착', kind: 'primary', onClick: () => { stop && stop(); if (!n) return; G.D = +(n * S.settings.stepLen).toFixed(1); G.distSrc = `걸음 ${n}`; G.result = null; saveG(); render(); } }],
+    actions: [{ label: '취소', onClick: () => stop && stop() }, { label: '도착', kind: 'primary', onClick: () => { stop && stop(); if (!n) return; addDist(n * S.settings.stepLen, 'steps'); saveG(); render(); } }],
   });
 }
 
@@ -256,7 +287,7 @@ function compute() {
   if (geo.kind === 'onsite' && !geo.nMeas && allowed('greenSlope')) toast('경사 측정이 없어 평지로 가정합니다');
   const res = $('#result'); res.innerHTML = '<div class="card"><div class="empty">물리 시뮬레이션 · 몬테카를로 계산 중…</div></div>';
   const msg = { id: ++reqId, spec: geo.spec, mu: muFromStimp(G.stimp), ball: geo.ball, hole: geo.hole, skill: { sigmaAimDeg: S.settings.aimSigma, sigmaSpeed: S.settings.speedSigma } };
-  const done = r => { if (msg.id !== reqId) return; G.result = { ...r, conf: confidence(geo), D: geo.D, kind: geo.kind }; G.revealed = false; renderResult(allowed('puttLine')); if (G.tab === 'map') mapTab($('#tabBody')); announce(); };
+  const done = r => { if (msg.id !== reqId) return; G.result = { ...r, conf: confidence(geo), D: geo.D, kind: geo.kind }; G.revealed = false; renderResult(allowed('puttLine')); liveSend?.(); if (G.tab === 'map') mapTab($('#tabBody')); announce(); };
   try {
     worker = worker || new Worker(new URL('../physics/putt.worker.js', import.meta.url), { type: 'module' });
     worker.onmessage = e => { if (e.data.ok) done(e.data.r); else fallback(); };
@@ -301,10 +332,21 @@ function announce() {
   speak(easy() ? sayPutt(r, bs) : `${cupsText(r)}, 평지 ${r.flatEquiv.toFixed(1)}미터 세기, 백스윙 ${Math.round(bs)}센티`);
 }
 
+// 이 계산에 쓴 기술 (거리 · 경사)
+function techLine() {
+  const geo = geometry(), slope = [];
+  if (geo.kind === 'grid') slope.push(G.src === 'scan' && G.scan ? (G.scan.kind === 'lidar' ? 'lidar' : G.scan.kind === 'depth' ? 'depth' : 'plane') : G.src === 'grid' ? 'survey' : null);
+  if (Object.values(G.meas || {}).some(Boolean)) slope.push(Object.values(G.meas).some(m => m?.precise) ? 'tiltPrecise' : 'tilt');
+  const d = G.dFuse ? srcLine(G.dFuse.srcs) : G.distSrc || '';
+  const sl = slope.filter(Boolean);
+  return `<p class="sub tech">🔀 거리: ${esc(d || (geo.kind === 'grid' ? '그린 지도 좌표' : '—'))}${G.dFuse?.dropped?.length ? ` <small>(튀는 값 뺌: ${esc(srcLine(G.dFuse.dropped))})</small>` : ''}<br>🔀 경사: ${esc(sl.length ? srcLine(sl) : '측정 없음 (평지로 가정)')}</p>`;
+}
+
 function renderResult(canLine) {
   const box = $('#result'); if (!box) return;
   const r = G.result; if (!r) { box.innerHTML = ''; return; }
   const E = easy();
+  setTimeout(() => { const b2 = $('#result'); if (b2 && !b2.querySelector('.tech')) b2.insertAdjacentHTML('beforeend', techLine()); }, 0);
   const dhTxt = Math.abs(r.dh) < 0.01 ? (E ? '평평해요' : '평지') : `${r.dh > 0 ? '오르막' : '내리막'} ${Math.abs(r.dh * 100).toFixed(0)}cm`;
   const head = E ? `<div class="card"><div class="row"><b class="grow">${r.D.toFixed(1)}m · ${dhTxt}</b><span class="pill">${confWord(r.conf)}</span></div></div>`
     : `<div class="card"><div class="row"><b class="grow">실제 ${r.D.toFixed(1)}m · ${dhTxt}</b>${confBadge(r.conf)}</div>
@@ -434,7 +476,14 @@ function arTab(body, canLine) {
     <p class="sub">${easy() ? `공 뒤에 서서 휴대폰을 눈높이로 들고 홀 쪽을 비춰요. 화면의 홀을 한 번 누르면 더 정확해져요.<br>흰 줄 = 1m마다 거리 · 흘러가는 줄 = 공이 굴러 내려가는 쪽 · 초록 점 = 공이 갈 길` : `공 뒤 ${STAND_BACK}m에 서서 휴대폰을 눈높이(${S.settings.eyeHeight}m, 설정에서 변경)로 들고 홀 쪽을 비추세요. 흰 링 = 내 위치에서 1m 간격 거리(지형 높이 따라 휨), 흐르는 흰 줄 = 물이 흘러가는(공이 휘는) 방향, 초록 점선 = 퍼팅 라인. LiDAR 없이 카메라 높이·기울기로 지면을 투영하는 근사 AR이며, 화면의 홀컵을 한 번 탭하면 각도가 보정됩니다.`}</p>`;
   const video = $('#cam video'), cv = $('#arcv'), msg = $('#arMsg'), info = $('#arInfo');
   const proj = new GroundProjector({ height: S.settings.eyeHeight, vfovDeg: S.settings.cameraVFov });
-  let cal = null, head = null, head0 = null; // cal: { pitch, beta, yaw, heading }
+  let cal = null, head = null, head0 = null; // (옛 값: 안 씀)
+  // 📐 정밀 자세: 회전행렬(나침반 α · 앞뒤 β · 좌우 γ) → 그린 좌표(x 오른쪽 · y 앞 · z 위)를 화면에 투영
+  //  그린의 '앞' 방위 b0 = AR을 켰을 때 카메라가 비춘 방위 (그래서 비추는 곳에 그린이 놓임) · 홀을 누르면 정확히 맞춤
+  let pa = null, pb = null, pg = null, b0 = null, calibrating = false, Rm = null, popt = null, tapPt = null, calGap = null;
+  const eyeH = S.settings.eyeHeight || 1.55;
+  const toWorld = q => { const r = b0 * Math.PI / 180, c = Math.cos(r), sn = Math.sin(r), x = q.x, y = q.y; return { x: x * c + y * sn, y: -x * sn + y * c, z: (q.z || 0) - eyeH }; };
+  const toLocalG = e => { const r = b0 * Math.PI / 180, c = Math.cos(r), sn = Math.sin(r); return { x: e.x * c - e.y * sn, y: e.x * sn + e.y * c }; };
+  const prec = document.createElement('div'); prec.className = 'gar-prec'; $('#cam').appendChild(prec);
   startOrientation();
   // 정적 장면(한 번만 계산): 표면·시야 좌표·거리 링
   const surf = buildSurface(geo.spec), D = geo.D || 1, frame = lineFrame(geo.ball, geo.hole, STAND_BACK);
@@ -453,38 +502,48 @@ function arTab(body, canLine) {
   // 결과가 없으면 바로 계산 (영상처럼 비추자마자 라인이 보이도록)
   if (!distMode && canLine && geo.D >= 0.3 && !G.result) compute();
 
-  $('#arCal').onclick = () => { if (distMode) { G.arMode = null; G.tab = 'measure'; render(); } else { cal = null; head0 = head; msg.textContent = '화면에서 홀컵을 탭하세요'; } };
+  $('#arCal').onclick = () => { if (distMode) { G.arMode = null; G.tab = 'measure'; render(); } else { calibrating = true; msg.textContent = '👆 화면에서 진짜 홀컵을 누르세요'; } };
   openCamera(video).then(stop => { camStop = stop; loop(); }).catch(e => { msg.textContent = '카메라를 열 수 없습니다: ' + e.message + ' (HTTPS·권한 확인)'; });
   cv.onclick = e => {
-    const r = cv.getBoundingClientRect(), T = coverTransform(video, cv);
-    const u = (e.clientX - r.left - T.ox) / T.s, v = (e.clientY - r.top - T.oy) / T.s;
-    const beta = Sensors.beta;
-    if (distMode) {
-      proj.pitchDeg = beta != null ? 90 - beta : 25; proj.yawDeg = 0;
-      const g = proj.toGround(u, v, video.videoWidth, video.videoHeight);
-      if (!g) return toast('수평선 아래(지면)를 탭하세요');
-      G.D = +Math.max(0.3, g.dist - STAND_BACK).toFixed(1); G.distSrc = '카메라'; G.arMode = null; G.tab = 'measure'; G.result = null; saveG(); vibrate(50); toast(`거리 ${G.D}m`); render(); return;
+    if (!Rm || !popt) return toast('방향 센서를 기다리는 중이에요');
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    const v = unproject(Rm, x, y, popt), gh = groundHit(v, { eye: eyeH });
+    if (!isFinite(gh.h)) return toast('수평선 아래(땅)를 눌러 주세요');
+    if (distMode) { addDist(Math.max(0.3, gh.h - STAND_BACK), 'camera', { sd: gh.err }); G.arMode = null; G.tab = 'measure'; G.result = null; saveG(); vibrate(50); toast(`거리 ${G.D.toFixed(2)}m (±${gh.err.toFixed(2)}m)`); render(); return; }
+    if (calibrating) {
+      // 누른 곳 = 진짜 홀: 그린의 '앞' 방위를 돌려 홀이 그 방향에 오게, 카메라가 본 거리와 입력 거리 차이도 알려 줌
+      const hv = frame.toView(geo.hole), want = Math.atan2(hv.x, hv.y) * 180 / Math.PI;
+      b0 = (gh.bearing - want + 360) % 360; calibrating = false;
+      calGap = gh.h - Math.hypot(hv.x, hv.y);
+      vibrate(40); msg.textContent = `✅ 홀에 맞췄어요 · 카메라가 본 거리와 ${calGap >= 0 ? '+' : ''}${(calGap * 100).toFixed(0)}cm 차이`;
+      return;
     }
-    if (!(geo.D > 0)) return toast('거리를 먼저 입력하세요');
-    proj.calibrateFromTap(u, v, geo.D + STAND_BACK, video.videoWidth, video.videoHeight);
-    cal = { pitch: proj.pitchDeg, beta, yaw: proj.yawDeg, heading: head };
-    vibrate(40); msg.textContent = '보정 완료 · 휴대폰을 움직여도 화면이 따라갑니다';
+    // 아무 곳이나: 그 점의 그린 좌표 → 공·홀에서 거리 (1cm)
+    const e3 = { x: Math.sin(gh.bearing * Math.PI / 180) * gh.h, y: Math.cos(gh.bearing * Math.PI / 180) * gh.h }, q = toLocalG(e3);
+    tapPt = { ...q, err: gh.err, at: performance.now() }; vibrate(15);
   };
 
   function loop() {
     if (!camStop) return;
     const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now;
     cv.width = cv.clientWidth * devicePixelRatio; cv.height = cv.clientHeight * devicePixelRatio;
-    const ctx = cv.getContext('2d'), k = devicePixelRatio, T = coverTransform(video, cv);
+    const ctx = cv.getContext('2d'), k = devicePixelRatio, T = video.videoWidth ? coverTransform(video, cv) : { s: 1, ox: 0, oy: 0, vw: cv.clientWidth, vh: cv.clientHeight };
     ctx.clearRect(0, 0, cv.width, cv.height);
     if (Sensors.heading != null) { head = smoothAngle(head, Sensors.heading, 0.2); if (head0 == null) head0 = head; }
-    if (!distMode && scene) {
-      // 자세: 보정 전엔 센서 그대로(피치 = 90 − β, 처음 방향 = 홀 쪽), 보정 후엔 보정값 + 변화량
-      const turn = ref => (head != null && ref != null ? ((head - ref + 540) % 360) - 180 : 0);
-      if (cal) { proj.pitchDeg = cal.pitch + (cal.beta != null && Sensors.beta != null ? cal.beta - Sensors.beta : 0); proj.yawDeg = cal.yaw + turn(cal.heading); }
-      else { proj.pitchDeg = Sensors.beta != null ? 90 - Sensors.beta : 25; proj.yawDeg = turn(head0); }
-      const vw = video.videoWidth, vh = video.videoHeight, f = proj.focal(vh) * T.s * k;
-      const P = q => { const im = proj.toImage(q.x, q.y, vw, vh, q.z || 0); return im ? { x: (T.ox + im.u * T.s) * k, y: (T.oy + im.v * T.s) * k, d: im.depth } : null; };
+    // 자세: 회전행렬(α·β·γ, 흔들림 완화) · 화면 회전(가로·세로)과 영상 확대(object-fit)까지 반영
+    const al = Sensors.alphaAbs ?? Sensors.alpha;
+    if (al != null && Sensors.beta != null) {
+      pa = smoothAngle(pa, al, 0.25); pb = pb == null ? Sensors.beta : pb + (Sensors.beta - pb) * 0.3; pg = pg == null ? Sensors.gamma : pg + (Sensors.gamma - pg) * 0.3;
+      Rm = rotationMatrix(pa, pb, pg || 0);
+      if (b0 == null) b0 = cameraAxis(Rm).bearing; // 켰을 때 비춘 쪽 = 홀 쪽
+    }
+    const W0 = cv.clientWidth, so = (screen.orientation && screen.orientation.angle) || 0;
+    const f = focalPx(S.settings.cameraVFov || 63, T.vh) * T.s * k;
+    popt = { f: focalPx(S.settings.cameraVFov || 63, T.vh) * T.s, cx: T.ox + T.vw * T.s / 2, cy: T.oy + T.vh * T.s / 2, screenAngle: so };
+    if (!distMode && scene && !Rm) msg.textContent = '🧭 방향 센서를 기다려요…';
+    if (!distMode && scene && Rm) {
+      const P = q => { const pp = project(Rm, toWorld(q), popt); return pp.visible ? { x: pp.x * k, y: pp.y * k, d: pp.depth } : null; };
+      void W0;
       const poly = (pts, close) => { ctx.beginPath(); let pen = false; for (const q of pts) { const p = P(q); if (!p) { pen = false; continue; } pen ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); pen = true; } if (close) ctx.closePath(); ctx.stroke(); };
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
@@ -549,7 +608,7 @@ function arTab(body, canLine) {
       if (bp) { ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2 * k; ctx.beginPath(); ctx.arc(bp.x, bp.y, clamp(0.06 * f / bp.d, 5 * k, 16 * k), 0, 7); ctx.stroke(); }
 
       // ⑤ 오르막/내리막 배지(오른쪽 위) + 물 흐름 나침반(왼쪽 위)
-      const top = 74 * k;
+      const top = 168 * k; // 위 정밀 숫자 판 아래
       if (verdict) {
         const t1 = verdict.en, t2 = verdict.en === 'FLAT' ? verdict.ko : `${verdict.ko} ${Math.abs(verdict.dh * 100).toFixed(0)}cm`;
         ctx.font = `800 ${20 * k}px system-ui, sans-serif`; const w1 = ctx.measureText(t1).width;
@@ -560,7 +619,7 @@ function arTab(body, canLine) {
         ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = `600 ${12 * k}px system-ui, sans-serif`; ctx.fillText(t2, x + 11 * k, top + 39 * k);
       }
       if (fall && fall.pct >= 0.3) {
-        const cx = 40 * k, cy = top + 30 * k, R0 = 26 * k, a = (fall.deg - proj.yawDeg) * Math.PI / 180;
+        const yawRel = ((cameraAxis(Rm).bearing - b0 + 540) % 360) - 180, cx = 40 * k, cy = top + 30 * k, R0 = 26 * k, a = (fall.deg - yawRel) * Math.PI / 180;
         ctx.fillStyle = 'rgba(30,30,30,.55)'; ctx.beginPath(); ctx.arc(cx, cy, R0, 0, 7); ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5 * k; ctx.stroke();
         ctx.save(); ctx.translate(cx, cy); ctx.rotate(a); ctx.fillStyle = '#8fd3ff';
@@ -568,8 +627,46 @@ function arTab(body, canLine) {
         ctx.fillStyle = '#fff'; ctx.font = `700 ${11 * k}px system-ui, sans-serif`; ctx.textAlign = 'center';
         ctx.fillText(`${fall.pct.toFixed(1)}%`, cx, cy + R0 + 13 * k); ctx.fillText('물 흐름', cx, cy + R0 + 26 * k); ctx.textAlign = 'start';
       }
+      // 📍 누른 곳: 공·홀에서 거리
+      if (tapPt) {
+        const tp = P({ x: tapPt.x, y: tapPt.y, z: zOf(frame.toSurf(tapPt)) || 0 });
+        if (tp) { ctx.fillStyle = '#ffc83d'; ctx.beginPath(); ctx.arc(tp.x, tp.y, 6 * k, 0, 7); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5 * k; ctx.stroke(); }
+      }
+      if (now - (loop._pT || 0) > 200) { loop._pT = now; precise(); }
     }
     arT = requestAnimationFrame(loop);
+  }
+  // 📐 정밀 숫자 (0.01m · 0.01° · 0.1%): 홀까지 · 고저차 · 경사 · 조준 · 카메라 자세 · 누른 곳
+  function precise() {
+    if (!Rm) return;
+    const ax = cameraAxis(Rm), hv = frame.toView(geo.hole), bv = frame.toView(geo.ball);
+    const D2 = Math.hypot(hv.x - bv.x, hv.y - bv.y), dh = canSlope && scene ? surf.height(geo.hole.x, geo.hole.y) - surf.height(geo.ball.x, geo.ball.y) : 0;
+    const sl = canSlope && scene ? surf.grad(geo.ball.x, geo.ball.y) : [0, 0];
+    const ux = (geo.hole.x - geo.ball.x) / (D || 1), uy = (geo.hole.y - geo.ball.y) / (D || 1);
+    const along = (sl[0] * ux + sl[1] * uy) * 100, cross = (sl[0] * uy - sl[1] * ux) * 100; // + 오르막 · + 오른쪽이 높음
+    const r = G.result && canLine ? G.result : null;
+    const aimDeg = r ? Math.atan2(r.aimOffset, D) * 180 / Math.PI : null;
+    const roll = pg ?? 0, tilt = ax.pitch;
+    const c2 = x => x.toFixed(2), c1 = x => x.toFixed(1);
+    let tapLine = '';
+    if (tapPt) {
+      const db = Math.hypot(tapPt.x - bv.x, tapPt.y - bv.y), dhl = Math.hypot(tapPt.x - hv.x, tapPt.y - hv.y);
+      tapLine = `<div class="gp-tap">📍 누른 곳 · 공에서 <b>${c2(db)}m</b> · 홀까지 <b>${c2(dhl)}m</b> <small>±${c2(tapPt.err)}m</small></div>`;
+    }
+    prec.innerHTML = `<div class="gp-g">
+      <span><small>홀까지</small><b>${c2(D2)}m</b></span>
+      <span><small>직선</small><b>${c2(Math.hypot(D2, dh))}m</b></span>
+      <span><small>고저차</small><b>${dh >= 0 ? '⬆' : '⬇'} ${c1(Math.abs(dh * 100))}cm</b></span>
+      <span><small>경사 (앞뒤)</small><b>${along >= 0 ? '오르막' : '내리막'} ${c1(Math.abs(along))}%</b></span>
+      <span><small>경사 (좌우)</small><b>${Math.abs(cross) < 0.05 ? '평평' : `${cross > 0 ? '오른쪽' : '왼쪽'}↑ ${c1(Math.abs(cross))}%`}</b></span>
+      ${r ? `<span><small>조준</small><b>${Math.abs(aimDeg) < 0.005 ? '정면' : `${aimDeg > 0 ? '왼쪽' : '오른쪽'} ${c2(Math.abs(aimDeg))}°`}</b></span>
+      <span><small>조준 (컵)</small><b>${c1(Math.abs(r.aimCups ?? r.aimOffset / CUP_W))}컵</b></span>
+      <span><small>평지 세기</small><b>${c2(r.flatEquiv)}m</b></span>` : ''}
+      <span><small>카메라 위아래</small><b>${c1(tilt)}°</b></span>
+      <span><small>좌우 기울기</small><b>${c1(roll)}°</b></span>
+      <span><small>방향</small><b>${c1(ax.bearing)}°</b></span>
+      ${calGap != null ? `<span><small>홀 맞춤 차이</small><b>${calGap >= 0 ? '+' : ''}${(calGap * 100).toFixed(0)}cm</b></span>` : ''}
+    </div>${tapLine}`;
   }
 }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));

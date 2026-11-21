@@ -234,6 +234,7 @@ function setupAudio() {
 // ---------- ⌚ 워치 스윙: 골프 치기 화면이면 그 화면이 처리 (쳤어요 · 공 찾았어요), 아니면 친 자리만 기억 ----------
 function setupWatch() {
   onWatchSwing(ev => {
+    if (ev.impact) App.lastSwingTs = ev.ts || Date.now(); // 🎥 공 추적의 '친 시각'으로도 씀
     if (!S.round || S.settings.watchAuto === false) return;
     if (current?.onWatchSwing) return current.onWatchSwing(ev);
     if (!ev.impact || !Sensors.pos) return;
@@ -311,7 +312,7 @@ function setupSwing() {
   if (!S.settings.swingDetect) return;
   unSwing = startSwingDetect(async ev => {
     if (!S.round || !Sensors.pos) return;
-    App.pendingShot = { lat: Sensors.pos.lat, lon: Sensors.pos.lon, ts: ev.ts, auto: true, hole: S.ui.hole };
+    App.pendingShot = { lat: Sensors.pos.lat, lon: Sensors.pos.lon, ts: ev.ts, auto: true, hole: S.ui.hole }; App.lastSwingTs = ev.ts;
     vibrate(60);
     toast('스윙 감지 · 샷 위치 저장 (공이 안 보이면 공찾기)');
   });

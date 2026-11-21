@@ -13,6 +13,7 @@ public class DepthPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "available", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "measure", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "overlay", returnType: CAPPluginReturnPromise),
     ]
 
     @objc func available(_ call: CAPPluginCall) {
@@ -29,9 +30,20 @@ public class DepthPlugin: CAPPlugin, CAPBridgedPlugin {
         let survey = call.getBool("survey") ?? false // 🛰️ 그린 전체 측량
         DispatchQueue.main.async {
             guard let host = self.bridge?.viewController else { call.reject("화면을 열 수 없어요"); return }
-            let vc = DepthViewController(scan: scan, survey: survey) { result in call.resolve(result) }
+            let live = call.getBool("live") ?? false, mode = call.getString("mode") ?? "green"
+            let vc = DepthViewController(scan: scan, survey: survey, live: live, mode: mode, done: { result in call.resolve(result) },
+                                         onScan: { [weak self] r in self?.notifyListeners("scan", data: r, retainUntilConsumed: true) })
             vc.modalPresentationStyle = .fullScreen
             host.present(vc, animated: true)
+        }
+    }
+
+    // 🔴 실시간 AR 선: 앱이 계산한 선을 열린 AR 화면에
+    @objc func overlay(_ call: CAPPluginCall) {
+        let data = call.options as? [String: Any] ?? [:]
+        DispatchQueue.main.async {
+            guard let vc = DepthViewController.current else { call.reject("AR 화면이 닫혀 있어요"); return }
+            vc.setOverlay(data); call.resolve()
         }
     }
 }

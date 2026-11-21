@@ -79,3 +79,25 @@ export function smoothAngle(prev, next, k = 0.25) {
 export const flagDistance = (hPx, fPx, H = 2.13) => (hPx > 0 ? fPx * H / hPx : Infinity);
 // 예상 오차: 손가락·AI 표시 오차 ±1.5px + 깃대 높이 차이(골프장마다 ±5%)
 export const flagError = (d, hPx) => d * Math.hypot(1.5 / Math.max(1, hPx), 0.05);
+
+// ---------- 🔭 먼 거리 (최대 10km): 시선 광선이 실제 지형과 처음 만나는 곳 ----------
+//  지구 곡률 + 대기 굴절(k≈0.13): 거리 s에서 땅이 s²/(2R') 만큼 내려가 보임 (10km ≈ 6.8m)
+export const EARTH_REFR = 6371008.8 / (1 - 0.13);
+export const curvDrop = s => s * s / (2 * EARTH_REFR);
+//  eye: 눈높이(m, 발밑 땅 기준) · tanEl: 시선 기울기(위 +) · ground(s): 수평 거리 s의 땅 높이(발밑 기준)
+//  1m부터 1.2%씩(+0.5m) 늘려 가며 땅 밑으로 들어가는 첫 구간을 찾고 반으로 나눠 0.05m까지 좁힘
+export function rayHit({ eye, tanEl, ground, maxS = 10000, minS = 0.5 }) {
+  const above = s => eye + tanEl * s - ground(s) + curvDrop(s);
+  let s0 = minS;
+  if (!(above(s0) > 0)) return null;
+  for (let s = 1; ; s = Math.min(maxS, s * 1.012 + 0.5)) {
+    const a = above(s);
+    if (Number.isFinite(a) && a <= 0) {
+      let lo = s0, hi = s;
+      while (hi - lo > 0.05) { const m = (lo + hi) / 2; if (above(m) > 0) lo = m; else hi = m; }
+      return (lo + hi) / 2;
+    }
+    if (s >= maxS) return null;
+    s0 = s;
+  }
+}

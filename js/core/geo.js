@@ -116,3 +116,28 @@ export function ellipsePoints(stats, k = 2, n = 48) {
   }
   return out;
 }
+
+// ---------- 📏 정밀 거리 (WGS84 타원체 · Vincenty 역해) ----------
+//  구(haversine)는 10km에서 최대 약 30m(0.3%)까지 틀릴 수 있어서, 먼 거리·지도 재기는 타원체로 계산 (mm 정밀)
+const WGS_A = 6378137, WGS_F = 1 / 298.257223563, WGS_B = WGS_A * (1 - WGS_F);
+export function geodesic(p, q) {
+  const L = toRad(q.lon - p.lon), U1 = Math.atan((1 - WGS_F) * Math.tan(toRad(p.lat))), U2 = Math.atan((1 - WGS_F) * Math.tan(toRad(q.lat)));
+  const sU1 = Math.sin(U1), cU1 = Math.cos(U1), sU2 = Math.sin(U2), cU2 = Math.cos(U2);
+  let lam = L, it = 0, sS, cS, sig, ca2, c2m;
+  do {
+    const sl = Math.sin(lam), cl = Math.cos(lam);
+    sS = Math.hypot(cU2 * sl, cU1 * sU2 - sU1 * cU2 * cl);
+    if (sS === 0) return 0;
+    cS = sU1 * sU2 + cU1 * cU2 * cl; sig = Math.atan2(sS, cS);
+    const sa = cU1 * cU2 * sl / sS; ca2 = 1 - sa * sa;
+    c2m = ca2 ? cS - 2 * sU1 * sU2 / ca2 : 0;
+    const C = WGS_F / 16 * ca2 * (4 + WGS_F * (4 - 3 * ca2)), prev = lam;
+    lam = L + (1 - C) * WGS_F * sa * (sig + C * sS * (c2m + C * cS * (-1 + 2 * c2m * c2m)));
+    if (Math.abs(lam - prev) < 1e-12) break;
+  } while (++it < 200);
+  if (it >= 200) return distance(p, q); // 거의 정반대 지점 (골프장에선 없음)
+  const u2 = ca2 * (WGS_A * WGS_A - WGS_B * WGS_B) / (WGS_B * WGS_B);
+  const A = 1 + u2 / 16384 * (4096 + u2 * (-768 + u2 * (320 - 175 * u2))), B = u2 / 1024 * (256 + u2 * (-128 + u2 * (74 - 47 * u2)));
+  const dS = B * sS * (c2m + B / 4 * (cS * (-1 + 2 * c2m * c2m) - B / 6 * c2m * (-3 + 4 * sS * sS) * (-3 + 4 * c2m * c2m)));
+  return WGS_B * A * (sig - dS);
+}

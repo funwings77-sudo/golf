@@ -7,28 +7,32 @@
 //           조준한 곳 거리 = 시선과 실제 지형이 만나는 곳 (평지 가정 대신 지형을 따라 광선 추적)
 import { openCamera, coverTransform } from '../core/camera.js';
 import { Sensors, startOrientation, requestMotionPermission, onOrientation } from '../core/sensors.js';
-import { rotationMatrix, project, enuOf, focalPx, cameraAxis, yawCorrection, smoothAngle, unproject, groundHit } from '../core/arproj.js';
-import { distance, bearing, destination, normAngle } from '../core/geo.js';
+import { rotationMatrix, project, enuOf, focalPx, cameraAxis, yawCorrection, smoothAngle, unproject, groundHit, rayHit } from '../core/arproj.js';
+import { distance, bearing, destination, normAngle, geodesic } from '../core/geo.js';
 import { S } from '../core/state.js';
 import { loadTerrain } from '../core/terrain.js';
 import { playsLike } from '../core/weather.js';
+import { buildHorizon, visibleIn } from '../core/horizon.js';
+import { FlightSpotter, AngleTrack, fitTrajectory, ImpactListener } from '../core/balltrack.js';
+import { BallDetector } from '../core/camera.js';
+import { curvDrop } from '../core/arproj.js';
 import { flightPath, flightAt } from '../physics/flight3d.js';
 import { openFlagCam } from './flagcam.js';
 
 const YAW_KEY = 'pinpoint.arYaw';
 const HZ = { ob: ['OB', 'rgba(255,255,255,.12)', '#ffffff'], water: ['💧물', 'rgba(64,160,255,.30)', '#58b4ff'], bunker: ['🏖벙커', 'rgba(240,214,150,.32)', '#f3dc9a'], trees: ['🌳숲', 'rgba(30,110,60,.30)', '#4fbf7a'] };
 
-export async function startAR(box, getScene, { onLock = null, onPin = null, onMapEl = null, onMapMode = null, onHeading = null, onFail = null, views = [], onView = null } = {}) {
+export async function startAR(box, getScene, { onLock = null, onPin = null, onMapEl = null, onMapMode = null, onHeading = null, onFail = null, views = [], onView = null, onTrack = null, onBallSeen = null } = {}) {
   box.innerHTML = `<div class="ar"><video playsinline muted></video><canvas></canvas>
     <div class="ar-map mini" id="arMap"><div class="ar-map-in"></div><button class="ar-map-catch" id="arMapCatch" aria-label="지도 크게 보기"></button><button class="ar-map-close" id="arMapClose">📷 카메라로</button></div>
     <div class="ar-msg" id="arMsg"></div><div class="ar-diag" id="arDiag"><div class="ar-diag-h"><b>🩺 AR 점검</b><button id="arDiagX" aria-label="점검 닫기">✕ 닫기</button></div><div class="ar-diag-b" id="arDiagB"></div></div>
-    <div class="ar-read" id="arRead"></div><div class="ar-fly" id="arFlyInfo"></div><input type="range" class="ar-slide" id="arT" min="0" max="1000" value="0" aria-label="공 비행 시간" hidden>
+    <div class="ar-read" id="arRead"></div><div class="ar-walk" id="arWalk" hidden></div><div class="ar-trk" id="arTrk" hidden></div><div class="ar-fly" id="arFlyInfo"></div><input type="range" class="ar-slide" id="arT" min="0" max="1000" value="0" aria-label="공 비행 시간" hidden>
     <button class="ar-tbtn" id="arTools" aria-label="카메라 도구" aria-expanded="false">🛠</button>
     <button class="ar-chip" id="arAim0" hidden>⊙ 가운데로</button>
     <div class="ar-tray" id="arTray" hidden>
       <div class="ar-tray-h">카메라 도구 <small>켜기/끄기는 그대로 두고, 나머지는 누르면 닫혀요</small></div>
       <div class="ar-tray-g">
-        <button id="arFly" class="fly">▶ 공 날려 보기</button><button id="arFlag" class="flag">🚩 깃대로 재기</button>
+        <button id="arTrack" class="track">🎥 친 공 따라가기</button><button id="arFly" class="fly">▶ 공 날려 보기</button><button id="arFlag" class="flag">🚩 깃대로 재기</button>
         <button id="arTer" class="on" data-keep>⛰️ 지형</button><button id="arRings" class="on" data-keep>◎ 거리선</button>
         <button id="arLock">📌 고정</button><button id="arHt">🌳 높이</button>
         <button id="arCal">🎯 깃발 맞추기</button><button id="arReset">↺ 보정 지우기</button>
@@ -62,6 +66,17 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     vBox.querySelectorAll('[data-view]').forEach(b => b.onclick = () => onView(b.dataset.view));
   }
 
+  // ---------- 🎥 친 공 따라가기 · 🎤 임팩트 소리 · 📷 가까이 공 찾기 ----------
+  let trk = null, trkFit = null, trkFitAt = 0, trkLiveTs = null, nearDet = null, nearN = 0, nearSeen = null;
+  const impact = new ImpactListener();
+  function armTrack(sec = 60, why = 'button') {
+    trk = { until: performance.now() + sec * 1000, spot: new FlightSpotter({ width: 240 }), at: new AngleTrack(), last: 0, why };
+    impact.start().then(ok => { if (trk) trk.mic = ok; });
+    box.querySelector('#arTrack').classList.add('on'); box.querySelector('#arTrack').textContent = '⏹ 따라가기 멈춤';
+  }
+  function disarm() { trk = null; impact.stop(); const b = box.querySelector('#arTrack'); b.classList.remove('on'); b.textContent = '🎥 친 공 따라가기'; box.querySelector('#arTrk').hidden = !trkFit; }
+  box.querySelector('#arTrack').onclick = () => (trk ? disarm() : armTrack(60));
+
   // ---------- 🗺️ 지도 (작게 ↔ 전체) ----------
   let mapFull = false, mapManual = false, lowSince = 0, highSince = 0;
   onMapEl && onMapEl(mapBox.querySelector('.ar-map-in'));
@@ -93,11 +108,11 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   // ---------- ⛰️ 땅 높이 ----------
   let terr = null, terrKey = '', terrLoading = false, geoCache = null;
   function ensureTerrain(sc) {
-    const h = sc.hole, key = `${h?.n}|${sc.me.lat.toFixed(3)},${sc.me.lon.toFixed(3)}|${h?.greenGrid ? 1 : 0}`;
+    const h = sc.hole, key = `${h?.n}|${sc.me.lat.toFixed(3)},${sc.me.lon.toFixed(3)}|${h?.greenGrid ? 1 : 0}`, farKey = `${sc.me.lat.toFixed(2)},${sc.me.lon.toFixed(2)}`;
     if (key === terrKey || terrLoading) return;
     terrLoading = true;
     const pts = [sc.me, h?.tee, h?.ip, h?.green, h?.front, h?.back, sc.pin, ...(h?.hazards || [])].filter(Boolean);
-    loadTerrain(pts, { greenGrid: h?.greenGrid }).then(t => { terr = t; terrKey = key; geoCache = null; }).catch(() => { terrKey = key; }).finally(() => { terrLoading = false; });
+    void farKey; loadTerrain(pts, { greenGrid: h?.greenGrid, far: sc.me }).then(t => { terr = t; terrKey = key; geoCache = null; }).catch(() => { terrKey = key; }).finally(() => { terrLoading = false; });
   }
   // 내 발밑 기준 높이(m): 지형이 있으면 지형, 없으면 깃발 쪽만 고저차(dzPin), 나머지는 평지
   let meZ = 0, meZFor = null;
@@ -108,6 +123,21 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       if (Number.isFinite(v) && Number.isFinite(meZ)) return v - meZ;
     }
     return sc.pin && p === sc.pin ? sc.dzPin || 0 : 0;
+  };
+
+  // ⛰️ 능선·가려짐 (core/horizon.js): 지형이 있을 때 뒤에서 계산
+  let hz = null, hzBusy = false, hzTerr = null;
+  function ensureHorizon(sc, eye) {
+    if (!terr || hzBusy || !alive) return;
+    if (hz && hzTerr === terr && distance(hz.me, sc.me) < 30) return;
+    hzBusy = true; const t0 = terr, me = { lat: sc.me.lat, lon: sc.me.lon };
+    buildHorizon({ me, eye, hgt: p => hgt(p, { ...sc, me }) }).then(h => { if (alive && t0 === terr) { hz = h; hzTerr = t0; geoCache = null; } }).catch(() => {}).finally(() => { hzBusy = false; });
+  }
+  // 이 점이 내 눈에 보이나 (앞 언덕에 가려지면 false) · zRel = 발밑 기준 높이
+  const seen = (sc, p, zRel, eye) => {
+    if (!hz) return true;
+    const s = distance(sc.me, p); if (s < 30) return true;
+    return visibleIn(hz.at(bearing(sc.me, p)), s, (zRel - curvDrop(s) - eye) / s);
   };
 
   const ctx = cv.getContext('2d');
@@ -146,7 +176,9 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     const h2 = project(R, { x: Math.sin((ax.bearing + 40) * Math.PI / 180) * 3000, y: Math.cos((ax.bearing + 40) * Math.PI / 180) * 3000, z: 0 }, opt);
     if (h1.visible && h2.visible) { ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.setLineDash([6, 8]); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(h1.x, h1.y); ctx.lineTo(h2.x, h2.y); ctx.stroke(); ctx.setLineDash([]); }
     // ⛰️ 입체 지도 (지형 격자 · 페어웨이 · 그린 · 해저드)
+    ensureHorizon(sc, eye);
     if (terrOn) drawTerrain(sc, R, opt, eye);
+    if (hz) drawRidges(sc, R, opt, ax, eye);
     // 추천 길: 공 → 떨어질 곳 (땅 위 노란 띠) → 깃발 (흰 점선) — 지형을 따라
     const path = (from, to, color, w, dash) => {
       const d = distance(from, to), br = bearing(from, to), pts = [];
@@ -163,6 +195,8 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     if (landing) { path(from, landing, 'rgba(255,226,122,.55)', 5, []); if (sc.pin && distance(landing, sc.pin) > 3) path(landing, sc.pin, 'rgba(255,255,255,.85)', 3, [8, 8]); }
     else if (sc.pin) path(from, sc.pin, 'rgba(255,226,122,.95)', 6, []);
     if (flight) drawFlight(sc, R, opt, eye, f);
+    trackStep(sc, R, opt, eye, f, t);
+    walkStep(sc, R, opt, eye, f, t, ax);
     // 해저드 이름
     for (const z of sc.hazards || []) { const q = P(z); if (q.visible && q.depth < 400) label(q.x, q.y, `${HZ[z.type]?.[0] || ''} ${Math.round(distance(sc.me, z))}m`, 'rgba(0,0,0,.55)', 12); }
     // 떨어질 곳
@@ -198,10 +232,10 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
       seg.push({ p: B, br: seg.at(-1)?.br ?? bearing(A, B) });
       const hw = h?.halfWidth || 16, W = hw + 30;
       // 페어웨이 양쪽 끝
-      for (const side of [-1, 1]) out.edges.push(seg.map(s => E(destination(s.p, s.br + 90 * side, hw))));
+      for (const side of [-1, 1]) out.edges.push(seg.map(s => { const p = destination(s.p, s.br + 90 * side, hw); return { e: E(p), p, z: hgt(p, sc) }; }));
       // 지형 격자: 홀 방향 줄(옆으로 10m마다) + 가로줄(앞으로 10m마다)
-      for (let o = -W; o <= W + 0.1; o += 10) out.grid.push(seg.filter((_, i) => i % 2 === 0).map(s => { const p = destination(s.p, s.br + 90, o); return { e: E(p), z: hgt(p, sc) }; }));
-      for (let i = 0; i < seg.length; i += 3) { const s = seg[i], row = []; for (let o = -W; o <= W + 0.1; o += 4) { const p = destination(s.p, s.br + 90, o); row.push({ e: E(p), z: hgt(p, sc) }); } out.grid.push(row); }
+      for (let o = -W; o <= W + 0.1; o += 10) out.grid.push(seg.filter((_, i) => i % 2 === 0).map(s => { const p = destination(s.p, s.br + 90, o); return { e: E(p), p, z: hgt(p, sc) }; }));
+      for (let i = 0; i < seg.length; i += 3) { const s = seg[i], row = []; for (let o = -W; o <= W + 0.1; o += 4) { const p = destination(s.p, s.br + 90, o); row.push({ e: E(p), p, z: hgt(p, sc) }); } out.grid.push(row); }
     }
     // 그린 (앞·뒤 거리로 반지름)
     const gC = h?.green || sc.pin;
@@ -214,17 +248,18 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     const key = `${sc.hole?.n}|${sc.me.lat.toFixed(5)},${sc.me.lon.toFixed(5)}|${terr ? 1 : 0}|${sc.pin?.lat}`;
     if (!geoCache || geoCache.key !== key) geoCache = { key, ...buildGeo(sc, eye) };
     const G = geoCache, pr = e => project(R, e, opt), FAR = 330;
+    if (hz && G.visFor !== hz) { for (const ln of [...G.grid, ...G.edges]) for (const v of ln) v.vis = seen(sc, v.p, v.z, eye); G.visFor = hz; } // 언덕 뒤는 숨김
     // 지형 격자: 높이에 따라 색 (낮은 곳 하늘색 → 높은 곳 주황), 멀수록 흐리게 · 색별로 묶어 한 번에 그림
     const buckets = new Map();
     for (const ln of G.grid) {
       let prev = null;
       for (const v of ln) {
         const q = pr(v.e);
-        if (prev && q.visible && prev.q.visible && q.depth < FAR && q.depth > 8) {
+        if (prev && q.visible && prev.q.visible && q.depth < FAR && q.depth > 8 && v.vis !== false && prev.vis !== false) {
           const z = (v.z + prev.z) / 2, c = z < -4 ? 0 : z < -1.5 ? 1 : z < 1.5 ? 2 : z < 4 ? 3 : 4, al = Math.round(Math.max(0.1, 0.42 * (1 - q.depth / FAR) * Math.min(1, (q.depth - 8) / 20)) * 10);
           const k = c * 100 + al; if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(prev.q, q);
         }
-        prev = { q, z: v.z };
+        prev = { q, z: v.z, vis: v.vis };
       }
     }
     const COLS = ['120,200,255', '150,225,255', '255,255,255', '255,214,140', '255,170,90'];
@@ -237,7 +272,7 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     // 해저드 (채운 원)
     for (const z of G.haz) { const pts = z.pts.map(pr).filter(q => q.visible && q.depth < FAR); if (pts.length > 4) poly(pts, HZ[z.type]?.[1] || 'rgba(255,255,255,.15)', HZ[z.type]?.[2] || '#fff', z.type === 'ob' ? [6, 6] : []); }
     // 페어웨이 양쪽 끝 (라임색)
-    for (const e of G.edges) line(e.map(pr).filter(q => q.visible && q.depth < FAR && q.depth > 2), 'rgba(200,241,105,.75)', 2.5, []);
+    for (const e of G.edges) runs(e.map(v => ({ q: pr(v.e), ok: v.vis !== false })).map(o => ({ ...o, ok: o.ok && o.q.visible && o.q.depth < FAR && o.q.depth > 2 })), 'rgba(200,241,105,.75)', 2.5, []);
     // 그린
     if (G.green) { const pts = G.green.map(pr).filter(q => q.visible); if (pts.length > 8) poly(pts, 'rgba(94,230,168,.22)', 'rgba(94,230,168,.95)', []); }
   }
@@ -248,6 +283,75 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     const z0 = hgt(flight.pts[0], sc), z1 = hgt(flight.landing, sc), k = Math.min(1, t / Math.max(0.01, flight.time));
     return enuOf(sc.me, p, { eye, dz: (p.h || 0) + (t <= flight.time ? z0 + (z1 - z0) * k : hgt(p, sc)) });
   };
+  // 🎥 매 화면: 움직이는 작은 점 → 각도(친 곳에서 본) → 이어 붙이기 → 끝나면 탄도 모델에 맞춤
+  function trackStep(sc, R, opt, eye, f, t) {
+    if (sc.live && sc.live.ts !== trkLiveTs && Date.now() - sc.live.ts < 4000) { trkLiveTs = sc.live.ts; if (!trk) armTrack(12, 'hit'); } // 친 직후 12초 저절로
+    const el = box.querySelector('#arTrk'), now = performance.now();
+    if (trk) {
+      const aim = sc.live?.aim ?? sc.plan?.aim ?? cameraAxis(R).bearing;
+      const cands = trk.spot.detect(video).map(c => {
+        const v = unproject(R, t.ox + c.x * t.s, t.oy + c.y * t.s, opt);
+        return { ...c, az: normAngle(Math.atan2(v.x, v.y) * 180 / Math.PI - aim), el: Math.asin(Math.max(-1, Math.min(1, v.z))) * 180 / Math.PI, sx: t.ox + c.x * t.s, sy: t.oy + c.y * t.s };
+      });
+      const o = trk.at.add(cands, now, c => c.el > -1.5 && Math.abs(c.az) < 28);
+      if (o) trk.last = now;
+      const obs = trk.at.obs;
+      for (const q of obs) { const p = project(R, angDir(q.az + aim, q.el), opt); if (p.visible) { ctx.fillStyle = '#ffe27a'; ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, 7); ctx.fill(); } }
+      el.hidden = false;
+      el.innerHTML = `🎥 <b>공을 따라가는 중</b>${trk.mic ? ' · 🎤 소리 듣는 중' : ''}<br><small>${obs.length ? `본 점 ${obs.length}개 · ${(obs.at(-1).t).toFixed(1)}초` : '공이 날아가는 쪽 하늘을 비춰 주세요'}</small>`;
+      const ended = obs.length >= 6 && now - trk.last > 700, timeout = now > trk.until;
+      if (ended || (timeout && obs.length >= 6)) {
+        const hitT = impact.last(trk.at.t0) || (sc.swingTs ? { t: performance.now() - (Date.now() - sc.swingTs), src: 'swing' } : null);
+        const base = { club: sc.live?.club || sc.plan?.club || '7i', wind: sc.live?.wind || sc.plan?.wind, rho: sc.live?.rho || sc.plan?.rho, aim, from: sc.live?.from || sc.from || sc.me, guessCarry: sc.live?.stdCarry || sc.plan?.stdCarry };
+        if (hitT && trk.at.t0 - hitT.t >= 0 && trk.at.t0 - hitT.t < 8000) { base.tau0 = (trk.at.t0 - hitT.t) / 1000; base.tauSd = hitT.src === 'swing' ? 0.12 : 0.03; }
+        const fit = fitTrajectory(obs, base);
+        if (fit) { fit.timedBy = hitT ? (hitT.src === 'swing' ? '⌚ 스윙' : '🎤 소리') : null; trkFit = fit; trkFitAt = now; onTrack && onTrack(fit); }
+        disarm();
+      } else if (timeout) disarm();
+    }
+    // 맞춘 비행: 밝은 선 + 착지 · 숫자 판 (30초)
+    if (trkFit && now - trkFitAt < 30000) {
+      const F = trkFit, z0 = hgt(F.path[0], sc), z1 = hgt(F.landing, sc);
+      const pts = F.path.map(q => project(R, enuOf(sc.me, q, { eye, dz: q.h + z0 + (z1 - z0) * Math.min(1, q.t / F.time) }), opt)).filter(q => q.visible && q.depth > 1);
+      line(pts, 'rgba(255,90,60,.35)', 12, []); line(pts, '#ff5a3c', 3.5, []);
+      const lq = project(R, enuOf(sc.me, F.landing, { eye, dz: z1 }), opt);
+      if (lq.visible) { ring(lq.x, lq.y, Math.max(10, f * 5 / lq.depth)); label(lq.x, lq.y - 24, `🎯 착지 ${(Math.round(F.carry * 10) / 10).toLocaleString('ko-KR', { minimumFractionDigits: 1 })}m ±${F.sd.toFixed(1)}`, 'rgba(200,60,40,.92)', 14); }
+      const f1 = x => x.toFixed(1);
+      el.hidden = false;
+      el.innerHTML = `<div class="trk-g"><span><small>공 속도</small><b>${f1(F.kmh)}km/h</b></span><span><small>발사 각</small><b>${f1(F.launch)}°</b></span><span><small>좌우</small><b>${Math.abs(F.sideDeg) < 0.05 ? '정면' : `${F.sideDeg > 0 ? '오른쪽' : '왼쪽'} ${f1(Math.abs(F.sideDeg))}°`}</b></span>
+        <span><small>최고 높이</small><b>${f1(F.apex)}m</b></span><span><small>비행 시간</small><b>${F.time.toFixed(2)}초</b></span><span><small>착지 각</small><b>${f1(F.landAngle)}°</b></span>
+        <span><small>공중 거리</small><b>${f1(F.carry)}m</b></span><span><small>멈출 거리</small><b>${f1(F.total)}m</b></span><span><small>오차</small><b>±${f1(F.sd)}m</b></span></div>
+        <small>🔀 ${F.timedBy ? `${F.timedBy}(친 시각) + ` : ''}📷 카메라 각도 ${F.n}점 + 🧮 탄도 모델${F.timedBy ? '' : ` · 친 시각을 몰라서 ${f1(F.lo)}~${f1(F.hi)}m 범위`}</small>`;
+    } else if (!trk) el.hidden = true;
+  }
+  // 방위·올려다보는 각 → 먼 방향 점 (화면에 찍기용)
+  const angDir = (az, elv) => { const a = az * Math.PI / 180, e = elv * Math.PI / 180; return { x: Math.sin(a) * Math.cos(e) * 1000, y: Math.cos(a) * Math.cos(e) * 1000, z: Math.sin(e) * 1000 }; };
+
+  // ⚪ 공까지 걸어갈 때: 거리(0.1m)·방향·앞/옆·위치 계속 · 45m 안이면 📷 땅 위 흰 공 찾기
+  function walkStep(sc, R, opt, eye, f, t, ax) {
+    const el = box.querySelector('#arWalk');
+    if (!sc.ball || !sc.live) { el.hidden = true; nearDet = null; return; }
+    const d = geodesic(sc.me, sc.ball), rel = normAngle(bearing(sc.me, sc.ball) - ax.bearing), fwd = d * Math.cos(rel * Math.PI / 180), side = d * Math.sin(rel * Math.PI / 180);
+    const clk = ((Math.round(((rel % 360) + 360) % 360 / 30) % 12) || 12);
+    const f1 = x => (Math.round(x * 10) / 10).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const SRC = { track: '🎥 공 추적', camera: '📷 카메라로 봄', course: '📷 골프장 카메라', pred: '🧮 예측' };
+    el.hidden = false;
+    el.innerHTML = `⚪ 내 공까지 <b>${f1(d)}m</b> · ${clk}시 방향<br><small>앞 ${f1(fwd)}m · ${side >= 0 ? '오른쪽' : '왼쪽'} ${f1(Math.abs(side))}m · ±${f1(sc.ballErr || 5)}m · ${(sc.ball.lat).toFixed(6)}°, ${(sc.ball.lon).toFixed(6)}° · ${SRC[sc.ballSrc] || '🧮 예측'}</small>`;
+    // 📷 가까이(45m 안): 땅 위 흰 공 찾기 → 위치 합치기
+    if (d > 45 || !video.videoWidth) { nearDet = null; return; }
+    nearDet ||= new BallDetector({ width: 320 });
+    if (nearN++ % 3) { if (nearSeen) { ctx.strokeStyle = '#5ee6a8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(nearSeen.x, nearSeen.y, 18, 0, 7); ctx.stroke(); } return; }
+    const tr = nearDet.detect(video)[0];
+    nearSeen = null; if (!tr) return;
+    const sx = t.ox + tr.x * t.s, sy = t.oy + tr.y * t.s, v = unproject(R, sx, sy, opt);
+    const gh = (terr && terrainHit(v, sc, eye)) || groundHit(v, { eye });
+    if (!isFinite(gh.h) || gh.h > 60) return;
+    const pos = destination(sc.me, gh.bearing, gh.h);
+    if (geodesic(pos, sc.ball) > 2.5 * (sc.ballErr || 8) + 10) return; // 엉뚱한 흰 점 (예측과 너무 멀면 버림)
+    nearSeen = { x: sx, y: sy };
+    onBallSeen && onBallSeen(pos, Math.max(0.5, gh.err));
+  }
+
   function drawFlight(sc, R, opt, eye, f) {
     const pr = (p) => project(R, flightENU(sc, eye, p, p.t), opt);
     const arc = flight.pts.map(pr).filter(q => q.visible && q.depth > 2);
@@ -296,22 +400,21 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
   const clubFor = d => { if (!getScene()?.clubOk) return null; const cs = (S.bag || []).filter(c => c.enabled !== false && c.carry > 0).sort((p, q) => p.carry - q.carry); return cs.find(c => c.carry >= d * 0.97) || cs.at(-1); };
   const DIRS = ['북', '북동', '동', '남동', '남', '남서', '서', '북서'];
   const compass = bb => DIRS[Math.round(bb / 45) % 8];
-  // 시선이 실제 지형과 만나는 곳: 1m부터 3%씩 늘려 가며 땅 아래로 들어가는 첫 구간을 찾고 반으로 나눠 좁힘
+  // 🔭 시선이 실제 지형과 만나는 곳 (최대 10km · 지구 곡률·대기 굴절 포함)
+  //  오차 범위: 휴대폰 기울기 ±0.25° · 땅 높이 ±2m(1km 안, 측량 그린은 더 정밀) / ±8m(먼 곳) 로 다시 재서 가장 가까운~가장 먼 값
   function terrainHit(v, sc, eye) {
-    const vh = Math.hypot(v.x, v.y); if (vh < 1e-3 || v.z > 0.2) return null;
-    const brg = (Math.atan2(v.x, v.y) * 180 / Math.PI + 360) % 360;
-    const above = tt => eye + v.z * tt - hgt(destination(sc.me, brg, tt * vh), sc);
-    let t0 = 0.5, d0 = above(t0);
-    for (let tt = 1; tt <= 650; tt *= 1.03) {
-      const d = above(tt);
-      if (d <= 0) {
-        let lo = t0, hi = tt; for (let k = 0; k < 14; k++) { const m = (lo + hi) / 2; if (above(m) > 0) lo = m; else hi = m; }
-        const hdist = hi * vh, dep = Math.max(0.01, Math.atan2(-v.z, vh));
-        return { h: hdist, bearing: brg, elev: Math.atan2(v.z, vh) * 180 / Math.PI, err: Math.hypot(0.1 * hdist, hdist * 0.5 * Math.PI / 180 / Math.tan(dep), 1.5 / Math.tan(dep) * 0.3) };
-      }
-      t0 = tt; d0 = d;
-    }
-    void d0; return null;
+    const vh = Math.hypot(v.x, v.y); if (vh < 1e-3) return null;
+    const brg = (Math.atan2(v.x, v.y) * 180 / Math.PI + 360) % 360, tanEl = v.z / vh;
+    const ground = s => hgt(destination(sc.me, brg, s), sc);
+    const d = rayHit({ eye, tanEl, ground });
+    const elev = Math.atan(tanEl) * 180 / Math.PI;
+    if (d == null) return { h: Infinity, bearing: brg, elev, err: Infinity };
+    const dl = Math.tan(0.25 * Math.PI / 180), sz = d < 900 ? 2 : 8;
+    // 조금 위로 본 광선이 하늘로 빠지면(null) = 능선 마루를 조준한 것 → 그 값은 오차에서 빼고 '능선 근처'로 표시
+    const raw = [rayHit({ eye, tanEl: tanEl + dl, ground }), rayHit({ eye, tanEl: tanEl - dl, ground }), rayHit({ eye, tanEl, ground: s => ground(s) + sz }), rayHit({ eye, tanEl, ground: s => ground(s) - sz })];
+    const alt = raw.filter(x => x != null), crest = raw[0] == null || raw[3] == null;
+    const lo = Math.min(d, ...alt), hi = Math.max(d, ...alt);
+    return { h: d, bearing: brg, elev, lo, hi, crest, err: Math.hypot(Math.max(d - lo, hi - d), sc.me.acc || 3) };
   }
   function rangefinder(sc, R, ax, opt, eye, f) {
     const W = box.clientWidth, H = box.clientHeight, { rx, ry } = aimXY();
@@ -324,12 +427,12 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
         const mp = destination(sc.me, ax.bearing, r), mid = project(R, enuOf(sc.me, mp, { eye, dz: hgt(mp, sc) }), opt);
         if (!mid.visible || mid.depth < 2 || mid.y > H - 140 || lastY - mid.y < 22) continue;
         lastY = mid.y;
-        const pts = [];
-        for (let k = -35; k <= 35; k += 2.5) { const p = destination(sc.me, ax.bearing + k, r), q = project(R, enuOf(sc.me, p, { eye, dz: hgt(p, sc) }), opt); if (q.visible && q.depth > 2) pts.push(q); }
+        const seq = [];
+        for (let k = -35; k <= 35; k += 1.25) { const p = destination(sc.me, ax.bearing + k, r), z = hgt(p, sc), q = project(R, enuOf(sc.me, p, { eye, dz: z }), opt); seq.push({ q, ok: q.visible && q.depth > 2 && seen(sc, p, z, eye) }); }
+        const pts = seq.filter(o => o.ok).map(o => o.q);
         if (pts.length < 3) continue;
         const major = r % 50 === 0;
-        ctx.strokeStyle = major ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.45)'; ctx.lineWidth = major ? 2 : 1.2; ctx.setLineDash(major ? [] : [5, 6]);
-        ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.stroke(); ctx.setLineDash([]);
+        runs(seq, major ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.45)', major ? 2 : 1.2, major ? [] : [5, 6]);
         const lp = pts.reduce((m, q) => (Math.abs(q.x - W * 0.6) < Math.abs(m.x - W * 0.6) ? q : m)), c = clubFor(r);
         if (lp.y > 110 && (lp.y < ry - 14 || lp.y > ry + 150)) tag(Math.min(W - 190, lp.x), lp.y - 10, `${r}m${c ? ' · ' + CLUBN(c) : ''}`);
       }
@@ -348,19 +451,20 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     const land = flight?.landing || sc.landing;
     if (land) cands.push({ p: land, name: '🎯 떨어질 곳' });
     if (sc.ball) cands.push({ p: sc.ball, name: '⚪ 내 공' });
+    for (const m of sc.marks || []) cands.push(m);
     if (lockPt) cands.push({ p: lockPt, name: '📌 고정점' });
     let snap = null, best = 36;
     for (const c of cands) { const q = project(R, enuOf(sc.me, c.p, { eye, dz: hgt(c.p, sc) }), opt); if (!q.visible) continue; const d = Math.hypot(q.x - rx, q.y - ry); if (d < best) { best = d; snap = { ...c, q }; } }
     const brg = gh.bearing, rel = sc.pin ? normAngle(brg - bearing(sc.me, sc.pin)) : null;
     let dist, err, pt;
-    if (snap) { dist = distance(sc.me, snap.p); err = sc.me.acc || 5; pt = snap.p; }
-    else if (isFinite(gh.h) && gh.h < 400) { dist = gh.h; err = gh.err; pt = destination(sc.me, brg, gh.h); }
+    if (snap) { dist = geodesic(sc.me, snap.p); err = sc.me.acc || 5; pt = snap.p; }
+    else if (isFinite(gh.h) && gh.h <= 10000) { dist = gh.h; err = gh.err; pt = destination(sc.me, brg, gh.h); }
     aim = pt ? { p: pt, dist, name: snap?.name || null } : null;
     if (pt && dist >= 2) {
       const br = bearing(sc.me, pt), gp = [];
       for (let s = 1.5; s <= dist; s += Math.max(0.5, dist / 90)) { const p = destination(sc.me, br, s), q = project(R, enuOf(sc.me, p, { eye, dz: hgt(p, sc) }), opt); if (q.visible && q.depth > 0.8) gp.push(q); }
       line(gp, 'rgba(0,0,0,.45)', 6, []); line(gp, 'rgba(255,200,61,.95)', 3, []);
-      const step = dist > 150 ? 25 : dist > 60 ? 10 : dist > 20 ? 5 : dist > 8 ? 2 : 1;
+      const step = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500].find(k => dist / k <= 40) || 2500;
       let lastLy = Infinity; // 눈금 글씨는 화면에서 18px 넘게 떨어질 때만 (멀리서 겹치지 않게)
       for (let s = step; s < dist - step * 0.4; s += step) {
         const p = destination(sc.me, br, s), q = project(R, enuOf(sc.me, p, { eye, dz: hgt(p, sc) }), opt);
@@ -385,13 +489,13 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     // 숫자 판: 조준점 아래 · 아래 메뉴에 닿으면 조준점 위로
     const rh = read.offsetHeight || 150, below = ry + 44 + rh < H - 200;
     read.style.top = `${below ? ry + 44 : Math.max(120, ry - 44 - rh)}px`; read.style.left = `${Math.max(150, Math.min(W - 150, rx))}px`;
-    const too = !snap && (!isFinite(gh.h) || gh.h >= 400 || err > Math.max(8, dist * 0.35));
-    const f1 = x => (Math.round(x * 10) / 10).toFixed(1);
-    const toPin = pt && sc.pin && !(snap && snap.p === sc.pin) ? distance(pt, sc.pin) : null;
+    const too = !snap && (!isFinite(gh.h) || gh.h > 10000 || err > Math.max(15, dist * 0.5));
+    const f1 = x => (Math.round(x * 10) / 10).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); // 1,234.5
+    const toPin = pt && sc.pin && !(snap && snap.p === sc.pin) ? geodesic(pt, sc.pin) : null;
     const dzPt = pt ? hgt(pt, sc) : 0;
     // 체감 거리: 오늘 바람·기온 + 고저차 (대회 모드면 sc.wx 없음 → 안 보임)
-    const pl = !too && dist && sc.wx ? playsLike({ dist, dh: dzPt, windSpeed: sc.wx.windSpeed || 0, windFrom: sc.wx.windFrom || 0, shotBearing: brg, tempC: sc.wx.temp ?? 20 }) : null;
-    const club = !too && dist ? clubFor(pl ? pl.total : dist) : null;
+    const pl = !too && dist && dist <= 400 && sc.wx ? playsLike({ dist, dh: dzPt, windSpeed: sc.wx.windSpeed || 0, windFrom: sc.wx.windFrom || 0, shotBearing: brg, tempC: sc.wx.temp ?? 20 }) : null;
+    const club = !too && dist && dist <= 400 ? clubFor(pl ? pl.total : dist) : null;
     const latM = rel != null && dist ? dist * Math.sin(rel * Math.PI / 180) : null;
     let htLine = '';
     if (ht?.base) {
@@ -400,14 +504,14 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     } else if (ht?.done) htLine = `<div class="ar-ht">🌳 높이 <b>${ht.done.h.toFixed(1)}m</b> <small>${Math.round(ht.done.d)}m 앞 · ${esc(ht.done.note)}</small></div>`;
     else if (ht) htLine = '<div class="ar-ht">🌳 나무·벽의 <b>밑동</b>을 조준하고 [높이]를 누르세요</div>';
     const cell = (k, v2) => `<span><small>${k}</small>${v2}</span>`;
-    read.innerHTML = `<div class="ar-big">${too ? `<span class="far">${!isFinite(gh.h) || gh.h >= 400 ? '하늘·먼 곳' : '너무 멀어요'}</span>` : `<em>${snap ? esc(snap.name) : '조준한 곳까지'}</em><b>${f1(dist)}</b><small>m</small><i>±${f1(err)}</i>${club ? `<u>${esc(CLUBN(club))}</u>` : ''}`}</div>
+    read.innerHTML = `<div class="ar-big">${too ? `<span class="far">${!isFinite(gh.h) ? (gh.elev > 0 ? '하늘이에요' : '10km보다 멀어요') : '오차가 너무 커요 · 땅이나 산을 조준해 주세요'}</span>` : `<em>${snap ? esc(snap.name) : gh.crest ? '⛰️ 능선 근처' : '조준한 곳까지'}</em><b>${f1(dist)}</b><small>m</small><i>±${f1(err)}</i>${club ? `<u>${esc(CLUBN(club))}</u>` : ''}`}</div>
       ${too ? `<div class="ar-sub"><span>🧭 ${compass(brg)} ${f1(brg)}°</span><span>${gh.elev >= 0 ? '⬆' : '⬇'} ${f1(Math.abs(gh.elev))}°</span></div>` : `<div class="ar-grid">
         ${cell('직선 거리', `${f1(Math.hypot(dist, dzPt))}m`)}
         ${cell('높이 차이', Math.abs(dzPt) < 0.05 ? '평평 0.0m' : `${dzPt > 0 ? '⬆' : '⬇'} ${f1(Math.abs(dzPt))}m · ${f1(Math.abs(dzPt / dist * 100))}%`)}
         ${cell('방향', `${compass(brg)} ${f1(brg)}°`)}
         ${rel != null ? cell('깃발 기준', Math.abs(rel) < 0.05 ? '정면 ✓' : `${rel > 0 ? '오른쪽' : '왼쪽'} ${f1(Math.abs(rel))}° · ${f1(Math.abs(latM))}m`) : cell('내려다봄', `${f1(Math.abs(gh.elev))}°`)}
         ${toPin != null ? cell('⛳까지', `${f1(toPin)}m`) : sc.pin ? cell('⛳까지', '여기예요') : ''}
-        ${pl ? cell('체감 거리', `${f1(pl.total)}m`) : cell('내 위치 오차', `±${f1(sc.me.acc || 0)}m`)}
+        ${pl ? cell('체감 거리', `${f1(pl.total)}m`) : !snap && gh.lo != null ? cell('범위', `${f1(gh.lo)}~${f1(gh.hi)}m`) : cell('내 위치 오차', `±${f1(sc.me.acc || 0)}m`)}
       </div>`}
       ${htLine}`;
   }
@@ -417,6 +521,30 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     if (pts.length < 2) return;
     ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.setLineDash(dash); ctx.beginPath();
     pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.stroke(); ctx.setLineDash([]);
+  }
+  // 보이는 점끼리만 이어서 (가려진 곳에서 끊김)
+  function runs(seq, color, w, dash) {
+    let cur = [];
+    for (const o of seq) { if (o.ok) cur.push(o.q); else { line(cur, color, w, dash); cur = []; } }
+    line(cur, color, w, dash);
+  }
+  // ⛰️ 능선(하늘과 맞닿는 선) + 앞 능선 마루 선 · 화면 안 가장 높은 곳에 거리·높이
+  function drawRidges(sc, R, opt, ax, eye) {
+    const P3 = (az, s, t) => project(R, { x: Math.sin(az * Math.PI / 180) * s, y: Math.cos(az * Math.PI / 180) * s, z: t * s }, opt);
+    const from = Math.floor(ax.bearing - 48), to = Math.ceil(ax.bearing + 48);
+    const sky = []; let top = null;
+    for (let az = from; az <= to; az++) {
+      const pf = hz.at(az), k = pf?.sky;
+      if (!k) { sky.push({ ok: false }); continue; }
+      const q = P3(az, k.s, k.t); sky.push({ q, ok: q.visible });
+      if (q.visible && (!top || q.y < top.q.y)) top = { q, s: k.s, h: k.t * k.s + curvDrop(k.s) + eye };
+    }
+    for (const ln of hz.ridges) {
+      const seq = ln.filter(c => Math.abs(normAngle(c.az - ax.bearing)) <= 48).map(c => { const q = P3(c.az, c.s, c.t); return { q, ok: q.visible && c.s > 60 }; });
+      runs(seq, 'rgba(0,0,0,.35)', 3.5, []); runs(seq, 'rgba(255,226,122,.7)', 1.6, []);
+    }
+    runs(sky, 'rgba(0,0,0,.45)', 5, []); runs(sky, 'rgba(255,255,255,.95)', 2.2, []);
+    if (top && top.q.y > 100) { const fmK = v => (v >= 1000 ? `${(v / 1000).toFixed(2)}km` : `${Math.round(v)}m`); tag(top.q.x + 6, top.q.y - 12, `⛰️ 능선 ${fmK(top.s)} · ${top.h >= 0 ? '+' : ''}${Math.round(top.h)}m`); }
   }
   function poly(pts, fill, stroke, dash) {
     ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.closePath();
@@ -535,6 +663,6 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     setCalib(false);
   });
   raf = requestAnimationFrame(frame);
-  return { stop: () => { alive = false; cancelAnimationFrame(raf); unOri(); stopCam && stopCam(); }, play: playFlight, setMap };
+  return { stop: () => { alive = false; cancelAnimationFrame(raf); unOri(); impact.stop(); stopCam && stopCam(); }, play: playFlight, setMap, armTrack };
 }
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

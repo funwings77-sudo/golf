@@ -3,9 +3,21 @@ import { S, save, allowed, FEATURE_NAMES } from '../core/state.js';
 import { toRad, toDeg } from '../core/geo.js';
 import { Sensors, onOrientation, sampleTilt, vibrate, speak } from '../core/sensors.js';
 import { clubType } from '../physics/flight.js';
-import { $, toast, sheet, lockedCard, clubOptions, DU } from '../ui.js';
+import { $, toast, sheet, lockedCard, clubOptions, DU, esc } from '../ui.js';
+import { depthInfo, liveDepth, lieOverlay, KIND_WORD } from '../core/depth.js';
+import { fuse, srcLine } from '../core/fusion.js';
 
 let unOri = null, last = null, clubSel = '7i', precise = false;
+// 🔀 라이 경사 = 기울기 센서 + 깊이 카메라 바닥면을 정확도(°)만큼 합침 (10분 안 같은 자리 측정끼리)
+let lastTilt = null, lastDepth = null, depthOk = false;
+const SD_DEG = { tilt: 0.5, tiltPrecise: 0.17, lidar: 0.2, depth: 0.4, plane: 0.7 };
+function combine() {
+  const fresh = m => m && Date.now() - m.ts < 10 * 60 * 1000;
+  const ms = [fresh(lastTilt) && lastTilt, fresh(lastDepth) && lastDepth].filter(Boolean);
+  if (!ms.length) return null;
+  const a = fuse(ms.map(m => ({ v: m.beta, sd: SD_DEG[m.src], src: m.src }))), g = fuse(ms.map(m => ({ v: m.gamma, sd: SD_DEG[m.src], src: m.src })));
+  return { beta: a.v, gamma: g.v, precise: !!lastTilt?.precise, srcs: [...new Set([...a.srcs, ...g.srcs])], sd: Math.max(a.sd, g.sd) };
+}
 
 export default {
   mount(el) {
@@ -15,7 +27,8 @@ export default {
         <div class="level" id="level"><i></i></div>
         <div class="row" style="justify-content:center"><span class="sub" id="live">센서 대기 중…</span></div>
         <label class="switch"><span>정밀 모드 (180° 돌려 2회 측정 · 센서 오차 상쇄)</span><input type="checkbox" id="precise" ${precise ? 'checked' : ''}></label>
-        <button class="btn primary block" id="meas">2초 측정</button></div>
+        <button class="btn primary block" id="meas">2초 측정</button>
+        <button class="btn block" id="measDepth" hidden style="margin-top:8px">📏 깊이 카메라로 재기 (기울기 센서와 합쳐요)</button></div>
       <div class="card"><label class="f" style="margin:0"><span>칠 클럽</span><select id="club">${clubOptions(clubSel)}</select></label></div>
       <div id="out"></div>`;
     unOri = onOrientation(s => {
@@ -29,6 +42,7 @@ export default {
     $('#precise').onchange = e => precise = e.target.checked;
     $('#club').onchange = e => { clubSel = e.target.value; if (last) renderOut(); };
     $('#meas').onclick = measure;
+    depthInfo().then(d => { depthOk = d.ok; const b = $('#measDepth'); if (b && d.ok) { b.hidden = false; b.textContent = `📏 ${KIND_WORD[d.kind] || '깊이 카메라'}로 재기 (기울기 센서와 합쳐요)`; b.onclick = measureDepth; } });
     if (Sensors.beta == null) $('#live').textContent = '기울기 센서가 없거나 권한이 필요합니다 (설정 → 센서 권한 요청)';
     if (last) renderOut();
   },
@@ -49,8 +63,21 @@ async function measure() {
     beta = (A.beta - B.beta) / 2; gamma = (A.gamma - B.gamma) / 2;
     S.calib.tilt = { beta: (A.beta + B.beta) / 2, gamma: (A.gamma + B.gamma) / 2, ts: Date.now() }; save('calib');
   } else { beta = A.beta - (S.calib.tilt?.beta || 0); gamma = A.gamma - (S.calib.tilt?.gamma || 0); }
-  last = { beta, gamma, precise };
+  lastTilt = { beta, gamma, precise, src: precise ? 'tiltPrecise' : 'tilt', ts: Date.now() };
+  last = combine();
   vibrate(40); renderOut();
+}
+
+// 📏 깊이 카메라: 공 → 칠 방향을 찍고 공 둘레를 비춤 → 실제 땅 바닥면의 경사 (화면에 격자로 고정해서 보여 줌)
+async function measureDepth() {
+  try {
+    await liveDepth({ mode: 'lie', onScan: r => {
+      const along = Math.atan(r.slope.along) * 180 / Math.PI, cross = Math.atan(r.slope.cross) * 180 / Math.PI;
+      lastDepth = { beta: along, gamma: -cross, src: r.kind === 'lidar' ? 'lidar' : r.kind === 'depth' ? 'depth' : 'plane', ts: Date.now() };
+      last = combine(); renderOut();
+      return lieOverlay(r, { info: `${along >= 0 ? '오르막' : '내리막'} ${Math.abs(along).toFixed(1)}° · 공이 발보다 ${(S.settings.hand === 'R' ? cross < 0 : cross > 0) ? '낮음' : '높음'} ${Math.abs(cross).toFixed(1)}°` + String.fromCharCode(10) + `합친 값: ${Math.abs(last.beta).toFixed(2)}° · ${Math.abs(last.gamma).toFixed(2)}° (${srcLine(last.srcs)})` });
+    } });
+  } catch (e) { toast('재지 못했어요: ' + (e?.message || e), 4000); }
 }
 
 // 물리: 발끝 경사에서 로프트가 있는 클럽 페이스는 경사 방향으로 돌아감 → 방향 변화 ≈ atan(sin(로프트)·tan(경사))
@@ -91,6 +118,7 @@ function renderOut() {
       <div class="stat"><div class="v">${Math.abs(a.cross).toFixed(1)}°</div><div class="l">${a.ballBelowFeet ? '발끝 내리막 (공이 낮음)' : '발끝 오르막 (공이 높음)'}</div></div></div>
       <div class="grid2" style="margin-top:8px"><div class="stat"><div class="v">${aim}</div><div class="l">조준 보정 (${ct?.name || clubSel}, 로프트 ${ct?.loft ?? '—'}°)</div></div>
       <div class="stat"><div class="v">${a.distPct >= 0 ? '+' : ''}${a.distPct.toFixed(0)}%</div><div class="l">거리 영향 (추정)</div></div></div>
+      <p class="sub">🔀 쓴 기술: <b>${esc(srcLine(last.srcs || [last.precise ? 'tiltPrecise' : 'tilt']))}</b>${last.sd ? ` · 합친 오차 ±${last.sd.toFixed(2)}°` : ''}</p>
       ${last.precise ? '<p><span class="pill">정밀 측정</span> 센서 오차를 상쇄했습니다 (±0.3° 목표)</p>' : '<p class="sub">빠른 측정: 기기 보정값 적용. 정밀 모드는 ±0.3°까지 정확합니다.</p>'}
       <h3>셋업 가이드</h3><ul class="tips">${a.tips.map(t => `<li>${t}</li>`).join('')}</ul>
       <p class="sub">페이스 방향 변화 = atan(sin(로프트)·tan(경사)) = ${a.dirDeg.toFixed(1)}°. 로프트가 클수록(웨지) 발끝 경사 영향이 큽니다.</p></div>`;

@@ -51,6 +51,10 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.Locale;
+import java.lang.ref.WeakReference;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import android.graphics.DashPathEffect;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -77,7 +81,15 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
     private boolean geometryChanged = true;
 
     // GL 스레드와 UI 스레드가 같이 보는 상태
-    private volatile int step = 0;            // 0 공 · 1 홀 · 2 비추기 · 3 끝
+    private volatile int step = 0;            // 0 공 · 1 홀 · 2 비추기 · 3 끝 · 4 실시간 AR 선(live)
+    // 🔴 실시간 AR 선: 앱(JS)이 보낸 선(공 기준 로컬 좌표)을 실제 세계 좌표로 바꿔 고정 · 깊이 영상으로 사물 뒤는 숨김
+    static WeakReference<DepthActivity> current = new WeakReference<>(null);
+    private boolean live = false; private String mode = "green";
+    private volatile float[][] ovW;      // 선마다 세계 좌표 [x,y,z,…]
+    private volatile int[] ovC; private volatile float[] ovWd; private volatile boolean[] ovDash;
+    private volatile float[][] lbW; private volatile String[] lbT; private volatile int[] lbC;
+    private volatile String ovInfo = "";
+    private short[] dbuf; private int dW, dH;
     private volatile int pendingTap = -1;     // 찍기 요청 (0 공 · 1 홀)
     private volatile boolean finishReq = false;
     private Anchor ballA, holeA;
@@ -95,6 +107,10 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
         super.onCreate(b);
         scanWanted = getIntent().getBooleanExtra("scan", true);
         survey = getIntent().getBooleanExtra("survey", false);
+        live = getIntent().getBooleanExtra("live", false);
+        String m = getIntent().getStringExtra("mode"); if (m != null) mode = m;
+        if ("lie".equals(mode)) scanTarget = 25;
+        current = new WeakReference<>(this);
         if (survey) { scanWanted = true; scanTarget = 900; stride = 4; }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         FrameLayout root = new FrameLayout(this);
@@ -105,7 +121,7 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
         glView.setRenderer(this);
         glView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         root.addView(glView, new FrameLayout.LayoutParams(-1, -1));
-        overlay = new Overlay(this);
+        overlay = new Overlay(this); overlay.owner = this;
         root.addView(overlay, new FrameLayout.LayoutParams(-1, -1));
 
         // 위: 큰 안내 · 아래: 큰 버튼 하나 + 보조 버튼
@@ -138,16 +154,25 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
             switch (step) {
                 case 0:
                     title.setText(survey ? "① 그린 앞 끝을 찍어요" : "① 공을 찍어요");
+                    if ("lie".equals(mode)) { title.setText("① 공을 찍어요"); }
                     hint.setText(survey ? "페어웨이 쪽 그린 끝(관리자 지도의 '그린 앞')에 ＋를 맞춰요.\n바닥을 못 찾으면 휴대폰을 천천히 좌우로 움직여요." : "공 뒤에 서서 화면 가운데 ＋를 공에 맞춰요.\n바닥을 못 찾으면 휴대폰을 천천히 좌우로 움직여요.");
                     mainBtn.setText(survey ? "📍  앞 끝 찍기" : "⚪  공 찍기"); sideBtn.setText("그만하기"); break;
                 case 1:
                     title.setText(survey ? "② 그린 뒤 끝을 찍어요" : "② 홀(컵)을 찍어요");
                     hint.setText(survey ? "그린 반대편 끝(관리자 지도의 '그린 뒤')에 ＋를 맞춰요. 멀면 걸어가서 찍어도 돼요." : "이제 ＋를 홀 한가운데에 맞춰요.");
-                    mainBtn.setText(survey ? "📍  뒤 끝 찍기" : "⛳  홀 찍기"); sideBtn.setText("↩  공 다시 찍기"); break;
+                    mainBtn.setText(survey ? "📍  뒤 끝 찍기" : "⛳  홀 찍기"); sideBtn.setText("↩  공 다시 찍기");
+                    if ("lie".equals(mode)) { title.setText("② 칠 방향을 찍어요"); hint.setText("공 앞 1~2m, 깃발 쪽 땅에 ＋를 맞춰요."); mainBtn.setText("🎯  방향 찍기"); }
+                    break;
                 case 2:
                     title.setText(survey ? "③ 그린 전체를 비춰요" : "③ 그린을 천천히 비춰요");
                     hint.setText((survey ? "그린 둘레를 천천히 걸으며 1~3m 앞 바닥을 빈틈없이 비춰요. 다 비췄으면 [다 됐어요].\n" : "공에서 홀까지, 그 둘레 1m를 천천히 쓸 듯이 비춰요 (약 3초).\n") + (depthOn ? "깊이 카메라로 높낮이를 재는 중" : "바닥 인식으로 기울기를 재는 중"));
-                    mainBtn.setText("✔  다 됐어요"); sideBtn.setText(survey ? "그만하기" : "기울기 없이 거리만"); break;
+                    mainBtn.setText("✔  다 됐어요"); sideBtn.setText(survey ? "그만하기" : "기울기 없이 거리만");
+                    if ("lie".equals(mode)) { title.setText("③ 공 둘레를 비춰요"); hint.setText("공 둘레 1m 땅을 천천히 비춰요 (약 2초)."); }
+                    break;
+                case 4:
+                    title.setText("lie".equals(mode) ? "AR 라이" : "AR 그린 읽기");
+                    hint.setText(ovInfo.isEmpty() ? "계산 중…" : ovInfo);
+                    mainBtn.setText("↻  다시 재기"); sideBtn.setText("닫기"); break;
                 default:
                     title.setText("다 됐어요!"); hint.setText(""); break;
             }
@@ -155,11 +180,16 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     private void onMain() {
+        if (step == 4) { // 다시 재기: 같은 AR 세션에서 처음부터
+            if (ballA != null) ballA.detach(); if (holeA != null) holeA.detach(); ballA = holeA = null;
+            ovW = null; lbW = null; ovInfo = ""; nPts = 0; scanFrames = 0; finishReq = false; step = 0; showStep(); return;
+        }
         if (step == 0) pendingTap = 0;
         else if (step == 1) pendingTap = 1;
         else if (step == 2) finishReq = true;
     }
     private void onSide() {
+        if (step == 4) { Intent d = new Intent(); d.putExtra("closed", true); setResult(RESULT_OK, d); finish(); return; }
         if (step == 0) { setResult(RESULT_CANCELED); finish(); }
         else if (step == 1) { step = 0; showStep(); }
         else if (step == 2 && survey) { setResult(RESULT_CANCELED); finish(); }
@@ -291,7 +321,8 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
                 runOnUiThread(() -> mainBtn.setText(String.format(Locale.KOREA, "✔  다 됐어요  (%d%%)", pc)));
                 if (scanFrames >= scanTarget || nPts >= MAX_POINTS) finishReq = true;
             }
-            if (finishReq && ballA != null && holeA != null && step != 3) { step = 3; showStep(); writeResult(); return; }
+            if (finishReq && ballA != null && holeA != null && step != 3 && step != 4) { step = 3; showStep(); writeResult(); return; }
+            if (step == 4) liveFrame(frame, cam);
             overlay.update(project(ballA), project(holeA), tracking, step);
         } catch (Throwable e) {
             // 카메라가 잠깐 끊기는 경우 등 → 다음 프레임에서 다시
@@ -356,6 +387,84 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
         return true;
     }
 
+    // ---------- 🔴 실시간 AR 선 ----------
+    // 앱(JS)에서: { info, lines:[{ p:[x,y,z,…] (공 기준: x 오른쪽 · y 홀 쪽 · z 위, m), c:[r,g,b,a], w, dash }], labels:[{ p:[x,y,z], t, c }] }
+    void setOverlay(JSONObject d) {
+        try {
+            if (ballA == null || holeA == null) return;
+            Pose b = ballA.getPose(), h = holeA.getPose();
+            float fx = h.tx() - b.tx(), fz = h.tz() - b.tz(), D = (float) Math.hypot(fx, fz); if (D < 1e-3) return;
+            fx /= D; fz /= D; float rx = -fz, rz = fx; // 오른쪽 = 앞 × 위
+            JSONArray L = d.optJSONArray("lines"); int n = L == null ? 0 : L.length();
+            float[][] W = new float[n][]; int[] C = new int[n]; float[] Wd = new float[n]; boolean[] Ds = new boolean[n];
+            for (int i = 0; i < n; i++) {
+                JSONObject o = L.getJSONObject(i); JSONArray q = o.getJSONArray("p"); float[] w = new float[q.length()];
+                for (int k = 0; k + 2 < q.length(); k += 3) { float x = (float) q.getDouble(k), y = (float) q.getDouble(k + 1), z = (float) q.getDouble(k + 2); w[k] = b.tx() + x * rx + y * fx; w[k + 1] = b.ty() + z; w[k + 2] = b.tz() + x * rz + y * fz; }
+                W[i] = w; C[i] = color(o.optJSONArray("c"), 0xCCFFFFFF); Wd[i] = (float) o.optDouble("w", 2); Ds[i] = o.optBoolean("dash", false);
+            }
+            JSONArray B = d.optJSONArray("labels"); int m = B == null ? 0 : B.length();
+            float[][] LW = new float[m][3]; String[] LT = new String[m]; int[] LC = new int[m];
+            for (int i = 0; i < m; i++) {
+                JSONObject o = B.getJSONObject(i); JSONArray q = o.getJSONArray("p"); float x = (float) q.getDouble(0), y = (float) q.getDouble(1), z = (float) q.getDouble(2);
+                LW[i] = new float[]{b.tx() + x * rx + y * fx, b.ty() + z, b.tz() + x * rz + y * fz}; LT[i] = o.optString("t"); LC[i] = color(o.optJSONArray("c"), 0xE6000000);
+            }
+            ovW = W; ovC = C; ovWd = Wd; ovDash = Ds; lbW = LW; lbT = LT; lbC = LC; ovInfo = d.optString("info", "");
+            showStep();
+        } catch (Exception ignored) { }
+    }
+    private static int color(JSONArray a, int def) {
+        if (a == null || a.length() < 3) return def;
+        int al = a.length() > 3 ? (int) Math.round(a.optDouble(3, 1) * 255) : 255;
+        return Color.argb(al, a.optInt(0), a.optInt(1), a.optInt(2));
+    }
+    // 매 화면: 세계 좌표 → 화면 · 카메라 기준 깊이와 깊이 영상(실제 사물까지 거리)을 비교해 사물 뒤면 숨김
+    private void liveFrame(Frame frame, Camera cam) {
+        float[][] W = ovW, LW = lbW; if (W == null) { overlay.setLive(null, null, null, null); return; }
+        if (depthOn && (frameNo++ % 2 == 0)) {
+            Image img = null;
+            try {
+                img = frame.acquireDepthImage16Bits();
+                int w = img.getWidth(), h = img.getHeight(); Image.Plane pl = img.getPlanes()[0];
+                ByteBuffer buf = pl.getBuffer().order(ByteOrder.nativeOrder()); int rs = pl.getRowStride(), ps = pl.getPixelStride();
+                if (dbuf == null || dbuf.length != w * h) dbuf = new short[w * h];
+                for (int v = 0; v < h; v++) for (int u = 0; u < w; u++) dbuf[v * w + u] = buf.getShort(v * rs + u * ps);
+                dW = w; dH = h;
+            } catch (Exception ignored) { } finally { if (img != null) img.close(); }
+        }
+        int nv = 0; for (float[] w : W) nv += w.length / 3; int nl = LW == null ? 0 : LW.length;
+        float[] scr = new float[(nv + nl) * 2], cz = new float[nv + nl]; boolean[] front = new boolean[nv + nl];
+        float[] in = new float[4], out = new float[4], vv = new float[4]; int k = 0;
+        for (int pass = 0; pass < 2; pass++) {
+            float[][] src = pass == 0 ? W : LW; if (src == null) continue;
+            for (float[] w : src) for (int i = 0; i + 2 < w.length; i += 3) {
+                in[0] = w[i]; in[1] = w[i + 1]; in[2] = w[i + 2]; in[3] = 1f;
+                Matrix.multiplyMV(out, 0, vp, 0, in, 0); Matrix.multiplyMV(vv, 0, view, 0, in, 0);
+                front[k] = out[3] > 0.05f; cz[k] = -vv[2];
+                scr[k * 2] = front[k] ? (out[0] / out[3] + 1f) / 2f * viewW : -1; scr[k * 2 + 1] = front[k] ? (1f - out[1] / out[3]) / 2f * viewH : -1;
+                k++;
+            }
+        }
+        // 화면 점 → 깊이 영상 좌표 (한 번에 바꿈)
+        boolean[] vis = new boolean[k];
+        float[] tex = null;
+        if (dbuf != null && k > 0) {
+            FloatBuffer a = floats(scr), t = floats(new float[scr.length]);
+            try { frame.transformCoordinates2d(Coordinates2d.VIEW, a, Coordinates2d.TEXTURE_NORMALIZED, t); tex = new float[scr.length]; t.position(0); t.get(tex); } catch (Exception ignored) { }
+        }
+        for (int i = 0; i < k; i++) {
+            if (!front[i]) { vis[i] = false; continue; }
+            vis[i] = true;
+            if (tex != null) {
+                int u = (int) (tex[i * 2] * dW), v = (int) (tex[i * 2 + 1] * dH);
+                if (u >= 0 && v >= 0 && u < dW && v < dH) {
+                    int mm = dbuf[v * dW + u] & 0xFFFF;
+                    if (mm > 0) { float real = mm / 1000f; vis[i] = cz[i] <= real + Math.max(0.06f, 0.03f * cz[i]); } // 실제 사물이 더 가까우면 가려짐
+                }
+            }
+        }
+        overlay.setLive(scr, vis, W, LW);
+    }
+
     private void writeResult() {
         try {
             Pose b = ballA.getPose(), h = holeA.getPose();
@@ -369,6 +478,11 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
                 sb.append(Math.round(pts[i] * 1000f) / 1000f);
             }
             sb.append("]}");
+            if (live) { // 앱이 높이 지도·퍼팅 길을 계산해 선을 보내 줌 (overlay) · 화면은 닫지 않음
+                DepthPlugin.emitScan(sb.toString());
+                finishReq = false; step = 4; showStep();
+                return;
+            }
             File f = new File(getCacheDir(), RESULT_FILE);
             try (FileOutputStream out = new FileOutputStream(f)) { out.write(sb.toString().getBytes("UTF-8")); }
             setResult(RESULT_OK);
@@ -453,6 +567,32 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
             line.setColor(Color.parseColor("#FFD23F")); line.setStrokeWidth(8f);
         }
         void update(float[] b, float[] h, boolean tracking, int step) { this.b = b; this.h = h; this.tracking = tracking; this.step = step; postInvalidate(); }
+        private volatile float[] ls; private volatile boolean[] lv; private volatile float[][] lw, llw;
+        private final Paint lp = new Paint(Paint.ANTI_ALIAS_FLAG), tp = new Paint(Paint.ANTI_ALIAS_FLAG), bg = new Paint(Paint.ANTI_ALIAS_FLAG);
+        void setLive(float[] scr, boolean[] vis, float[][] w, float[][] lw2) { ls = scr; lv = vis; lw = w; llw = lw2; postInvalidate(); }
+        DepthActivity owner;
+        private void drawLive(Canvas c) {
+            float[] S = ls; boolean[] V = lv; float[][] W = lw; DepthActivity o = owner; if (S == null || V == null || W == null || o == null) return;
+            int[] C = o.ovC; float[] Wd = o.ovWd; boolean[] Ds = o.ovDash; if (C == null) return;
+            lp.setStyle(Paint.Style.STROKE); lp.setStrokeCap(Paint.Cap.ROUND);
+            int k = 0;
+            for (int li = 0; li < W.length; li++) {
+                int n = W[li].length / 3;
+                lp.setColor(C[li]); lp.setStrokeWidth(Wd[li] * getResources().getDisplayMetrics().density);
+                lp.setPathEffect(Ds[li] ? new DashPathEffect(new float[]{18f, 14f}, 0) : null);
+                for (int i = 1; i < n; i++) { int a = k + i - 1, b2 = k + i; if (V[a] && V[b2]) c.drawLine(S[a * 2], S[a * 2 + 1], S[b2 * 2], S[b2 * 2 + 1], lp); }
+                k += n;
+            }
+            lp.setPathEffect(null);
+            String[] T = o.lbT; int[] LC = o.lbC; if (T == null) return;
+            tp.setColor(Color.WHITE); tp.setTextSize(13 * getResources().getDisplayMetrics().density); tp.setFakeBoldText(true);
+            for (int i = 0; i < T.length && k + i < V.length; i++) {
+                if (!V[k + i]) continue;
+                float x = S[(k + i) * 2], y = S[(k + i) * 2 + 1], tw = tp.measureText(T[i]);
+                bg.setColor(LC[i]); c.drawRoundRect(x - tw / 2 - 12, y - 46, x + tw / 2 + 12, y - 8, 18, 18, bg);
+                c.drawText(T[i], x - tw / 2, y - 20, tp);
+            }
+        }
         @Override protected void onDraw(Canvas c) {
             float cx = getWidth() / 2f, cy = getHeight() / 2f, r = 34f;
             if (step < 2) {
@@ -460,6 +600,7 @@ public class DepthActivity extends Activity implements GLSurfaceView.Renderer {
                 c.drawLine(cx - r, cy, cx + r, cy, cross); c.drawLine(cx, cy - r, cx, cy + r, cross);
                 c.drawCircle(cx, cy, r * 0.55f, cross);
             }
+            if (step == 4) { drawLive(c); return; }
             float[] B = b, H = h;
             if (B != null && H != null) c.drawLine(B[0], B[1], H[0], H[1], line);
             if (B != null) c.drawCircle(B[0], B[1], 16f, ball);

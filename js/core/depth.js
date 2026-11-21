@@ -19,9 +19,9 @@ export async function depthInfo(force = false) {
 export const KIND_WORD = { lidar: 'LiDAR', depth: '깊이 카메라', plane: '카메라 (바닥 인식)' };
 
 // 재기 화면 열기 → 결과 처리
-export async function measureWithDepth({ scan = true } = {}) {
+export async function measureWithDepth({ scan = true, mode = 'green' } = {}) {
   const p = plugin(); if (!p) throw new Error('이 휴대폰에서는 깊이 카메라를 쓸 수 없어요');
-  const raw = await p.measure({ scan });
+  const raw = await p.measure({ scan, mode });
   if (!raw || raw.cancelled || !raw.ok) return { cancelled: true };
   return processScan(raw);
 }
@@ -182,4 +182,62 @@ export function processSurvey(raw, hole, { dx = 0.25, date = new Date() } = {}) 
     coverage, nPts: P.length, arLen: Math.round(L.D * 10) / 10, mapLen: Math.round(gD * 10) / 10,
     warn: Math.abs(L.D - gD) > Math.max(3, gD * 0.2) ? `찍은 앞·뒤 거리(${L.D.toFixed(1)}m)가 지도(${gD.toFixed(1)}m)와 많이 달라요. 그린 앞·뒤 끝을 정확히 찍었는지 확인하세요` : null,
   };
+}
+
+// ---------- 🔴 실시간 AR 선 (깊이 카메라 화면이 열린 채로) ----------
+//  measure({ live:true }) → 잰 결과는 'scan' 이벤트로 → onScan(처리 결과)이 돌려준 선을 overlay로 보냄
+//  선은 실제 측정한 표면 높이 위에 놓이고, 화면에서는 깊이 영상과 비교해 사물(발·깃대·가방) 뒤면 숨김
+let liveHandle = null;
+export async function liveDepth({ mode = 'green', onScan }) {
+  const p = plugin(); if (!p) throw new Error('이 휴대폰에서는 깊이 카메라를 쓸 수 없어요');
+  await liveHandle?.remove?.();
+  liveHandle = await p.addListener('scan', async raw => {
+    try { const r = processScan(raw); const ov = await onScan(r, raw); if (ov) await p.overlay(ov); } catch (e) { console.warn('live', e); }
+  });
+  try { return await p.measure({ scan: true, live: true, mode }); }
+  finally { await liveHandle?.remove?.(); liveHandle = null; }
+}
+export async function sendOverlay(ov) { try { await plugin()?.overlay(ov); } catch {} }
+
+// 그린 AR 선: 높이 지도 격자(0.5m) · 경사 화살표(1m마다, 내리막 쪽) · 퍼팅 길 · 조준점 · 홀·공 · 홀 둘레 1m 거리 원
+//  좌표 = 공 기준 (x 오른쪽 · y 홀 쪽 · z 위, m) — processScan 격자와 같은 좌표
+export function greenOverlay(scan, result = null, { info = '' } = {}) {
+  const g = scan.grid, H = (x, y) => { const i = Math.round((x - g.x0) / g.dx), j = Math.round((y - g.y0) / g.dx); return g.h[Math.max(0, Math.min(g.ny - 1, j)) * g.nx + Math.max(0, Math.min(g.nx - 1, i))] ?? 0; };
+  const lines = [], labels = [], up = 0.006; // 땅 위로 6mm (선이 땅에 묻히지 않게)
+  const W = Math.min(-g.x0, 2.5), y0 = Math.max(g.y0, -0.8), y1 = Math.min(g.y0 + (g.ny - 1) * g.dx, scan.D + 1.2);
+  const seg = pts => pts.flatMap(([x, y]) => [x, y, H(x, y) + up]);
+  // 격자: 홀 방향 줄 0.5m마다 · 가로줄 0.5m마다 (1m는 진하게)
+  for (let x = -W; x <= W + 1e-6; x += 0.5) { const pts = []; for (let y = y0; y <= y1 + 1e-6; y += 0.1) pts.push([x, y]); lines.push({ p: seg(pts), c: [255, 255, 255, Math.abs(x % 1) < 0.01 ? 0.55 : 0.3], w: Math.abs(x % 1) < 0.01 ? 1.6 : 1 }); }
+  for (let y = Math.ceil(y0 * 2) / 2; y <= y1 + 1e-6; y += 0.5) { const pts = []; for (let x = -W; x <= W + 1e-6; x += 0.1) pts.push([x, y]); lines.push({ p: seg(pts), c: [255, 255, 255, Math.abs(y % 1) < 0.01 ? 0.55 : 0.3], w: Math.abs(y % 1) < 0.01 ? 1.6 : 1, dash: Math.abs(y % 1) >= 0.01 }); }
+  // 경사 화살표: 1m마다 내리막 쪽으로, 길이 ∝ 경사 (2% = 25cm)
+  for (let x = -Math.floor(W); x <= Math.floor(W); x += 1) for (let y = Math.ceil(y0); y <= y1; y += 1) {
+    const gx = (H(x + 0.25, y) - H(x - 0.25, y)) / 0.5, gy = (H(x, y + 0.25) - H(x, y - 0.25)) / 0.5, m = Math.hypot(gx, gy);
+    if (m < 0.004) continue;
+    const L = Math.min(0.45, m * 12.5), ux = -gx / m, uy = -gy / m, ex = x + ux * L, ey = y + uy * L;
+    lines.push({ p: seg([[x, y], [ex, ey]]), c: [143, 211, 255, 0.95], w: 2.4 });
+    lines.push({ p: seg([[ex - ux * 0.07 + uy * 0.05, ey - uy * 0.07 - ux * 0.05], [ex, ey], [ex - ux * 0.07 - uy * 0.05, ey - uy * 0.07 + ux * 0.05]]), c: [143, 211, 255, 0.95], w: 2.4 });
+  }
+  // 홀 둘레 1·2m 원 (붙이기 목표) · 홀(컵 지름 10.8cm) · 공
+  const circ = (cx, cy, r, n = 48) => Array.from({ length: n + 1 }, (_, i) => [cx + r * Math.cos(i / n * 2 * Math.PI), cy + r * Math.sin(i / n * 2 * Math.PI)]);
+  for (const r of [1, 2]) lines.push({ p: seg(circ(0, scan.D, r)), c: [255, 226, 122, 0.6], w: 1.4, dash: true });
+  lines.push({ p: seg(circ(0, scan.D, 0.054, 24)), c: [255, 255, 255, 1], w: 3 });
+  lines.push({ p: seg(circ(0, 0, 0.03, 16)), c: [255, 255, 255, 1], w: 2.5 });
+  // 퍼팅 길 · 조준점
+  if (result?.path?.length) {
+    lines.push({ p: result.path.flatMap(q => [q.x, q.y, H(q.x, q.y) + up * 2]), c: [77, 255, 115, 1], w: 4 });
+    if (result.aimPoint) { lines.push({ p: seg(circ(result.aimPoint.x, result.aimPoint.y, 0.06, 20)), c: [255, 226, 122, 1], w: 2.5 }); labels.push({ p: [result.aimPoint.x, result.aimPoint.y, H(result.aimPoint.x, result.aimPoint.y) + 0.08], t: `🎯 여기를 보고 (${Math.abs(result.aimCups ?? 0).toFixed(1)}컵)`, c: [160, 120, 0, 0.92] }); }
+  }
+  labels.push({ p: [0, scan.D, H(0, scan.D) + 0.12], t: `⛳ ${scan.D.toFixed(2)}m · ${scan.dh >= 0 ? '⬆' : '⬇'}${Math.abs(scan.dh * 100).toFixed(1)}cm`, c: [31, 95, 63, 0.95] });
+  return { info, lines, labels };
+}
+
+// 라이 AR 선: 공 둘레 0.5m 격자(측정한 땅) + 칠 방향 줄 + 경사 숫자
+export function lieOverlay(scan, { info = '' } = {}) {
+  const g = scan.grid, H = (x, y) => { const i = Math.round((x - g.x0) / g.dx), j = Math.round((y - g.y0) / g.dx); return g.h[Math.max(0, Math.min(g.ny - 1, j)) * g.nx + Math.max(0, Math.min(g.nx - 1, i))] ?? 0; };
+  const lines = [], seg = pts => pts.flatMap(([x, y]) => [x, y, H(x, y) + 0.005]);
+  for (let x = -1; x <= 1.001; x += 0.5) { const pts = []; for (let y = -1; y <= 1.5; y += 0.1) pts.push([x, y]); lines.push({ p: seg(pts), c: [255, 255, 255, 0.5], w: 1.2 }); }
+  for (let y = -1; y <= 1.501; y += 0.5) { const pts = []; for (let x = -1; x <= 1; x += 0.1) pts.push([x, y]); lines.push({ p: seg(pts), c: [255, 255, 255, 0.5], w: 1.2 }); }
+  lines.push({ p: seg([[0, 0], [0, Math.min(scan.D, 3)]]), c: [255, 226, 122, 1], w: 3.5 });
+  const along = Math.atan(scan.slope.along) * 180 / Math.PI, cross = Math.atan(scan.slope.cross) * 180 / Math.PI;
+  return { info, lines, labels: [{ p: [0, 0, H(0, 0) + 0.15], t: `${along >= 0 ? '⬆ 오르막' : '⬇ 내리막'} ${Math.abs(along).toFixed(1)}° · 좌우 ${Math.abs(cross).toFixed(1)}°`, c: [0, 0, 0, 0.8] }] };
 }

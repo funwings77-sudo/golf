@@ -7,7 +7,7 @@ import { newRound, totals } from '../core/score.js';
 import { demoCourse } from '../core/course.js';
 import { getCatalog, installCourse, findInstalled, getClubs } from '../core/remote.js';
 import { Sensors, onPos, onOrientation, sampleFix, keepAwake, vibrate, speak, startOrientation, restartGPS } from '../core/sensors.js';
-import { distance, bearing, destination, normAngle, toLocal } from '../core/geo.js';
+import { distance, bearing, destination, normAngle, toLocal, geodesic } from '../core/geo.js';
 import { gridSurface } from '../physics/putt.js';
 import { fetchElevations, playsLike } from '../core/weather.js';
 import { adviseShot, predictBall, toBall, dirWords, compassName, greenR } from '../physics/advice.js';
@@ -22,6 +22,7 @@ import { analyzeShot, shotSummary, windAlongCross, kmh } from '../physics/shotfi
 import { shotSheet } from './lmform.js';
 import { spin } from '../core/heading.js';
 import { withHoleWind, matchBall } from '../core/live.js';
+import { blendWeight } from '../core/fusion.js';
 import { swingAction, watchSend } from '../core/watch.js';
 import { say, shotCue, walkCue, resultCue, clock, ro, m as mWords } from '../core/voice.js';
 import { stdCarry, playsWhy, holeHistory, roundBriefing, conditionBrief, provisionalRisk, roundDiagnosis, lessonVideos, clubRange, dots, greenToday } from '../core/insights.js';
@@ -73,7 +74,7 @@ export default {
   voiceUndo() { if (shotOf()) { cancelShot(); say('방금 친 기록을 취소했어요.', { force: true }); } else say('취소할 샷이 없어요.', { force: true }); },
 };
 
-function teardown() { document.documentElement.classList.remove('in-hole'); $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; arCtl = null; headMk = null; P.mapFull = false; }
+function teardown() { document.documentElement.classList.remove('in-hole'); $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; arCtl = null; headMk = null; measLay = null; P.mapFull = false; }
 function render() {
   teardown(); unPos?.(); unOri?.(); clearInterval(timer); unPos = unOri = null;
   el_.className = 'play';
@@ -1078,6 +1079,7 @@ async function foundRun(shot) {
       let fit = null; try { fit = shotSummary(analyzeShot({ clubId: shot.club, total, err, latDeg, wind, rho })); } catch {}
       rec = { id: Date.now(), club: shot.club, total: Math.round(total * 10) / 10, carry: fit?.est.carry ?? total / 1.05, latDeg: latDeg == null ? null : Math.round(latDeg * 10) / 10, err, wind, rho, power: shot.power, partial: shot.power < 95 || total <= 20, start: shot.start, end: { lat: f.lat, lon: f.lon }, hole: shot.hole, course: S.round.courseName, ts: Date.now(), fromPlay: true, fit };
       { const sc = stdCarry(rec); if (sc && Math.abs(sc - rec.carry) >= 0.5) rec.stdCarry = sc; } // 날씨를 뺀 표준 캐리
+      if (shot.track) { rec.track = shot.track; toast(`🎥 추적 ${shot.track.total}m · 🛰️ GPS ${rec.total}m (차이 ${(rec.total - shot.track.total).toFixed(1)}m)`, 4000); }
       S.shots.push(rec);
       const i = S.bag.findIndex(c => c.id === shot.club); if (i >= 0 && !rec.partial) S.bag[i] = learnClub(S.bag[i], S.shots);
       save('shots', 'bag');
@@ -1109,6 +1111,8 @@ function sceneData() {
     me: Sensors.pos || me, ball: shot ? shot.pred : (P.ballPos && P.ballHole === h?.n ? P.ballPos : null), from: me, pin: h ? (h.pin || h.green) : null,
     landing: !shot && adv?.landing && allowed('clubRec') ? adv.landing : null, ellipse: !shot && allowed('clubRec') ? adv?.ellipse : null,
     hazards: h?.hazards || [], hole: h, clubOk: allowed('clubRec'), wx: allowed('playsLike') ? wx() : null,
+    ballSrc: shot ? (shot.track ? 'track' : shot.seen ? 'camera' : shot.cam ? 'course' : 'pred') : null, ballErr: shot ? (shot.r80 || 15) / 1.5 : null, swingTs: App_.lastSwingTs || null,
+    marks: (activeCourse()?.holes || []).filter(x => x !== h && (x.pin || x.green)).map(x => ({ p: x.pin || x.green, name: `⛳ ${x.nine ? x.nine + ' ' : ''}${x.nineHole ?? x.n}번 홀 그린` })),
     dzPin: (() => { const pn = h ? (h.pin || h.green) : null; const f = me; return pn && f ? pinDrop(f, pn, h)?.v ?? null : null; })(),
     plan: (() => { if (shot || !allowed('clubRec') || !me || !adv?.club || adv.club === 'PT' || !(adv.kind === 'full' || adv.kind === 'partial')) return null; const cb = S.bag.find(c => c.id === adv.club), w = allowed('windAdjust') ? wx() : null; return cb ? { from: me, aim: adv.aimBearing, club: adv.club, stdCarry: cb.carry * (adv.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: w?.rho } : null; })(),
     live: (() => { if (!shot || shot.aimBearing == null || !shot.club) return null; const cb = S.bag.find(c => c.id === shot.club), w = allowed('windAdjust') ? wx() : null; return cb ? { ts: shot.ts, from: shot.start, aim: shot.aimBearing, club: shot.club, stdCarry: cb.carry * (shot.power || 100) / 100, wind: w?.windSpeed != null ? { windSpeed: w.windSpeed, windFrom: w.windFrom } : null, rho: shot.rho ?? w?.rho } : null; })(),
@@ -1170,7 +1174,37 @@ async function mountView() {
       onFail: () => { if (P.view !== 'ar') return; P.view = '2d'; P.viewSet = true; persist(); render(); toast('📷 카메라를 쓸 수 없어서 지도로 보여 드려요', 3500); },
       views: [['big', '🔠 큰 숫자'], ['2d', '🗺️ 지도만'], ...(S.settings.detail ? [['3d', '🏔️ 입체 지도만'], ['4d', '🎬 공 비행만']] : [])],
       onView: k => { P.view = k; P.viewSet = true; persist(); render(); },
-      onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); }, onPin: p => { const h = activeHole(); h.pin = { lat: +p.lat.toFixed(7), lon: +p.lon.toFixed(7), ts: Date.now(), src: 'flag', err: p.err }; save('courses'); adv = null; advKey = ''; update(true); toast(`⛳ 카메라로 잰 핀을 저장했어요 (${p.d}m ±${p.err}m)`, 3500); } });
+      // 🎥 친 공 따라가기 결과: 공이 멈출 곳을 착지+굴러감으로 · 아직 [쳤어요]를 안 눌렀으면 같이 기록
+      onTrack: async fit => {
+        if (!shotOf()) await hit();
+        const shot = shotOf(); if (!shot || !fit.rest) return;
+        shot.pred = { lat: fit.rest.lat, lon: fit.rest.lon }; shot.r80 = Math.max(3, fit.sd * 1.5);
+        shot.track = { kmh: +fit.kmh.toFixed(1), launch: +fit.launch.toFixed(1), side: +fit.sideDeg.toFixed(1), apex: +fit.apex.toFixed(1), time: +fit.time.toFixed(2), carry: +fit.carry.toFixed(1), total: +fit.total.toFixed(1), sd: +fit.sd.toFixed(1), timedBy: fit.timedBy, n: fit.n };
+        save('round'); vibrate([60, 40, 60]); update(true);
+        say(`착지 거리 ${fit.carry.toFixed(1)}미터, 공 속도 시속 ${Math.round(fit.kmh)}킬로미터`, { force: true });
+        toast(`🎥 착지 ${fit.carry.toFixed(1)}m ±${fit.sd.toFixed(1)} · 공 속도 ${fit.kmh.toFixed(1)}km/h · 발사 ${fit.launch.toFixed(1)}°`, 4500);
+      },
+      // 📷 가까이서 본 공: 지금 공 위치(예측·추적)와 정확도만큼 합침
+      onBallSeen: (pos, sd) => {
+        const shot = shotOf(); if (!shot?.pred) return;
+        const sdPrev = (shot.r80 || 15) / 1.5, w = blendWeight(sdPrev, sd);
+        shot.pred = { lat: shot.pred.lat + (pos.lat - shot.pred.lat) * w, lon: shot.pred.lon + (pos.lon - shot.pred.lon) * w };
+        shot.r80 = Math.max(0.8, 1.5 / Math.sqrt(1 / sdPrev ** 2 + 1 / sd ** 2));
+        if (!shot.seen) { shot.seen = true; vibrate(40); toast('📷 공을 찾았어요 · 위치를 맞췄어요', 2500); say('공을 찾았어요', { force: false }); }
+        save('round');
+      },
+      onLock: p => { const h = activeHole(); P.target = { hole: h.n, lat: p.lat, lon: p.lon }; persist(); toast('📌 고정한 곳을 목표로 정했어요 (2D 지도에서 확인)'); }, onPin: p => {
+        // 🔀 깃대 카메라 + 골프장이 발행한 오늘 핀(또는 전에 잰 핀)을 정확도만큼 합침
+        const h = activeHole(), prev = h.pin, today = prev && new Date(prev.ts || 0).toDateString() === new Date().toDateString();
+        let lat = p.lat, lon = p.lon, err = p.err, how = '깃대 카메라';
+        if (prev && (prev.src === 'official' || today)) {
+          const sdPrev = prev.src === 'official' ? 1.5 : prev.err || 3, w = blendWeight(sdPrev, p.err || 3);
+          lat = prev.lat + (p.lat - prev.lat) * w; lon = prev.lon + (p.lon - prev.lon) * w; err = Math.round(1 / Math.sqrt(1 / sdPrev ** 2 + 1 / (p.err || 3) ** 2) * 10) / 10;
+          how = `깃대 카메라 + ${prev.src === 'official' ? '골프장 핀' : '전에 잰 핀'}`;
+        }
+        h.pin = { lat: +lat.toFixed(7), lon: +lon.toFixed(7), ts: Date.now(), src: 'flag', err };
+        save('courses'); adv = null; advKey = ''; update(true); toast(`⛳ 핀 위치를 저장했어요 (${how} · ±${err}m)`, 3500);
+      } });
     arStop = arCtl?.stop || null;
   }
 }
@@ -1178,6 +1212,7 @@ async function mountView() {
 // 지도 누르기: 목표점 · 핀 · 그린 · 내 공 찍기 (지도 화면과 카메라 화면 속 지도가 같이 씀)
 function mapClick(e) {
   const h = activeHole();
+  if (!P.marking) mapMeasure({ lat: e.latlng.lat, lon: e.latlng.lng });
       if (!P.marking) { // 아무 곳이나 누르면 그곳까지 거리 (목표점 이동)
         if (!shotOf() && sceneData().from) { P.target = { hole: h.n, lat: e.latlng.lat, lon: e.latlng.lng }; persist(); drawRings(sceneData()); vibrate(20); }
         return;
@@ -1194,6 +1229,21 @@ function mapClick(e) {
       if (P.afterMark === 'hit') { P.afterMark = null; hit(); fit2d(); return; }
       update(true); fit2d();
     }
+
+// 📍 지도 재기: 누른 곳까지 정밀 거리(WGS84 타원체) · 선과 숫자 (다시 누르면 바뀜)
+let measLay = null;
+function mapMeasure(p) {
+  const me = Sensors.pos || ballPos(); if (!me || !map) return;
+  const d = geodesic(me, p), fm = x => (Math.round(x * 10) / 10).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  if (measLay) { measLay.remove(); measLay = null; }
+  measLay = L.layerGroup([
+    L.polyline([ll(me), ll(p)], { color: '#000', weight: 6, opacity: 0.35, interactive: false }),
+    L.polyline([ll(me), ll(p)], { color: '#ffc83d', weight: 3, dashArray: '8 6', interactive: false }),
+    L.circleMarker(ll(p), { radius: 6, color: '#0e1410', weight: 2, fillColor: '#ffc83d', fillOpacity: 1, interactive: false }),
+    L.marker(ll(p), { icon: labelIcon(`📍 ${fm(d)}m · ${Math.round(bearing(me, p))}°`, 'meas'), interactive: false }),
+  ]).addTo(map);
+  vibrate(15); toast(`📍 여기까지 ${fm(d)}m (±${Math.round(me.acc || 3)}m)`, 2500);
+}
 
 // 지도로 찍어야 할 때: 카메라 화면이면 그 안의 지도를 크게, 아니면 지도 화면으로
 function toMap() {

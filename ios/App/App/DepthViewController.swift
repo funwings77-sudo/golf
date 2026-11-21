@@ -23,9 +23,20 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
     private var scanTarget = 45, stride = 3
     private var lidar = false
 
-    init(scan: Bool, survey: Bool = false, done: @escaping ([String: Any]) -> Void) {
+    // 🔴 실시간 AR 선: 잰 결과를 onScan으로 보내고 화면은 열린 채 · 앱이 보낸 선을 실제 세계에 고정 · LiDAR 깊이로 사물 뒤는 숨김
+    static weak var current: DepthViewController?
+    private let live: Bool, mode: String
+    private let onScan: (([String: Any]) -> Void)?
+    private var ovW: [[simd_float3]] = [], ovC: [UIColor] = [], ovWd: [CGFloat] = [], ovDash: [Bool] = []
+    private var lbW: [simd_float3] = [], lbT: [String] = [], lbC: [UIColor] = []
+    private var ovInfo = ""
+    private let liveView = LiveOverlay()
+
+    init(scan: Bool, survey: Bool = false, live: Bool = false, mode: String = "green", done: @escaping ([String: Any]) -> Void, onScan: (([String: Any]) -> Void)? = nil) {
         self.scan = scan || survey; self.survey = survey; self.done = done
+        self.live = live; self.mode = mode; self.onScan = onScan
         if survey { scanTarget = 900; stride = 4 }
+        if mode == "lie" { scanTarget = 25 }
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
@@ -39,6 +50,9 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
         arView.session.delegate = self
         arView.autoenablesDefaultLighting = true
         view.addSubview(arView)
+        liveView.frame = view.bounds; liveView.autoresizingMask = [.flexibleWidth, .flexibleHeight]; liveView.isUserInteractionEnabled = false; liveView.backgroundColor = .clear; liveView.isHidden = true
+        view.addSubview(liveView)
+        DepthViewController.current = self
 
         // 가운데 ＋
         cross.translatesAutoresizingMaskIntoConstraints = false
@@ -115,9 +129,16 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
             titleLabel.text = survey ? "③ 그린 전체를 비춰요" : "③ 그린을 천천히 비춰요"
             hintLabel.text = (survey ? "그린 둘레를 천천히 걸으며 1~3m 앞 바닥을 빈틈없이 비춰요. 다 비췄으면 [다 됐어요].\n" : "공에서 홀까지, 그 둘레 1m를 천천히 쓸 듯이 비춰요 (약 3초).\n") + (lidar ? "LiDAR로 높낮이를 재는 중" : "바닥 인식으로 기울기를 재는 중")
             mainButton.setTitle("✔  다 됐어요", for: .normal); sideButton.setTitle(survey ? "그만하기" : "기울기 없이 거리만", for: .normal)
+        case 4:
+            titleLabel.text = mode == "lie" ? "AR 라이" : "AR 그린 읽기"
+            hintLabel.text = ovInfo.isEmpty ? "계산 중…" : ovInfo
+            mainButton.setTitle("↻  다시 재기", for: .normal); sideButton.setTitle("닫기", for: .normal)
         default:
             titleLabel.text = "다 됐어요!"; hintLabel.text = ""
         }
+        if mode == "lie" && step == 1 { titleLabel.text = "② 칠 방향을 찍어요"; hintLabel.text = "공 앞 1~2m, 깃발 쪽 땅에 ＋를 맞춰요."; mainButton.setTitle("🎯  방향 찍기", for: .normal) }
+        if mode == "lie" && step == 2 { titleLabel.text = "③ 공 둘레를 비춰요"; hintLabel.text = "공 둘레 1m 땅을 천천히 비춰요 (약 2초)." }
+        liveView.isHidden = step != 4
     }
 
     @objc private func onMain() {
@@ -130,10 +151,14 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
             hole = p; holeNode = mark(p, color: UIColor(red: 0.78, green: 0.95, blue: 0.41, alpha: 1), old: holeNode); drawLine(); buzz()
             if scan { step = 2; pts.removeAll(); scanFrames = 0; showStep() } else { finish() }
         case 2: finish()
+        case 4: // 다시 재기
+            ballNode?.removeFromParentNode(); holeNode?.removeFromParentNode(); lineNode?.removeFromParentNode()
+            ball = nil; hole = nil; ovW = []; lbW = []; ovInfo = ""; pts.removeAll(); scanFrames = 0; step = 0; showStep()
         default: break
         }
     }
     @objc private func onSide() {
+        if step == 4 { close(["ok": true, "closed": true]); return }
         switch step {
         case 0: close(["ok": false, "cancelled": true])
         case 1: step = 0; ball = nil; showStep()
@@ -154,6 +179,7 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
 
     // ---------- 높이 점 모으기 ----------
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        if step == 4 { liveFrame(frame); return }
         guard step == 2 else { return }
         frameNo += 1
         if frameNo % 2 != 0 { return }
@@ -221,6 +247,7 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
             "ball": ["x": b.x, "y": b.y, "z": b.z], "hole": ["x": h.x, "y": h.y, "z": h.z],
             "points": pts.map { (Double($0) * 1000).rounded() / 1000 },
         ]
+        if live, let cb = onScan { cb(r); step = 4; showStep(); return } // 앱이 선을 계산해 overlay로 보내 줌
         close(r)
     }
     private func close(_ r: [String: Any]) {
@@ -228,6 +255,59 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
         done = nil
         arView.session.pause()
         dismiss(animated: true) { cb(r) }
+    }
+
+    // ---------- 🔴 실시간 AR 선 ----------
+    // { info, lines:[{ p:[x,y,z,…] (공 기준: x 오른쪽 · y 홀 쪽 · z 위), c:[r,g,b,a], w, dash }], labels:[{ p, t, c }] }
+    func setOverlay(_ d: [String: Any]) {
+        guard let b = ball, let h = hole else { return }
+        var f = simd_float2(h.x - b.x, h.z - b.z); let D = simd_length(f); if D < 1e-3 { return }
+        f /= D; let r = simd_float2(-f.y, f.x) // 오른쪽 = 앞 × 위
+        let W = { (x: Float, y: Float, z: Float) -> simd_float3 in simd_float3(b.x + x * r.x + y * f.x, b.y + z, b.z + x * r.y + y * f.y) }
+        let col = { (a: Any?, def: UIColor) -> UIColor in
+            guard let c = a as? [Double], c.count >= 3 else { return def }
+            return UIColor(red: CGFloat(c[0]) / 255, green: CGFloat(c[1]) / 255, blue: CGFloat(c[2]) / 255, alpha: CGFloat(c.count > 3 ? c[3] : 1))
+        }
+        var lw: [[simd_float3]] = [], lc: [UIColor] = [], lwd: [CGFloat] = [], ld: [Bool] = []
+        for o in (d["lines"] as? [[String: Any]]) ?? [] {
+            let q = (o["p"] as? [Double]) ?? []; var pts: [simd_float3] = []
+            var i = 0; while i + 2 < q.count { pts.append(W(Float(q[i]), Float(q[i + 1]), Float(q[i + 2]))); i += 3 }
+            lw.append(pts); lc.append(col(o["c"], UIColor(white: 1, alpha: 0.8))); lwd.append(CGFloat((o["w"] as? Double) ?? 2)); ld.append((o["dash"] as? Bool) ?? false)
+        }
+        var bw: [simd_float3] = [], bt: [String] = [], bc: [UIColor] = []
+        for o in (d["labels"] as? [[String: Any]]) ?? [] {
+            let q = (o["p"] as? [Double]) ?? []; guard q.count >= 3 else { continue }
+            bw.append(W(Float(q[0]), Float(q[1]), Float(q[2]))); bt.append((o["t"] as? String) ?? ""); bc.append(col(o["c"], UIColor(white: 0, alpha: 0.85)))
+        }
+        ovW = lw; ovC = lc; ovWd = lwd; ovDash = ld; lbW = bw; lbT = bt; lbC = bc; ovInfo = (d["info"] as? String) ?? ""
+        showStep()
+    }
+    // 세계 → 화면 · 카메라 기준 깊이와 LiDAR 깊이(실제 사물까지)를 비교해 사물 뒤면 숨김
+    private func liveFrame(_ frame: ARFrame) {
+        let size = arView.bounds.size, cam = frame.camera, inv = cam.transform.inverse
+        var dm: CVPixelBuffer? = nil
+        if lidar, let d = frame.sceneDepth { dm = d.depthMap; CVPixelBufferLockBaseAddress(d.depthMap, .readOnly) }
+        defer { if let m = dm { CVPixelBufferUnlockBaseAddress(m, .readOnly) } }
+        let toImage = frame.displayTransform(for: .portrait, viewportSize: size).inverted()
+        let real: (CGPoint) -> Float? = { pt in
+            guard let m = dm, let base = CVPixelBufferGetBaseAddress(m) else { return nil }
+            let w = CVPixelBufferGetWidth(m), h = CVPixelBufferGetHeight(m), row = CVPixelBufferGetBytesPerRow(m)
+            let n = CGPoint(x: pt.x / size.width, y: pt.y / size.height).applying(toImage)
+            let u = Int(n.x * CGFloat(w)), v = Int(n.y * CGFloat(h)); if u < 0 || v < 0 || u >= w || v >= h { return nil }
+            let d = base.advanced(by: v * row).assumingMemoryBound(to: Float32.self)[u]; return d > 0 ? d : nil
+        }
+        let proj = { (p: simd_float3) -> (CGPoint, Bool) in
+            let c = inv * simd_float4(p, 1), depth = -c.z
+            if depth < 0.05 { return (.zero, false) }
+            let s = cam.projectPoint(p, orientation: .portrait, viewportSize: size)
+            if let r = real(s) { return (s, depth <= r + max(0.06, 0.03 * depth)) } // 실제 사물이 더 가까우면 가려짐
+            return (s, true)
+        }
+        liveView.segs = ovW.map { $0.map(proj) }
+        liveView.colors = ovC; liveView.widths = ovWd; liveView.dash = ovDash
+        liveView.labels = zip(lbW, lbT).map { (w, t) in let (s, ok) = proj(w); return (s, ok, t) }
+        liveView.labelColors = lbC
+        liveView.setNeedsDisplay()
     }
 
     // ---------- 표시 ----------
@@ -264,4 +344,26 @@ final class DepthViewController: UIViewController, ARSessionDelegate {
         UIView.animate(withDuration: 0.3, delay: 2.2, options: [], animations: { l.alpha = 0 }) { _ in l.removeFromSuperview() }
     }
     private func buzz() { UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
+}
+
+/// 🔴 실시간 AR 선 그리기 (보이는 구간만)
+final class LiveOverlay: UIView {
+    var segs: [[(CGPoint, Bool)]] = [], colors: [UIColor] = [], widths: [CGFloat] = [], dash: [Bool] = []
+    var labels: [(CGPoint, Bool, String)] = [], labelColors: [UIColor] = []
+    override func draw(_ rect: CGRect) {
+        for (i, line) in segs.enumerated() {
+            let path = UIBezierPath(); var pen = false
+            for (pt, ok) in line { if ok { if pen { path.addLine(to: pt) } else { path.move(to: pt); pen = true } } else { pen = false } }
+            path.lineWidth = i < widths.count ? widths[i] : 2; path.lineCapStyle = .round
+            if i < dash.count && dash[i] { path.setLineDash([9, 7], count: 2, phase: 0) }
+            (i < colors.count ? colors[i] : .white).setStroke(); path.stroke()
+        }
+        let attrs: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 13), .foregroundColor: UIColor.white]
+        for (i, l) in labels.enumerated() where l.1 {
+            let t = l.2 as NSString, sz = t.size(withAttributes: attrs)
+            let box = CGRect(x: l.0.x - sz.width / 2 - 8, y: l.0.y - sz.height - 16, width: sz.width + 16, height: sz.height + 8)
+            (i < labelColors.count ? labelColors[i] : UIColor(white: 0, alpha: 0.85)).setFill(); UIBezierPath(roundedRect: box, cornerRadius: 9).fill()
+            t.draw(at: CGPoint(x: box.minX + 8, y: box.minY + 4), withAttributes: attrs)
+        }
+    }
 }

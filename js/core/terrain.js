@@ -46,22 +46,27 @@ export function withGreen(sampler, greenGrid) {
   return (lat, lon) => { const q = toLocal(o, { lat, lon }), v = gh(q.x, q.y); return Number.isFinite(v) ? base + (v - c0) : sampler(lat, lon); };
 }
 
-// 필요한 타일 번호들 (점들 주변 margin m)
+// 필요한 타일 번호들: 점마다 주변 margin m 네모를 덮는 타일 전부 (모서리만이 아니라 사이 타일까지)
 export function tilesFor(points, marginM = 120, z = ZOOM) {
   const out = new Set();
   for (const p of points) {
     if (!p) continue;
     const dLat = marginM / 111320, dLon = marginM / (111320 * Math.cos(p.lat * Math.PI / 180));
-    for (const [la, lo] of [[p.lat - dLat, p.lon - dLon], [p.lat + dLat, p.lon + dLon], [p.lat - dLat, p.lon + dLon], [p.lat + dLat, p.lon - dLon], [p.lat, p.lon]]) { const t = tileXY(la, lo, z); out.add(t.tx + '/' + t.ty); }
+    const a = tileXY(p.lat + dLat, p.lon - dLon, z), b = tileXY(p.lat - dLat, p.lon + dLon, z);
+    for (let x = a.tx; x <= b.tx; x++) for (let y = a.ty; y <= b.ty; y++) out.add(x + '/' + y);
   }
   return [...out];
 }
+// 가까운 곳(z15 · 약 4m 화소)이 있으면 그것, 없으면 먼 곳(z12 · 약 30m 화소)
+export const combine = (near, far) => (!far ? near : !near ? far : (lat, lon) => { const v = near(lat, lon); return Number.isFinite(v) ? v : far(lat, lon); });
+export const FAR_ZOOM = 12, FAR_RADIUS = 10500;
 
 // ---------- 불러오기 (브라우저) ----------
-const cache = new Map(); // 'x/y' → Float32Array | Promise
-async function loadTile(key, z = ZOOM) {
+const cache = new Map(); // 'z/x/y' → Float32Array | Promise
+async function loadTile(key0, z = ZOOM) {
+  const key = z + '/' + key0;
   if (cache.has(key)) return cache.get(key);
-  const [x, y] = key.split('/');
+  const [x, y] = key0.split('/');
   const p = (async () => {
     const r = await fetch(TERRAIN_URL.replace('{z}', z).replace('{x}', x).replace('{y}', y), { mode: 'cors' });
     if (!r.ok) throw new Error('terrain ' + r.status);
@@ -76,11 +81,13 @@ async function loadTile(key, z = ZOOM) {
   try { const v = await p; cache.set(key, v); return v; } catch (e) { cache.delete(key); throw e; }
 }
 // 홀(티·IP·그린·해저드)과 내 위치 주변 지형 → 높이 읽개 (실패하면 null: 평평하게 그림)
-export async function loadTerrain(points, { greenGrid = null } = {}) {
+//  far: 내 위치 → 10km 둘레까지 먼 지형(z12)도 받아 붙임 (먼 산·능선까지 거리 재기)
+export async function loadTerrain(points, { greenGrid = null, far = null } = {}) {
+  const load = async (keys, z) => { const tiles = new Map(); await Promise.all(keys.map(async k => { try { tiles.set(k, await loadTile(k, z)); } catch {} })); return tiles.size ? makeSampler(tiles, z) : null; };
   const keys = tilesFor(points);
-  if (!keys.length || keys.length > 12) return null;
-  const tiles = new Map();
-  await Promise.all(keys.map(async k => { try { tiles.set(k, await loadTile(k)); } catch {} }));
-  if (!tiles.size) return null;
-  return withGreen(makeSampler(tiles), greenGrid);
+  const near = keys.length && keys.length <= 16 ? await load(keys, ZOOM) : null;
+  const farKeys = far ? tilesFor([far], FAR_RADIUS, FAR_ZOOM) : [];
+  const farS = farKeys.length && farKeys.length <= 16 ? await load(farKeys, FAR_ZOOM) : null;
+  const both = combine(near && withGreen(near, greenGrid), farS);
+  return both || null;
 }

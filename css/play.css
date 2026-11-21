@@ -647,3 +647,20 @@ html.easy.in-hole #toast { bottom: auto; top: calc(86px + env(safe-area-inset-to
 .ar-tray-v { margin-top: 10px; }
 /* 카메라 화면에서는 오른쪽 보기 바꾸기 줄(큰·2D·3D·4D·AR·◀▶)을 숨김 → 도구 판의 '화면 바꾸기'로 */
 .imm.arv .imm-side { display: none !important; }
+/* 📐 그린 카메라 정밀 숫자 (0.01m · 0.01°) */
+.cam .gar-prec { position: absolute; left: 6px; right: 6px; top: 80px; z-index: 3; pointer-events: none; color: #fff; }
+.gp-g { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+.gp-g span { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,.58); border-radius: 8px; padding: 2px 2px 3px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.gp-g small { font-size: 9.5px; opacity: .75; font-weight: 700; white-space: nowrap; }
+.gp-g b { font-size: 12px; font-weight: 800; white-space: nowrap; }
+.gp-tap { margin-top: 3px; background: rgba(255,200,61,.92); color: #111; border-radius: 8px; padding: 4px 8px; font-size: 12.5px; text-align: center; }
+/* 🎥 친 공 따라가기 · ⚪ 공까지 걸어가기 */
+.ar-trk, .ar-walk { position: absolute; left: 50%; transform: translateX(-50%); z-index: 4; width: min(380px, calc(100% - 20px)); background: rgba(10,14,12,.78); color: #fff; border-radius: 14px; padding: 8px 10px; font-size: 13px; text-align: center; pointer-events: none; border: 1px solid rgba(255,255,255,.14); }
+.ar-trk { top: 100px; } .ar-walk { top: 100px; }
+.ar-trk:not([hidden]) ~ .ar-walk { top: 250px; }
+.ar-walk b { font-size: 22px; color: #ffe27a; font-variant-numeric: tabular-nums; } .ar-walk small, .ar-trk small { opacity: .85; font-size: 11.5px; }
+.trk-g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-bottom: 4px; }
+.trk-g span { display: flex; flex-direction: column; background: rgba(255,255,255,.08); border-radius: 8px; padding: 2px; font-variant-numeric: tabular-nums; }
+.trk-g small { font-size: 10px; opacity: .75; } .trk-g b { font-size: 13px; color: #ffb4a3; }
+.ar-tray-g button.track { background: #ff5a3c; border-color: #ff5a3c; }
+.ar-tray-g button.track.on { background: #c8f169; color: #0e1410; }

@@ -25,6 +25,20 @@ import java.io.FileInputStream;
  */
 @CapacitorPlugin(name = "PinpointDepth")
 public class DepthPlugin extends Plugin {
+    private static DepthPlugin instance;
+    @Override public void load() { instance = this; }
+    // 실시간 모드: 잰 결과를 이벤트로 (화면은 열린 채) — JS가 선을 계산해 overlay()로 돌려줌
+    static void emitScan(String json) {
+        DepthPlugin p = instance; if (p == null) return;
+        try { p.notifyListeners("scan", new JSObject(json), true); } catch (Exception ignored) { }
+    }
+    @PluginMethod
+    public void overlay(PluginCall call) {
+        DepthActivity a = DepthActivity.current.get();
+        if (a == null) { call.reject("AR 화면이 닫혀 있어요"); return; }
+        a.setOverlay(call.getData());
+        call.resolve();
+    }
 
     @PluginMethod
     public void available(PluginCall call) {
@@ -65,6 +79,8 @@ public class DepthPlugin extends Plugin {
         Intent i = new Intent(getContext(), DepthActivity.class);
         i.putExtra("scan", call.getBoolean("scan", true));
         i.putExtra("survey", call.getBoolean("survey", false)); // 🛰️ 그린 전체 측량
+        i.putExtra("live", call.getBoolean("live", false));     // 🔴 실시간 AR 선
+        String mode = call.getString("mode"); if (mode != null) i.putExtra("mode", mode); // green | lie
         startActivityForResult(call, i, "onMeasureResult");
     }
 
@@ -72,6 +88,9 @@ public class DepthPlugin extends Plugin {
     private void onMeasureResult(PluginCall call, ActivityResult result) {
         if (call == null) return;
         File f = new File(getContext().getCacheDir(), DepthActivity.RESULT_FILE);
+        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null && result.getData().getBooleanExtra("closed", false)) {
+            JSObject o = new JSObject(); o.put("ok", true); o.put("closed", true); call.resolve(o); return;
+        }
         if (result.getResultCode() != Activity.RESULT_OK || !f.exists()) {
             JSObject o = new JSObject(); o.put("ok", false); o.put("cancelled", true);
             String err = result.getData() != null ? result.getData().getStringExtra("error") : null;
