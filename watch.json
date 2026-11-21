@@ -1,9 +1,9 @@
 {
   "packageId": "io.github.funwings77sudo.pinpoint",
-  "versionName": "1.0.36",
-  "versionCode": 100037,
+  "versionName": "1.0.37",
+  "versionCode": 100038,
   "bytes": 1143448,
-  "sha256": "c38a9221ce25fb44508d389b2f69b3dd75a491f3b7283c8bd8e3bc04a8443f7e",
-  "builtAt": "2026-11-21T00:43:38.150Z",
+  "sha256": "f6518eb9bb10e4f8b082ca6ed480f3cabcd0af6ad6245cc3ade946ad3faa04d6",
+  "builtAt": "2026-11-21T00:51:57.141Z",
   "platform": "Wear OS 3+"
 }

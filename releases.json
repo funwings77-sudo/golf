@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.37",
+   "code": 38,
+   "date": "2026-11-21T00:52:00.150Z",
+   "bytes": 6068324,
+   "sha256": "b0d8f780c87836455fbfc4232e004ecf38dfab23025937d1b06151c22e6cb4ac",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.37/pinpoint-caddie-1.0.37.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.37",
+   "notes": [
+    "Camera screen no longer covered: now-line hidden, info card folds to one line, long hint only first 10 s"
+   ]
+  },
+  {
    "version": "1.0.36",
    "code": 37,
    "date": "2026-11-21T00:43:41.447Z",
@@ -464,6 +476,6 @@
    ]
   }
  ],
- "latest": "1.0.36",
- "updatedAt": "2026-11-21T00:43:47.065Z"
+ "latest": "1.0.37",
+ "updatedAt": "2026-11-21T00:52:04.795Z"
 }
