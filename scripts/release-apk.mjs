@@ -23,7 +23,7 @@ const sha = buf => createHash('sha256').update(buf).digest('hex');
 // 다른 작업 중인 변경이 섞여 커밋되지 않도록, APK·버전 파일만 커밋한다.
 // 단, 웹 코드에 커밋 안 된 변경이 있으면 APK와 저장소 내용이 어긋나므로 먼저 알린다.
 const dirty = out('git status --porcelain').split('\n').filter(Boolean)
-  .filter(l => !/pinpoint-caddie\.apk$|pinpoint-watch\.apk$|apk\.json$|watch\.json$|releases\.json$|android\/(app|wear)\/build\.gradle$/.test(l));
+  .filter(l => !/pinpoint-caddie\.apk$|pinpoint-watch\.apk$|apk\.json$|watch\.json$|releases\.json$|android\/(app|wear)\/build\.gradle$|release-notes\.md$|\.vscode\/$/.test(l)); // 노트 파일·편집기 설정은 APK와 무관
 if (dirty.length && push) {
   console.warn('⚠ 커밋되지 않은 변경이 있습니다 (APK에는 포함되지만 커밋되지 않음):\n  ' + dirty.join('\n  '));
 }
