@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.38",
+   "code": 39,
+   "date": "2026-11-21T00:59:00.992Z",
+   "bytes": 6068439,
+   "sha256": "17eff80bb393ea58f5a27e38abb65b26bad9466b319fc185f5e43b120bd50fc3",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.38/pinpoint-caddie-1.0.38.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.38",
+   "notes": [
+    "Camera screen: remove the \"distance is an estimate\" info card; fold rules no longer depend on :has()"
+   ]
+  },
+  {
    "version": "1.0.37",
    "code": 38,
    "date": "2026-11-21T00:52:00.150Z",
@@ -476,6 +488,6 @@
    ]
   }
  ],
- "latest": "1.0.37",
- "updatedAt": "2026-11-21T00:52:04.795Z"
+ "latest": "1.0.38",
+ "updatedAt": "2026-11-21T00:59:06.958Z"
 }
