@@ -12,6 +12,7 @@ import { holeHistory } from './core/insights.js';
 import { $, $$, sheet, toast, esc, bottomMenuHTML } from './ui.js';
 import { icon } from './icons.js';
 import { startIconize } from './iconize.js';
+import { immersive } from './core/screen.js';
 import { hasMapsKey, cachedSession, getSession } from './core/gmaps.js';
 import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
@@ -87,8 +88,14 @@ async function route() {
   } catch (e) {
     console.error(e);
     logError(e);
+    // 전체 화면(머리줄·아래 메뉴 숨김)이 걸린 채로 멈추지 않게 모두 풀고 → 메뉴로 다른 화면에 갈 수 있게
+    document.documentElement.classList.remove('in-hole', 'gar-on', 'msheet-on', 'msheet-tall', 'dist-on', 'map-on');
+    try { immersive(false); } catch {}
+    // 오류 내용은 늘 접어서 보여 줌: 펼쳐서 캡처해 보내면 원인을 바로 찾을 수 있게 (쉬운 화면에서도)
+    const where = String(e?.stack || '').split('\n').slice(1, 3).map(l => l.trim().replace(/^at\s+/, '').replace(/\(?https?:\/\/[^/]+\//, '').replace(/\)$/, '')).join(' ← ');
     view.innerHTML = `<div class="card"><b>이 화면을 여는 중에 문제가 생겼어요</b><p class="sub">기록은 그대로 있어요. 다시 해 보거나 골프 치기로 돌아가 주세요.</p>
-      <div class="grid2"><button class="btn" onclick="location.reload()">↻ 다시 시도</button><a class="btn primary" href="#/play">🏌️ 골프 치기</a></div>${S.settings.detail ? `<p class="sub">${esc(e.message)}</p>` : ''}</div>`;
+      <div class="grid2"><button class="btn" onclick="location.reload()">↻ 다시 시도</button><a class="btn primary" href="#/play">🏌️ 골프 치기</a></div>
+      <details class="err-why"><summary>오류 내용 (캡처해서 보내 주세요)</summary><code>${esc(name)} · ${esc(APP_VERSION.name)} · ${esc(e?.message || e)}${where ? `<br>${esc(where)}` : ''}</code></details></div>`;
   }
   refreshHeader();
 }

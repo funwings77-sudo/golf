@@ -776,3 +776,4 @@ html.msheet-on .m-map .leaflet-top { top: max(env(safe-area-inset-top), var(--cu
 .gp-btn .ic { width: 18px; height: 18px; }
 .gp-note { margin: 4px 0 0; font-size: 12px; opacity: .7; text-align: center; }
 .cam.pan-on .hud.bottom { visibility: hidden; } /* 판이 열려 있으면 아래 버튼 줄은 판 뒤로 (겹치지 않게) */
+.err-why { margin-top: 10px; font-size: 12.5px; color: var(--sub, #777); } .err-why code { display: block; margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: rgba(127,127,127,.12); white-space: pre-wrap; word-break: break-all; font-size: 12px; }
