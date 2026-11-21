@@ -1,2 +1,2 @@
 // 앱(APK) 버전 — scripts/release-apk.mjs가 빌드할 때마다 자동으로 바꿉니다
-export const APP_VERSION = { name: '1.0.40', code: 41 };
+export const APP_VERSION = { name: '1.0.41', code: 42 };

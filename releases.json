@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.41",
+   "code": 42,
+   "date": "2026-11-21T02:11:21.362Z",
+   "bytes": 6106333,
+   "sha256": "d7d96325cf8d4418ad70318df40d2ccf828e7e3a77a0deec7058c966eccb1699",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.41/pinpoint-caddie-1.0.41.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.41",
+   "notes": [
+    "Long range to 10 km, ridgelines, depth-camera AR lines, sensor fusion, ball-flight tracking"
+   ]
+  },
+  {
    "version": "1.0.40",
    "code": 41,
    "date": "2026-11-21T01:31:09.515Z",
@@ -512,6 +524,6 @@
    ]
   }
  ],
- "latest": "1.0.40",
- "updatedAt": "2026-11-21T01:31:15.340Z"
+ "latest": "1.0.41",
+ "updatedAt": "2026-11-21T02:11:27.009Z"
 }
