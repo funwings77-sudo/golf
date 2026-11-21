@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.54",
+   "code": 55,
+   "date": "2026-11-21T13:08:07.846Z",
+   "bytes": 6141181,
+   "sha256": "929ad0d3be14dab471bda91d335d1d22c130925a751c96eb5cb632820a13906f",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.54/pinpoint-caddie-1.0.54.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.54",
+   "notes": [
+    "앱 아이콘·시작 화면을 새 브랜드 마크(위치 핀 + 골프 깃발)로 바꿈"
+   ]
+  },
+  {
    "version": "1.0.53",
    "code": 54,
    "date": "2026-11-21T13:04:46.083Z",
@@ -703,6 +715,6 @@
    ]
   }
  ],
- "latest": "1.0.53",
- "updatedAt": "2026-11-21T13:04:50.330Z"
+ "latest": "1.0.54",
+ "updatedAt": "2026-11-21T13:08:13.082Z"
 }
