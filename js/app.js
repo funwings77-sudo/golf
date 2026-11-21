@@ -11,6 +11,7 @@ import { configureVoice, onAudio, audioRoute, earButtons, say, holeIntro, ROUTE_
 import { holeHistory } from './core/insights.js';
 import { $, $$, sheet, toast, esc, bottomMenuHTML } from './ui.js';
 import { icon } from './icons.js';
+import { startIconize } from './iconize.js';
 import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
 
@@ -412,6 +413,7 @@ function applyIcons() {
 
 function init() {
   applyIcons();
+  startIconize(); // 본문 버튼 이모지도 아이콘으로 (화면이 다시 그려져도)
   applySettings();
   safetyNets();
   askLocation();
