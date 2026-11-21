@@ -7,6 +7,7 @@ import { learnClub } from '../core/score.js';
 import { BEGINNER_TIPS } from '../core/rules.js';
 import { createMap, destroyMap, drawHole, fitHole, ll, labelIcon, HZ_STYLE } from '../map.js';
 import { $, esc, toast, sheet, DU, D, U, clubOptions } from '../ui.js';
+import { immersive } from '../core/screen.js';
 
 let map, holeLayer, lineLayer, unPos, target = null, placing = false, elev = { me: null, pin: null, at: null }, lastSpoken = 0, App_;
 
@@ -26,7 +27,9 @@ export default {
       </div>
       <div class="hud bottom" id="hudB" style="display:none"></div></div>`;
     const c = hole?.green || hole?.tee || Sensors.pos || { lat: 37.5665, lon: 126.978 };
-    map = createMap($('#map', el), { center: ll(c), zoom: 17 });
+    // 📱 거리 화면 = 지도 화면: 늘 전체 화면 (상태바·앱 머리줄 숨김 · 아래 메뉴는 지도 위에 떠 있음)
+    document.documentElement.classList.add('dist-on'); immersive(true);
+    map = createMap($('#map', el), { center: ll(c), zoom: 17, full: false });
     if (map) {
       holeLayer = drawHole(map, hole); lineLayer = L.layerGroup().addTo(map);
       if (hole) fitHole(map, hole, Sensors.pos);
@@ -43,7 +46,7 @@ export default {
     unPos = onPos(() => render());
     render();
   },
-  unmount() { unPos && unPos(); destroyMap(map); map = null; target = null; placing = false; },
+  unmount() { document.documentElement.classList.remove('dist-on'); immersive(false); unPos && unPos(); destroyMap(map); map = null; target = null; placing = false; },
   onHole() { const h = activeHole(); target = null; if (map) { drawHole(map, h, holeLayer); fitHole(map, h, Sensors.pos); } render(); },
 };
 
