@@ -4,6 +4,21 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.66",
+   "code": 67,
+   "date": "2026-11-21T15:17:28.085Z",
+   "bytes": 6160241,
+   "sha256": "5e4e652bde2036cf1c224226ebcd23493eb8fe827d2123b5103b7ee5b6a59a5a",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.66/pinpoint-caddie-1.0.66.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.66",
+   "notes": [
+    "앱을 켜자마자 모든 지도·골프장 사진이 구글 위성지도로 (카메라 화면 작은 지도 포함)",
+    "신호 없는 코스에서는 미리 받아 둔 지도로 자동 전환 (빈 지도가 되지 않게)",
+    "아래 메뉴 '그린'을 누르면 바로 AR 그린 리딩",
+    "AR 그린 리딩: 숫자 판은 한 줄로(눌러서 펼치기) · ⚙ 설정에서 그린 종류·거리·빠르기·재기를 카메라를 끄지 않고 바로"
+   ]
+  },
+  {
    "version": "1.0.65",
    "code": 66,
    "date": "2026-11-21T14:33:01.238Z",
@@ -851,6 +866,6 @@
    ]
   }
  ],
- "latest": "1.0.65",
- "updatedAt": "2026-11-21T14:33:06.949Z"
+ "latest": "1.0.66",
+ "updatedAt": "2026-11-21T15:17:33.702Z"
 }
