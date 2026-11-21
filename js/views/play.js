@@ -1134,7 +1134,7 @@ async function mountView() {
     stage.innerHTML = '<div class="map" id="pmap"></div><div class="zoomb"><button id="zi">＋</button><button id="zo">－</button></div>';
     const c = activeCourse(), near = c.holes.find(x => x.green) || null;
     const c0 = ballPos() || h.green || h.tee || near?.green || c.center || Sensors.pos || { lat: 36.5, lon: 127.8 };
-    map = createMap($('#pmap'), { center: ll(c0), zoom: h.green || ballPos() || near ? 17 : c.center ? (c.center.precision === "sigungu" ? 12 : 15) : 7 });
+    map = createMap($('#pmap'), { full: false, center: ll(c0), zoom: h.green || ballPos() || near ? 17 : c.center ? (c.center.precision === "sigungu" ? 12 : 15) : 7 });
     if (!map) return;
     drawHole(map, h); lay = L.layerGroup().addTo(map); map.on('zoomend', () => drawRings(sceneData()));
     $('#zi').onclick = () => map.zoomIn(); $('#zo').onclick = () => map.zoomOut();
@@ -1170,7 +1170,7 @@ async function mountView() {
     arCtl = await startAR($('#arb'), () => { const sd = sceneData(); return { ...sd, me: Sensors.pos || sd.from }; }, {
       onMapEl: el => {
         const c = activeCourse(), c0 = ballPos() || h.green || h.tee || c?.center || Sensors.pos || { lat: 36.5, lon: 127.8 };
-        map = createMap(el, { center: ll(c0), zoom: 17 }); if (!map) return;
+        map = createMap(el, { center: ll(c0), zoom: 17, full: false }); if (!map) return; // 골프 치기 화면은 자체 '지도 크게' 버튼이 있음
         drawHole(map, h); lay = L.layerGroup().addTo(map); map.on('click', mapClick); map.on('zoomend', () => P.mapFull && drawRings(sceneData()));
         headMk = L.marker(ll(c0), { icon: L.divIcon({ className: 'hd-cone', html: '<i></i>', iconSize: [0, 0] }), interactive: false, zIndexOffset: -10 }).addTo(map);
         setTimeout(() => { map?.invalidateSize(); miniFit(); scene(); }, 120);

@@ -711,3 +711,11 @@ nav.tabs a .i .ic { width: 22px; height: 22px; }
 .topbar .brand-mk .ic { width: 28px; height: 28px; }
 .drawer .brand .brand-ic { width: 30px; height: 30px; margin-right: 6px; vertical-align: -.35em; }
 .topbar button.ic > svg.ic { width: 24px; height: 24px; border-radius: 0; display: inline-block; } /* 메뉴 버튼(class ic)과 아이콘 SVG(class ic) 이름이 같아 커지던 것 */
+/* 📱 지도 전체 화면 (모든 지도 공통 · js/map.js fullControl) */
+.map-full-btn { width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 10px; background: rgba(14,20,16,.82); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.35); cursor: pointer; }
+.map-full-btn .ic { width: 22px; height: 22px; }
+.map-full { position: fixed !important; inset: 0 !important; z-index: 950 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important; min-height: 0 !important; margin: 0 !important; border-radius: 0 !important; display: block !important; }
+.map-full > .map, .map-full.map { width: 100% !important; height: 100% !important; }
+.map-full .leaflet-top { top: max(env(safe-area-inset-top), var(--cut-top, 0px)); }
+html.map-on, html.map-on body { overflow: hidden; }
+html.map-on .bd-global, html.map-on nav.tabs, html.map-on .topbar { display: none !important; }

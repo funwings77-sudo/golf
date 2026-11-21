@@ -1,8 +1,8 @@
 // 오프라인 우선 서비스 워커: 앱 셸·물리 엔진은 캐시 우선, 지도 타일은 런타임 캐시
-const VER = 'pinpoint-v52';
+const VER = 'pinpoint-v54';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'css/theme.css', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'js/core/files.js',
-  'js/app.js', 'js/ui.js', 'js/icons.js', 'js/iconize.js', 'js/canvasicon.js', 'js/core/screen.js', 'js/map.js',
+  'js/app.js', 'js/ui.js', 'js/icons.js', 'js/iconize.js', 'js/canvasicon.js', 'js/core/screen.js', 'js/core/gmaps.js', 'js/map.js',
   'js/core/geo.js', 'js/core/state.js', 'js/core/sensors.js', 'js/core/weather.js', 'js/core/camera.js', 'js/core/score.js', 'js/core/rules.js', 'js/core/course.js', 'js/core/remote.js', 'js/core/report.js', 'js/core/appver.js', 'js/core/appupdate.js', 'js/core/search.js', 'js/core/gemini.js', 'js/core/aicaddie.js', 'js/views/aisheet.js', 'js/core/offline.js', 'js/core/insights.js', 'js/core/depth.js', 'js/core/live.js', 'js/core/grip.js', 'js/core/watch.js', 'js/core/voice.js', 'js/core/terrain.js', 'js/physics/flight3d.js', 'js/core/horizon.js', 'js/core/fusion.js', 'js/core/balltrack.js',
   'js/physics/putt.js', 'js/physics/putt.worker.js', 'js/physics/flight.js', 'js/physics/strategy.js', 'js/physics/lostball.js',
   'js/views/home.js', 'js/views/play.js', 'js/views/view3d.js', 'js/views/arview.js', 'js/views/flagcam.js', 'js/physics/advice.js', 'js/physics/greenmesh.js', 'js/core/arproj.js', 'js/core/greenar.js', 'js/core/heading.js', 'js/physics/shotfit.js', 'js/views/shotviz.js', 'js/views/shots.js', 'js/views/lmform.js', 'js/views/lmimport.js', 'js/core/lmcsv.js', 'css/play.css', 'js/views/distance.js', 'js/views/tee.js', 'js/views/lost.js', 'js/views/green.js', 'js/views/greencanvas.js', 'js/views/green3d.js', 'js/views/lie.js', 'js/views/score.js',
@@ -19,7 +19,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  if (url.hostname.includes('open-meteo.com') || url.hostname === 'api.github.com' || url.hostname === 'generativelanguage.googleapis.com') return; // 날씨·관리자 API는 항상 네트워크
+  if (url.hostname.includes('open-meteo.com') || url.hostname === 'api.github.com' || url.hostname === 'generativelanguage.googleapis.com' || url.hostname === 'tile.googleapis.com') return; // 날씨·관리자·AI API와 구글 지도 타일(약관상 저장 안 함)은 항상 네트워크
   // APK·관리자 페이지·발행 데이터는 캐시하지 않음 (발행 데이터는 앱이 localStorage에 직접 보관)
   if (url.origin === location.origin && (/(\.apk|\/apk\.json|\/watch\.json|\/releases\.json|\/download\.html|\/admin\.html)$/.test(url.pathname) || /\/(data|js\/admin)\//.test(url.pathname))) return;
   if (url.hostname.includes('arcgisonline.com')) {

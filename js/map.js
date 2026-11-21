@@ -2,6 +2,9 @@
 import { toLocal, fromLocal, distance } from './core/geo.js';
 import { Sensors, onPos } from './core/sensors.js';
 import { iconHTML } from './iconize.js';
+import { icon } from './icons.js';
+import { immersive } from './core/screen.js';
+import { hasMapsKey, cachedSession, getSession, tileUrl, viewportCopyright, forgetSession } from './core/gmaps.js';
 
 export const HZ_STYLE = {
   ob: { color: '#ffffff', fill: '#ffffff', label: 'OB' },
@@ -28,13 +31,58 @@ function cachedTileLayer() {
   });
 }
 
-export function createMap(el, { center = [37.5, 127], zoom = 17, me = true } = {}) {
+// 바탕 위성지도: 구글 지도 키가 있으면 구글(Map Tiles API), 없거나 안 되면 Esri
+//  · 보관된 구글 세션이 있으면 처음부터 구글 · 없으면 Esri로 먼저 보여 주고 세션이 생기면 구글로 바꿈
+//  · 구글 타일이 잇달아 실패하면(키 막힘·한도 초과) 저절로 Esri로 돌아감
+function esriLayer() {
+  const native = !!window.Capacitor?.isNativePlatform?.() && 'caches' in window;
+  const o = { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' };
+  return native ? new (cachedTileLayer())(SAT_URL, o) : L.tileLayer(SAT_URL, o);
+}
+function googleLayer(map, s) {
+  const lay = L.tileLayer(tileUrl(s), { maxZoom: 21, maxNativeZoom: 19, attribution: 'Google' }); // 구글 위성은 확대 19까지
+  let fails = 0, oks = 0, last = '';
+  lay.on('tileload', () => { oks++; });
+  lay.on('tileerror', e => {
+    // 구글이 안 주는 칸(보안 지역 등)은 그 칸만 Esri 사진으로 채움
+    const t = e.tile, c = e.coords;
+    if (t && c && !t.dataset.fb) { t.dataset.fb = '1'; t.src = SAT_URL.replace('{z}', c.z).replace('{y}', c.y).replace('{x}', c.x); }
+    // 하나도 안 되면(키 막힘·한도 초과) 지도 전체를 Esri로
+    if (++fails >= 6 && oks === 0 && map._base === lay) { forgetSession(); swapBase(map, esriLayer()); }
+  });
+  const copy = () => {
+    if (map._base !== lay) return;
+    viewportCopyright(s, map.getBounds(), map.getZoom()).then(t => {
+      if (!t || t === last || map._base !== lay) return;
+      if (last) map.attributionControl?.removeAttribution(last);
+      map.attributionControl?.addAttribution(last = t);
+    }).catch(() => {});
+  };
+  let tm = null; map.on('moveend', () => { clearTimeout(tm); tm = setTimeout(copy, 700); });
+  lay.once('add', () => setTimeout(copy, 300));
+  lay.on('remove', () => { if (last) map.attributionControl?.removeAttribution(last); last = ''; });
+  return lay;
+}
+function swapBase(map, lay) {
+  if (!map._container) return; // 이미 닫힌 지도
+  if (map._base) map.removeLayer(map._base);
+  map._base = lay.addTo(map); lay.bringToBack?.();
+}
+function baseLayer(map) {
+  if (!hasMapsKey()) return swapBase(map, esriLayer());
+  const s = cachedSession();
+  if (s) return swapBase(map, googleLayer(map, s));
+  swapBase(map, esriLayer());
+  getSession().then(ss => swapBase(map, googleLayer(map, ss))).catch(() => {});
+}
+
+export function createMap(el, { center = [37.5, 127], zoom = 17, me = true, full = true } = {}) {
   if (!window.L) { el.innerHTML = '<div class="map-off">지도 라이브러리를 불러오지 못했습니다 (오프라인). 거리 계산은 계속 동작합니다.</div>'; return null; }
   const map = L.map(el, { zoomControl: false, attributionControl: true, maxZoom: 21, tap: true }).setView(center, zoom);
   // 앱(APK)에는 서비스 워커가 없어서, 미리 받은 타일(Cache Storage)을 지도 칸이 직접 꺼내 씀 → 신호 없는 코스에서도 위성 지도
-  const native = !!window.Capacitor?.isNativePlatform?.() && 'caches' in window;
-  (native ? new (cachedTileLayer())(SAT_URL, { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' }) : L.tileLayer(SAT_URL, { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' })).addTo(map);
+  baseLayer(map);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
+  if (full) fullControl(map, el);
   if (me) {
     const dot = L.circleMarker(center, { radius: 7, color: '#fff', weight: 2, fillColor: '#2b7bff', fillOpacity: 1, interactive: false });
     const accC = L.circle(center, { radius: 5, color: '#2b7bff', weight: 1, fillOpacity: 0.12, interactive: false });
@@ -48,7 +96,30 @@ export function createMap(el, { center = [37.5, 127], zoom = 17, me = true } = {
   setTimeout(() => map.invalidateSize(), 50);
   return map;
 }
-export function destroyMap(map) { if (!map) return; map._unMe && map._unMe(); map.remove(); }
+// 📱 지도 전체 화면: 오른쪽 위 버튼 → 지도 칸이 화면을 꽉 채움 (상태바·아래 메뉴까지 숨김) · 다시 누르거나 뒤로 가기로 원래대로
+function fullControl(map, el) {
+  const box = el.closest('.mapwrap') || el;
+  const C = L.Control.extend({
+    onAdd() {
+      const b = L.DomUtil.create('button', 'map-full-btn'); b.type = 'button';
+      const paint = () => { const on = box.classList.contains('map-full'); b.innerHTML = icon(on ? 'shrink' : 'expand'); b.setAttribute('aria-label', on ? '지도 작게' : '지도 전체 화면'); on ? b.setAttribute('data-back', '') : b.removeAttribute('data-back'); };
+      L.DomEvent.disableClickPropagation(b);
+      b.onclick = () => { setMapFull(map, box, !box.classList.contains('map-full')); paint(); };
+      map._fullPaint = paint; paint();
+      return b;
+    },
+  });
+  new C({ position: 'topright' }).addTo(map);
+  map._fullBox = box;
+}
+export function setMapFull(map, box, on) {
+  box.classList.toggle('map-full', on);
+  document.documentElement.classList.toggle('map-on', on);
+  immersive(on);
+  map._fullPaint?.();
+  setTimeout(() => map.invalidateSize(), 60);
+}
+export function destroyMap(map) { if (!map) return; if (map._fullBox?.classList.contains('map-full')) setMapFull(map, map._fullBox, false); map._unMe && map._unMe(); map.remove(); }
 
 export const ll = p => [p.lat, p.lon];
 
