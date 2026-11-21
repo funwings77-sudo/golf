@@ -4,6 +4,21 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.68",
+   "code": 69,
+   "date": "2026-11-21T16:05:15.316Z",
+   "bytes": 6171559,
+   "sha256": "bea4b1d321f7e4c832807e46697569db8d62ea410d3de445e311cd8996c8c47b",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.68/pinpoint-caddie-1.0.68.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.68",
+   "notes": [
+    "골프 치기 카메라 화면을 내비게이션처럼: 왼쪽 위 '지금 할 일'(클럽·보낼 거리·방향) · 오른쪽 '앞으로 나올 곳' 거리 목록 · 위험할 때만 노란 경고 · 가운데는 비우고 글자 겹침 없앰",
+    "카메라 화면 확대 (버튼 1×·2×·3× · 두 손가락) · 선과 거리도 같은 배율로",
+    "직접 재기: AR 화면에서 홀컵을 누르면 바로 거리 재고 안내선 표시",
+    "AR 그린: 2cm 등고선(낮은 곳 파랑·높은 곳 주황) · 능선·골 점선 · 경사 색 흐름 · 1m 눈금 · 설정 판에 퍼팅 길 높낮이 그래프"
+   ]
+  },
+  {
    "version": "1.0.67",
    "code": 68,
    "date": "2026-11-21T15:34:36.343Z",
@@ -878,6 +893,6 @@
    ]
   }
  ],
- "latest": "1.0.67",
- "updatedAt": "2026-11-21T15:34:41.269Z"
+ "latest": "1.0.68",
+ "updatedAt": "2026-11-21T16:05:19.761Z"
 }
