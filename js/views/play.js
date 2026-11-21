@@ -122,7 +122,7 @@ function stepClub() {
   el_.innerHTML = `<div class="pwrap">
     <div class="p-hero"><p class="p-kicker">골프 치기</p><h1 class="pq">어디서 쳐요? ⛳</h1><p class="p-sub">골프장을 누르면 바로 1번 홀이 시작돼요</p></div>
     <div id="near"></div>
-    <input type="search" id="pq" class="pin-search" placeholder="🔍 골프장 이름으로 찾기" value="${esc(P.q || '')}">
+    <label class="pin-search-w">${icon('lost')}<input type="search" id="pq" class="pin-search" placeholder="골프장 이름으로 찾기" aria-label="골프장 이름으로 찾기" value="${esc(P.q || '')}"></label>
     ${mine.length ? `<h2 class="ph2">⭐ 내 골프장</h2><div class="picks">${mine.map(c => `<button class="pick" data-c="${esc(c.id)}">${c.demo ? '<span class="pi">🧪</span>' : thumb(courseCenter(c), c.name)}<span class="pt"><b>${esc(c.name)}</b><small>${c.holes.length}홀${c.official?.region ? ' · ' + esc(c.official.region) : ''}${c.todayPins ? ' · 오늘 핀 ✓' : ''}</small></span><span class="pa">›</span></button>`).join('')}</div>` : ''}
     <h2 class="ph2">${q ? '🔍 찾은 골프장' : Sensors.pos ? '📍 가까운 골프장' : '🏌️ 골프장'}</h2><div class="picks" id="dir"><p class="sub center">불러오는 중…</p></div>
     <button class="pbtn ghost" id="demo">🧪 연습용 가상 골프장으로 해 보기</button>
