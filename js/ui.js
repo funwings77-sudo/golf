@@ -2,6 +2,7 @@
 import { S } from './core/state.js';
 import { fmtNum } from './core/geo.js';
 
+import { icon } from './icons.js';
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -15,9 +16,9 @@ let toastT = null;
 //  골프 치기 화면은 이 HTML을 자기 화면 아래에 넣고, 다른 화면은 앱 공통 메뉴(#bdNav)로 씀 — 버튼 id가 같아야 함
 export function bottomMenuHTML({ lost = '공 찾기', on = '' } = {}) {
   const item = (id, i, t, r) => `<button id="${id}"${r && r === on ? ' class="on"' : ''}><i>${i}</i><span>${t}</span></button>`;
-  return `${item('mMenu', '☰', '더보기')}${item('mGreen', '📷', '그린', 'green')}${item('mLost', '🔍', lost, 'lost')}
-    <button class="mid" id="mPlay" aria-label="골프 치기 화면으로"><i>⛳</i><span>골프 치기</span></button>
-    ${item('mShots', '📈', '내 샷 기록', 'shots')}${item('mYard', '📋', '거리표')}${item('more', '🧰', '도구')}`;
+  return `${item('mMenu', icon('menu'), '더보기')}${item('mGreen', icon('green'), '그린', 'green')}${item('mLost', icon('lost'), lost, 'lost')}
+    <button class="mid" id="mPlay" aria-label="골프 치기 화면으로"><i>${icon('play')}</i><span>골프 치기</span></button>
+    ${item('mShots', icon('shots'), '내 샷 기록', 'shots')}${item('mYard', icon('yard'), '거리표')}${item('more', icon('tools'), '도구')}`;
 }
 
 export function toast(msg, ms = 2600) {

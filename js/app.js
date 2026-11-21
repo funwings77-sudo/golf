@@ -10,6 +10,7 @@ import { onWatchSwing } from './core/watch.js';
 import { configureVoice, onAudio, audioRoute, earButtons, say, holeIntro, ROUTE_WORD } from './core/voice.js';
 import { holeHistory } from './core/insights.js';
 import { $, $$, sheet, toast, esc, bottomMenuHTML } from './ui.js';
+import { icon } from './icons.js';
 import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
 
@@ -267,7 +268,7 @@ async function appUpdateTick(manual = false) {
     actions: [{ label: '나중에' }, { label: '⬇ 업데이트', kind: 'primary', onClick: () => openDownload() }] });
 }
 App.checkUpdate = () => appUpdateTick(true);
-function markVer(u) { const vb = $('#verBtn'); if (vb) vb.innerHTML = `🎉 새 버전 ${esc(u.name)} 받기 <small style="color:var(--danger)">●</small>`; }
+function markVer(u) { const vb = $('#verBtn'); if (vb) vb.innerHTML = `${icon('refresh')}<span>새 버전 ${esc(u.name)} 받기 <small style="color:var(--danger)">●</small></span>`; }
 
 // 홀 도착 시각 (골프장 제출용 리포트의 진행 속도 계산에 사용)
 function markHoleArrival(n) {
@@ -388,7 +389,29 @@ function bottomMenu(name) {
   $('#more', nav).onclick = () => playCmd('tools');
 }
 
+// 🎨 전체 메뉴(☰)·탭 막대: 이모지 대신 앱 아이콘 세트 (js/icons.js)
+const DRAWER_IC = { '#/play': 'play', '#/home': 'home', '#/lie': 'lie', '#/courses': 'map', '#/shots': 'shots', '#/bag': 'bag', '#/rules': 'book', '#/safety': 'bolt', '#/history': 'bars', '#/calib': 'sliders', '#/settings': 'gear', '#/about': 'info', verBtn: 'refresh' };
+const TAB_IC = { play: 'play', distance: 'green', tee: 'tee', lost: 'lost', green: 'green', score: 'card' };
+// 화면 제목(h2) 앞 이모지 → 아이콘 (화면이 다시 그려져도 바로 바꿈)
+const TITLE_IC = { shots: 'shots', score: 'card', green: 'green', lost: 'lost', tee: 'tee', distance: 'wind', lie: 'lie', bag: 'bag', rules: 'book', safety: 'bolt', history: 'bars', calib: 'sliders', settings: 'gear', about: 'info', courses: 'map' };
+function titleIcon() {
+  const n = TITLE_IC[currentName], h = n && $('#view h2'); if (!h || h.dataset.ic) return;
+  const t = h.firstChild; if (!t || t.nodeType !== 3) return;
+  const m = t.textContent.match(/^\s*([^\s0-9A-Za-z가-힣(]+)\s*/u); if (!m) return;
+  t.textContent = t.textContent.slice(m[0].length); h.dataset.ic = '1'; h.insertAdjacentHTML('afterbegin', icon(n, 'ic-h'));
+}
+function applyIcons() {
+  new MutationObserver(titleIcon).observe($('#view'), { childList: true, subtree: true });
+  $$('#drawer .panel a').forEach(a => {
+    const n = DRAWER_IC[a.id] || DRAWER_IC[a.getAttribute('href')]; if (!n) return;
+    const t = a.textContent.replace(/^[^0-9A-Za-z가-힣(]+/u, '').trim();
+    a.innerHTML = `${icon(n)}<span>${esc(t)}</span>`;
+  });
+  $$('#tabs a').forEach(a => { const n = TAB_IC[a.dataset.r] || (a.id === 'tabMore' ? 'menu' : null), i = a.querySelector('.i'); if (n && i) i.innerHTML = icon(n); });
+}
+
 function init() {
+  applyIcons();
   applySettings();
   safetyNets();
   askLocation();
@@ -409,7 +432,7 @@ function init() {
   setInterval(remoteTick, 5 * 60 * 1000);
   setInterval(liveTick, 30000); setTimeout(liveTick, 2500);
   setTimeout(() => appUpdateTick(), 4000); setInterval(() => appUpdateTick(), 6 * 3600 * 1000);
-  const vb = $('#verBtn'); if (vb) { vb.textContent = `🔄 업데이트 확인 · ${isNative() ? '앱 ' + APP_VERSION.name : '웹 (항상 최신)'}`; vb.onclick = () => { $('#drawer').classList.remove('open'); appUpdateTick(true); }; }
+  const vb = $('#verBtn'); if (vb) { vb.innerHTML = `${icon('refresh')}<span>업데이트 확인 · ${isNative() ? '앱 ' + esc(APP_VERSION.name) : '웹 (항상 최신)'}</span>`; vb.onclick = () => { $('#drawer').classList.remove('open'); appUpdateTick(true); }; }
   setTimeout(remoteTick, 1500);
   window.addEventListener('online', () => remoteTick());
   subscribe(keys => { if (keys.includes('ui') && activeCourse()?.official && remoteTick._course !== activeCourse().id) { remoteTick._course = activeCourse().id; remoteTick(); } });

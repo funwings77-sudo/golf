@@ -27,6 +27,7 @@ import { swingAction, watchSend } from '../core/watch.js';
 import { say, shotCue, walkCue, resultCue, clock, ro, m as mWords } from '../core/voice.js';
 import { stdCarry, playsWhy, holeHistory, roundBriefing, conditionBrief, provisionalRisk, roundDiagnosis, lessonVideos, clubRange, dots, greenToday } from '../core/insights.js';
 import { immersive } from '../core/screen.js';
+import { icon } from '../icons.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: 'ar', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: 'ar' }; } })();
@@ -271,7 +272,7 @@ function stepHole() {
     <div class="bd-top"><button class="bd-nav" id="bdP" aria-label="이전 홀">‹</button>
       <button class="bd-bar" id="bdInfo" aria-label="홀 정보"><span class="bd-n"><small>${esc(h.nine ? String(h.nine).slice(0, 4) : '홀')}</small>${h.nineHole ?? h.n}</span><span class="bd-d"><small>깃발까지</small><b id="bdDist">—</b></span><span class="bd-m"><small>파</small><b>${h.par}</b></span>${hd ? `<span class="bd-m bd-hd"><small>핸디</small><b>${hd}</b></span>` : ''}</button>
       <button class="bd-nav" id="bdN" aria-label="다음 홀">›</button></div>
-    <div class="bd-fab"><button id="fabAI" aria-label="AI 캐디에게 묻기">🤖</button><button id="fabGreen" aria-label="그린 보기">⛳</button><button id="fabMe" aria-label="내 위치로">◎<small class="e-only">내 위치</small></button></div>
+    <div class="bd-fab"><button id="fabAI" aria-label="AI 캐디에게 묻기">${icon('ai')}</button><button id="fabGreen" aria-label="그린 보기">${icon('green')}</button><button id="fabMe" aria-label="내 위치로">${icon('target')}<small class="e-only">내 위치</small></button></div>
     <button class="imm-mini" id="mini" aria-label="코스 지도 (2D로 보기)"></button>
     <div class="imm-side">
       ${[['big', '큰'], ['2d', '2D'], ['3d', '3D'], ['4d', '4D'], ['ar', 'AR']].map(([k, t]) => `<button class="${P.view === k ? 'on' : ''}" data-v="${k}" aria-label="${t} 보기">${t}</button>`).join('')}
@@ -421,7 +422,7 @@ async function batteryNote() {
 }
 async function batteryGuard() {
   const b = await battery(); if (!b || b.charging || battWarned) return;
-  if (b.level <= 0.2 && ['3d', '4d', 'ar'].includes(P.view)) {
+  if (b.level <= 0.2 && ['3d', '@mountain', 'ar'].includes(P.view)) {
     battWarned = true; P.view = 'big'; persist(); render();
     toast(`🔋 배터리 ${Math.round(b.level * 100)}% · 절전을 위해 큰 글씨 보기로 바꿨어요`, 4500);
   }
@@ -890,35 +891,36 @@ async function pointShot() {
 
 // 🧰 도구: 18Birdies 'Tools' 목록처럼 아이콘 · 이름 · 한 줄 설명
 function moreSheet() {
-  const h = activeHole(), V = [['ar', '📷', '카메라 · 지도'], ['big', '🔠', '큰 숫자'], ...(S.settings.detail ? [['2d', '🗺️', '지도만'], ['3d', '🏔️', '입체 지도만'], ['4d', '🎬', '공 비행만']] : [])];
+  const ic = i => (i.startsWith('@') ? icon(i.slice(1)) : i);
+  const h = activeHole(), V = [['ar', '@camera', '카메라 · 지도'], ['big', '@big', '큰 숫자'], ...(S.settings.detail ? [['2d', '@map', '지도만'], ['3d', '🏔️', '입체 지도만'], ['4d', '@film', '공 비행만']] : [])];
   const T = [
-    ['ai', '🤖', 'AI 캐디에게 묻기', '이 샷 어떻게 칠지 물어보기 (숫자는 엔진이 계산)', () => openAICaddie({ getFacts: aiFacts })],
-    ['yd', '📋', '거리표', '그린 앞·뒤 · 벙커·물 넘기기 거리와 클럽', yardBook],
-    ...(!(h.pin || h.green) ? [['ghere', '⛳', '여기가 그린이에요', '지금 그린 위라면 눌러서 그린 위치를 바로 저장', greenHere], ['gmap', '🗺️', '지도에서 그린 찍기', '그린까지 가지 않고 위성지도에서 그린 가운데를 눌러요', markGreenOnMap]] : []),
-    ['mark', '📍', '내 공 위치 찍기', 'GPS가 약할 때 지도에서 공 자리를 눌러요', () => markBall()],
-    ['prec', '📡', '정밀하게 재기', '5초 동안 여러 번 재서 평균 (±1~3m)', precise],
-    ['green', '🟢', '퍼팅 계산', '경사 지도 · 굴릴 방향 · 세기 · 백스윙 크기', () => App_.go('green')],
-    ['greenar', '📷', '그린 읽기 (카메라)', '카메라에 경사 흐름 · 퍼팅 라인 · 홀까지 거리', () => App_.go('green?ar')],
-    ['lie', '📐', '공 놓인 경사', '휴대폰을 땅에 2초 → 오르막·내리막과 셋업 팁', () => App_.go('lie')],
-    ['tee', '🎯', '티샷 작전', '내 샷 퍼짐(타원)으로 가장 안전한 방향', () => App_.go('tee')],
-    ['dist', '🌬️', '거리 · 바람 자세히', '체감 거리 · 고저차 · 바람 · 기온', () => App_.go('distance')],
-    ['lost', '🔍', '공 찾기', '떨어진 구역 · 남은 거리 · 3분 타이머', () => App_.go('lost')],
-    ...(shotOf() ? [['point', '🧭', '날아간 쪽 가리키기', '공이 사라진 쪽으로 휴대폰을 2초 가리키면 찾을 곳을 좁혀요', pointShot]] : []),
-    ['brief', '📋', '오늘 공략 미리 보기', '홀마다 한 줄 · 지키는 홀/노려 볼 홀 · 오늘 날씨', () => briefingSheet(activeCourse(), App_.holeOrder())],
-    ['info', 'ℹ️', '홀 정보 · 메모', '스코어카드 · 메모 · 지도 미리 받기 · 배터리', () => holeInfo(h)],
-    ['rule', '⚖️', '규칙 도움', 'OB · 물 · 언플레이어블 구제 방법', () => App_.go('rules')],
-    ['shots', '📈', '내 샷 기록', '클럽별 공 속도 · 각도 · 높이 · 거리 · 방향', () => App_.go('shots')],
-    ['bag', '🎒', '내 클럽 비거리', '실제로 친 거리로 저절로 맞춰져요', () => App_.go('bag')],
+    ['ai', '@ai', 'AI 캐디에게 묻기', '이 샷 어떻게 칠지 물어보기 (숫자는 엔진이 계산)', () => openAICaddie({ getFacts: aiFacts })],
+    ['yd', '@yard', '거리표', '그린 앞·뒤 · 벙커·물 넘기기 거리와 클럽', yardBook],
+    ...(!(h.pin || h.green) ? [['ghere', '@green', '여기가 그린이에요', '지금 그린 위라면 눌러서 그린 위치를 바로 저장', greenHere], ['gmap', '@map', '지도에서 그린 찍기', '그린까지 가지 않고 위성지도에서 그린 가운데를 눌러요', markGreenOnMap]] : []),
+    ['mark', '@pin', '내 공 위치 찍기', 'GPS가 약할 때 지도에서 공 자리를 눌러요', () => markBall()],
+    ['prec', '@target', '정밀하게 재기', '5초 동안 여러 번 재서 평균 (±1~3m)', precise],
+    ['green', '@green', '퍼팅 계산', '경사 지도 · 굴릴 방향 · 세기 · 백스윙 크기', () => App_.go('green')],
+    ['greenar', '@camera', '그린 읽기 (카메라)', '카메라에 경사 흐름 · 퍼팅 라인 · 홀까지 거리', () => App_.go('green?ar')],
+    ['lie', '@lie', '공 놓인 경사', '휴대폰을 땅에 2초 → 오르막·내리막과 셋업 팁', () => App_.go('lie')],
+    ['tee', '@tee', '티샷 작전', '내 샷 퍼짐(타원)으로 가장 안전한 방향', () => App_.go('tee')],
+    ['dist', '@wind', '거리 · 바람 자세히', '체감 거리 · 고저차 · 바람 · 기온', () => App_.go('distance')],
+    ['lost', '@lost', '공 찾기', '떨어진 구역 · 남은 거리 · 3분 타이머', () => App_.go('lost')],
+    ...(shotOf() ? [['point', '@compass', '날아간 쪽 가리키기', '공이 사라진 쪽으로 휴대폰을 2초 가리키면 찾을 곳을 좁혀요', pointShot]] : []),
+    ['brief', '@card', '오늘 공략 미리 보기', '홀마다 한 줄 · 지키는 홀/노려 볼 홀 · 오늘 날씨', () => briefingSheet(activeCourse(), App_.holeOrder())],
+    ['info', '@info', '홀 정보 · 메모', '스코어카드 · 메모 · 지도 미리 받기 · 배터리', () => holeInfo(h)],
+    ['rule', '@scale', '규칙 도움', 'OB · 물 · 언플레이어블 구제 방법', () => App_.go('rules')],
+    ['shots', '@shots', '내 샷 기록', '클럽별 공 속도 · 각도 · 높이 · 거리 · 방향', () => App_.go('shots')],
+    ['bag', '@bag', '내 클럽 비거리', '실제로 친 거리로 저절로 맞춰져요', () => App_.go('bag')],
   ];
   // 자주 쓰는 4개는 큰 타일, 나머지는 접어 두기 (처음 보는 사람이 고를 것을 줄임)
   const FAV = [allowed('puttLine') ? 'greenar' : 'green', 'lost', 'shots', 'yd'], fav = FAV.map(k => T.find(t => t[0] === k)).filter(Boolean);
   const rest = T.filter(t => !FAV.includes(t[0]));
-  sheet({ title: '🧰 더보기', body: `<div class="tl-fav">${fav.map(([k, i, n]) => `<button data-mt="${k}"><i>${i}</i><b>${n}</b></button>`).join('')}</div>
+  sheet({ title: '더보기', body: `<div class="tl-fav">${fav.map(([k, i, n]) => `<button data-mt="${k}"><i>${ic(i)}</i><b>${n}</b></button>`).join('')}</div>
     <div class="tl-h">화면 바꾸기</div>
-    <div class="tl-views">${V.map(([k, i, n]) => `<button data-mv="${k}" class="${P.view === k ? 'on' : ''}"><i>${i}</i>${n}</button>`).join('')}</div>
-    <details class="tl-more"><summary>🔧 다른 도구 ${rest.length}개</summary><div class="tl-list">${rest.map(([k, i, n, d]) => `<button data-mt="${k}"><i>${i}</i><span><b>${n}</b><small>${d}</small></span><em>›</em></button>`).join('')}</div></details>
-    <div class="tl-links"><button id="moCard">📋 점수표</button><button id="moCourse">🔁 코스·친구 바꾸기</button><button id="moEnd">🏁 라운드 끝내기</button></div>
-    <button class="mo-detail" id="moMenu">☰ 전체 메뉴 · 설정</button>
+    <div class="tl-views">${V.map(([k, i, n]) => `<button data-mv="${k}" class="${P.view === k ? 'on' : ''}"><i>${ic(i)}</i>${n}</button>`).join('')}</div>
+    <details class="tl-more"><summary>🔧 다른 도구 ${rest.length}개</summary><div class="tl-list">${rest.map(([k, i, n, d]) => `<button data-mt="${k}"><i>${ic(i)}</i><span><b>${n}</b><small>${d}</small></span><em>›</em></button>`).join('')}</div></details>
+    <div class="tl-links"><button id="moCard">${icon('card')} 점수표</button><button id="moCourse">${icon('swap')} 코스·친구 바꾸기</button><button id="moEnd">${icon('finish')} 라운드 끝내기</button></div>
+    <button class="mo-detail" id="moMenu">${icon('menu')} 전체 메뉴 · 설정</button>
     <button class="mo-detail" id="moDet">${S.settings.detail ? '🙂 쉬운 화면으로 바꾸기' : '🔧 자세히 화면으로 바꾸기 <small>(숫자·지도 표시가 많은 전문가 화면)</small>'}</button>`, actions: [{ label: '닫기' }] });
   const close = () => $('#sheet').classList.remove('open');
   $$('[data-mv]').forEach(b => b.onclick = () => { close(); P.view = b.dataset.mv; P.viewSet = true; persist(); render(); });

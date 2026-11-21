@@ -684,3 +684,20 @@ html.in-hole .bd-global, html.gar-on .bd-global { display: none !important; }
 .bd-menu > button.on:not(.mid) { color: #c8f169; }
 /* 📱 골프 치기 화면 완전 전체 화면: 카메라는 화면 끝까지, 위쪽 버튼·안내는 펀치홀(--cut-top)만큼 아래로 */
 html.imm-on .imm :is(.imm-top, .bd-top, .bd-fab, .imm-mini, .imm-side, .ar-bar, .zoomb, .tbar, .ar-msg, .ar-diag, .ar-tools, .ar-map.mini, .ar-map-close, .ar-tbtn, .ar-chip, .ar-tray, .ar-trk, .ar-walk) { margin-top: var(--cut-top, 0px); }
+
+/* 🎨 아이콘 세트 (js/icons.js): 선 = 글자색 · 포인트 면 = 라임 · 포인트 위 작은 선 = 진한 색 */
+.ic { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: -.22em; flex: none; overflow: visible; }
+.ic .a { fill: var(--ic-acc, #c8f169); stroke: none; }
+.ic .k { stroke: #14241c; }
+.bd-menu > button i .ic { width: 24px; height: 24px; }
+.bd-menu > button.mid i .ic { width: 30px; height: 30px; --ic-acc: rgba(200,241,105,.35); }
+.drawer a .ic { width: 22px; height: 22px; color: var(--ink); }
+.drawer a.on .ic { color: var(--green); }
+nav.tabs a .i .ic { width: 22px; height: 22px; }
+.tl-fav i .ic, .tl-list i .ic { width: 26px; height: 26px; color: var(--ink, #14241c); }
+.tl-views i .ic { width: 24px; height: 24px; }
+.tl-links .ic, .mo-detail .ic { width: 18px; height: 18px; }
+.bd-fab button .ic { width: 24px; height: 24px; }
+.bd-fab #fabAI .ic { --ic-acc: rgba(255,255,255,.35); }
+.ic.ic-h { width: 1em; height: 1em; margin-right: 8px; vertical-align: -.12em; }
+#verBtn .ic { width: 22px; height: 22px; }
