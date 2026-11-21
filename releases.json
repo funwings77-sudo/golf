@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.39",
+   "code": 40,
+   "date": "2026-11-21T01:19:08.331Z",
+   "bytes": 6074052,
+   "sha256": "fbe4edb5c4b0d14e31307501396de256f7b3edab0ace1b9677b79d92241f57eb",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.39/pinpoint-caddie-1.0.39.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.39",
+   "notes": [
+    "Camera screen UX: bottom menu with center action, movable aim with precise readout, one tool button, visible messages"
+   ]
+  },
+  {
    "version": "1.0.38",
    "code": 39,
    "date": "2026-11-21T00:59:00.992Z",
@@ -488,6 +500,6 @@
    ]
   }
  ],
- "latest": "1.0.38",
- "updatedAt": "2026-11-21T00:59:06.958Z"
+ "latest": "1.0.39",
+ "updatedAt": "2026-11-21T01:19:14.215Z"
 }
