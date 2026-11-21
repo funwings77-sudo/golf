@@ -12,7 +12,11 @@
    "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.42/pinpoint-caddie-1.0.42.apk",
    "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.42",
    "notes": [
-    "Ball tracking with speed-camera principles: shake compensation, CFAR, Kalman confirm, residual invalidation, sensor cross-check"
+    "친 공 추적 정확도 개선: 휴대폰 흔들림 보정 · 공 잔상 제거 · 주변 잡음에 맞춰 감지 문턱 자동 조절",
+    "공 궤적은 3번 이어져야 확정 (새·나뭇잎을 공으로 잘못 잡지 않음) · 잠깐 가려져도 다시 이어 붙임",
+    "탄도와 안 맞는 점은 버리고 다시 계산 · 믿을 수 없는 추적은 기록하지 않고 \"이번 추적은 쓰지 않아요\"로 알림",
+    "친 시각: 🎤 소리와 ⌚ 스윙이 맞을 때만 사용 (옆 사람 샷 소리 걸러냄) · 어긋나면 거리를 범위로 표시",
+    "휴대폰 눈높이·찍는 위치 보정 · 카메라가 실제로 찍은 시각으로 계산 · 결과에 검증 내용(잔차·버린 점) 표시"
    ]
   },
   {
@@ -537,5 +541,5 @@
   }
  ],
  "latest": "1.0.42",
- "updatedAt": "2026-11-21T11:46:42.397Z"
+ "updatedAt": "2026-11-21T11:48:14.545Z"
 }
