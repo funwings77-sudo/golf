@@ -4,6 +4,18 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.55",
+   "code": 56,
+   "date": "2026-11-21T13:11:13.206Z",
+   "bytes": 6141183,
+   "sha256": "847260216278cf7b87b853b66364aab99fe2ec0473830758f2517607df198a25",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.55/pinpoint-caddie-1.0.55.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.55",
+   "notes": [
+    "워치 앱 아이콘·알림 아이콘도 새 브랜드 마크로 바꿈"
+   ]
+  },
+  {
    "version": "1.0.54",
    "code": 55,
    "date": "2026-11-21T13:08:07.846Z",
@@ -715,6 +727,6 @@
    ]
   }
  ],
- "latest": "1.0.54",
- "updatedAt": "2026-11-21T13:08:13.082Z"
+ "latest": "1.0.55",
+ "updatedAt": "2026-11-21T13:11:17.964Z"
 }
