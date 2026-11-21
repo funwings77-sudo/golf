@@ -8,10 +8,12 @@ function apply(want) {
   if (want === on) return;
   on = want;
   const root = document.documentElement, P = window.Capacitor?.Plugins?.PinpointScreen;
+  root.classList.toggle('imm-on', want); // CSS: 위쪽 버튼을 펀치홀 높이(--cut-top)만큼 내림
   if (P?.immersive) {
     P.immersive({ on: want }).then(r => root.style.setProperty('--cut-top', `${want ? Math.max(0, r?.cutTop || 0) : 0}px`)).catch(() => {});
     return;
   }
+  if (!matchMedia?.('(pointer: coarse)').matches) return; // 웹은 휴대폰(터치)에서만 · PC 브라우저는 그대로
   try {
     if (want && !document.fullscreenElement) root.requestFullscreen?.({ navigationUI: 'hide' })?.catch?.(() => {});
     else if (!want && document.fullscreenElement) document.exitFullscreen?.()?.catch?.(() => {});

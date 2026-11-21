@@ -26,6 +26,7 @@ import { blendWeight } from '../core/fusion.js';
 import { swingAction, watchSend } from '../core/watch.js';
 import { say, shotCue, walkCue, resultCue, clock, ro, m as mWords } from '../core/voice.js';
 import { stdCarry, playsWhy, holeHistory, roundBriefing, conditionBrief, provisionalRisk, roundDiagnosis, lessonVideos, clubRange, dots, greenToday } from '../core/insights.js';
+import { immersive } from '../core/screen.js';
 
 const KEY = 'pinpoint.play';
 const P = (() => { try { return { view: 'ar', ...JSON.parse(sessionStorage.getItem(KEY) || '{}') }; } catch { return { view: 'ar' }; } })();
@@ -81,7 +82,7 @@ export default {
   voiceUndo() { if (shotOf()) { cancelShot(); say('방금 친 기록을 취소했어요.', { force: true }); } else say('취소할 샷이 없어요.', { force: true }); },
 };
 
-function teardown() { document.documentElement.classList.remove('in-hole'); $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; arCtl = null; headMk = null; measLay = null; P.mapFull = false; }
+function teardown() { document.documentElement.classList.remove('in-hole'); immersive(false); $('#stage')?.querySelector('.rg-hud')?.remove(); ringLay = null; destroyMap(map); map = lay = null; v3?.destroy(); v3 = null; arStop?.(); arStop = null; arCtl = null; headMk = null; measLay = null; P.mapFull = false; }
 function render() {
   teardown(); unPos?.(); unOri?.(); clearInterval(timer); unPos = unOri = null;
   el_.className = 'play';
@@ -279,6 +280,7 @@ function stepHole() {
     <div class="imm-sheet"><div class="e-now" id="eNow" role="status" aria-live="polite"></div><div class="imm-card" id="cards"></div><div class="imm-act" id="act"></div></div>
   </div>`;
   document.documentElement.classList.add('in-hole'); // 쉬운 화면: 홀 화면에서는 앱 머리줄·하단 탭을 숨겨 버튼 층을 하나로
+  if (!S.settings.detail) immersive(true); // 📱 쉬운 화면: 상태바·내비게이션 바까지 숨겨 완전 전체 화면
   $('#hPrev').onclick = () => App_.stepHole(-1);
   $('#eHp').onclick = () => App_.stepHole(-1); $('#eHn').onclick = () => App_.stepHole(1);
   $('#hNext').onclick = () => App_.stepHole(1);
