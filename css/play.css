@@ -820,6 +820,6 @@ html.msheet-on .m-map .leaflet-top { top: max(env(safe-area-inset-top), var(--cu
 .gp-key .k1 { background: #58b4ff; } .gp-key .k2 { background: #ff9f43; } .gp-key .k3 { background: repeating-linear-gradient(90deg, #ffe066 0 5px, transparent 5px 8px); } .gp-key .k4 { background: repeating-linear-gradient(90deg, #58b4ff 0 5px, transparent 5px 8px); }
 
 /* 구글 지도: 판·메뉴가 덮는 만큼 지도 칸을 짧게 (Leaflet의 아래 단추 올리기와 같은 자리) */
-.imm .gmap-on { --gm-cover: 260px; }
+.imm .gmap-on { --gm-cover: 306px; } /* 1× 단추가 구글 약관·저작권을 가리지 않게 그 위에서 지도를 끝냄 */
 html.dist-on .mapwrap .gmap-on { --gm-cover: calc(var(--nav-h) + 6px + env(safe-area-inset-bottom)); }
 html.msheet-on .m-map .gmap-on, html.msheet-on .m-map.gmap-on { --gm-cover: calc(var(--m-sheet) + var(--nav-h) + env(safe-area-inset-bottom)); }

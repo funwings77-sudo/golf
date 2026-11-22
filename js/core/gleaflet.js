@@ -76,11 +76,13 @@ export function makeGoogleL(google) {
       // 구글 지도는 안쪽 칸에: 아래를 덮는 판(--gm-cover)만큼 짧게 → 구글 로고·저작권이 판에 가려지지 않음
       //  화면 코드의 좌표(가운데·여백)는 Leaflet처럼 바깥 칸 전체 기준으로 맞춰 줌
       this._host = document.createElement('div'); this._host.className = 'gm-host'; el.appendChild(this._host);
+      // 단추 자리: 골퍼 앱은 위쪽에 앱 판(홀 정보·거리)이 있어서 [위성/지도]는 왼쪽 아래 · 골프 치기 지도는 1× 단추와 안 겹치게 +/−를 오른쪽 가운데로
+      const admin = !!el.closest('#aview'), imm = !!el.closest('.imm');
       this.gm = new g.Map(this._host, {
         center: { lat: 37.5, lng: 127 }, zoom: 17, mapTypeId: o.mapType || 'satellite', tilt: 0, heading: 0,
         gestureHandling: 'greedy', clickableIcons: false, keyboardShortcuts: false, maxZoom: o.maxZoom || 21, minZoom: 3,
-        disableDefaultUI: true, zoomControl: o.zoomControl !== false, zoomControlOptions: { position: g.ControlPosition.RIGHT_BOTTOM },
-        mapTypeControl: o.mapTypeControl !== false, mapTypeControlOptions: { style: g.MapTypeControlStyle.HORIZONTAL_BAR, position: g.ControlPosition.TOP_LEFT, mapTypeIds: ['satellite', 'hybrid', 'roadmap'] },
+        disableDefaultUI: true, zoomControl: o.zoomControl !== false, zoomControlOptions: { position: imm ? g.ControlPosition.RIGHT_CENTER : g.ControlPosition.RIGHT_BOTTOM },
+        mapTypeControl: o.mapTypeControl !== false, mapTypeControlOptions: { style: g.MapTypeControlStyle.HORIZONTAL_BAR, position: admin ? g.ControlPosition.TOP_LEFT : g.ControlPosition.LEFT_BOTTOM, mapTypeIds: ['satellite', 'hybrid', 'roadmap'] },
         scaleControl: true, isFractionalZoomEnabled: false, backgroundColor: '#1d2a22',
       });
       this.vec = new VectorPane(this);
