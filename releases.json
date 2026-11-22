@@ -4,6 +4,19 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.75",
+   "code": 76,
+   "date": "2026-11-22T08:43:55.344Z",
+   "bytes": 6209811,
+   "sha256": "4a2746b8266513b67e79a039c0910dc5344d88a65f841e422a4a8263d77cd2be",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.75/pinpoint-caddie-1.0.75.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.75",
+   "notes": [
+    "연습용 가상 그린을 없애고 직접 재기로 합쳤어요",
+    "직접 재기에서 그린 모양(2단·말안장·마운드)을 고르면 굴곡이 바로 보이고, 기울기를 재면 실제 크기로 맞춰져요"
+   ]
+  },
+  {
    "version": "1.0.74",
    "code": 75,
    "date": "2026-11-22T08:22:13.465Z",
@@ -972,6 +985,6 @@
    ]
   }
  ],
- "latest": "1.0.74",
- "updatedAt": "2026-11-22T08:22:19.820Z"
+ "latest": "1.0.75",
+ "updatedAt": "2026-11-22T08:44:00.074Z"
 }
