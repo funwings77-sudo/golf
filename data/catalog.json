@@ -50,13 +50,11 @@
    "region": "경기 광주시",
    "holes": 18,
    "par": 73,
-   "length": 0,
+   "length": 5979,
    "greens": 0,
-   "rev": 1,
-   "updatedAt": "2026-11-14T16:31:48.863Z",
-   "file": "courses/kgba-9.json",
-   "geometry": "none",
-   "source": "KGBA"
+   "rev": 2,
+   "updatedAt": "2026-11-21T23:59:39.443Z",
+   "file": "courses/kgba-9.json"
   },
   {
    "id": "kgba-10",
@@ -269,5 +267,5 @@
    "source": "KGBA"
   }
  ],
- "updatedAt": "2026-11-14T16:31:48.885Z"
+ "updatedAt": "2026-11-21T23:59:39.457Z"
 }

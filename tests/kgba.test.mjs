@@ -93,3 +93,20 @@ test('그린맵 현장 검증: 수평계 측정 vs 격자 (±0.2%p)', () => {
   const bad = verifyGrid(g, [{ x: 0, y: 0, pct: 2.0, dir: 90 }]);
   assert.ok(!bad.pass && bad.rms > 3.9, '반대 방향이면 실패');
 });
+
+test('OSM 가져오기: 여러 나인 코스는 홀 이름의 나인 이름 + ref로 맞춤 (IN 코스가 OUT에 덮이지 않음)', () => {
+  const line = (lat, par, name, ref) => ({ type: 'way', id: Math.round(lat * 1e6), tags: { golf: 'hole', ref: String(ref), par: String(par), name }, geometry: [{ lat, lon: 127 }, { lat: lat + 0.003, lon: 127 }] });
+  const els = [line(37.1, 4, 'OUT 코스 1', 1), line(37.2, 5, 'IN 코스 1', 1)];
+  const c = newOfficialCourse({ id: 'osm-nine', name: 'N', holes: 2 });
+  c.nines = [{ name: 'OUT', holes: [1] }, { name: 'IN', holes: [2] }];
+  Object.assign(c.holes[0], { nine: 'OUT', nineHole: 1, par: 4 }); Object.assign(c.holes[1], { nine: 'IN', nineHole: 1, par: 4 });
+  const rep = applyOSM(c, parseOSM(els));
+  assert.deepEqual(rep.matched, [1, 2]);
+  assert.ok(Math.abs(c.holes[0].tee.lat - 37.1) < 1e-6 && Math.abs(c.holes[1].tee.lat - 37.2) < 1e-6, 'IN 1번 = 코스 2번째 나인 1번');
+  assert.deepEqual(rep.parDiff, [{ n: 2, ours: 4, osm: 5 }], '파 차이는 바꾸지 않고 알림');
+  // 나인 이름이 없으면 어느 나인인지 모르므로 넣지 않음
+  const c2 = newOfficialCourse({ id: 'osm-nine2', name: 'N', holes: 2 });
+  c2.nines = c.nines; Object.assign(c2.holes[0], { nine: 'OUT', nineHole: 1 }); Object.assign(c2.holes[1], { nine: 'IN', nineHole: 1 });
+  const r2 = applyOSM(c2, parseOSM([line(37.1, 4, '', 1), line(37.2, 5, '', 1)]));
+  assert.deepEqual(r2.matched, []);
+});

@@ -68,16 +68,33 @@ export function holeFromOSM(oh, osm) {
   return { tee, green: center, front, back, ip, hazards, par: oh.par, hdcp: oh.hdcp };
 }
 
-// 코스에 적용: ref(홀 번호)로 맞춤 · 비어 있는 칸만 채우거나(기본) 덮어쓰기
+// 여러 나인 코스(예: OUT/IN · 동/서/남)는 OSM에도 나인마다 ref 1~9가 따로 있고 이름에 나인 이름이 붙음 ("IN 코스 3")
+const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
+export function matchOSMHole(h, osm, course) {
+  const multi = (course.nines || []).length > 1 && h.nine;
+  if (multi) {
+    const nh = h.nineHole ?? h.n, key = norm(h.nine);
+    const byName = osm.holes.filter(x => x.ref === nh && norm(x.name).includes(key));
+    if (byName.length === 1) return byName[0];
+    const refN = osm.holes.filter(x => x.ref === h.n && x.ref > 9);
+    if (refN.length === 1) return refN[0]; // OSM이 10~18처럼 통번호를 쓴 경우
+    return null; // 어느 나인인지 모르면 넣지 않음 (엉뚱한 홀에 들어가는 것 방지)
+  }
+  const c = osm.holes.filter(x => x.ref === h.n);
+  return c.length === 1 ? c[0] : null;
+}
+
+// 코스에 적용: 홀 번호(나인 이름 + ref)로 맞춤 · 비어 있는 칸만 채우거나(기본) 덮어쓰기
 export function applyOSM(course, osm, { overwrite = false } = {}) {
-  const report = { matched: [], skipped: [] };
+  const report = { matched: [], skipped: [], parDiff: [] };
   for (const h of course.holes) {
-    const oh = osm.holes.find(x => x.ref === h.n);
+    const oh = matchOSMHole(h, osm, course);
     if (!oh) { report.skipped.push(h.n); continue; }
     const g = holeFromOSM(oh, osm);
     for (const k of ['tee', 'green', 'front', 'back', 'ip']) if (g[k] && (overwrite || !h[k])) h[k] = g[k];
     if (overwrite || !h.hazards?.length) h.hazards = g.hazards;
     if (g.par && !h.scorecard && (overwrite || !h.par)) h.par = g.par;
+    if (g.par && h.par && g.par !== h.par) report.parDiff.push({ n: h.n, ours: h.par, osm: g.par });
     report.matched.push(h.n);
   }
   course.dataSources = [...(course.dataSources || []).filter(s => s.type !== 'geometry-osm'), { type: 'geometry-osm', provider: 'OpenStreetMap', license: OSM_ATTRIB, date: new Date().toISOString().slice(0, 10), note: `${report.matched.length}개 홀 매칭` }];

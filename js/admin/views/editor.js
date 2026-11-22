@@ -100,7 +100,7 @@ async function importOSM() {
     sheet({
       title: `OSM에서 ${osm.holes.length}개 홀 발견`,
       body: `<p>홀 번호: ${refs.join(', ') || '번호 없음'} · 그린 ${osm.greens.length} · 벙커·물 ${osm.hazards.length}</p>
-        <p class="sub">홀 번호(ref)가 같은 홀에 티·그린 앞/중앙/뒤·IP·해저드를 넣습니다. OSM 데이터는 누구나 편집한 것이라 오차가 있을 수 있으니, 넣은 뒤 위성지도와 스코어카드 거리 검증으로 꼭 확인하세요. 출처 표기: ${OSM_ATTRIB}</p>`,
+        <p class="sub">홀 번호(여러 코스면 OSM 홀 이름의 코스 이름 + 번호, 예: "IN 코스 3")가 같은 홀에 티·그린 앞/중앙/뒤·IP·해저드를 넣습니다. OSM 데이터는 누구나 편집한 것이라 오차가 있을 수 있으니, 넣은 뒤 위성지도와 스코어카드 거리 검증으로 꼭 확인하세요. 출처 표기: ${OSM_ATTRIB}</p>`,
       actions: [{ label: '취소' }, { label: '빈 칸만 채우기', onClick: () => doApply(osm, false) }, { label: '모두 덮어쓰기', kind: 'primary', onClick: () => doApply(osm, true) }],
     });
   } catch (e) { btn.disabled = false; btn.textContent = '🌍 OSM 가져오기'; toast(e.message, 5000); }
@@ -108,7 +108,7 @@ async function importOSM() {
 function doApply(osm, overwrite) {
   const r = applyOSM(st.course, osm, { overwrite });
   st.fitted = false; persist(); renderAll(); fit(true);
-  toast(`${r.matched.length}개 홀 채움${r.skipped.length ? ` · 못 찾은 홀 ${r.skipped.join(', ')}` : ''} — 검증 결과를 확인하세요`, 5000);
+  toast(`${r.matched.length}개 홀 채움${r.skipped.length ? ` · 못 찾은 홀 ${r.skipped.join(', ')}` : ''}${r.parDiff.length ? ` · 파가 OSM과 다른 홀 ${r.parDiff.map(d => `${d.n}번(우리 ${d.ours}/OSM ${d.osm})`).join(', ')} — 스코어카드 확인` : ''} — 검증 결과를 확인하세요`, 8000);
 }
 
 // ---------- ⚡ 빠른 지정: 그린 후보(위성사진 자동 감지) → 홀마다 그린 클릭 → 티 클릭(스코어카드 거리 안내 원) → 다음 홀 ----------
