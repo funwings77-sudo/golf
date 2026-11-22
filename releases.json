@@ -4,6 +4,20 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.71",
+   "code": 72,
+   "date": "2026-11-22T01:20:35.389Z",
+   "bytes": 6183568,
+   "sha256": "54e3331472221be8ab58d91b1589b549bcfcaa4a2cf2fc3ee48226f93a0aecde",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.71/pinpoint-caddie-1.0.71.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.71",
+   "notes": [
+    "그린의 '직접 재기'를 누르면 바로 카메라로 보기가 열려요",
+    "카메라를 켜자마자 등고선·능선·경사 흐름이 보여요 (홀컵을 누르기 전에도). 경사를 아직 안 쟀으면 재는 방법을 알려 줘요",
+    "강남300 18홀의 티·그린 위치가 들어가 바로 거리 안내가 돼요"
+   ]
+  },
+  {
    "version": "1.0.70",
    "code": 71,
    "date": "2026-11-21T17:18:46.437Z",
@@ -917,6 +931,6 @@
    ]
   }
  ],
- "latest": "1.0.70",
- "updatedAt": "2026-11-21T17:18:51.146Z"
+ "latest": "1.0.71",
+ "updatedAt": "2026-11-22T01:20:42.509Z"
 }
