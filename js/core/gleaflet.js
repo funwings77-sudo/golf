@@ -86,7 +86,7 @@ export function makeGoogleL(google) {
         scaleControl: true, isFractionalZoomEnabled: false, backgroundColor: '#1d2a22',
       });
       this.vec = new VectorPane(this);
-      let small = null; this._ro = new ResizeObserver(() => { const s = this._container && this._container.clientWidth < 260; if (s !== small) { small = s; this.gm.setOptions({ zoomControl: !s && o.zoomControl !== false, mapTypeControl: !s && o.mapTypeControl !== false, scaleControl: !s }); } this.vec.redraw(); });
+      let small = null; this._ro = new ResizeObserver(() => { if (this._container) { const ch = this._container.clientHeight, cov = parseFloat(getComputedStyle(this._container).getPropertyValue('--gm-cover')) || 0; this._host.style.bottom = ch - cov < 60 ? '0px' : ''; } /* 가림 높이가 지도보다 크면 무시 (작은 지도가 빈 칸이 되지 않게) */ const s = this._container && this._container.clientWidth < 260; if (s !== small) { small = s; this.gm.setOptions({ zoomControl: !s && o.zoomControl !== false, mapTypeControl: !s && o.mapTypeControl !== false, scaleControl: !s }); } this.vec.redraw(); });
       this._ro.observe(el);
       this.attributionControl = { addAttribution() {}, removeAttribution() {} }; // 저작권 표시는 구글이 직접
       const ev = (name, fn) => this._gl.push(g.event.addListener(this.gm, name, fn));

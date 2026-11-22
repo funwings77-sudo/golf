@@ -588,8 +588,16 @@ export async function startAR(box, getScene, { onLock = null, onPin = null, onMa
     ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.closePath();
     ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.setLineDash(dash); ctx.stroke(); ctx.setLineDash([]);
   }
+  // 나침반 띠 높이: 홀 정보판 바로 아래 (폰마다 상태바·카메라 구멍 높이(--cut-top)만큼 판이 내려가므로 실제 판 위치로 맞춤)
+  let tapeAt = { t: 0, y: 84 };
+  const tapeY = () => {
+    const now = performance.now(); if (now - tapeAt.t < 500) return tapeAt.y;
+    const top = cv.getBoundingClientRect().top, bars = [...(box.closest('.imm') || document).querySelectorAll('.bd-top, .imm-top')].filter(e => e.offsetParent && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 8); // 빈 칸(높이 0)은 빼고
+    const bottom = bars.reduce((m, e) => Math.max(m, e.getBoundingClientRect().bottom - top), 0);
+    tapeAt = { t: now, y: Math.max(84, Math.round(bottom + 18)) }; return tapeAt.y;
+  };
   function compassTape(sc, ax, W) {
-    const y = 84, span = 60, px = W / span;
+    const y = tapeY(), span = 60, px = W / span;
     ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, y - 14, W, 30);
     ctx.font = '700 11px system-ui, sans-serif'; ctx.textAlign = 'center';
     for (let d = Math.ceil((ax.bearing - span / 2) / 5) * 5; d <= ax.bearing + span / 2; d += 5) {
