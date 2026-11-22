@@ -1,6 +1,7 @@
 // PinPoint 관리자 — 셸 · 라우터 · 연결 상태
 import { $, $$, esc } from '../ui.js';
 import { Store } from './store.js';
+import { initMaps } from '../core/mapsinit.js';
 
 const ROUTES = {
   dashboard: () => import('./views/dashboard.js'),
@@ -60,6 +61,7 @@ window.addEventListener('beforeunload', e => { if (current?.dirty?.()) { e.preve
   $('#connChip').onclick = () => go('connect');
   Store.on(chip); chip();
   window.addEventListener('hashchange', route);
-  await Store.init();
+  await Promise.all([Store.init(), initMaps().catch(() => {})]); // 🗺️ 구글 지도 키가 있으면 관리자 지도도 진짜 구글 지도
+  window.addEventListener('pinpoint:maps-engine', () => route());
   route();
 })();

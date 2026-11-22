@@ -16,6 +16,7 @@ import { immersive } from './core/screen.js';
 import { hasMapsKey, cachedSession, getSession } from './core/gmaps.js';
 import { checkAppUpdate, openDownload, isNative, isPlayBuild } from './core/appupdate.js';
 import { APP_VERSION } from './core/appver.js';
+import { initMaps } from './core/mapsinit.js';
 
 const ROUTES = {
   home: () => import('./views/home.js'),
@@ -456,7 +457,11 @@ function init() {
   setTimeout(remoteTick, 1500);
   window.addEventListener('online', () => remoteTick());
   subscribe(keys => { if (keys.includes('ui') && activeCourse()?.official && remoteTick._course !== activeCourse().id) { remoteTick._course = activeCourse().id; remoteTick(); } });
-  route();
+  // 🗺️ 구글 지도를 먼저 불러온 뒤 첫 화면 (늦어도 7초 · 실패하면 원래 지도) · 키가 거부되면 원래 지도로 다시 그림
+  { let routed = false; const go = () => { if (!routed) { routed = true; route(); } };
+    initMaps().catch(() => {}).then(e => { if (routed && e === 'google' && /^#\/(play|distance|tee|lost|courses|rules|green)/.test(location.hash)) route(); go(); });
+    setTimeout(go, 1500); }
+  window.addEventListener('pinpoint:maps-engine', () => route());
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !window.Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW', e));
 }
 init();

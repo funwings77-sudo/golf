@@ -1,6 +1,9 @@
 // 연결 설정: GitHub 저장소 + 세분화 토큰(fine-grained PAT)
 import { $, esc, toast } from '../../ui.js';
 import { Store } from '../store.js';
+import { userMapsKey, setMapsKey, testMapsKey } from '../../core/gmaps.js';
+import { mapEngine, gmFailInfo, clearGmFail } from '../../core/mapsinit.js';
+import { testMapsJs } from '../../core/gleaflet.js';
 
 export default {
   mount(el) {
@@ -28,6 +31,13 @@ export default {
                 <button class="btn primary block" id="conn">연결하고 권한 확인</button>
                 ${Store.connError ? `<div class="note err">${esc(Store.connError)}</div>` : ''}`}
             </div>
+            <div class="card">
+              <h3 style="margin-top:0">🗺️ 구글 지도 <span class="badge ${mapEngine() === 'google' ? '' : 'warn'}">${mapEngine() === 'google' ? '진짜 구글 지도 사용 중' : userMapsKey() ? (gmFailInfo() ? '키 거부됨 · 위성 사진 지도' : '위성 사진 지도') : '키 없음 · Esri 위성지도'}</span></h3>
+              <p class="sub">관리자 페이지의 지도(코스 편집 · 오늘의 핀 · 운영 분석)를 구글 지도로 봅니다. 키는 <b>이 브라우저에만</b> 저장되고 저장소에는 올라가지 않습니다. 같은 브라우저에서 연 골퍼 앱(웹)도 이 키를 씁니다.</p>
+              <label class="f"><span>Google Maps API 키 ${userMapsKey() ? '<b style="color:var(--green)">✓ 저장됨</b>' : ''}</span><input type="password" id="gmKey" autocomplete="off" spellcheck="false" placeholder="AIza…" value="${esc(userMapsKey())}"></label>
+              <div class="row" style="gap:8px"><button class="btn primary" id="gmTest">🔌 저장 · 연결 시험</button><button class="btn" id="gmDel">키 지우기</button></div>
+              <p class="sub" id="gmStat" style="margin-bottom:0">${gmFailInfo() ? '⚠ 구글이 키를 거부했습니다. Google Cloud 콘솔에서 <b>Maps JavaScript API</b>를 켜고, 키의 웹사이트 제한에 이 주소를 넣은 뒤 다시 시험하세요.' : '필요한 API: <b>Maps JavaScript API</b>(지도 화면) · <b>Map Tiles API</b>(위성 사진·그린 자동 찾기)'}</p>
+            </div>
           </div>
           <div class="card">
             <h3 style="margin-top:0">토큰 만드는 법 (3분)</h3>
@@ -42,6 +52,16 @@ export default {
             <div class="note" style="margin-top:12px"><b>보안</b><br>· 토큰은 <code>api.github.com</code>으로만 전송되고 다른 곳으로 보내지 않습니다.<br>· 기본값은 탭을 닫으면 삭제(sessionStorage)입니다.<br>· 이 페이지는 공개 주소지만 토큰 없이는 아무것도 바꿀 수 없습니다.<br>· 관리자를 추가하려면 저장소에 협업자로 초대하고 각자 토큰을 만드세요. 퇴사자는 협업자에서 제거하면 즉시 권한이 사라집니다.</div>
           </div>
         </div>`;
+      $('#gmTest').onclick = async () => {
+        const k = $('#gmKey').value.trim(), st = $('#gmStat');
+        if (!/^[A-Za-z0-9_-]{20,60}$/.test(k)) { st.textContent = '키 모양이 이상합니다. 복사한 키 전체를 붙여 넣으세요'; return; }
+        st.textContent = '구글에 연결하는 중…';
+        try { await testMapsKey(k); } catch (e) { st.textContent = '위성 사진(Map Tiles API) 연결 실패: ' + e.message; return; }
+        setMapsKey(k); clearGmFail();
+        const js = await testMapsJs(k);
+        st.innerHTML = js.ok ? '<b style="color:var(--green)">✓ 연결됐습니다</b> · 페이지를 새로 고치면 모든 지도가 구글 지도로 바뀝니다' : `위성 사진은 연결됨 · ⚠ 지도 화면은 안 됨: ${esc(js.why)}`;
+      };
+      $('#gmDel').onclick = () => { setMapsKey(''); clearGmFail(); toast('지도 키를 지웠습니다 · 새로 고치면 Esri 위성지도'); render(); };
       $('#disc')?.addEventListener('click', () => { Store.disconnect(); toast('연결을 해제하고 토큰을 지웠습니다'); render(); });
       $('#conn')?.addEventListener('click', async () => {
         const token = $('#token').value.trim();

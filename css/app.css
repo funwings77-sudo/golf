@@ -189,3 +189,12 @@ table.score td.cur { outline: 2px solid var(--green2); outline-offset: -2px; }
 .hero h2 { color: #fff; margin: 0 0 4px; }
 .hero p { opacity: .9; margin: 0; }
 @media (max-width: 360px) { nav.tabs a { font-size: 10.5px; } .big { font-size: calc(var(--big) * .85); } }
+
+/* 🗺️ 진짜 구글 지도 (js/core/gleaflet.js) · 구글 지도는 안쪽 칸(.gm-host)에 — 아래를 덮는 판 높이(--gm-cover)만큼 짧게 해서 구글 로고·저작권이 늘 보임 */
+.gm-host { position: absolute; left: 0; top: 0; right: 0; bottom: var(--gm-cover, 0px); transition: bottom .25s; }
+.gmap-on { background: #1d2a22; overflow: hidden; }
+.gl-mk { box-sizing: border-box; }
+.gl-tip { white-space: nowrap; pointer-events: none; z-index: 1000; }
+.gl-ctrl.map-full-btn { margin: 10px; }
+/* 위성 사진 지도(Leaflet)의 출처 표시: 구글 지도처럼 작은 한 줄 (저작권 문구는 그대로) */
+.leaflet-container .leaflet-control-attribution { font-size: 10px; line-height: 1.35; padding: 1px 5px; background: rgba(255, 255, 255, .72); color: #333; border-radius: 3px 0 0 0; max-width: calc(100% - 110px); }

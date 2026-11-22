@@ -1,4 +1,5 @@
-// 지도 (Leaflet + 위성 타일, 오프라인 캐시는 서비스 워커가 담당)
+// 지도: 구글 지도 키가 있으면 진짜 구글 지도(Maps JavaScript API · js/core/gleaflet.js가 L.*을 구글 지도로 그림)
+//        없거나 신호가 없으면 Leaflet + 위성 사진(구글 타일 또는 Esri · 미리 받은 지도는 신호 없는 코스용)
 import { toLocal, fromLocal, distance } from './core/geo.js';
 import { Sensors, onPos } from './core/sensors.js';
 import { iconHTML } from './iconize.js';
@@ -109,10 +110,15 @@ function baseLayer(map) {
 
 export function createMap(el, { center = [37.5, 127], zoom = 17, me = true, full = true } = {}) {
   if (!window.L) { el.innerHTML = '<div class="map-off">지도 라이브러리를 불러오지 못했습니다 (오프라인). 거리 계산은 계속 동작합니다.</div>'; return null; }
-  const map = L.map(el, { zoomControl: false, attributionControl: true, maxZoom: 21, tap: true }).setView(center, zoom);
-  // 앱(APK)에는 서비스 워커가 없어서, 미리 받은 타일(Cache Storage)을 지도 칸이 직접 꺼내 씀 → 신호 없는 코스에서도 위성 지도
-  baseLayer(map);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  let map;
+  if (L.__google) map = L.map(el, { maxZoom: 21 }).setView(center, zoom); // 구글 지도: 바탕·확대 단추·위성/지도 전환·로고는 구글이 직접
+  else {
+    map = L.map(el, { zoomControl: false, attributionControl: true, maxZoom: 21, tap: true }).setView(center, zoom);
+    map.attributionControl?.setPrefix(false); // 'Leaflet' 글자 빼고 지도 출처(구글·Esri 저작권)만 작게
+    // 앱(APK)에는 서비스 워커가 없어서, 미리 받은 타일(Cache Storage)을 지도 칸이 직접 꺼내 씀 → 신호 없는 코스에서도 위성 지도
+    baseLayer(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+  }
   if (full) fullControl(map, el);
   if (me) {
     const dot = L.circleMarker(center, { radius: 7, color: '#fff', weight: 2, fillColor: '#2b7bff', fillOpacity: 1, interactive: false });

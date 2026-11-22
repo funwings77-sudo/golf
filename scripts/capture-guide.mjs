@@ -36,6 +36,10 @@ ws.onmessage = e => { const m = JSON.parse(e.data); if (m.id && pend.has(m.id)) 
 await new Promise(r => (ws.onopen = r));
 const send = (method, params = {}) => new Promise(r => { const i = ++id; pend.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
 const ev = async x => (await send('Runtime.evaluate', { expression: x, returnByValue: true, awaitPromise: true })).result?.result?.value;
+// 구글 지도 키(local.keys.json · 저장소에 없음)가 있으면 캡처 브라우저에만 넣어 진짜 구글 지도로 찍음 (그림·guide.json에는 키가 남지 않음)
+let MAPS_KEY = process.env.PINPOINT_MAPS_KEY || ''; try { MAPS_KEY ||= JSON.parse(await readFile(join(ROOT, 'local.keys.json'), 'utf8')).mapsKey || ''; } catch {}
+await send('Page.enable');
+if (MAPS_KEY) await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { if (!localStorage.getItem('pinpoint.mapsKey')) localStorage.setItem('pinpoint.mapsKey', ${JSON.stringify(MAPS_KEY)}); } catch {}` });
 await send('Runtime.enable'); await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: DPR, mobile: true });
 await send('Emulation.setTouchEmulationEnabled', { enabled: true });
@@ -64,6 +68,8 @@ const FIND = `(${function (marks, H) {
   });
 }})`;
 
+// 예열: 지도 화면을 한 번 열어 둠 → 구글이 키를 거부하면(지도 API 꺼짐 등) 이때 원래 지도로 정해져, 캡처 중간에 화면이 바뀌지 않음
+if (MAPS_KEY) { await send('Page.navigate', { url: BASE + '#/distance' }); await wait(9000); console.log('🗺️ 지도: ' + ((await ev('window.L && window.L.__google ? "구글 지도" : "위성 사진 지도 (구글 지도 키 거부 또는 없음)"')) || '?')); }
 await mkdir(join(OUT, 'img'), { recursive: true });
 let old = null; try { old = JSON.parse(await readFile(join(OUT, 'guide.json'), 'utf8')); } catch {}
 const oldScreens = new Map((old?.sections || []).flatMap(s => s.screens).map(s => [s.id, s]));
