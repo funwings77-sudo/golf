@@ -4,6 +4,19 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.74",
+   "code": 75,
+   "date": "2026-11-22T08:22:13.465Z",
+   "bytes": 6207121,
+   "sha256": "4e67913c73bfe3775847964f0211873683de5145c45660d7f510ce1b5e028809",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.74/pinpoint-caddie-1.0.74.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.74",
+   "notes": [
+    "지도의 위성/지도 단추와 확대 단추가 앱 단추와 겹치지 않게 자리를 옮겼어요",
+    "구글 로고·저작권·약관 표시가 가려지지 않아요"
+   ]
+  },
+  {
    "version": "1.0.73",
    "code": 74,
    "date": "2026-11-22T08:01:40.976Z",
@@ -959,6 +972,6 @@
    ]
   }
  ],
- "latest": "1.0.73",
- "updatedAt": "2026-11-22T08:01:46.849Z"
+ "latest": "1.0.74",
+ "updatedAt": "2026-11-22T08:22:19.820Z"
 }
