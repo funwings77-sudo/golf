@@ -10,7 +10,7 @@ import { distance, toLocal, toRad } from '../core/geo.js';
 import { Sensors, sampleTilt, startSteps, onOrientation, startOrientation, vibrate, speak } from '../core/sensors.js';
 import { smoothAngle, rotationMatrix, project, focalPx, cameraAxis, unproject, groundHit } from '../core/arproj.js';
 import { lineFrame, distanceRings, SlopeFlow, resamplePath, slopeVerdict, fallLine, contours, ridgeLines, lineProfile, slopeHue } from '../core/greenar.js';
-import { muFromStimp, buildSurface, fitQuadFromGradients, fitGridFromGradients, windSlope, optimizePutt, backswingCm, demoGreen, CUP_W } from '../physics/putt.js';
+import { muFromStimp, buildSurface, fitQuadFromGradients, fitGridFromGradients, shapeGrid, windSlope, optimizePutt, backswingCm, CUP_W } from '../physics/putt.js';
 import { openCamera, GroundProjector, coverTransform, zoomed, attachZoom } from '../core/camera.js';
 import { drawGreen, makeView } from './greencanvas.js';
 import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed, DU } from '../ui.js';
@@ -26,7 +26,7 @@ let el_, App_, G, worker = null, reqId = 0, camStop = null, arT = null, unOri = 
 
 function loadG() {
   try { const g = JSON.parse(sessionStorage.getItem('pinpoint.green') || 'null'); if (g) return g; } catch {}
-  return { src: null, demoKind: 'tier', D: 0, distSrc: '', meas: {}, precise: false, gBall: null, gHole: null, stimp: S.settings.stimp, result: null, tab: 'measure', training: false, guess: null, revealed: false, holeN: null };
+  return { src: null, shape: { kind: 'none', at: 0, side: 0 }, D: 0, distSrc: '', meas: {}, precise: false, gBall: null, gHole: null, stimp: S.settings.stimp, result: null, tab: 'measure', training: false, guess: null, revealed: false, holeN: null };
 }
 // 그린 굴곡(등고선·능선)을 바로 보여 줄 수 있는 출처 우선: 이 홀 카메라 스캔 > 골프장 그린맵 > 직접 재기
 const bestSrc = (g, hole) => (g.scan && g.holeN === (hole?.n ?? null) ? 'scan' : hole?.greenGrid ? 'grid' : 'onsite');
@@ -49,10 +49,11 @@ export default {
     // 오늘 내 퍼트 결과로 맞춘 빠르기가 있으면 그것이 우선 (골프장 발표보다 오늘 내 느낌이 최신)
     const gt = greenToday(activeCourse());
     if (gt?.src === 'feel' && G.stimp !== gt.stimp) { G.stimp = gt.stimp; G.result = null; }
-    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.dm = []; G.scan = null; G.lineBrg = null; if (G.src === 'scan') G.src = null; G.holeN = hole?.n ?? null; }
+    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.dm = []; G.scan = null; G.lineBrg = null; G.shape = { kind: 'none', at: 0, side: 0 }; /* 그린마다 모양이 다름 */ if (G.src === 'scan') G.src = null; G.holeN = hole?.n ?? null; }
     if (G.src === 'scan' && !G.scan) G.src = null;
     if (!G.src) G.src = hole?.greenGrid ? 'grid' : 'onsite';
-    if (G.src === 'grid' && !hole?.greenGrid) G.src = 'demo';
+    if (G.src === 'grid' && !hole?.greenGrid) G.src = 'onsite';
+    if (G.src === 'demo') G.src = 'onsite'; // 연습용 가상 그린은 없앰 → 2단·말안장·마운드는 직접 재기의 '그린 모양'으로
     render();
     if (!depth) depthInfo().then(d => { depth = d; if (d.ok && G.tab === 'measure' && el_?.isConnected) render(); });
   },
@@ -79,7 +80,6 @@ function gridInfo() {
   const hole = activeHole();
   if (G.src === 'scan' && G.scan) return { grid: G.scan.grid, origin: null, name: `${KIND_WORD[G.scan.kind] || '카메라'} 스캔`, pin: null };
   if (G.src === 'grid' && hole?.greenGrid) return { grid: hole.greenGrid.grid, origin: hole.greenGrid.origin, name: hole.greenGrid.source || '사전 측량 그린', pin: hole.pin || hole.green };
-  if (G.src === 'demo') { const g = demoGreen(G.demoKind); g.y0 -= 12.5; return { grid: g, origin: null, name: `데모(가상) · ${g.name}`, pin: null }; }
   return null;
 }
 function gridBounds(g) { return { x0: g.x0, y0: g.y0, x1: g.x0 + (g.nx - 1) * g.dx, y1: g.y0 + (g.ny - 1) * g.dx }; }
@@ -118,6 +118,16 @@ function measurePoints(D, { all = true } = {}) {
 // 잰 곳들의 기울기 → 매끈한 높이 격자 (등고선이 지형 따라 휨) · 같은 입력이면 다시 계산하지 않음
 let fitMemo = { key: '', spec: null };
 function onsiteSurfaceSpec(D, pts) {
+  const sh = G.shape || { kind: 'none' };
+  if (sh.kind && sh.kind !== 'none') {
+    const half = Math.max(2.5, D * 0.4) + 1, at = shapeAt(D), key = JSON.stringify(['shape', D, sh.kind, at, sh.side || 0, pts.map(p => [p.x, p.y, p.m.gx, p.m.gy])]);
+    if (fitMemo.key !== key) {
+      const dx = Math.max(0.25, Math.min(0.45, (D + 4) / 40));
+      const r = shapeGrid(pts.map(p => ({ x: p.x, y: p.y, gx: p.m.gx, gy: p.m.gy })), sh.kind, { at, side: sh.side || 0 }, { x0: -half, y0: -1.5, x1: half, y1: D + 2.5 }, { dx, smooth: 0.01 });
+      fitMemo = { key, spec: { kind: 'grid', grid: r.grid }, shape: { a: r.a, fitted: r.fitted } };
+    }
+    return fitMemo.spec;
+  }
   if (pts.length < 2) return { kind: 'quad', coeffs: fitQuadFromGradients(pts.map(p => ({ x: p.x, y: p.y, gx: p.m.gx, gy: p.m.gy }))).coeffs };
   const half = Math.max(2.5, D * 0.4) + 1, key = JSON.stringify([D, pts.map(p => [p.x, p.y, p.m.gx, p.m.gy])]);
   if (fitMemo.key !== key) {
@@ -125,6 +135,25 @@ function onsiteSurfaceSpec(D, pts) {
     fitMemo = { key, spec: { kind: 'grid', grid: fitGridFromGradients(pts.map(p => ({ x: p.x, y: p.y, gx: p.m.gx, gy: p.m.gy })), { x0: -half, y0: -1.5, x1: half, y1: D + 2.5 }, { dx, smooth: 0.01 }) } };
   }
   return fitMemo.spec;
+}
+// 👀 눈으로 본 그린 모양 (직접 재기): 모양·위치는 골퍼가 고르고, 크기는 잰 기울기로 맞춤
+const SHAPES = [['none', '모름'], ['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']];
+const shapeAt = D => { const a = G.shape?.at; return a > 0 ? Math.min(a, Math.max(1, D + 1)) : Math.max(1, Math.round(D) / 2); };
+function shapeHTML(D, id = 'shp') {
+  const sh = G.shape || { kind: 'none' }, on = sh.kind && sh.kind !== 'none', E = easy();
+  if (on && G.src === 'onsite') onsiteGeo(D || G.lastD || PREVIEW_D); // 크기 표시가 지금 값이 되게 먼저 계산 (같은 값이면 다시 계산 안 함)
+  const info = on && fitMemo.shape ? fitMemo.shape : null, cm = info ? Math.round(Math.abs(info.a) * 100) : null;
+  const what = { tier: info && info.a < 0 ? '홀 쪽 단이 낮아요' : '홀 쪽 단이 높아요', saddle: '말안장', mound: '둔덕' }[sh.kind] || '';
+  return `<div class="seg" id="${id}Seg">${SHAPES.map(([k, n]) => `<button data-shape="${k}" class="${(sh.kind || 'none') === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+    ${on ? `<label class="shp-r"><span>${sh.kind === 'tier' ? '단이 있는 곳' : '가운데'} · 공에서 <b>${shapeAt(D).toFixed(1)}m</b></span><input type="range" id="${id}At" min="0.5" max="${Math.max(1.5, D + 1).toFixed(1)}" step="0.5" value="${shapeAt(D)}"></label>
+      ${sh.kind === 'mound' ? `<label class="shp-r"><span>좌우 · ${!sh.side ? '선 위' : `${sh.side < 0 ? '왼쪽' : '오른쪽'} <b>${Math.abs(sh.side).toFixed(1)}m</b>`}</span><input type="range" id="${id}Side" min="-3" max="3" step="0.5" value="${sh.side || 0}"></label>` : ''}
+      <p class="sub shp-n">${info ? (info.fitted ? `✓ 잰 기울기로 크기를 맞췄어요: ${what} 약 <b>${cm}cm</b>` : `크기는 보통(${cm}cm)으로 가정했어요 · ${E ? '모양 근처를 재면' : '모양 근처 기울기를 재면'} 실제 크기로 맞춰져요`) : ''} · 눈으로 본 모양이라 추정이에요</p>` : `<p class="sub shp-n">그린이 2단·말안장·둔덕처럼 보이면 골라 주세요. 고르기만 해도 굴곡이 바로 보이고, 기울기를 재면 실제 크기로 맞춰져요.</p>`}`;
+}
+function bindShape(root, id, done) {
+  const set = o => { G.shape = { kind: 'none', at: 0, side: 0, ...G.shape, ...o }; G.result = null; saveG(); done(); };
+  root.querySelectorAll(`#${id}Seg [data-shape]`).forEach(b => (b.onclick = () => set({ kind: b.dataset.shape })));
+  root.querySelector(`#${id}At`)?.addEventListener('change', e => set({ at: +e.target.value }));
+  root.querySelector(`#${id}Side`)?.addEventListener('change', e => set({ side: +e.target.value }));
 }
 // 사전 맵 + 현장 측정 융합: 측정(라인 좌표계)을 그리드 좌표계로 회전해 평균 차이를 보정 평면으로
 function fusionCorrection(surf, ball, hole) {
@@ -144,7 +173,7 @@ function fusionCorrection(surf, ball, hole) {
 }
 function confidence(geo) {
   if (G.src === 'scan' && G.scan) return G.scan.conf;
-  if (geo.kind === 'grid') return Math.min(0.95, (G.src === 'demo' ? 0.8 : 0.85) + (Object.values(G.meas).filter(Boolean).length ? 0.05 : 0));
+  if (geo.kind === 'grid') return Math.min(0.95, 0.85 + (Object.values(G.meas).filter(Boolean).length ? 0.05 : 0));
   const n = geo.nMeas || 0, precise = Object.values(G.meas).some(m => m?.precise);
   return n === 0 ? 0.2 : Math.min(0.8, 0.45 + n * 0.08 + (precise ? 0.08 : 0) - (G.D > 8 ? 0.1 : 0));
 }
@@ -159,14 +188,14 @@ function render() {
   const mapMode = G.tab === 'map' && canSlope; // 📱 그린 지도: 그림은 판 위 보이는 칸 전체 · 제목·탭·버튼·결과는 지도 위 아래 판
   mapSheetPage(mapMode);
   const page = `<h2>🟢 ${E ? '그린 읽기' : '그린 리딩 · 퍼팅'}</h2>
-    <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">${E ? '직접 재기' : '현장 측정'}</button>${G.scan ? `<button data-v="scan" class="${G.src === 'scan' ? 'on' : ''}">📏 ${E ? '카메라 스캔' : '깊이 스캔'}</button>` : ''}${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">${E ? '그린 지도' : '그린맵'}</button>` : ''}<button data-v="demo" class="${G.src === 'demo' ? 'on' : ''}">${E ? '연습 그린' : '데모 그린'}</button></div>
-    ${G.src === 'demo' ? `<div class="seg" id="demoSeg" style="margin-top:6px">${[['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']].map(([k, n]) => `<button data-v="${k}" class="${G.demoKind === k ? 'on' : ''}">${n}</button>`).join('')}</div><p class="sub">${E ? '연습용 가짜 그린이에요. ② 그린 지도에서 공·홀 위치를 눌러 바꿔 보세요.' : '가상의 사전 측량 그린입니다 (실제 코스 아님). 그린맵 탭에서 공·홀 위치를 탭으로 바꿔 보세요.'}</p>` : ''}
+    <div class="seg" id="srcSeg"><button data-v="onsite" class="${G.src === 'onsite' ? 'on' : ''}">${E ? '직접 재기' : '현장 측정'}</button>${G.scan ? `<button data-v="scan" class="${G.src === 'scan' ? 'on' : ''}">📏 ${E ? '카메라 스캔' : '깊이 스캔'}</button>` : ''}${gridName ? `<button data-v="grid" class="${G.src === 'grid' ? 'on' : ''}">${E ? '그린 지도' : '그린맵'}</button>` : ''}</div>
+    ${G.src === 'onsite' && allowed('greenSlope') ? `<div class="shp-box"><div class="shp-lab">그린 모양 <span class="sub">(눈으로 본 것 · 선택)</span></div>${shapeHTML(G.D || 0)}</div>` : ''}
     <div class="seg" id="tabSeg" style="margin-top:10px"><button data-v="measure" class="${G.tab === 'measure' ? 'on' : ''}">${E ? '① 재기' : '③ 측정'}</button><button data-v="map" class="${G.tab === 'map' ? 'on' : ''}">${E ? '② 그린 지도' : '④ 그린맵'}</button><button data-v="ar" class="${G.tab === 'ar' ? 'on' : ''}">${E ? '③ 카메라로 보기' : '⑤ AR 리딩'}</button></div>
     <div id="tabBody"></div><div id="result"></div>`;
   el_.innerHTML = mapMode ? `<div class="g-back" id="gBack"></div>` + sheetHTML(page, '그린 판 크게·작게') : page;
   if (mapMode) $('#mGrip').onclick = () => { $('#mSheet').classList.toggle('tall'); document.documentElement.classList.toggle('msheet-tall'); setTimeout(() => G.tab === 'map' && $('#tabBody') && mapTab($('#tabBody')), 280); }; // 판 크기가 바뀌면 그린을 다시 그림
   $$('#srcSeg button').forEach(b => b.onclick = () => { G.src = b.dataset.v; G.result = null; G.gBall = G.gHole = null; if (b.dataset.v === 'onsite' && allowed('puttLine')) { if (G.tab !== 'ar') G.prevTab = G.tab; G.tab = 'ar'; G.arMode = null; } saveG(); render(); }); // 직접 재기 = 카메라로 보기가 먼저
-  $$('#demoSeg button').forEach(b => b.onclick = () => { G.demoKind = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
+  bindShape(el_, 'shp', render);
   $$('#tabSeg button').forEach(b => b.onclick = () => { if (b.dataset.v === 'ar' && G.tab !== 'ar') G.prevTab = G.tab; G.tab = b.dataset.v; saveG(); render(); });
   const body = $('#tabBody');
   if (G.tab === 'measure') measureTab(body, canSlope);
@@ -768,11 +797,11 @@ function arTab(body, canLine) {
 // ⚙ AR 화면 설정 판: 그린 화면(① 재기)의 기능을 카메라를 끄지 않고 바로 (닫혀 있으면 화면을 가리지 않음 · 열면 아래 절반만)
 function arPanelHTML(geo) {
   const E = easy(), hole = activeHole(), onsite = geo.kind === 'onsite';
-  const srcs = [['onsite', E ? '직접 재기' : '현장 측정'], ...(hole?.greenGrid ? [['grid', E ? '그린 지도' : '그린맵']] : []), ['demo', E ? '연습 그린' : '데모 그린']];
+  const srcs = [['onsite', E ? '직접 재기' : '현장 측정'], ...(hole?.greenGrid ? [['grid', E ? '그린 지도' : '그린맵']] : [])];
   return `<button class="gar-pan-h" id="arPanClose" aria-label="설정 닫기"><i></i><span>그린 설정</span><em>${icon('shrink')}</em></button>
     <div class="gar-pan-b">
-      <div class="gp-sec"><div class="gp-lab">어떤 그린</div><div class="seg" id="apSrc">${srcs.map(([k, n]) => `<button data-v="${k}" class="${G.src === k ? 'on' : ''}">${n}</button>`).join('')}</div>
-        ${G.src === 'demo' ? `<div class="seg" id="apDemo" style="margin-top:6px">${[['tier', '2단'], ['saddle', '말안장'], ['mound', '마운드']].map(([k, n]) => `<button data-v="${k}" class="${G.demoKind === k ? 'on' : ''}">${n}</button>`).join('')}</div>` : ''}</div>
+      ${srcs.length > 1 ? `<div class="gp-sec"><div class="gp-lab">어떤 그린</div><div class="seg" id="apSrc">${srcs.map(([k, n]) => `<button data-v="${k}" class="${G.src === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>` : ''}
+      ${onsite && allowed('greenSlope') ? `<div class="gp-sec"><div class="gp-lab">그린 모양 <span class="gp-end">눈으로 본 것 · 선택</span></div>${shapeHTML(G.D || 0, 'aps')}</div>` : ''}
       <div class="gp-sec"><div class="gp-lab">공에서 홀까지</div>
         ${onsite ? `<div class="gp-dist"><button class="gp-step" data-dd="-0.5" aria-label="0.5m 줄이기">−</button><b>${(G.D || 0).toFixed(1)}<small>m</small></b><button class="gp-step" data-dd="0.5" aria-label="0.5m 늘리기">＋</button></div>
           <div class="gp-row"><button class="gp-btn" id="apCam">${icon('camera')}카메라로 다시 재기</button>${depth?.ok ? `<button class="gp-btn" id="apDepth">${icon('ruler')}카메라로 한 번에 재기</button>` : ''}</div>`
@@ -806,7 +835,7 @@ function bindArPanel(geo) {
   if (G.arPanel) show(true);
   const redo = () => { G.result = null; saveG(); render(); }; // 바뀐 값으로 다시 계산 (판은 열린 채)
   $$('#apSrc button').forEach(b => b.onclick = () => { if (G.src === b.dataset.v) return; G.src = b.dataset.v; G.gBall = G.gHole = null; redo(); });
-  $$('#apDemo button').forEach(b => b.onclick = () => { G.demoKind = b.dataset.v; G.gBall = G.gHole = null; redo(); });
+  bindShape(pan, 'aps', redo);
   pan.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => { addDist(Math.max(0.5, Math.round(((G.D || 0) + +b.dataset.dd) * 10) / 10), 'typed'); redo(); });
   $$('#apSpd button').forEach(b => b.onclick = () => { G.stimp = +b.dataset.st; S.settings.stimp = G.stimp; save('settings'); redo(); });
   $('#apCam')?.addEventListener('click', () => { G.arMode = 'distance'; G.distBack = 'ar'; G.arPanel = false; saveG(); render(); });

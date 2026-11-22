@@ -133,6 +133,47 @@ export function windSlope(speed10m, windFrom, lineBrg) {
   // 공은 낮은 쪽으로 구르므로 미는 쪽이 '내리막'이 되게: 높이 기울기 = -(가속/g)·방향
   return { a: -(acc / G) * px, b: -(acc / G) * py, pct, along: py * pct, cross: px * pct, ground: v };
 }
+// 🟢 직접 재기 + 눈으로 본 그린 모양(2단 · 말안장 · 마운드): 모양은 골퍼가 고르고, 크기는 잰 기울기로 맞춤
+//  좌표: x 오른쪽 · y 홀 쪽(공 = 0) · at = 공에서 모양까지(m) · side = 마운드 좌우(m, +오른쪽)
+export const SHAPE_DEFAULT = { tier: 0.12, saddle: 0.06, mound: 0.08 }; // 잰 기울기가 모자랄 때 쓰는 보통 크기(m)
+export const SHAPE_MAX = { tier: 0.45, saddle: 0.25, mound: 0.3 };
+export function shapeBasis(kind, { at = 4, side = 0 } = {}) {
+  if (kind === 'tier') { const w = 0.7; return { f: (x, y) => 1 / (1 + Math.exp(-(y - at) / w)), g: (x, y) => { const e = Math.exp(-(y - at) / w), s = 1 / (1 + e); return [0, s * (1 - s) / w]; } }; } // 높이 1 = 위 단이 아래 단보다 1m
+  if (kind === 'saddle') return { f: (x, y) => (x * x - (y - at) ** 2) / 4, g: (x, y) => [x / 2, -(y - at) / 2] }; // 2m 떨어진 곳 높이 차 = 크기
+  if (kind === 'mound') { const s2 = 2 * 1.8 * 1.8; return { f: (x, y) => Math.exp(-((x - side) ** 2 + (y - at) ** 2) / s2), g: (x, y) => { const e = Math.exp(-((x - side) ** 2 + (y - at) ** 2) / s2); return [-2 * (x - side) / s2 * e, -2 * (y - at) / s2 * e]; } }; }
+  return null;
+}
+// 잰 기울기 = 평면(p, q) + 크기 a × 모양 기울기 → 최소제곱으로 a를 구함 (점이 모자라거나 모양과 상관없는 곳만 쟀으면 보통 크기)
+export function fitShapeAmplitude(samples, kind, opts) {
+  const B = shapeBasis(kind, opts); if (!B) return { a: 0, fitted: false };
+  if (samples.length >= 2) {
+    const A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], b = [0, 0, 0];
+    for (const m of samples) {
+      const [sx, sy] = B.g(m.x, m.y);
+      for (const [row, r] of [[[1, 0, sx], m.gx], [[0, 1, sy], m.gy]]) for (let i = 0; i < 3; i++) { b[i] += row[i] * r; for (let j = 0; j < 3; j++) A[i][j] += row[i] * row[j]; }
+    }
+    const sens = A[2][2] - (A[0][2] ** 2) / (A[0][0] || 1) - (A[1][2] ** 2) / (A[1][1] || 1); // 잰 곳이 모양을 얼마나 '보는지'
+    if (sens > 1e-4) { const sol = solveLinear(A, b), lim = SHAPE_MAX[kind]; return { a: Math.max(-lim, Math.min(lim, sol[2])), fitted: true }; }
+  }
+  return { a: SHAPE_DEFAULT[kind], fitted: false };
+}
+// 모양 + 잰 기울기 → 높이 격자: 크기 a를 맞춘 모양을 깔고, 남은 차이(잰 기울기 − 모양 기울기)는 매끈한 면으로 채움 → 잰 곳의 기울기는 그대로
+export function shapeGrid(samples, kind, opts, box, fit = {}) {
+  const B = shapeBasis(kind, opts), { a, fitted } = fitShapeAmplitude(samples, kind, opts);
+  const res = samples.map(m => { const [sx, sy] = B.g(m.x, m.y); return { x: m.x, y: m.y, gx: m.gx - a * sx, gy: m.gy - a * sy }; });
+  let base;
+  if (res.length >= 2) base = fitGridFromGradients(res, box, fit);
+  else {
+    const q = res.length ? quadSurface({ a: res[0].gx, b: res[0].gy }) : quadSurface({}), dx = fit.dx || 0.3;
+    const nx = Math.round((box.x1 - box.x0) / dx) + 1, ny = Math.round((box.y1 - box.y0) / dx) + 1, h = [];
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) h.push(q.height(box.x0 + i * dx, box.y0 + j * dx));
+    base = { x0: box.x0, y0: box.y0, dx, nx, ny, h };
+  }
+  const o = B.f(0, 0);
+  base.h = base.h.map((v, k) => { const i = k % base.nx, j = Math.floor(k / base.nx); return Math.round((v + a * (B.f(base.x0 + i * base.dx, base.y0 + j * base.dx) - o)) * 1e5) / 1e5; });
+  base.name = `직접 잰 그린 + ${{ tier: '2단', saddle: '말안장', mound: '마운드' }[kind]} 모양`;
+  return { grid: base, a, fitted };
+}
 export function solveLinear(A, B) {
   const n = B.length, M = A.map((r, i) => [...r, B[i]]);
   for (let c = 0; c < n; c++) {

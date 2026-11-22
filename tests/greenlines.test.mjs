@@ -2,6 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { lineFrame, contours, ridgeLines, lineProfile, slopeHue } from '../js/core/greenar.js';
+import { shapeGrid, fitShapeAmplitude } from '../js/physics/putt.js';
 import { buildSurface, demoGreen, fitGridFromGradients, fitQuadFromGradients, gridSurface, windSlope } from '../js/physics/putt.js';
 
 const plane = (gx, gy) => ({ height: (x, y) => gx * x + gy * y, grad: () => [gx, gy] });
@@ -53,4 +54,26 @@ test('바람: 뒤바람은 내리막처럼, 옆바람은 그쪽으로 · 10m/s �
   const cross = windSlope(10, 270, 0); // 서풍 → 오른쪽(동)으로 밂
   assert.ok(cross.a < 0 && cross.cross > 0);
   assert.equal(windSlope(5, 90, null), null, '방향을 모르면 반영 안 함');
+});
+
+test('직접 재기 + 눈으로 본 모양: 2단 높이를 잰 기울기로 맞추고, 잰 곳의 기울기는 그대로', () => {
+  // 진짜 그린: 1.5% 오르막 + 공에서 4m 지점에 15cm 위로 올라가는 단
+  const H = (x, y) => 0.015 * y + 0.15 / (1 + Math.exp(-(y - 4) / 0.7));
+  const Gd = (x, y, e = 1e-4) => [(H(x + e, y) - H(x - e, y)) / 2 / e, (H(x, y + e) - H(x, y - e)) / 2 / e];
+  const P = [[0, 0], [0, 4], [0, 7]].map(([x, y]) => { const [gx, gy] = Gd(x, y); return { x, y, gx, gy }; }), box = { x0: -4, y0: -1.5, x1: 4, y1: 10.5 };
+  const r = shapeGrid(P, 'tier', { at: 4 }, box, { dx: 0.3, smooth: 0.01 });
+  assert.ok(r.fitted && Math.abs(r.a - 0.15) < 0.03, `단 높이 ${r.a}`);
+  const s = gridSurface(r.grid), dh = s.height(0, 8) - s.height(0, 0), truth = H(0, 8) - H(0, 0);
+  assert.ok(Math.abs(dh - truth) < 0.02, `공→홀 높이 차 ${dh} vs ${truth}`);
+  // 모양 없이(매끈하게) 맞춘 것보다 단 모양을 더 잘 따라감 (단 바로 앞뒤 높이 차)
+  const smooth = gridSurface(fitGridFromGradients(P, box, { dx: 0.3, smooth: 0.01 }));
+  const step = f => f.height(0, 5) - f.height(0, 3), real = H(0, 5) - H(0, 3);
+  assert.ok(Math.abs(step(s) - real) < Math.abs(step(smooth) - real), '단 앞뒤 높이 차가 실제에 더 가까움');
+  // 모양과 상관없는 곳만 쟀으면 보통 크기로 가정 (fitted=false)
+  const far = [{ x: 0, y: 0, gx: 0, gy: 0.015 }, { x: 0, y: 0.5, gx: 0, gy: 0.015 }];
+  const f2 = fitShapeAmplitude(far, 'mound', { at: 6, side: 2 });
+  assert.equal(f2.fitted, false); assert.ok(f2.a > 0);
+  // 단이 내려가면 크기가 음수 (홀 쪽이 낮음)
+  const Pd = P.map(m => ({ ...m, gx: -m.gx, gy: -m.gy }));
+  assert.ok(shapeGrid(Pd, 'tier', { at: 4 }, box, { dx: 0.3 }).a < -0.1);
 });

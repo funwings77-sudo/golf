@@ -823,3 +823,9 @@ html.msheet-on .m-map .leaflet-top { top: max(env(safe-area-inset-top), var(--cu
 .imm .gmap-on { --gm-cover: 306px; } /* 1× 단추가 구글 약관·저작권을 가리지 않게 그 위에서 지도를 끝냄 */
 html.dist-on .mapwrap .gmap-on { --gm-cover: calc(var(--nav-h) + 6px + env(safe-area-inset-bottom)); }
 html.msheet-on .m-map .gmap-on, html.msheet-on .m-map.gmap-on { --gm-cover: calc(var(--m-sheet) + var(--nav-h) + env(safe-area-inset-bottom)); }
+/* 👀 직접 재기: 눈으로 본 그린 모양 */
+.shp-box { margin-top: 8px; padding: 8px 10px 4px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); }
+.shp-lab { font-weight: 800; font-size: 14px; margin-bottom: 6px; }
+.shp-r { display: block; margin-top: 8px; font-size: 13.5px; }
+.shp-r input { width: 100%; }
+.shp-n { margin: 6px 0 2px; font-size: 12.5px; }
