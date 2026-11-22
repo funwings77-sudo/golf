@@ -4,6 +4,20 @@
  "repo": "funwings77-sudo/golf",
  "releases": [
   {
+   "version": "1.0.72",
+   "code": 73,
+   "date": "2026-11-22T01:33:32.805Z",
+   "bytes": 6186587,
+   "sha256": "280473a6071e02c2dd85941791e262b07c4c8107be24258a76ef437a6dc32279",
+   "url": "https://github.com/funwings77-sudo/golf/releases/download/v1.0.72/pinpoint-caddie-1.0.72.apk",
+   "page": "https://github.com/funwings77-sudo/golf/releases/tag/v1.0.72",
+   "notes": [
+    "그린 기울기를 좌우 1m 지점까지 더 재면(선택 4곳) 등고선·능선이 직선이 아니라 실제 지형을 따라 휘어요",
+    "정밀 숫자에 경사 각도(°)와 가장 가파른 쪽을 함께 보여 줘요",
+    "오늘 바람을 퍼팅 길 계산에 반영해요 (카메라로 홀컵을 누르면 방향을 알아서 반영)"
+   ]
+  },
+  {
    "version": "1.0.71",
    "code": 72,
    "date": "2026-11-22T01:20:35.389Z",
@@ -931,6 +945,6 @@
    ]
   }
  ],
- "latest": "1.0.71",
- "updatedAt": "2026-11-22T01:20:42.509Z"
+ "latest": "1.0.72",
+ "updatedAt": "2026-11-22T01:33:39.038Z"
 }
