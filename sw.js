@@ -1,5 +1,5 @@
 // 오프라인 우선 서비스 워커: 앱 셸·물리 엔진은 캐시 우선, 지도 타일은 런타임 캐시
-const VER = 'pinpoint-v74';
+const VER = 'pinpoint-v75';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'css/theme.css', 'icons/icon.svg', 'icons/google-maps-logo.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'js/core/files.js',
   'js/app.js', 'js/ui.js', 'js/icons.js', 'js/iconize.js', 'js/canvasicon.js', 'js/core/screen.js', 'js/core/gmaps.js', 'js/core/mapskey.js', 'js/map.js',
@@ -21,7 +21,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (url.hostname.includes('open-meteo.com') || url.hostname === 'api.github.com' || url.hostname === 'generativelanguage.googleapis.com' || url.hostname === 'tile.googleapis.com') return; // 날씨·관리자·AI API와 구글 지도 타일(약관상 저장 안 함)은 항상 네트워크
   // APK·관리자 페이지·발행 데이터는 캐시하지 않음 (발행 데이터는 앱이 localStorage에 직접 보관)
-  if (url.origin === location.origin && (/(\.apk|\/apk\.json|\/watch\.json|\/releases\.json|\/download\.html|\/admin\.html)$/.test(url.pathname) || /\/(data|js\/admin)\//.test(url.pathname))) return;
+  if (url.origin === location.origin && (/(\.apk|\/apk\.json|\/watch\.json|\/releases\.json|\/download\.html|\/admin\.html)$/.test(url.pathname) || /\/(data|js\/admin|guide)\//.test(url.pathname))) return;
   if (url.hostname.includes('arcgisonline.com')) {
     e.respondWith(caches.open('pinpoint-tiles').then(async c => {
       // Leaflet(<img>, no-cors)이 저장한 불투명 응답은 3D 지도(fetch, cors)에 쓸 수 없음 → 다시 받아 교체

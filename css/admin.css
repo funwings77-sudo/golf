@@ -162,3 +162,48 @@ input.sm, select.sm { min-height: 36px; padding: 4px 8px; width: 84px; }
 .rd-len { font-size: 12px; opacity: .7; margin-top: 4px; }
 .rd-line { display: flex; gap: 8px; font-size: 13px; line-height: 1.45; padding: 8px 10px; margin-top: 8px; border-radius: 12px; background: rgba(255,255,255,.06); }
 .rd-line i { font-style: normal; } .rd-line.bad { background: rgba(255,90,79,.18); color: #ffc9c3; } .rd-line.mute { opacity: .55; }
+
+/* 📘 사용자 가이드 */
+.gd-cover { display: grid; gap: 14px; }
+.gd-cover-t { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 18px; }
+.gd-quick { background: var(--green-soft); border-radius: 12px; padding: 12px 16px; }
+.gd-quick ol { margin: 6px 0 0; padding-left: 22px; line-height: 1.75; }
+.gd-toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 18px; }
+.gd-toc div { display: flex; flex-direction: column; gap: 3px; }
+.gd-toc a { color: var(--ink); text-decoration: none; font-size: 14px; padding: 2px 0; }
+.gd-toc a:hover { color: var(--green); text-decoration: underline; }
+.gd-sec { margin-top: 26px; }
+.gd-sec > h2 { margin-bottom: 4px; }
+.gd-scr { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; margin-top: 14px; scroll-margin-top: 80px; }
+.gd-txt h3 { margin: 0 0 6px; font-size: 19px; }
+.gd-how { background: #f3f5f2; border-radius: 8px; padding: 6px 10px; font-size: 14px; }
+.gd-how b { color: var(--green); margin-right: 6px; }
+.gd-marks { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 8px; }
+.gd-marks li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 8px; border-radius: 10px; transition: background .12s; }
+.gd-marks li.hl { background: #fff6d6; }
+.gd-marks li p { margin: 2px 0 0; color: #44514a; line-height: 1.55; }
+.gd-num, .gd-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; border-radius: 12px; background: #ff4d2e; color: #fff; font-weight: 800; font-size: 13px; box-shadow: 0 0 0 2px #fff; flex: none; }
+.gd-legend { margin-top: 10px; font-size: 14px; }
+.gd-legend dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 6px 0 0; }
+.gd-legend dt { font-weight: 700; }
+.gd-legend dd { margin: 0; color: #44514a; }
+.gd-tips { margin-top: 10px; background: #f1f7ff; border-radius: 10px; padding: 4px 12px; font-size: 14px; }
+.gd-phone { margin: 0; position: sticky; top: 76px; }
+.gd-shot { position: relative; border-radius: 22px; overflow: hidden; border: 6px solid #1b211d; box-shadow: 0 10px 30px rgba(0,0,0,.18); background: #000; }
+.gd-shot img { display: block; width: 100%; height: auto; }
+.gd-box { position: absolute; border: 2px solid #ff4d2e; border-radius: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.7); pointer-events: auto; transition: background .12s; }
+.gd-box.hl { background: rgba(255, 214, 0, .28); border-color: #ffd600; }
+.gd-badge { position: absolute; transform: translate(-30%, -20%); z-index: 2; cursor: default; }
+.gd-badge.hl { background: #ffd600; color: #222; }
+.gd-faq { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.gd-faq summary { font-weight: 700; cursor: pointer; }
+.gd-faq p { margin: 6px 0 0; color: #44514a; }
+.gd-foot { margin: 18px 0 40px; }
+@media (max-width: 900px) { .gd-scr { grid-template-columns: 1fr; } .gd-phone { position: static; max-width: 340px; margin: 0 auto; } }
+@media print {
+  .a-nav, .a-top, .a-actions, .a-conn, #nav { display: none !important; }
+  .gd-scr { break-inside: avoid; page-break-inside: avoid; box-shadow: none; grid-template-columns: 1fr 230px; }
+  .gd-phone { position: static; }
+  .gd-sec { break-before: page; }
+  .gd-faq { break-inside: avoid; }
+}

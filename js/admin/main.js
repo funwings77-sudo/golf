@@ -15,6 +15,7 @@ const ROUTES = {
   analytics: () => import('./views/analytics.js'),
   deploy: () => import('./views/deploy.js'),
   connect: () => import('./views/connect.js'),
+  guide: () => import('./views/guide.js'),
 };
 const NAV_OF = { course: 'courses' };
 
