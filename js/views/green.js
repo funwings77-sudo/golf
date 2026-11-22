@@ -19,6 +19,7 @@ import { mapSheetPage, sheetHTML } from '../map.js';
 import { icon } from '../icons.js';
 
 const STAND_BACK = 0.6; // 공 뒤에 서는 거리 (m)
+const PREVIEW_D = 8; // 거리를 재기 전 카메라 화면에 그린 굴곡을 미리 그릴 임시 거리 (m)
 let depth = null; // 깊이 카메라 (LiDAR · ARCore) 쓸 수 있나
 let liveSend = null; // 🔴 실시간 AR 선이 열려 있으면: 퍼팅 계산이 끝날 때마다 선을 다시 보냄
 let el_, App_, G, worker = null, reqId = 0, camStop = null, arT = null, unOri = null, metroOn = false;
@@ -27,6 +28,8 @@ function loadG() {
   try { const g = JSON.parse(sessionStorage.getItem('pinpoint.green') || 'null'); if (g) return g; } catch {}
   return { src: null, demoKind: 'tier', D: 0, distSrc: '', meas: {}, precise: false, gBall: null, gHole: null, stimp: S.settings.stimp, result: null, tab: 'measure', training: false, guess: null, revealed: false, holeN: null };
 }
+// 그린 굴곡(등고선·능선)을 바로 보여 줄 수 있는 출처 우선: 이 홀 카메라 스캔 > 골프장 그린맵 > 직접 재기
+const bestSrc = (g, hole) => (g.scan && g.holeN === (hole?.n ?? null) ? 'scan' : hole?.greenGrid ? 'grid' : 'onsite');
 function saveG() { try { const { result, ...rest } = G; sessionStorage.setItem('pinpoint.green', JSON.stringify({ ...rest, result: null })); } catch {} }
 
 export default {
@@ -36,7 +39,7 @@ export default {
     //   예외: 계산 화면을 열려고 누른 곳은 #/green?measure(① 재기) · #/green?map(② 그린 지도)
     const want = (location.hash.match(/\?(?:.*&)?(ar|measure|map)\b/) || [])[1];
     if (want === 'measure' || want === 'map') G.tab = want;
-    else { G.src = 'onsite'; G.prevTab = 'measure'; G.tab = allowed('puttLine') ? 'ar' : 'measure'; G.arMode = null; G.arPanel = false; }
+    else { G.src = bestSrc(G, activeHole()); G.prevTab = 'measure'; G.tab = allowed('puttLine') ? 'ar' : 'measure'; G.arMode = null; G.arPanel = false; }
     App_.greenAR = false;
     if (/\?/.test(location.hash)) history.replaceState(null, '', '#/green');
     const hole = activeHole();
@@ -55,7 +58,7 @@ export default {
   },
   unmount() { stopAR(); mapSheetPage(false); metronome(false); metroOn = false; saveG(); },
   // 아래 메뉴 '그린': 이미 그린 화면이면 다시 불러오지 않고 바로 AR 그린 리딩
-  openAR() { if (G.tab !== 'ar') G.prevTab = G.tab; G.src = 'onsite'; G.tab = 'ar'; G.arMode = null; G.result = null; saveG(); render(); }, // 메뉴 '그린'도 직접 재기 + 카메라
+  openAR() { if (G.tab !== 'ar') G.prevTab = G.tab; G.src = bestSrc(G, activeHole()); G.tab = 'ar'; G.arMode = null; G.result = null; saveG(); render(); }, // 메뉴 '그린'도 직접 재기 + 카메라
   onHole() { G.holeN = null; this.mount(el_, App_); },
 };
 
@@ -67,7 +70,7 @@ function addDist(v, src, { acc, sd } = {}) {
   const sdv = sd ?? (src === 'gps' ? SIGMA.dist.gps(v, acc) : (SIGMA.dist[src] || SIGMA.dist.camera)(v));
   G.dm.push({ v, sd: sdv, src, ts: Date.now() });
   const f = fuse(G.dm);
-  G.D = Math.round(f.v * 100) / 100; G.dFuse = { sd: f.sd, srcs: f.srcs, dropped: f.dropped.map(d => d.src) };
+  G.D = Math.round(f.v * 100) / 100; if (G.D >= 0.3 && G.D <= 25) G.lastD = G.D; G.dFuse = { sd: f.sd, srcs: f.srcs, dropped: f.dropped.map(d => d.src) };
   G.distSrc = `${srcLine(f.srcs)} ±${f.sd < 0.1 ? Math.round(f.sd * 100) + 'cm' : f.sd.toFixed(1) + 'm'}`;
   G.result = null;
 }
@@ -98,7 +101,9 @@ function geometry() {
     const inside = p => p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1;
     return { spec, ball, hole, inside, D: Math.hypot(hole.x - ball.x, hole.y - ball.y), kind: 'grid', name: gi.name };
   }
-  const D = G.D || 0;
+  return onsiteGeo(G.D || 0);
+}
+function onsiteGeo(D) {
   const pts = measurePoints(D).filter(p => p.m);
   const surf = fitQuadFromGradients(pts.map(p => ({ x: 0, y: p.y, gx: p.m.gx, gy: p.m.gy })));
   const half = Math.max(2.5, D * 0.4);
@@ -146,7 +151,7 @@ function render() {
     <div id="tabBody"></div><div id="result"></div>`;
   el_.innerHTML = mapMode ? `<div class="g-back" id="gBack"></div>` + sheetHTML(page, '그린 판 크게·작게') : page;
   if (mapMode) $('#mGrip').onclick = () => { $('#mSheet').classList.toggle('tall'); document.documentElement.classList.toggle('msheet-tall'); setTimeout(() => G.tab === 'map' && $('#tabBody') && mapTab($('#tabBody')), 280); }; // 판 크기가 바뀌면 그린을 다시 그림
-  $$('#srcSeg button').forEach(b => b.onclick = () => { G.src = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
+  $$('#srcSeg button').forEach(b => b.onclick = () => { G.src = b.dataset.v; G.result = null; G.gBall = G.gHole = null; if (b.dataset.v === 'onsite' && allowed('puttLine')) { if (G.tab !== 'ar') G.prevTab = G.tab; G.tab = 'ar'; G.arMode = null; } saveG(); render(); }); // 직접 재기 = 카메라로 보기가 먼저
   $$('#demoSeg button').forEach(b => b.onclick = () => { G.demoKind = b.dataset.v; G.result = null; G.gBall = G.gHole = null; saveG(); render(); });
   $$('#tabSeg button').forEach(b => b.onclick = () => { if (b.dataset.v === 'ar' && G.tab !== 'ar') G.prevTab = G.tab; G.tab = b.dataset.v; saveG(); render(); });
   const body = $('#tabBody');
@@ -486,9 +491,11 @@ function mapTab(body) {
 //  거리 링 격자(지형 따라 휨) · 경사 흐름 입자 · 퍼팅 라인 점선(굴러가는 공 미리보기) · 홀 거리 태그 · 오르막/내리막 · 물 흐름 나침반
 //  휴대폰 기울기로 바로 표시, 홀컵 1탭으로 피치·요 보정, 이후 나침반으로 좌우 회전을 따라감
 function arTab(body, canLine) {
-  const geo = geometry();
-  const distMode = G.arMode === 'distance' && geo.kind === 'onsite';
-  const needD = !distMode && geo.kind === 'onsite' && geo.D < 0.3; // 직접 재기인데 거리가 아직 없음 → 홀컵을 누르면 바로 재기
+  const geo0 = geometry();
+  const distMode = G.arMode === 'distance' && geo0.kind === 'onsite';
+  const needD = !distMode && geo0.kind === 'onsite' && geo0.D < 0.3; // 직접 재기인데 거리가 아직 없음 → 홀컵을 누르면 바로 재기
+  // 거리 전에도 그린 굴곡(등고선·능선·흐름)을 바로 보여 주려고 임시 거리(지난번 거리 또는 8m)로 장면을 만듦 · 홀 표시·조준·오르막 판정은 거리를 잰 뒤에
+  const geo = needD ? onsiteGeo(G.lastD || PREVIEW_D) : geo0;
   const canSlope = allowed('greenSlope');
   // 📱 전체 화면: 앱 머리줄·아래 메뉴를 숨기고 카메라가 화면을 꽉 채움 (✕ 또는 뒤로 가기로 닫기)
   document.documentElement.classList.add('gar-on'); immersive(true);
@@ -520,17 +527,17 @@ function arTab(body, canLine) {
   // 🗺️ 굴곡 표현 (측량에서 쓰는 일반 기법): 2cm 등고선(10cm마다 굵게) · 능선(노랑)/골(파랑) — 경사를 잰 그린만
   const topo = scene && canSlope ? contours(surf, frame, geo.inside, { rMax }) : null;
   const ridges = scene && canSlope ? ridgeLines(surf, frame, geo.inside, { rMax, h0: scene.h0, half: Math.max(2.5, Math.min(5, D * 0.45)) }) : [];
-  const verdict = canSlope && scene ? slopeVerdict(surf.height(geo.hole.x, geo.hole.y) - surf.height(geo.ball.x, geo.ball.y), D) : null;
+  const verdict = canSlope && scene && !needD ? slopeVerdict(surf.height(geo.hole.x, geo.hole.y) - surf.height(geo.ball.x, geo.ball.y), D) : null;
   const fall = canSlope && scene ? fallLine(surf, frame, geo.ball) : null;
   let dots = null, dotsFor = null, t0 = performance.now(), last = t0;
 
   if (distMode) msg.textContent = '화면에서 홀컵을 탭하세요 (휴대폰 기울기로 거리 계산)';
   else if (!canLine) msg.textContent = '대회 모드: 퍼팅 길은 규칙상 보여 줄 수 없어요';
-  else if (needD) msg.innerHTML = '👆 <b>화면의 홀컵을 누르면</b> 거리를 재고 안내선을 바로 그려요 <small>(⚙ 설정에서 숫자로 넣어도 돼요)</small>';
+  else if (needD) msg.innerHTML = `👆 <b>화면의 홀컵을 누르면</b> 거리를 재고 안내선을 바로 그려요${canSlope && !topo?.lines.length && !ridges.length ? '<br><small>경사를 아직 안 재서 평평하게 보여요 · ✕ → ① 재기의 <b>기울기 재기</b>(휴대폰을 그린에 눕혀 2초)를 하면 등고선·능선이 바로 나와요</small>' : ' <small>(⚙ 설정에서 숫자로 넣어도 돼요)</small>'}`;
   else if (geo.D < 0.3) msg.textContent = '먼저 측정 탭에서 거리를 입력하세요';
   else msg.textContent = '홀 쪽을 비추고, 화면의 홀을 한 번 누르면 정확해져요';
   // 결과가 없으면 바로 계산 (영상처럼 비추자마자 라인이 보이도록)
-  if (!distMode && canLine && geo.D >= 0.3 && !G.result) compute();
+  if (!distMode && canLine && !needD && geo.D >= 0.3 && !G.result) compute();
 
   $('#arClose').onclick = () => { G.tab = G.arMode === 'distance' ? 'measure' : (G.prevTab || 'measure'); G.arMode = null; saveG(); render(); };
   if (!distMode) bindArPanel(geo);
@@ -609,7 +616,7 @@ function arTab(body, canLine) {
       }
       // ①-3 거리 눈금: 공 → 홀 선 위 1m마다 짧은 가로 눈금 (거리 고리 대신 · 화면을 덜 가림)
       ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.6 * k;
-      for (let m = 1; m < D; m += 1) { const yv = STAND_BACK + m, a = P({ x: -0.18, y: yv, z: zOf(frame.toSurf({ x: 0, y: yv })) }), b = P({ x: 0.18, y: yv, z: zOf(frame.toSurf({ x: 0, y: yv })) }); if (a && b) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); } }
+      if (!needD) for (let m = 1; m < D; m += 1) { const yv = STAND_BACK + m, a = P({ x: -0.18, y: yv, z: zOf(frame.toSurf({ x: 0, y: yv })) }), b = P({ x: 0.18, y: yv, z: zOf(frame.toSurf({ x: 0, y: yv })) }); if (a && b) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); } }
 
       // ② 경사 흐름: 내리막으로 흘러가는 흰 줄
       if (flow) {
@@ -621,11 +628,11 @@ function arTab(body, canLine) {
         }
       }
 
-      // ③ 홀: 컵 테두리 + 거리 태그 (│10 yd)
+      // ③ 홀: 컵 테두리 + 거리 태그 (│10 yd) — 거리를 재기 전(임시 장면)에는 그리지 않음
       const hv = frame.toView(geo.hole), hz = zOf(geo.hole);
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5 * k;
-      poly(Array.from({ length: 25 }, (_, i) => { const a = i / 24 * Math.PI * 2; return { x: hv.x + Math.cos(a) * 0.054, y: hv.y + Math.sin(a) * 0.054, z: hz }; }), true);
-      const hp = P({ ...hv, z: hz });
+      if (!needD) poly(Array.from({ length: 25 }, (_, i) => { const a = i / 24 * Math.PI * 2; return { x: hv.x + Math.cos(a) * 0.054, y: hv.y + Math.sin(a) * 0.054, z: hz }; }), true);
+      const hp = needD ? null : P({ ...hv, z: hz });
       if (hp) {
         const txt = DU(geo.D, S.settings.unit === 'yd' ? 0 : 1);
         ctx.font = `700 ${17 * k}px system-ui, sans-serif`;
@@ -654,7 +661,8 @@ function arTab(body, canLine) {
         const ap = P({ ...frame.toView(r.aimPoint), z: zOf(r.aimPoint) });
         if (ap) { ctx.strokeStyle = 'rgba(255,226,122,.9)'; ctx.lineWidth = 2 * k; ctx.beginPath(); ctx.arc(ap.x, ap.y, 9 * k, 0, 7); ctx.stroke(); ctx.fillStyle = '#ffe27a'; ctx.font = `700 ${13 * k}px system-ui, sans-serif`; ctx.fillText('조준점', ap.x + 12 * k, ap.y + 4 * k); }
         info.textContent = easy() ? `${aimText(r)} · 퍼터를 뒤로 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm` : `${cupsText(r)} · 평지 ${r.flatEquiv.toFixed(1)}m 세기 · 백스윙 ${Math.round(backswingCm(r.flatEquiv, S.calib))}cm`;
-      } else {
+      } else if (needD) info.textContent = '홀컵을 누르면 거리를 재요';
+      else {
         ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2 * k; ctx.setLineDash([8 * k, 8 * k]);
         poly([{ x: 0, y: STAND_BACK, z: zOf(geo.ball) }, { ...hv, z: hz }]); ctx.setLineDash([]);
         info.textContent = G.result || !canLine ? DU(geo.D, 1) : '퍼팅 라인 계산 중…';
@@ -714,6 +722,7 @@ function arTab(body, canLine) {
       <span><small>고저차</small><b>${dh >= 0 ? '⬆' : '⬇'} ${c1(Math.abs(dh * 100))}cm</b></span>
       ${r ? `<span><small>조준</small><b>${Math.abs(aimDeg) < 0.005 ? '정면' : `${aimDeg > 0 ? '왼쪽' : '오른쪽'} ${c1(Math.abs(r.aimCups ?? r.aimOffset / CUP_W))}컵`}</b></span>` : `<span><small>경사</small><b>${along >= 0 ? '오르막' : '내리막'} ${c1(Math.abs(along))}%</b></span>`}
       <button class="gp-more" data-gp="open" aria-label="숫자 모두 보기">▾</button></div>`;
+    if (needD) { prec.innerHTML = `<div class="gp-k"><span><small>홀까지</small><b>홀컵을 누르세요</b></span><span><small>발밑 경사</small><b>${along >= 0 ? '오르막' : '내리막'} ${c1(Math.abs(along))}%</b></span></div>`; return; }
     if (!G.precOpen) { prec.innerHTML = key3 + tapLine; return; } // 📱 기본은 한 줄 (카메라 화면을 가리지 않게)
     prec.innerHTML = `<button class="gp-less" data-gp="close" aria-label="숫자 접기">▴ 접기</button><div class="gp-g">
       <span><small>홀까지</small><b>${c2(D2)}m</b></span>
