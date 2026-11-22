@@ -10,7 +10,7 @@ import { distance, toLocal, toRad } from '../core/geo.js';
 import { Sensors, sampleTilt, startSteps, onOrientation, startOrientation, vibrate, speak } from '../core/sensors.js';
 import { smoothAngle, rotationMatrix, project, focalPx, cameraAxis, unproject, groundHit } from '../core/arproj.js';
 import { lineFrame, distanceRings, SlopeFlow, resamplePath, slopeVerdict, fallLine, contours, ridgeLines, lineProfile, slopeHue } from '../core/greenar.js';
-import { muFromStimp, buildSurface, fitQuadFromGradients, optimizePutt, backswingCm, demoGreen, CUP_W } from '../physics/putt.js';
+import { muFromStimp, buildSurface, fitQuadFromGradients, fitGridFromGradients, windSlope, optimizePutt, backswingCm, demoGreen, CUP_W } from '../physics/putt.js';
 import { openCamera, GroundProjector, coverTransform, zoomed, attachZoom } from '../core/camera.js';
 import { drawGreen, makeView } from './greencanvas.js';
 import { $, $$, esc, toast, sheet, lockedCard, confBadge, metronome, signed, DU } from '../ui.js';
@@ -49,7 +49,7 @@ export default {
     // 오늘 내 퍼트 결과로 맞춘 빠르기가 있으면 그것이 우선 (골프장 발표보다 오늘 내 느낌이 최신)
     const gt = greenToday(activeCourse());
     if (gt?.src === 'feel' && G.stimp !== gt.stimp) { G.stimp = gt.stimp; G.result = null; }
-    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.dm = []; G.scan = null; if (G.src === 'scan') G.src = null; G.holeN = hole?.n ?? null; }
+    if (G.holeN !== (hole?.n ?? null)) { G.gBall = G.gHole = null; G.result = null; G.meas = {}; G.D = 0; G.dm = []; G.scan = null; G.lineBrg = null; if (G.src === 'scan') G.src = null; G.holeN = hole?.n ?? null; }
     if (G.src === 'scan' && !G.scan) G.src = null;
     if (!G.src) G.src = hole?.greenGrid ? 'grid' : 'onsite';
     if (G.src === 'grid' && !hole?.greenGrid) G.src = 'demo';
@@ -105,12 +105,26 @@ function geometry() {
 }
 function onsiteGeo(D) {
   const pts = measurePoints(D).filter(p => p.m);
-  const surf = fitQuadFromGradients(pts.map(p => ({ x: 0, y: p.y, gx: p.m.gx, gy: p.m.gy })));
   const half = Math.max(2.5, D * 0.4);
-  return { spec: { kind: 'quad', coeffs: surf.coeffs }, ball: { x: 0, y: 0 }, hole: { x: 0, y: D }, inside: p => Math.abs(p.x) <= half && p.y >= -1.5 && p.y <= D + 2, D, kind: 'onsite', name: '현장 측정', nMeas: pts.length };
+  return { spec: onsiteSurfaceSpec(D, pts), ball: { x: 0, y: 0 }, hole: { x: 0, y: D }, inside: p => Math.abs(p.x) <= half && p.y >= -1.5 && p.y <= D + 2, D, kind: 'onsite', name: '현장 측정', nMeas: pts.length };
 }
-function measurePoints(D) {
-  return [{ key: 'ball', label: '공 있는 곳', y: 0 }, { key: 'mid', label: '가운데', y: D / 2 }, { key: 'hole', label: '홀 바로 앞', y: Math.max(0, D - 1) }].map(p => ({ ...p, m: G.meas[p.key] }));
+const SIDE = 1; // 좌우 측정점: 선에서 1m
+function measurePoints(D, { all = true } = {}) {
+  const yh = Math.max(0, D - 1);
+  const base = [{ key: 'ball', label: '공 있는 곳', x: 0, y: 0 }, { key: 'mid', label: '가운데', x: 0, y: D / 2 }, { key: 'hole', label: '홀 바로 앞', x: 0, y: yh }];
+  const side = [{ key: 'midL', label: '가운데 왼쪽 1m', x: -SIDE, y: D / 2 }, { key: 'midR', label: '가운데 오른쪽 1m', x: SIDE, y: D / 2 }, { key: 'holeL', label: '홀 앞 왼쪽 1m', x: -SIDE, y: yh }, { key: 'holeR', label: '홀 앞 오른쪽 1m', x: SIDE, y: yh }].map(p => ({ ...p, opt: true }));
+  return (all ? [...base, ...side] : base).map(p => ({ ...p, m: G.meas[p.key] }));
+}
+// 잰 곳들의 기울기 → 매끈한 높이 격자 (등고선이 지형 따라 휨) · 같은 입력이면 다시 계산하지 않음
+let fitMemo = { key: '', spec: null };
+function onsiteSurfaceSpec(D, pts) {
+  if (pts.length < 2) return { kind: 'quad', coeffs: fitQuadFromGradients(pts.map(p => ({ x: p.x, y: p.y, gx: p.m.gx, gy: p.m.gy }))).coeffs };
+  const half = Math.max(2.5, D * 0.4) + 1, key = JSON.stringify([D, pts.map(p => [p.x, p.y, p.m.gx, p.m.gy])]);
+  if (fitMemo.key !== key) {
+    const dx = Math.max(0.25, Math.min(0.45, (D + 4) / 40));
+    fitMemo = { key, spec: { kind: 'grid', grid: fitGridFromGradients(pts.map(p => ({ x: p.x, y: p.y, gx: p.m.gx, gy: p.m.gy })), { x0: -half, y0: -1.5, x1: half, y1: D + 2.5 }, { dx, smooth: 0.01 }) } };
+  }
+  return fitMemo.spec;
 }
 // 사전 맵 + 현장 측정 융합: 측정(라인 좌표계)을 그리드 좌표계로 회전해 평균 차이를 보정 평면으로
 function fusionCorrection(surf, ball, hole) {
@@ -118,8 +132,8 @@ function fusionCorrection(surf, ball, hole) {
   const D = Math.hypot(hole.x - ball.x, hole.y - ball.y) || 1, ux = (hole.x - ball.x) / D, uy = (hole.y - ball.y) / D, rx = uy, ry = -ux;
   let a = 0, b = 0;
   for (const [k, m] of ms) {
-    const f = k === 'ball' ? 0 : k === 'mid' ? 0.5 : Math.max(0, 1 - 1 / D);
-    const p = { x: ball.x + ux * D * f, y: ball.y + uy * D * f };
+    const f = /^ball/.test(k) ? 0 : /^mid/.test(k) ? 0.5 : Math.max(0, 1 - 1 / D), side = /L$/.test(k) ? -SIDE : /R$/.test(k) ? SIDE : 0;
+    const p = { x: ball.x + ux * D * f + rx * side, y: ball.y + uy * D * f + ry * side };
     const gw = [m.gx * rx + m.gy * ux, m.gx * ry + m.gy * uy], gs = surf.grad(p.x, p.y);
     a += gw[0] - gs[0]; b += gw[1] - gs[1];
   }
@@ -178,7 +192,7 @@ function measureTab(body, canSlope) {
       <input type="range" id="stimp" min="6" max="14" step="0.5" value="${G.stimp}"><div class="row sub"><span>느림 6</span><span class="grow"></span><span>보통 10</span><span class="grow"></span><span>빠름 14</span></div></div>`}
     ${canSlope ? `<div class="card"><div class="row"><b class="grow">${E ? `기울기 재기 ${isGrid ? '(안 해도 돼요)' : ''}` : `경사 측정 ${isGrid ? '(선택: 현장 보정)' : ''}`}</b><label class="row sub"><input type="checkbox" id="precise" ${G.precise ? 'checked' : ''}> ${E ? '더 정확하게 (두 번)' : '정밀(180° 2회)'}</label></div>
       <p class="sub">휴대폰 화면을 위로, <b>윗부분이 홀 쪽</b>을 보게 그린에 눕혀 놓고 [재기]를 눌러요. 2초 동안 움직이지 마세요.</p>
-      ${measurePoints(G.D || geo.D).map(p => `<div class="kv"><span>${p.label}${!isGrid && G.D ? ` <span class="sub">(${p.y.toFixed(1)}m)</span>` : ''}</span><span>${p.m ? (E ? slopeEasy(p.m) : slopeText(p.m)) : `<span class="sub">${E ? '아직' : '미측정'}</span>`} <button class="btn small" data-meas="${p.key}">${p.m ? '다시' : E ? '재기' : '측정'}</button></span></div>`).join('')}
+      ${measurePoints(G.D || geo.D).map(p => `${p.key === 'midL' ? `<p class="sub" style="margin:10px 0 2px">${E ? '➕ 더 재면 굴곡이 더 정확해요 (선택 · 휴대폰 윗부분은 계속 홀 쪽)' : '➕ 선택: 좌우 1m 지점 (옆 굴곡 · 등고선이 지형 따라 휨)'}</p>` : ''}<div class="kv${p.opt ? ' opt' : ''}"><span>${p.label}${!isGrid && G.D ? ` <span class="sub">(${p.y.toFixed(1)}m)</span>` : ''}</span><span>${p.m ? (E ? slopeEasy(p.m) : slopeText(p.m)) : `<span class="sub">${E ? '아직' : '미측정'}</span>`} <button class="btn small" data-meas="${p.key}">${p.m ? '다시' : E ? '재기' : '측정'}</button></span></div>`).join('')}
       ${Object.values(G.meas).some(Boolean) ? `<button class="btn small ghost" id="clrMeas">${E ? '잰 기울기 지우기' : '측정값 지우기'}</button>` : ''}
     </div>` : lockedCard(FEATURE_NAMES.greenSlope)}
     <button class="btn primary block" id="calc" ${!isGrid && !(G.D > 0) ? 'disabled' : ''}>${E ? '🎯 어떻게 칠지 보기' : '퍼팅 계산'}</button>`;
@@ -300,12 +314,19 @@ function stepsSheet() {
 }
 
 // ---------- 계산 ----------
+// 🌬️ 오늘 바람을 퍼팅 물리에 (방향을 아는 경우만: 골프장 그린맵은 북쪽 기준 · 직접 재기는 카메라로 홀을 누른 방향)
+function windFix(geo) {
+  const w = App_?.weather; if (!w || !allowed('puttLine')) return null;
+  const brg = geo.kind === 'grid' && G.src === 'grid' && activeHole()?.greenGrid?.origin ? 0 : geo.kind === 'onsite' && G.lineBrg != null ? G.lineBrg : null;
+  return windSlope(w.windSpeed, w.windFrom, brg);
+}
 function compute() {
   const geo = geometry();
   if (geo.D < 0.3) return toast('거리를 먼저 입력하세요');
   if (geo.kind === 'onsite' && !geo.nMeas && allowed('greenSlope')) toast('경사 측정이 없어 평지로 가정합니다');
   const res = $('#result'); res.innerHTML = '<div class="card"><div class="empty">물리 시뮬레이션 · 몬테카를로 계산 중…</div></div>';
-  const msg = { id: ++reqId, spec: geo.spec, mu: muFromStimp(G.stimp), ball: geo.ball, hole: geo.hole, skill: { sigmaAimDeg: S.settings.aimSigma, sigmaSpeed: S.settings.speedSigma } };
+  const wf = windFix(geo), spec = wf ? { ...geo.spec, correction: { a: (geo.spec.correction?.a || 0) + wf.a, b: (geo.spec.correction?.b || 0) + wf.b } } : geo.spec;
+  const msg = { id: ++reqId, spec, mu: muFromStimp(G.stimp), ball: geo.ball, hole: geo.hole, skill: { sigmaAimDeg: S.settings.aimSigma, sigmaSpeed: S.settings.speedSigma } };
   const done = r => { if (msg.id !== reqId) return; G.result = { ...r, conf: confidence(geo), D: geo.D, kind: geo.kind }; G.revealed = false; renderResult(allowed('puttLine')); liveSend?.(); if (G.tab === 'map') mapTab($('#tabBody')); announce(); };
   try {
     worker = worker || new Worker(new URL('../physics/putt.worker.js', import.meta.url), { type: 'module' });
@@ -548,11 +569,11 @@ function arTab(body, canLine) {
     const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     const v = unproject(Rm, x, y, popt), gh = groundHit(v, { eye: eyeH });
     if (!isFinite(gh.h)) return toast('수평선 아래(땅)를 눌러 주세요');
-    if (distMode || needD) { addDist(Math.max(0.3, gh.h - STAND_BACK), 'camera', { sd: gh.err }); const back = needD || G.distBack === 'ar'; G.arMode = null; G.distBack = null; G.tab = back ? 'ar' : 'measure'; G.result = null; saveG(); vibrate(50); toast(`거리 ${G.D.toFixed(2)}m (±${gh.err.toFixed(2)}m)${back ? ' · 안내선을 그려요' : ''}`); render(); return; } // AR에서 쟀으면 AR에 그대로
+    if (distMode || needD) { G.lineBrg = gh.bearing; addDist(Math.max(0.3, gh.h - STAND_BACK), 'camera', { sd: gh.err }); const back = needD || G.distBack === 'ar'; G.arMode = null; G.distBack = null; G.tab = back ? 'ar' : 'measure'; G.result = null; saveG(); vibrate(50); toast(`거리 ${G.D.toFixed(2)}m (±${gh.err.toFixed(2)}m)${back ? ' · 안내선을 그려요' : ''}`); render(); return; } // AR에서 쟀으면 AR에 그대로
     if (calibrating) {
       // 누른 곳 = 진짜 홀: 그린의 '앞' 방위를 돌려 홀이 그 방향에 오게, 카메라가 본 거리와 입력 거리 차이도 알려 줌
       const hv = frame.toView(geo.hole), want = Math.atan2(hv.x, hv.y) * 180 / Math.PI;
-      b0 = (gh.bearing - want + 360) % 360; calibrating = false;
+      b0 = (gh.bearing - want + 360) % 360; calibrating = false; if (geo.kind === 'onsite') G.lineBrg = gh.bearing;
       calGap = gh.h - Math.hypot(hv.x, hv.y);
       vibrate(40); msg.textContent = `✅ 홀에 맞췄어요 · 카메라가 본 거리와 ${calGap >= 0 ? '+' : ''}${(calGap * 100).toFixed(0)}cm 차이`;
       return;
@@ -711,7 +732,9 @@ function arTab(body, canLine) {
     const r = G.result && canLine ? G.result : null;
     const aimDeg = r ? Math.atan2(r.aimOffset, D) * 180 / Math.PI : null;
     const roll = pg ?? 0, tilt = ax.pitch;
-    const c2 = x => x.toFixed(2), c1 = x => x.toFixed(1);
+    const c2 = x => x.toFixed(2), c1 = x => x.toFixed(1), deg = pct => (Math.atan(Math.abs(pct) / 100) * 180 / Math.PI).toFixed(2);
+    const wf = needD ? null : windFix(geo), wx = App_?.weather;
+    const wTxt = wf ? `${wx.windSpeed.toFixed(1)}m/s · ${Math.abs(wf.along) >= Math.abs(wf.cross) ? (wf.along > 0 ? '뒤바람(덜 쳐요)' : '맞바람(더 쳐요)') : wf.cross > 0 ? '오른쪽으로 밀어요' : '왼쪽으로 밀어요'} · 경사 ${c2(wf.pct)}%만큼 반영` : wx && !needD ? `${wx.windSpeed.toFixed(1)}m/s · 방향을 몰라 미반영 (홀컵을 눌러 주세요)` : '';
     let tapLine = '';
     if (tapPt) {
       const db = Math.hypot(tapPt.x - bv.x, tapPt.y - bv.y), dhl = Math.hypot(tapPt.x - hv.x, tapPt.y - hv.y);
@@ -728,8 +751,10 @@ function arTab(body, canLine) {
       <span><small>홀까지</small><b>${c2(D2)}m</b></span>
       <span><small>직선</small><b>${c2(Math.hypot(D2, dh))}m</b></span>
       <span><small>고저차</small><b>${dh >= 0 ? '⬆' : '⬇'} ${c1(Math.abs(dh * 100))}cm</b></span>
-      <span><small>경사 (앞뒤)</small><b>${along >= 0 ? '오르막' : '내리막'} ${c1(Math.abs(along))}%</b></span>
-      <span><small>경사 (좌우)</small><b>${Math.abs(cross) < 0.05 ? '평평' : `${cross > 0 ? '오른쪽' : '왼쪽'}↑ ${c1(Math.abs(cross))}%`}</b></span>
+      <span><small>경사 (앞뒤)</small><b>${along >= 0 ? '오르막' : '내리막'} ${c1(Math.abs(along))}% · ${deg(along)}°</b></span>
+      <span><small>경사 (좌우)</small><b>${Math.abs(cross) < 0.05 ? '평평' : `${cross > 0 ? '오른쪽' : '왼쪽'}↑ ${c1(Math.abs(cross))}% · ${deg(cross)}°`}</b></span>
+      <span><small>가장 가파른 쪽</small><b>${c1(Math.hypot(along, cross))}% · ${deg(Math.hypot(along, cross))}°</b></span>
+      ${wTxt ? `<span><small>바람 (퍼팅)</small><b>${wTxt}</b></span>` : ''}
       ${r ? `<span><small>조준</small><b>${Math.abs(aimDeg) < 0.005 ? '정면' : `${aimDeg > 0 ? '왼쪽' : '오른쪽'} ${c2(Math.abs(aimDeg))}°`}</b></span>
       <span><small>조준 (컵)</small><b>${c1(Math.abs(r.aimCups ?? r.aimOffset / CUP_W))}컵</b></span>
       <span><small>평지 세기</small><b>${c2(r.flatEquiv)}m</b></span>` : ''}

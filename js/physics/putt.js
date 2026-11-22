@@ -87,6 +87,52 @@ export function fitQuadFromGradients(measures, lambda = 0.02) {
   const sol = solveLinear(A, B);
   return quadSurface({ a: sol[0], b: sol[1], c: sol[2], d: sol[3], e: sol[4] });
 }
+// 📐 기울기 측정 몇 곳 → 매끈한 높이 격자 (얇은 판 스플라인처럼 굽힘이 가장 적은 면)
+//  이차식(quad)은 등고선이 거의 평행 직선이 되지만, 이 면은 잰 곳마다 기울기가 달라지는 만큼 등고선이 휘어 지형을 따라감
+//  samples: [{x, y, gx, gy, w?}] (그린 좌표 m · 기울기 비율) · box: {x0, y0, x1, y1} · 높이는 첫 측정점 = 0 기준
+export function fitGridFromGradients(samples, box, { dx = 0.3, smooth = 0.05, iters = 4000, tol = 1e-10 } = {}) {
+  const nx = Math.max(3, Math.round((box.x1 - box.x0) / dx) + 1), ny = Math.max(3, Math.round((box.y1 - box.y0) / dx) + 1), N = nx * ny;
+  const rows = []; // { idx: [], c: [], r, w }
+  const id = (i, j) => j * nx + i;
+  const cellOf = (x, y) => { const fx = Math.max(0, Math.min(nx - 1.0001, (x - box.x0) / dx)), fy = Math.max(0, Math.min(ny - 1.0001, (y - box.y0) / dx)); const i = Math.floor(fx), j = Math.floor(fy); return { i, j, tx: fx - i, ty: fy - j }; };
+  for (const m of samples) {
+    const { i, j, tx, ty } = cellOf(m.x, m.y), w = m.w ?? 1;
+    // 셀 안 이중선형 면의 기울기 (x 방향 · y 방향)
+    rows.push({ idx: [id(i, j), id(i + 1, j), id(i, j + 1), id(i + 1, j + 1)], c: [-(1 - ty) / dx, (1 - ty) / dx, -ty / dx, ty / dx], r: m.gx, w });
+    rows.push({ idx: [id(i, j), id(i + 1, j), id(i, j + 1), id(i + 1, j + 1)], c: [-(1 - tx) / dx, -tx / dx, (1 - tx) / dx, tx / dx], r: m.gy, w });
+  }
+  // 굽힘 에너지(2차 차분) — 측정이 없는 곳은 가장 매끈하게 이어짐
+  const ws = smooth / dx;
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    if (i > 0 && i < nx - 1) rows.push({ idx: [id(i - 1, j), id(i, j), id(i + 1, j)], c: [1 / dx / dx, -2 / dx / dx, 1 / dx / dx], r: 0, w: ws });
+    if (j > 0 && j < ny - 1) rows.push({ idx: [id(i, j - 1), id(i, j), id(i, j + 1)], c: [1 / dx / dx, -2 / dx / dx, 1 / dx / dx], r: 0, w: ws });
+    if (i < nx - 1 && j < ny - 1) rows.push({ idx: [id(i, j), id(i + 1, j), id(i, j + 1), id(i + 1, j + 1)], c: [1, -1, -1, 1].map(v => v * Math.SQRT2 / dx / dx), r: 0, w: ws });
+  }
+  // 높이 기준: 첫 측정점 = 0
+  if (samples.length) { const { i, j } = cellOf(samples[0].x, samples[0].y); rows.push({ idx: [id(i, j)], c: [1], r: 0, w: 1 }); }
+  // 정규방정식 AᵀWA h = AᵀW r 를 켤레기울기법으로 (행렬을 만들지 않음)
+  const Ax = h => { const out = new Float64Array(N); for (const R of rows) { let v = 0; for (let k = 0; k < R.idx.length; k++) v += R.c[k] * h[R.idx[k]]; v *= R.w * R.w; for (let k = 0; k < R.idx.length; k++) out[R.idx[k]] += R.c[k] * v; } for (let k = 0; k < N; k++) out[k] += 1e-9 * h[k]; return out; };
+  const b = new Float64Array(N); for (const R of rows) if (R.r) for (let k = 0; k < R.idx.length; k++) b[R.idx[k]] += R.c[k] * R.r * R.w * R.w;
+  const h = new Float64Array(N), r = Float64Array.from(b), p = Float64Array.from(b);
+  let rr = r.reduce((a, v) => a + v * v, 0); const rr0 = rr || 1;
+  for (let it = 0; it < iters && rr / rr0 > tol; it++) {
+    const Ap = Ax(p); let pAp = 0; for (let k = 0; k < N; k++) pAp += p[k] * Ap[k];
+    const a = rr / (pAp || 1e-30); let rn = 0;
+    for (let k = 0; k < N; k++) { h[k] += a * p[k]; r[k] -= a * Ap[k]; rn += r[k] * r[k]; }
+    const beta = rn / rr; rr = rn; for (let k = 0; k < N; k++) p[k] = r[k] + beta * p[k];
+  }
+  return { x0: box.x0, y0: box.y0, dx, nx, ny, h: Array.from(h, v => Math.round(v * 1e5) / 1e5), name: '직접 잰 그린 (기울기 ' + samples.length + '곳)' };
+}
+// 🌬️ 바람 → 굴러가는 공에 주는 힘을 '가짜 경사'로 (추정)
+//  공기 저항 F = ½ρ·Cd·A·v² · 공 높이(2cm)의 바람은 10m 예보 풍속의 약 35% (잔디 위 대수 풍속 분포 근사)
+//  windFrom: 바람이 불어오는 방위(°) · lineBrg: 그린 좌표 y축(공→홀)의 방위(°) → 높이 보정 기울기 {a, b} (+x 오른쪽, +y 홀 쪽)
+export function windSlope(speed10m, windFrom, lineBrg) {
+  if (!(speed10m > 0) || windFrom == null || lineBrg == null) return null;
+  const v = 0.35 * speed10m, acc = 0.5 * 1.2 * 0.47 * Math.PI * 0.02134 ** 2 * v * v / 0.04593, pct = acc / G * 100;
+  const th = ((windFrom + 180 - lineBrg) * Math.PI) / 180, px = Math.sin(th), py = Math.cos(th); // 바람이 미는 쪽 (그린 좌표)
+  // 공은 낮은 쪽으로 구르므로 미는 쪽이 '내리막'이 되게: 높이 기울기 = -(가속/g)·방향
+  return { a: -(acc / G) * px, b: -(acc / G) * py, pct, along: py * pct, cross: px * pct, ground: v };
+}
 export function solveLinear(A, B) {
   const n = B.length, M = A.map((r, i) => [...r, B[i]]);
   for (let c = 0; c < n; c++) {
